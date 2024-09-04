@@ -1,7 +1,7 @@
 locals {
   service_name                      = "sfmon-service"
-  cluster_name                      = "dev-finance-cluster"
+  cluster_name                      = "monitoring"
   ecr_name                          = local.service_name
   cloudwatch_name                   = "/ecs/${local.service_name}"
-  application_context               = "finance"
+  application_context               = "monitoring"
 }
