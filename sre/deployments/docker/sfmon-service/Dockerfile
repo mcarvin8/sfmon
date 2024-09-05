@@ -15,13 +15,14 @@ ENV SF_AUTOUPDATE_DISABLE=true \
 
 # Set working directory to script
 WORKDIR /app/sfmon
-ADD sre/deployments/scripts/sfmon-service /app/sfmon
+COPY sre/deployments/scripts/sfmon-service /app/sfmon
 
 # Install required Salesforce and Python dependencies
 RUN apt-get update && apt-get install -y curl python3 python3-pip python3-venv && \
     python3 -m venv /opt/venv && \
     curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
     apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/* && \
     npm install --global @salesforce/cli@latest && \
     /opt/venv/bin/pip install --no-cache-dir simple_salesforce prometheus_client requests && \
     sf version --verbose --json && \
