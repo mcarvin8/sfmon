@@ -65,8 +65,8 @@ db_total_time_metric = Gauge('salesforce_apex_db_total_time_seconds', 'Total dat
 callout_time_metric = Gauge('salesforce_apex_callout_time_seconds', 'Total callout time', ['entry_point', 'quiddity'])
 long_running_requests_metric = Gauge('salesforce_apex_long_running_requests_total', 'Number of long-running requests', ['entry_point', 'quiddity'])
 
-apex_cpu_timeout_exception_metric_gauge = Gauge('apex_cpu_timeout_exceeded_exceptions', 'Count of CPU timeout exceptions', ['request_id', 'entry_point', 'quiddity', 'cpu_time', 'run_time', 'exception_type', 'exception_message', 'stack_trace', 'exception_category'])
-total_apex_exception_metric_guage = Gauge('total_apex_exceptions', 'Count of Apex exceptions by category', ['exception_category'])
+apex_exception_details_gauge = Gauge('apex_exception_details', 'Details of each Apex exception', ['request_id', 'exception_category', 'exception_type', 'exception_message', 'stack_trace'])
+apex_exception_category_count_gauge = Gauge('apex_exception_category_count', 'Total count of Apex exceptions by category', ['exception_category'])
 
 
 salesforce_limits_descriptions = {
@@ -528,70 +528,54 @@ def monitor_apex_execution(sf):
         logging.error("An unexpected error occurred: %s", e)
 
 
-def apex_cpu_timeout_errors(sf):
+def expose_apex_exception_metrics(sf):
+
     """
-    Fetch ApexExecution and ApexUnexpectedException logs
-    Match 'REQUEST_ID' of ApexExecution logs with ApexUnexpectedException
-    Findout entries with EXCEPTION_MESSAGE containing 'Apex CPU time limit exceeded'
-    and expose apex_cpu_timeout_exception_metric and total_apex_exception_metric
+    Processes list of Apex Unexpected Exception records and exposes two Prometheus metrics:
+    1. Detailed metrics for each individual exception including 
+        request ID, exception type, message, stack trace, and category fields.
+    2. Metric that counts the total number of exceptions for each exception category.
     """
 
-    apex_cpu_timeout_exception_metric_gauge.clear()
-    total_apex_exception_metric_guage.clear()
+    apex_unexpected_exception_query = (
+        "SELECT Id FROM EventLogFile WHERE EventType = 'ApexUnexpectedException' and Interval = 'Hourly' "
+        "ORDER BY LogDate DESC LIMIT 1")
+    apex_unexpected_exception_records = list(parse_logs(sf, apex_unexpected_exception_query))
 
-    try:
-        apex_execution_query = (
-            "SELECT Id FROM EventLogFile WHERE EventType = 'ApexExecution' and Interval = 'Hourly' "
-            "ORDER BY LogDate DESC LIMIT 1")
-        apex_execution_records = parse_logs(sf, apex_execution_query)
+    exception_category_counts = {}
 
-        apex_unexpected_exception_query = (
-            "SELECT Id FROM EventLogFile WHERE EventType = 'ApexUnexpectedException' and Interval = 'Hourly' "
-            "ORDER BY LogDate DESC LIMIT 1")
-        apex_unexpected_exception_records = list(parse_logs(sf, apex_unexpected_exception_query))
-
-        exception_category_counts = {}
-
-        for row in apex_unexpected_exception_records:
+    for row in apex_unexpected_exception_records:
+        try:
             category = row['EXCEPTION_CATEGORY']
+
+            # Count the number of occurrences of each exception category
             if category in exception_category_counts:
                 exception_category_counts[category] += 1
             else:
                 exception_category_counts[category] = 1
 
+            # Expose the details for each entry
+            apex_exception_details_gauge.labels(
+                request_id=row['REQUEST_ID'],
+                exception_type=row['EXCEPTION_TYPE'],
+                exception_message=row['EXCEPTION_MESSAGE'],
+                stack_trace=row['STACK_TRACE'],
+                exception_category=category
+            ).set(1)
+
+        except KeyError as e:
+            logging.warning("Missing expected key: %s. Record: %s", e, row)
+        except TypeError as e:
+            logging.warning("Type error encountered: %s. Record: %s", e, row)
+        except Exception as e:
+            logging.warning("Unexpected error: %s. Record: %s", e, row)
+
+    try:
         # Expose the metrics for each exception category
         for category, count in exception_category_counts.items():
-            total_apex_exception_metric_guage.labels(exception_category=category).set(count)
-
-        unexpected_exceptions = {
-            row['REQUEST_ID']: {
-                'EXCEPTION_TYPE': row['EXCEPTION_TYPE'],
-                'EXCEPTION_MESSAGE': row['EXCEPTION_MESSAGE'],
-                'STACK_TRACE': row['STACK_TRACE'],
-                'EXCEPTION_CATEGORY': row['EXCEPTION_CATEGORY']}
-                for row in apex_unexpected_exception_records
-                if 'Apex CPU time limit exceeded' in row['EXCEPTION_MESSAGE']}
-
-        apex_executions = {row['REQUEST_ID']: row for row in apex_execution_records}
-
-        # Process each unexpected exception and find matching execution logs
-        for request_id, exception_details in unexpected_exceptions.items():
-            if request_id in apex_executions:
-                execution_details = apex_executions[request_id]
-
-                apex_cpu_timeout_exception_metric_gauge.labels(
-                    request_id=request_id,
-                    entry_point=execution_details['ENTRY_POINT'],
-                    quiddity=execution_details['QUIDDITY'],
-                    cpu_time=execution_details['CPU_TIME'],
-                    run_time=execution_details['RUN_TIME'],
-                    exception_type=exception_details['EXCEPTION_TYPE'],
-                    exception_message=exception_details['EXCEPTION_MESSAGE'],
-                    stack_trace=exception_details['STACK_TRACE'],
-                    exception_category=exception_details['EXCEPTION_CATEGORY']).set(1)
-
+            apex_exception_category_count_gauge.labels(exception_category=category).set(count)
     except Exception as e:
-        logging.error("An unexpected error occurred: %s", e)
+        logging.error("Error while exposing category count metrics: %s", e)
 
 
 def main():
@@ -630,8 +614,8 @@ def main():
             logging.info("Getting Apex executions...")
             monitor_apex_execution(sf)
 
-            logging.info("Getting Apex CPU Timeout exeception errors...")
-            apex_cpu_timeout_errors(sf)
+            logging.info("Getting Apex unexpected execeptions...")
+            expose_apex_exception_metrics(sf)
 
         except Exception as e:
             logging.error("An error occurred: %s", e)
