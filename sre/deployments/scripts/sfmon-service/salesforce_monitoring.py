@@ -12,121 +12,17 @@ import subprocess
 import time
 
 import requests
-from prometheus_client import Gauge, start_http_server
+from prometheus_client import start_http_server
 from simple_salesforce import SalesforceMalformedRequest, Salesforce
+
+import gauges
+from limits import salesforce_limits_descriptions
 
 # Set up logging for CloudWatch
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Constants
-TOTAL_LICENSES = 'Total Salesforce licenses'
-USED_LICENSES = 'Used Salesforce licenses'
-USED_LICENSES_PERCENTAGE = 'Percentage of Salesforce licenses used'
 REQUESTS_TIMEOUT_SECONDS = 300
-
-# Prometheus metrics
-api_usage_gauge = Gauge('salesforce_api_usage', 'Salesforce API Usage', ['limit_name'])
-api_usage_percentage_gauge = Gauge('salesforce_api_usage_percentage', 'Salesforce API Usage Percentage', ['limit_name', 'limit_description', 'limit_utilized', 'max_limit'])
-
-total_user_licenses_gauge = Gauge('salesforce_total_user_licenses',
-                                  TOTAL_LICENSES, ['license_name', 'status'])
-used_user_licenses_gauge = Gauge('salesforce_used_user_licenses',
-                                 USED_LICENSES, ['license_name', 'status'])
-percent_user_licenses_used_gauge = Gauge('salesforce_user_licenses_usage_percentage', USED_LICENSES_PERCENTAGE, ['license_name', 'status', 'used_licenses', 'total_licenses'])
-
-total_permissionset_licenses_gauge = Gauge('salesforce_total_permissionset_licenses', TOTAL_LICENSES, ['license_name', 'status'])
-used_permissionset_licenses_gauge = Gauge('salesforce_used_permissionset_licenses', USED_LICENSES, ['license_name', 'status'])
-percent_permissionset_used_gauge = Gauge('salesforce_permissionset_license_usage_percentage', USED_LICENSES_PERCENTAGE, ['license_name', 'status', 'used_licenses', 'total_licenses', 'expiration_date'])
-
-total_usage_based_entitlements_licenses_gauge = Gauge('salesforce_total_licenses_usage_based_entitlements', TOTAL_LICENSES, ['license_name'])
-used_usage_based_entitlements_licenses_gauge = Gauge('salesforce_used_licenses_usage_based_entitlements', USED_LICENSES, ['license_name'])
-percent_usage_based_entitlements_used_gauge = Gauge('salesforce_percent_used_usage_based_entitlements', USED_LICENSES_PERCENTAGE, ['license_name', 'used_licenses', 'total_licenses', 'expiration_date'])
-
-incident_gauge = Gauge('salesforce_incidents', 'Number of active Salesforce incidents', ['pod', 'severity', 'message'])
-login_count_gauge = Gauge('salesforce_login_count', 'Number of logins', ['geohash', 'latitude', 'longitude'])
-
-deployment_details_gauge = Gauge('deployment_details', 'Salesforce Deployment details', ['pending_time', 'deployment_time', 'deployed_by', 'status', 'deployment_id'])
-pending_time_gauge = Gauge('deployment_pending_time', 'Pending time before starting the deployment', ['deployment_id', 'deployed_by', 'status'])
-deployment_time_gauge = Gauge('deployment_time', 'Time taken for the deployment', ['deployment_id', 'deployed_by', 'status'])
-
-ept_metric = Gauge('salesforce_experienced_page_time', 'Experienced Page Time (EPT) in seconds', ['EFFECTIVE_PAGE_TIME_DEVIATION_REASON', 'EFFECTIVE_PAGE_TIME_DEVIATION_ERROR_TYPE', 'PREVPAGE_ENTITY_TYPE', 'PREVPAGE_APP_NAME', 'PAGE_ENTITY_TYPE', 'PAGE_APP_NAME', 'BROWSER_NAME'])
-
-login_success_gauge = Gauge('salesforce_login_success_total', 'Total number of successful Salesforce logins')
-login_failure_gauge = Gauge('salesforce_login_failure_total', 'Total number of failed Salesforce logins')
-
-geolocation_gauge = Gauge('user_location', 'Longitude and Latitude of user location', ['user', 'longitude', 'latitude', 'browser', 'status'])
-
-async_job_status_gauge = Gauge('salesforce_async_job_status_count', 'Total count of Salesforce Async Jobs by Status', ['status', 'method', 'job_type', 'number_of_errors'])
-
-run_time_metric = Gauge('salesforce_apex_run_time_seconds', 'Total Apex execution time', ['entry_point', 'quiddity'])
-cpu_time_metric = Gauge('salesforce_apex_cpu_time_seconds', 'CPU time used by Apex execution', ['entry_point', 'quiddity'])
-exec_time_metric = Gauge('salesforce_apex_execution_time_seconds', 'Total execution time', ['entry_point', 'quiddity'])
-db_total_time_metric = Gauge('salesforce_apex_db_total_time_seconds', 'Total database execution time', ['entry_point', 'quiddity'])
-callout_time_metric = Gauge('salesforce_apex_callout_time_seconds', 'Total callout time', ['entry_point', 'quiddity'])
-long_running_requests_metric = Gauge('salesforce_apex_long_running_requests_total', 'Number of long-running requests', ['entry_point', 'quiddity'])
-
-apex_exception_details_gauge = Gauge('apex_exception_details', 'Details of each Apex exception', ['request_id', 'exception_category', 'exception_type', 'exception_message', 'stack_trace'])
-apex_exception_category_count_gauge = Gauge('apex_exception_category_count', 'Total count of Apex exceptions by category', ['exception_category'])
-
-
-salesforce_limits_descriptions = {
-    'ActiveScratchOrgs': 'Number of active scratch orgs in use.',
-    'AnalyticsExternalDataSizeMB': 'Storage size used by external analytics data in MB.',
-    'CdpAiInferenceApiMonthlyLimit': 'Monthly limit for CDP AI Inference API calls.',
-    'ConcurrentAsyncGetReportInstances': 'Number of concurrent asynchronous report instances.',
-    'ConcurrentEinsteinDataInsightsStoryCreation': 'Concurrent creation limit for Einstein Data Insights stories.',
-    'ConcurrentEinsteinDiscoveryStoryCreation': 'Concurrent creation limit for Einstein Discovery stories.',
-    'ConcurrentSyncReportRuns': 'Number of concurrent synchronous report runs.',
-    'DailyAnalyticsDataflowJobExecutions': 'Daily limit for executing analytics dataflow jobs.',
-    'DailyAnalyticsUploadedFilesSizeMB': 'Daily limit on size of uploaded analytics files in MB.',
-    'DailyApiRequests': 'Daily limit on API requests.',
-    'DailyAsyncApexExecutions': 'Daily limit for asynchronous Apex executions.',
-    'DailyAsyncApexTests': 'Daily limit for asynchronous Apex test executions.',
-    'DailyBulkApiBatches': 'Daily limit on bulk API batches.',
-    'DailyBulkV2QueryFileStorageMB': 'Daily limit on storage size for Bulk API v2 query files in MB.',
-    'DailyBulkV2QueryJobs': 'Daily limit on Bulk API v2 query jobs.',
-    'DailyDeliveredPlatformEvents': 'Daily limit for delivered platform events.',
-    'DailyDurableGenericStreamingApiEvents': 'Daily limit for durable generic streaming API events.',
-    'DailyDurableStreamingApiEvents': 'Daily limit for durable streaming API events.',
-    'DailyEinsteinDataInsightsStoryCreation': 'Daily limit for Einstein Data Insights story creation.',
-    'DailyEinsteinDiscoveryOptimizationJobRuns': 'Daily limit for Einstein Discovery optimization job runs.',
-    'DailyEinsteinDiscoveryPredictAPICalls': 'Daily limit for Einstein Discovery Predict API calls.',
-    'DailyEinsteinDiscoveryPredictionsByCDC': 'Daily limit for Einstein Discovery predictions by CDC.',
-    'DailyEinsteinDiscoveryStoryCreation': 'Daily limit for Einstein Discovery story creation.',
-    'DailyFunctionsApiCallLimit': 'Daily limit for Salesforce Functions API calls.',
-    'DailyGenericStreamingApiEvents': 'Daily limit for generic streaming API events.',
-    'DailyScratchOrgs': 'Daily limit for scratch org creation.',
-    'DailyStandardVolumePlatformEvents': 'Daily limit for standard volume platform events.',
-    'DailyStreamingApiEvents': 'Daily limit for streaming API events.',
-    'DailyWorkflowEmails': 'Daily limit for workflow emails sent.',
-    'DataStorageMB': 'Total data storage limit in MB.',
-    'DurableStreamingApiConcurrentClients': 'Concurrent client limit for durable streaming API.',
-    'FileStorageMB': 'Total file storage limit in MB.',
-    'HourlyAsyncReportRuns': 'Hourly limit for asynchronous report runs.',
-    'HourlyDashboardRefreshes': 'Hourly limit for dashboard refreshes.',
-    'HourlyDashboardResults': 'Hourly limit for retrieving dashboard results.',
-    'HourlyDashboardStatuses': 'Hourly limit for checking dashboard statuses.',
-    'HourlyElevateAsyncReportRuns': 'Hourly limit for elevate asynchronous report runs.',
-    'HourlyElevateSyncReportRuns': 'Hourly limit for elevate synchronous report runs.',
-    'HourlyLongTermIdMapping': 'Hourly limit for long-term ID mapping.',
-    'HourlyManagedContentPublicRequests': 'Hourly limit for managed content public requests.',
-    'HourlyODataCallout': 'Hourly limit for OData callouts.',
-    'HourlyPublishedPlatformEvents': 'Hourly limit for published platform events.',
-    'HourlyPublishedStandardVolumePlatformEvents': 'Hourly limit for published standard volume platform events.',
-    'HourlyShortTermIdMapping': 'Hourly limit for short-term ID mapping.',
-    'HourlySyncReportRuns': 'Hourly limit for synchronous report runs.',
-    'HourlyTimeBasedWorkflow': 'Hourly limit for time-based workflow actions.',
-    'MassEmail': 'Daily limit for sending mass emails.',
-    'MonthlyEinsteinDiscoveryStoryCreation': 'Monthly limit for Einstein Discovery story creation.',
-    'MonthlyPlatformEventsUsageEntitlement': 'Monthly limit for platform events usage.',
-    'Package2VersionCreates': 'Limit for creating package versions.',
-    'Package2VersionCreatesWithoutValidation': 'Limit for creating package versions without validation.',
-    'PermissionSets': 'Total number of permission sets allowed.',
-    'PrivateConnectOutboundCalloutHourlyLimitMB': 'Hourly limit on Private Connect outbound callout data in MB.',
-    'PublishCallbackUsageInApex': 'Limit for publish callback usage in Apex.',
-    'SingleEmail': 'Daily limit for sending single emails.',
-    'StreamingApiConcurrentClients': 'Concurrent client limit for streaming API.'
-}
 
 
 def get_salesforce_connection_url(url):
@@ -167,8 +63,8 @@ def monitor_salesforce_limits(limits):
         if max_limit != 0:
             usage_percentage = (used * 100) / max_limit
 
-            api_usage_gauge.labels(limit_name=limit_name).set(used)
-            api_usage_percentage_gauge.labels(limit_name=limit_name, limit_description=salesforce_limits_descriptions.get(limit_name, 'Description not available'), limit_utilized=used, max_limit=max_limit).set(usage_percentage)
+            gauges.api_usage_gauge.labels(limit_name=limit_name).set(used)
+            gauges.api_usage_percentage_gauge.labels(limit_name=limit_name, limit_description=salesforce_limits_descriptions.get(limit_name, 'Description not available'), limit_utilized=used, max_limit=max_limit).set(usage_percentage)
 
             if usage_percentage >= 90:
                 logging.warning('API usage for %s has exceeded %s percent of the total limit.',
@@ -186,12 +82,12 @@ def get_salesforce_licenses(sf):
         total_licenses = dict(entry)['TotalLicenses']
         used_licenses = dict(entry)['UsedLicenses']
 
-        total_user_licenses_gauge.labels(license_name=license_name, status=status).set(total_licenses)
-        used_user_licenses_gauge.labels(license_name=license_name, status=status).set(used_licenses)
+        gauges.total_user_licenses_gauge.labels(license_name=license_name, status=status).set(total_licenses)
+        gauges.used_user_licenses_gauge.labels(license_name=license_name, status=status).set(used_licenses)
 
         if total_licenses != 0:
             percent_used = (used_licenses / total_licenses) * 100
-            percent_user_licenses_used_gauge.labels(license_name=license_name, status=status, used_licenses=used_licenses, total_licenses=total_licenses).set(percent_used)
+            gauges.percent_user_licenses_used_gauge.labels(license_name=license_name, status=status, used_licenses=used_licenses, total_licenses=total_licenses).set(percent_used)
 
             if percent_used >= 90:
                 logging.warning('License usage for %s has exceeded %s percent of the total limit.',
@@ -205,12 +101,12 @@ def get_salesforce_licenses(sf):
         used_licenses = dict(entry)['UsedLicenses']
         expiration_date = dict(entry)['ExpirationDate']
 
-        total_permissionset_licenses_gauge.labels(license_name=license_name, status=status).set(total_licenses)
-        used_permissionset_licenses_gauge.labels(license_name=license_name, status=status).set(used_licenses)
+        gauges.total_permissionset_licenses_gauge.labels(license_name=license_name, status=status).set(total_licenses)
+        gauges.used_permissionset_licenses_gauge.labels(license_name=license_name, status=status).set(used_licenses)
 
         if total_licenses != 0:
             percent_used = (used_licenses / total_licenses) * 100
-            percent_permissionset_used_gauge.labels(license_name=license_name, status=status, expiration_date=expiration_date, used_licenses=used_licenses, total_licenses=total_licenses).set(percent_used)
+            gauges.percent_permissionset_used_gauge.labels(license_name=license_name, status=status, expiration_date=expiration_date, used_licenses=used_licenses, total_licenses=total_licenses).set(percent_used)
 
             if percent_used >= 90:
                 logging.warning('License usage for %s has exceeded %s percent of the total limit.', license_name, percent_used)
@@ -229,13 +125,13 @@ def get_salesforce_licenses(sf):
         used_licenses = dict(entry)['AmountUsed']
         expiration_date = dict(entry)['EndDate']
 
-        total_usage_based_entitlements_licenses_gauge.labels(license_name=license_name).set(total_licenses)
+        gauges.total_usage_based_entitlements_licenses_gauge.labels(license_name=license_name).set(total_licenses)
         if used_licenses:
-            used_usage_based_entitlements_licenses_gauge.labels(license_name=license_name).set(used_licenses)
+            gauges.used_usage_based_entitlements_licenses_gauge.labels(license_name=license_name).set(used_licenses)
 
         if total_licenses != 0 and used_licenses is not None:
             percent_used = (used_licenses / total_licenses) * 100
-            percent_usage_based_entitlements_used_gauge.labels(license_name=license_name, expiration_date=expiration_date, used_licenses=used_licenses, total_licenses=total_licenses).set(percent_used)
+            gauges.percent_usage_based_entitlements_used_gauge.labels(license_name=license_name, expiration_date=expiration_date, used_licenses=used_licenses, total_licenses=total_licenses).set(percent_used)
 
             if percent_used >= 90:
                 logging.warning('License usage for %s has exceeded %s percent of the total limit.',
@@ -292,15 +188,15 @@ def get_salesforce_incidents(instancepod):
                 severity = element['IncidentImpacts'][0]['severity']
                 pods = str(element['instanceKeys']).replace("'", "").replace("[", "").replace("]", "")
                 if instancepod in pods:
-                    incident_gauge.labels(pod=instancepod, severity=severity, message=message).set(1)
+                    gauges.incident_gauge.labels(pod=instancepod, severity=severity, message=message).set(1)
                     incident_cnt += 1
             except (KeyError, IndexError) as e:
                 logging.warning("Error processing incident element: %s", e)
         if incident_cnt == 0:
-            incident_gauge.labels(pod=instancepod, severity='ok', message=None).set(0)
+            gauges.incident_gauge.labels(pod=instancepod, severity='ok', message=None).set(0)
     except requests.RequestException as e:
         logging.error("Error fetching incidents: %s", e)
-        incident_gauge.clear()
+        gauges.incident_gauge.clear()
 
 
 def get_deployment_status(sf):
@@ -326,10 +222,10 @@ def get_deployment_status(sf):
             deployment_time = (completed_date - start_date).total_seconds()/60 if start_date and completed_date else 0.0
             pending_time = (start_date - created_date).total_seconds()/60 if created_date and start_date else 0.0
 
-            deployment_details_gauge.labels(pending_time=pending_time, deployment_time=deployment_time, deployment_id=record['Id'],
+            gauges.deployment_details_gauge.labels(pending_time=pending_time, deployment_time=deployment_time, deployment_id=record['Id'],
                                             deployed_by=record['CreatedBy']['Name'], status=record['Status']).set(status_mapping[record['Status']])
-            pending_time_gauge.labels(deployment_id=record['Id'], deployed_by=record['CreatedBy']['Name'], status=record['Status']).set(pending_time)
-            deployment_time_gauge.labels(deployment_id=record['Id'], deployed_by=record['CreatedBy']['Name'], status=record['Status']).set(deployment_time)
+            gauges.pending_time_gauge.labels(deployment_id=record['Id'], deployed_by=record['CreatedBy']['Name'], status=record['Status']).set(pending_time)
+            gauges.deployment_time_gauge.labels(deployment_id=record['Id'], deployed_by=record['CreatedBy']['Name'], status=record['Status']).set(deployment_time)
 
 
 def get_salesforce_ept(sf):
@@ -354,7 +250,7 @@ def get_salesforce_ept(sf):
                 if row['EFFECTIVE_PAGE_TIME_DEVIATION']:
                     ept = float(row['EFFECTIVE_PAGE_TIME'])/1000 if row['EFFECTIVE_PAGE_TIME'] else 0
 
-                    ept_metric.labels(EFFECTIVE_PAGE_TIME_DEVIATION_REASON=row['EFFECTIVE_PAGE_TIME_DEVIATION_REASON'],
+                    gauges.ept_metric.labels(EFFECTIVE_PAGE_TIME_DEVIATION_REASON=row['EFFECTIVE_PAGE_TIME_DEVIATION_REASON'],
                                       EFFECTIVE_PAGE_TIME_DEVIATION_ERROR_TYPE=row['EFFECTIVE_PAGE_TIME_DEVIATION_ERROR_TYPE'],
                                       PREVPAGE_ENTITY_TYPE=row['PREVPAGE_ENTITY_TYPE'],
                                       PREVPAGE_APP_NAME=row['PREVPAGE_APP_NAME'],
@@ -391,8 +287,8 @@ def monitor_login_events(sf):
                     else:
                         failure_count += 1
 
-                login_success_gauge.set(success_count)
-                login_failure_gauge.set(failure_count)
+                gauges.login_success_gauge.set(success_count)
+                gauges.login_failure_gauge.set(failure_count)
 
             else:
                 return None
@@ -432,7 +328,7 @@ def geolocation(sf, chunk_size=100):
                 username = record['UserName']
                 browser = record['Browser']
                 login_status = record['Status']
-                geolocation_gauge.labels(user=username, longitude=longitude, latitude=latitude, browser=browser, status=login_status).set(1)
+                gauges.geolocation_gauge.labels(user=username, longitude=longitude, latitude=latitude, browser=browser, status=login_status).set(1)
 
     except KeyError as e:
         logging.error("Key error: %s", e)
@@ -463,7 +359,7 @@ def async_apex_job_status(sf):
         overall_status_counts[(status, method, job_type, errors)] += 1
 
     for (status, method, job_type, errors), count in overall_status_counts.items():
-        async_job_status_gauge.labels(status=status, method=method, job_type=job_type, number_of_errors=errors).set(count)
+        gauges.async_job_status_gauge.labels(status=status, method=method, job_type=job_type, number_of_errors=errors).set(count)
 
 
 def parse_logs(sf, log_query):
@@ -517,12 +413,12 @@ def monitor_apex_execution(sf):
             is_long_running = float(log_entry.get('IS_LONG_RUNNING_REQUEST', 0))
             quiddity = log_entry.get('QUIDDITY')
 
-            run_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(run_time)
-            cpu_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(cpu_time)
-            exec_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(exec_time)
-            db_total_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(db_total_time)
-            callout_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(callout_time)
-            long_running_requests_metric.labels(entry_point=entry_point, quiddity=quiddity).set(is_long_running)
+            gauges.run_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(run_time)
+            gauges.cpu_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(cpu_time)
+            gauges.exec_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(exec_time)
+            gauges.db_total_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(db_total_time)
+            gauges.callout_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(callout_time)
+            gauges.long_running_requests_metric.labels(entry_point=entry_point, quiddity=quiddity).set(is_long_running)
 
     except Exception as e:
         logging.error("An unexpected error occurred: %s", e)
@@ -555,7 +451,7 @@ def expose_apex_exception_metrics(sf):
                 exception_category_counts[category] = 1
 
             # Expose the details for each entry
-            apex_exception_details_gauge.labels(
+            gauges.apex_exception_details_gauge.labels(
                 request_id=row['REQUEST_ID'],
                 exception_type=row['EXCEPTION_TYPE'],
                 exception_message=row['EXCEPTION_MESSAGE'],
@@ -573,7 +469,7 @@ def expose_apex_exception_metrics(sf):
     try:
         # Expose the metrics for each exception category
         for category, count in exception_category_counts.items():
-            apex_exception_category_count_gauge.labels(exception_category=category).set(count)
+            gauges.apex_exception_category_count_gauge.labels(exception_category=category).set(count)
     except Exception as e:
         logging.error("Error while exposing category count metrics: %s", e)
 
