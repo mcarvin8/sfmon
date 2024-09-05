@@ -1,0 +1,5877 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "o7MvocN7k"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 4222,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "o7MvocN7k"
+      },
+      "description": "Source Code Management repository.",
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 0,
+        "y": 0
+      },
+      "id": 28,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "Update link here for your SCM repo.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.4.1",
+      "title": "SCM Link",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 3
+      },
+      "id": 22,
+      "panels": [],
+      "title": "Incidents",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "o7MvocN7k"
+      },
+      "description": "The # of open incidents against each Salesforce org.",
+      "fieldConfig": {
+        "defaults": {
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "dark-red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 11,
+        "x": 0,
+        "y": 4
+      },
+      "id": 7,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false,
+        "sizing": "auto"
+      },
+      "pluginVersion": "10.4.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max_over_time(salesforce_incidents[30m])",
+          "format": "time_series",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Salesforce Incidents",
+      "transparent": true,
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "o7MvocN7k"
+      },
+      "description": "The # of open incidents against each Salesforce org over time.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": true,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 50,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "dark-red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 13,
+        "x": 11,
+        "y": 4
+      },
+      "id": 21,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.4.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max_over_time(salesforce_incidents[30m])",
+          "format": "time_series",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Salesforce Incidents Over Time",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "o7MvocN7k"
+      },
+      "description": "Incidents details against each Salesforce org.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "color-text"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "displayName": "Time",
+          "fieldMinMax": false,
+          "mappings": [
+            {
+              "options": {
+                "major": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "major"
+                },
+                "minor": {
+                  "color": "yellow",
+                  "index": 1,
+                  "text": "minor"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 9,
+      "interval": "1800",
+      "options": {
+        "cellHeight": "md",
+        "footer": {
+          "countRows": true,
+          "fields": "",
+          "reducer": [
+            "count"
+          ],
+          "show": true
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.4.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "max by(pod, severity, message) (max_over_time(salesforce_incidents[30m]))",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Incidents details",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Value": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "Time": "",
+              "message": "Incident Message",
+              "pod": "POD Instance",
+              "severity": "Severity"
+            }
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "id": 24,
+      "panels": [],
+      "title": "API Limits",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "o7MvocN7k"
+      },
+      "description": "The usage percentage for each API.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 50
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 16,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "id": 1,
+      "interval": "15s",
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false,
+        "sizing": "auto",
+        "text": {
+          "titleSize": 12
+        }
+      },
+      "pluginVersion": "10.4.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max by(limit_name) (max_over_time(salesforce_api_usage_percentage[30m])) > 0",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Salesforce API Usage % (Data refreshes every 30 minutes)",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "o7MvocN7k"
+      },
+      "description": "API limits in Salesforce refer to the maximum number of API requests that can be made to a Salesforce instance over a period of time.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 16,
+        "w": 24,
+        "x": 0,
+        "y": 44
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.4.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max by(limit_name) (max_over_time(salesforce_api_usage_percentage[30m])) > 0",
+          "format": "time_series",
+          "fullMetaSearch": false,
+          "includeNullMetadata": false,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Salesforce API Usage % (Data refreshes every 30 minutes)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 60
+      },
+      "id": 48,
+      "panels": [],
+      "title": "Licenses Usage",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "o7MvocN7k"
+      },
+      "description": "User licenses in Salesforce define the baseline level of features and permissions that a user can access within the Salesforce environment, determining what apps, objects, and functionalities are available to them based on their assigned license type.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "series",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 80
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 7,
+        "x": 0,
+        "y": 61
+      },
+      "id": 4,
+      "interval": "1800",
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.4.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "max by(license_name) (max_over_time(salesforce_user_licenses_usage_percentage[30m])) > 0",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "salesforce_user_licenses_usage_percentage",
+          "useBackend": false
+        }
+      ],
+      "title": "User Licenses Usage % (Data refreshes every 30 minutes)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "o7MvocN7k"
+      },
+      "description": "Active Licenses details, Data refreshes every 30 minutes",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "series",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "log": 2,
+              "type": "log"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 17,
+        "x": 7,
+        "y": 61
+      },
+      "id": 27,
+      "interval": "1800",
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.9,
+        "fullHighlight": true,
+        "groupWidth": 0.5,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "text": {
+          "valueSize": 9
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        },
+        "xField": "license_name",
+        "xTickLabelRotation": 30,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "max by(license_name) (max_over_time(salesforce_used_user_licenses{status=\"Active\"}[30m]))",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "Used : {{license_name}}",
+          "range": false,
+          "refId": "Used User Licenses",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "max by(license_name) (max_over_time(salesforce_total_user_licenses{status=\"Active\"}[30m]))",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "Total : {{license_name}}",
+          "range": false,
+          "refId": "Total User Licenses",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max by(license_name) (max_over_time(salesforce_user_licenses_usage_percentage{status=\"Active\"}[30m]))",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "Total : {{license_name}}",
+          "range": false,
+          "refId": "% Licenses Used",
+          "useBackend": false
+        }
+      ],
+      "title": "User Active Licenses Count (Used vs Total vs Percentage Utilized)",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ],
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "o7MvocN7k"
+      },
+      "description": "Usage-based entitlements licenses in Salesforce are licenses that track and limit the consumption of specific features or services based on usage metrics, such as API calls or storage, rather than per-user allocations.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "series",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 80
+              },
+              {
+                "color": "#EAB839",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 7,
+        "x": 0,
+        "y": 75
+      },
+      "id": 50,
+      "interval": "1800",
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.4.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "max by(license_name) (max_over_time(salesforce_percent_used_usage_based_entitlements[30m])) > 0",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "salesforce_usage_based_entitlements_licenses_usage_percentage",
+          "useBackend": false
+        }
+      ],
+      "title": "Usage based entitlements Usage % (Data refreshes every 30 minutes)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "o7MvocN7k"
+      },
+      "description": "Usage based entitlements Licenses details, Data refreshes every 30 minutes",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "series",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 0,
+            "scaleDistribution": {
+              "log": 2,
+              "type": "log"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 17,
+        "x": 7,
+        "y": 75
+      },
+      "id": 51,
+      "interval": "1800",
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.9,
+        "fullHighlight": true,
+        "groupWidth": 0.6,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "never",
+        "stacking": "none",
+        "text": {
+          "valueSize": 10
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        },
+        "xField": "license_name",
+        "xTickLabelMaxLength": 50,
+        "xTickLabelRotation": 20,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max by(license_name) (max_over_time(salesforce_used_licenses_usage_based_entitlements[30m])) > 0",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "Used : {{license_name}}",
+          "range": false,
+          "refId": "Used Licenses",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max by(license_name) (max_over_time(salesforce_total_licenses_usage_based_entitlements[30m]))",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "Total : {{license_name}}",
+          "range": false,
+          "refId": "Total Licenses",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max by(license_name) (max_over_time(salesforce_percent_used_usage_based_entitlements[30m]))",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": true,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "Total : {{license_name}}",
+          "range": false,
+          "refId": "% Licenses Used",
+          "useBackend": false
+        }
+      ],
+      "title": "Usage based entitlements Licenses Count(Used vs Total)",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ],
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "o7MvocN7k"
+      },
+      "description": "Licenses to grants access to additional features or permissions beyond the standard Salesforce license. It allows administrators to assign specific sets of permissions to users on top of their existing user license, enabling more granular control over feature access and customization.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 7,
+        "x": 0,
+        "y": 89
+      },
+      "id": 8,
+      "interval": "5m",
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.4.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "max by(license_name) (max_over_time(salesforce_permissionset_license_usage_percentage[30m])) > 0",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Permission Set License Usage % (Data refreshes every 30mins)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "o7MvocN7k"
+      },
+      "description": "Permissionset Active Licenses details, Data refreshes every 30 minutes",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "series",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "log": 2,
+              "type": "log"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 17,
+        "x": 7,
+        "y": 89
+      },
+      "id": 52,
+      "interval": "1800",
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.9,
+        "fullHighlight": true,
+        "groupWidth": 0.6,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "never",
+        "stacking": "none",
+        "text": {
+          "valueSize": 9
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        },
+        "xField": "license_name",
+        "xTickLabelMaxLength": 40,
+        "xTickLabelRotation": 40,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max by(license_name) (max_over_time(salesforce_used_permissionset_licenses{status=\"Active\"}[30m]))",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "Used Licenses",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max by(license_name) (max_over_time(salesforce_total_permissionset_licenses{status=\"Active\"}[30m]))",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "Total Licenses",
+          "useBackend": false
+        }
+      ],
+      "title": "Permissionset Licenses Count (Used vs Total)",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ],
+      "type": "barchart"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 103
+      },
+      "id": 34,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 109
+          },
+          "id": 29,
+          "interval": "1800",
+          "options": {
+            "legend": {
+              "calcs": [
+                "firstNotNull",
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "max by(job_type) (max_over_time(salesforce_async_job_status_count[30m]))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Asynchronous Apex Jobs status by Job Type",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 109
+          },
+          "id": 30,
+          "interval": "1800",
+          "options": {
+            "displayLabels": [],
+            "legend": {
+              "calcs": [],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "values": [
+                "value",
+                "percent"
+              ]
+            },
+            "pieType": "donut",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "max by(status) (max_over_time(salesforce_async_job_status_count[30m]))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Asynchronous Apex Jobs status",
+          "type": "piechart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 0,
+            "y": 119
+          },
+          "id": 33,
+          "interval": "1800",
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "firstNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "max by(method) (max_over_time(salesforce_async_job_status_count[30m]))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Asynchronous Apex Jobs status by Method",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 119
+          },
+          "id": 32,
+          "interval": "1800",
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "firstNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Name",
+              "sortDesc": false
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "max by(method, status) (max_over_time(salesforce_async_job_status_count[30m]))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Asynchronous Apex Jobs status by Method and Status",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 131
+          },
+          "id": 35,
+          "interval": "1800",
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "expr": "avg without(job, instance) (avg_over_time(salesforce_apex_run_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E\"}[60m]))",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "{{entry_point}}",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Average Salesforce Synchronous Apex Run Time (Last 1hour) by Entry Point",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Average Salesforce Synchronous Apex Run Time (Last 1hour) by Quiddity",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 0,
+            "y": 143
+          },
+          "id": 36,
+          "interval": "1800",
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "builder",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_run_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[60m]))",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Average Salesforce Synchronous Apex Run Time (Last 1hour) by Quiddity",
+          "transformations": [
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "V",
+                "renamePattern": "Visualforce Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "M",
+                "renamePattern": "Managed Package Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "R",
+                "renamePattern": "Remote Process Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "C",
+                "renamePattern": "Custom Function Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "H",
+                "renamePattern": "HTTP Request Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "F",
+                "renamePattern": "Future Method Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "S",
+                "renamePattern": "Scheduled Job Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "I",
+                "renamePattern": "Interactive Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "Q",
+                "renamePattern": "Queueable Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "BA",
+                "renamePattern": "Batch Apex Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "W",
+                "renamePattern": "Workflow Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "L",
+                "renamePattern": "Lightning Component Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "A",
+                "renamePattern": "API Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Outbound Messaging Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "E",
+                "renamePattern": "Email Services Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "QTXF",
+                "renamePattern": "Queueable Chain Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "B",
+                "renamePattern": "Batch Child Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "TD",
+                "renamePattern": "Test Driven Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Kafka Stream Execution"
+              }
+            }
+          ],
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Average Salesforce Asynchronous Apex Run Time (Last 1hour) by Quiddity",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 143
+          },
+          "id": 37,
+          "interval": "1800",
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "builder",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_run_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[60m]))",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Average Salesforce Asynchronous Apex Run Time (Last 1hour) by Quiddity",
+          "transformations": [
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "V",
+                "renamePattern": "Visualforce Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "M",
+                "renamePattern": "Managed Package Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "R",
+                "renamePattern": "Remote Process Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "C",
+                "renamePattern": "Custom Function Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "H",
+                "renamePattern": "HTTP Request Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "F",
+                "renamePattern": "Future Method Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "S",
+                "renamePattern": "Scheduled Job Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "I",
+                "renamePattern": "Interactive Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "Q",
+                "renamePattern": "Queueable Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "BA",
+                "renamePattern": "Batch Apex Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "W",
+                "renamePattern": "Workflow Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "L",
+                "renamePattern": "Lightning Component Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "A",
+                "renamePattern": "API Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Outbound Messaging Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "E",
+                "renamePattern": "Email Services Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "QTXF",
+                "renamePattern": "Queueable Chain Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "B",
+                "renamePattern": "Batch Child Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "TD",
+                "renamePattern": "Test Driven Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Kafka Stream Execution"
+              }
+            }
+          ],
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Average Salesforce Synchronous Apex CPU Time (Last 1hour) by Quiddity",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 0,
+            "y": 155
+          },
+          "id": 38,
+          "interval": "1800",
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_cpu_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[60m]))",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Average Salesforce Synchronous Apex CPU Time (Last 1hour) by Quiddity",
+          "transformations": [
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "V",
+                "renamePattern": "Visualforce Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "M",
+                "renamePattern": "Managed Package Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "R",
+                "renamePattern": "Remote Process Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "C",
+                "renamePattern": "Custom Function Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "H",
+                "renamePattern": "HTTP Request Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "F",
+                "renamePattern": "Future Method Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "S",
+                "renamePattern": "Scheduled Job Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "I",
+                "renamePattern": "Interactive Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "Q",
+                "renamePattern": "Queueable Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "BA",
+                "renamePattern": "Batch Apex Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "W",
+                "renamePattern": "Workflow Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "L",
+                "renamePattern": "Lightning Component Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "A",
+                "renamePattern": "API Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Outbound Messaging Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "E",
+                "renamePattern": "Email Services Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "QTXF",
+                "renamePattern": "Queueable Chain Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "B",
+                "renamePattern": "Batch Child Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "TD",
+                "renamePattern": "Test Driven Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Kafka Stream Execution"
+              }
+            }
+          ],
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Average Salesforce Asynchronous Apex CPU Time (Last 1hour) by Quiddity",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 155
+          },
+          "id": 39,
+          "interval": "1800",
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_cpu_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[60m]))",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Average Salesforce Asynchronous Apex CPU Time (Last 1hour) by Quiddity",
+          "transformations": [
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "V",
+                "renamePattern": "Visualforce Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "M",
+                "renamePattern": "Managed Package Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "R",
+                "renamePattern": "Remote Process Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "C",
+                "renamePattern": "Custom Function Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "H",
+                "renamePattern": "HTTP Request Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "F",
+                "renamePattern": "Future Method Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "S",
+                "renamePattern": "Scheduled Job Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "I",
+                "renamePattern": "Interactive Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "Q",
+                "renamePattern": "Queueable Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "BA",
+                "renamePattern": "Batch Apex Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "W",
+                "renamePattern": "Workflow Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "L",
+                "renamePattern": "Lightning Component Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "A",
+                "renamePattern": "API Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Outbound Messaging Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "E",
+                "renamePattern": "Email Services Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "QTXF",
+                "renamePattern": "Queueable Chain Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "B",
+                "renamePattern": "Batch Child Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "TD",
+                "renamePattern": "Test Driven Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Kafka Stream Execution"
+              }
+            }
+          ],
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Average Salesforce Synchronous Apex Execution Time (Last 1hour) by Quiddity",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 0,
+            "y": 167
+          },
+          "id": 40,
+          "interval": "1800",
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_execution_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[60m]))",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Average Salesforce Synchronous Apex Execution Time (Last 1hour) by Quiddity",
+          "transformations": [
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "V",
+                "renamePattern": "Visualforce Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "M",
+                "renamePattern": "Managed Package Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "R",
+                "renamePattern": "Remote Process Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "C",
+                "renamePattern": "Custom Function Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "H",
+                "renamePattern": "HTTP Request Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "F",
+                "renamePattern": "Future Method Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "S",
+                "renamePattern": "Scheduled Job Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "I",
+                "renamePattern": "Interactive Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "Q",
+                "renamePattern": "Queueable Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "BA",
+                "renamePattern": "Batch Apex Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "W",
+                "renamePattern": "Workflow Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "L",
+                "renamePattern": "Lightning Component Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "A",
+                "renamePattern": "API Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Outbound Messaging Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "E",
+                "renamePattern": "Email Services Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "QTXF",
+                "renamePattern": "Queueable Chain Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "B",
+                "renamePattern": "Batch Child Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "TD",
+                "renamePattern": "Test Driven Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Kafka Stream Execution"
+              }
+            }
+          ],
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Average Salesforce Asynchronous Apex Execution Time (Last 1hour) by Quiddity",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 167
+          },
+          "id": 41,
+          "interval": "1800",
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_execution_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[60m]))",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Average Salesforce Asynchronous Apex Execution Time (Last 1hour) by Quiddity",
+          "transformations": [
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "V",
+                "renamePattern": "Visualforce Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "M",
+                "renamePattern": "Managed Package Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "R",
+                "renamePattern": "Remote Process Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "C",
+                "renamePattern": "Custom Function Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "H",
+                "renamePattern": "HTTP Request Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "F",
+                "renamePattern": "Future Method Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "S",
+                "renamePattern": "Scheduled Job Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "I",
+                "renamePattern": "Interactive Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "Q",
+                "renamePattern": "Queueable Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "BA",
+                "renamePattern": "Batch Apex Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "W",
+                "renamePattern": "Workflow Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "L",
+                "renamePattern": "Lightning Component Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "A",
+                "renamePattern": "API Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Outbound Messaging Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "E",
+                "renamePattern": "Email Services Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "QTXF",
+                "renamePattern": "Queueable Chain Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "B",
+                "renamePattern": "Batch Child Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "TD",
+                "renamePattern": "Test Driven Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Kafka Stream Execution"
+              }
+            }
+          ],
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Average Salesforce Synchronous Apex Database Time (Last 1hour) by Quiddity",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 0,
+            "y": 179
+          },
+          "id": 42,
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_db_total_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[60m]))",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Average Salesforce Synchronous Apex Database Time (Last 1hour) by Quiddity",
+          "transformations": [
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "V",
+                "renamePattern": "Visualforce Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "M",
+                "renamePattern": "Managed Package Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "R",
+                "renamePattern": "Remote Process Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "C",
+                "renamePattern": "Custom Function Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "H",
+                "renamePattern": "HTTP Request Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "F",
+                "renamePattern": "Future Method Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "S",
+                "renamePattern": "Scheduled Job Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "I",
+                "renamePattern": "Interactive Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "Q",
+                "renamePattern": "Queueable Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "BA",
+                "renamePattern": "Batch Apex Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "W",
+                "renamePattern": "Workflow Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "L",
+                "renamePattern": "Lightning Component Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "A",
+                "renamePattern": "API Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Outbound Messaging Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "E",
+                "renamePattern": "Email Services Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "QTXF",
+                "renamePattern": "Queueable Chain Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "B",
+                "renamePattern": "Batch Child Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "TD",
+                "renamePattern": "Test Driven Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Kafka Stream Execution"
+              }
+            }
+          ],
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Average Salesforce Asynchronous Apex Database Time (Last 1hour) by Quiddity",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 179
+          },
+          "id": 43,
+          "interval": "1800",
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_db_total_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[60m]))",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Average Salesforce Asynchronous Apex Database Time (Last 1hour) by Quiddity",
+          "transformations": [
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "V",
+                "renamePattern": "Visualforce Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "M",
+                "renamePattern": "Managed Package Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "R",
+                "renamePattern": "Remote Process Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "C",
+                "renamePattern": "Custom Function Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "H",
+                "renamePattern": "HTTP Request Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "F",
+                "renamePattern": "Future Method Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "S",
+                "renamePattern": "Scheduled Job Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "I",
+                "renamePattern": "Interactive Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "Q",
+                "renamePattern": "Queueable Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "BA",
+                "renamePattern": "Batch Apex Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "W",
+                "renamePattern": "Workflow Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "L",
+                "renamePattern": "Lightning Component Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "A",
+                "renamePattern": "API Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Outbound Messaging Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "E",
+                "renamePattern": "Email Services Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "QTXF",
+                "renamePattern": "Queueable Chain Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "B",
+                "renamePattern": "Batch Child Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "TD",
+                "renamePattern": "Test Driven Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Kafka Stream Execution"
+              }
+            }
+          ],
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Average Salesforce Synchronous Apex CalloutTime (Last 1hour) by Quiddity",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 0,
+            "y": 191
+          },
+          "id": 44,
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_callout_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[60m]))",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Average Salesforce Synchronous Apex Callout Time (Last 1hour) by Quiddity",
+          "transformations": [
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "V",
+                "renamePattern": "Visualforce Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "M",
+                "renamePattern": "Managed Package Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "R",
+                "renamePattern": "Remote Process Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "C",
+                "renamePattern": "Custom Function Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "H",
+                "renamePattern": "HTTP Request Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "F",
+                "renamePattern": "Future Method Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "S",
+                "renamePattern": "Scheduled Job Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "I",
+                "renamePattern": "Interactive Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "Q",
+                "renamePattern": "Queueable Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "BA",
+                "renamePattern": "Batch Apex Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "W",
+                "renamePattern": "Workflow Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "L",
+                "renamePattern": "Lightning Component Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "A",
+                "renamePattern": "API Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Outbound Messaging Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "E",
+                "renamePattern": "Email Services Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "QTXF",
+                "renamePattern": "Queueable Chain Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "B",
+                "renamePattern": "Batch Child Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "TD",
+                "renamePattern": "Test Driven Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Kafka Stream Execution"
+              }
+            }
+          ],
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Average Salesforce Asynchronous Apex Callout Time (Last 1hour) by Quiddity",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 191
+          },
+          "id": 45,
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_callout_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[60m]))",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Average Salesforce Asynchronous Apex Callout Time (Last 1hour) by Quiddity",
+          "transformations": [
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "V",
+                "renamePattern": "Visualforce Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "M",
+                "renamePattern": "Managed Package Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "R",
+                "renamePattern": "Remote Process Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "C",
+                "renamePattern": "Custom Function Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "H",
+                "renamePattern": "HTTP Request Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "F",
+                "renamePattern": "Future Method Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "S",
+                "renamePattern": "Scheduled Job Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "I",
+                "renamePattern": "Interactive Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "Q",
+                "renamePattern": "Queueable Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "BA",
+                "renamePattern": "Batch Apex Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "W",
+                "renamePattern": "Workflow Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "L",
+                "renamePattern": "Lightning Component Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "A",
+                "renamePattern": "API Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Outbound Messaging Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "E",
+                "renamePattern": "Email Services Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "QTXF",
+                "renamePattern": "Queueable Chain Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "B",
+                "renamePattern": "Batch Child Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "TD",
+                "renamePattern": "Test Driven Execution"
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "K",
+                "renamePattern": "Kafka Stream Execution"
+              }
+            }
+          ],
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "series",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "fieldMinMax": false,
+              "links": [],
+              "mappings": [
+                {
+                  "options": {
+                    "A": {
+                      "index": 7,
+                      "text": "API Execution"
+                    },
+                    "E": {
+                      "index": 8,
+                      "text": "Email Service Execution"
+                    },
+                    "H": {
+                      "index": 3,
+                      "text": "HTTP Callout Execution"
+                    },
+                    "I": {
+                      "index": 4,
+                      "text": "Interactive Execution"
+                    },
+                    "K": {
+                      "index": 10,
+                      "text": "Kafka Stream Execution"
+                    },
+                    "L": {
+                      "index": 6,
+                      "text": "Lightning Execution"
+                    },
+                    "M": {
+                      "index": 1,
+                      "text": "Managed Package Execution"
+                    },
+                    "R": {
+                      "index": 2,
+                      "text": "Rest API Execution"
+                    },
+                    "TD": {
+                      "index": 9,
+                      "text": "Test Driven Execution"
+                    },
+                    "V": {
+                      "index": 0,
+                      "text": "Visualforce Execution"
+                    },
+                    "W": {
+                      "index": 5,
+                      "text": "Workflow Execution"
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 13,
+            "w": 12,
+            "x": 0,
+            "y": 203
+          },
+          "id": 46,
+          "interval": "1800",
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.9,
+            "fullHighlight": true,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "orientation": "auto",
+            "showValue": "never",
+            "stacking": "none",
+            "text": {
+              "valueSize": 10
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            },
+            "xField": "quiddity",
+            "xTickLabelRotation": 30,
+            "xTickLabelSpacing": 0
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_run_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[30m])) / 1000",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "Run Time",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_cpu_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[30m])) / 1000",
+              "format": "table",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "CPU Time",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_execution_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[30m])) / 1000",
+              "format": "table",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "Execution Time",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_db_total_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[30m])) / 1000",
+              "format": "table",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "Database Time",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_callout_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[30m])) / 1000",
+              "format": "table",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "Callout Time",
+              "useBackend": false
+            }
+          ],
+          "title": "Synchronous Apex Execution Time details",
+          "transformations": [
+            {
+              "id": "joinByField",
+              "options": {
+                "byField": "quiddity",
+                "mode": "outer"
+              }
+            }
+          ],
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "series",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "fieldMinMax": false,
+              "links": [],
+              "mappings": [
+                {
+                  "options": {
+                    "B": {
+                      "index": 7,
+                      "text": "Batch Child Execution"
+                    },
+                    "BA": {
+                      "index": 3,
+                      "text": "Batch Apex Execution"
+                    },
+                    "C": {
+                      "index": 4,
+                      "text": "Custom Function Execution"
+                    },
+                    "F": {
+                      "index": 0,
+                      "text": "Future Method Execution"
+                    },
+                    "K": {
+                      "index": 5,
+                      "text": "Outbound Messaging Execution"
+                    },
+                    "Q": {
+                      "index": 2,
+                      "text": "Queueable Execution"
+                    },
+                    "QTXF": {
+                      "index": 6,
+                      "text": "Queueable Chain Execution"
+                    },
+                    "S": {
+                      "index": 1,
+                      "text": "Scheduled Job Execution"
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 13,
+            "w": 12,
+            "x": 12,
+            "y": 203
+          },
+          "id": 47,
+          "interval": "1800",
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.9,
+            "fullHighlight": true,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "orientation": "auto",
+            "showValue": "never",
+            "stacking": "none",
+            "text": {
+              "valueSize": 10
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            },
+            "xField": "quiddity",
+            "xTickLabelRotation": 30,
+            "xTickLabelSpacing": 0
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_run_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[30m])) / 1000",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "Run Time",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_cpu_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[30m])) / 1000",
+              "format": "table",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "CPU Time",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_execution_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[30m])) / 1000",
+              "format": "table",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "Execution Time",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_db_total_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[30m])) / 1000",
+              "format": "table",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "Database Time",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_callout_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[30m])) / 1000",
+              "format": "table",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "Callout Time",
+              "useBackend": false
+            }
+          ],
+          "title": "Asynchronous Apex Execution Time details",
+          "transformations": [
+            {
+              "id": "joinByField",
+              "options": {
+                "byField": "quiddity",
+                "mode": "outer"
+              }
+            }
+          ],
+          "type": "barchart"
+        }
+      ],
+      "title": "Performance",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 104
+      },
+      "id": 49,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Refers to the errors that occur during the execution of Apex code",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-YlRd"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 13,
+            "w": 24,
+            "x": 0,
+            "y": 105
+          },
+          "id": 53,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "text": {},
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max by (exception_category) (max_over_time(apex_exception_category_count[30m]))",
+              "format": "time_series",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Apex exceptions occurred in last 1hour",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Data categorized based on Types of exceptions occurred in last 1hour",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "series",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 1,
+                "pointSize": 7,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 14,
+            "w": 24,
+            "x": 0,
+            "y": 118
+          },
+          "id": 55,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max by (exception_category) (max_over_time(apex_exception_category_count[30m]))",
+              "format": "time_series",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Total Apex exceptions occurred in last 1hour",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Details displayed based on CPU Timeout exceptions occurred in last 1hour",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-RdYlGr"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "mappings": [],
+              "noValue": "No CPU Exceptions occurred in Last hour",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Time"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 207
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Exception Cateogry"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 186
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Exception Type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 213
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 132
+          },
+          "id": 56,
+          "interval": "1800",
+          "options": {
+            "cellHeight": "md",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Time"
+              }
+            ]
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max by (exception_category, exception_type, exception_message, stack_trace) (max_over_time(apex_exception_details{exception_message=~\".*Apex CPU time limit exceeded.*\"}[30m]))",
+              "format": "table",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Apex CPU Timeout exception details",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": false,
+                  "Value": true,
+                  "exception_category": false,
+                  "exception_type": false
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 8,
+                  "cpu_time": 4,
+                  "entry_point": 3,
+                  "exception_category": 1,
+                  "exception_message": 6,
+                  "exception_type": 2,
+                  "run_time": 5,
+                  "stack_trace": 7
+                },
+                "renameByName": {
+                  "cpu_time": "CPU Time",
+                  "entry_point": "Entry Point",
+                  "exception_category": "Exception Cateogry",
+                  "exception_message": "Exception Message",
+                  "exception_type": "Exception Type",
+                  "run_time": "Run Time",
+                  "stack_trace": "Stack Trace"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Details displayed based on Row Lock errors occurred in last 1hour",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-RdYlGr"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "mappings": [],
+              "noValue": "No Row Lock Exceptions occurred in Last hour",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Time"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 207
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Exception Cateogry"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 186
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Exception Type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 213
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 144
+          },
+          "id": 57,
+          "interval": "1800",
+          "options": {
+            "cellHeight": "md",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Time"
+              }
+            ]
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max by (exception_category, exception_type, exception_message, stack_trace) (max_over_time(apex_exception_details{exception_message=~\".*UNABLE_TO_LOCK_ROW.*\"}[30m]))",
+              "format": "table",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Apex Row Lock exception details",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": false,
+                  "Value": true,
+                  "exception_category": false,
+                  "exception_type": false
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 8,
+                  "cpu_time": 4,
+                  "entry_point": 3,
+                  "exception_category": 1,
+                  "exception_message": 6,
+                  "exception_type": 2,
+                  "run_time": 5,
+                  "stack_trace": 7
+                },
+                "renameByName": {
+                  "cpu_time": "CPU Time",
+                  "entry_point": "Entry Point",
+                  "exception_category": "Exception Cateogry",
+                  "exception_message": "Exception Message",
+                  "exception_type": "Exception Type",
+                  "run_time": "Run Time",
+                  "stack_trace": "Stack Trace"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        }
+      ],
+      "title": "Errors",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 105
+      },
+      "id": 25,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "dark-red",
+                "mode": "fixed"
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 4,
+            "x": 0,
+            "y": 106
+          },
+          "id": 13,
+          "interval": "5m",
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "value_and_name",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(salesforce_login_failure_total{})",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "Login Failures",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Experienced Page Time (EPT) for 'LightningPageView'.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds",
+                "seriesBy": "last"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 70
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 16,
+            "w": 20,
+            "x": 4,
+            "y": 106
+          },
+          "id": 14,
+          "interval": "30m",
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "builder",
+              "exemplar": false,
+              "expr": "salesforce_experienced_page_time{PAGE_APP_NAME='LightningSales'} and {PAGE_ENTITY_TYPE='Account'}",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "includeNullMetadata": false,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Experienced Page Time (EPT)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "dark-green",
+                "mode": "fixed"
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 4,
+            "x": 0,
+            "y": 113
+          },
+          "id": 19,
+          "interval": "5m",
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "value_and_name",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(salesforce_login_success_total{})",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "Login Successes",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "User location based on their login coordinates",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "orange",
+                "mode": "fixed",
+                "seriesBy": "last"
+              },
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 16,
+            "w": 24,
+            "x": 0,
+            "y": 122
+          },
+          "id": 15,
+          "interval": "30m",
+          "options": {
+            "basemap": {
+              "config": {},
+              "name": "Layer 0",
+              "opacity": 1,
+              "tooltip": true,
+              "type": "osm-standard"
+            },
+            "controls": {
+              "mouseWheelZoom": true,
+              "showAttribution": true,
+              "showDebug": false,
+              "showMeasure": false,
+              "showScale": false,
+              "showZoom": true
+            },
+            "layers": [
+              {
+                "config": {
+                  "showLegend": false,
+                  "style": {
+                    "color": {
+                      "fixed": "semi-dark-orange"
+                    },
+                    "opacity": 1,
+                    "rotation": {
+                      "fixed": 0,
+                      "max": 360,
+                      "min": -360,
+                      "mode": "mod"
+                    },
+                    "size": {
+                      "fixed": 10,
+                      "max": 15,
+                      "min": 2
+                    },
+                    "symbol": {
+                      "fixed": "img/icons/unicons/user-location.svg",
+                      "mode": "fixed"
+                    },
+                    "symbolAlign": {
+                      "horizontal": "center",
+                      "vertical": "center"
+                    },
+                    "textConfig": {
+                      "fontSize": 12,
+                      "offsetX": 0,
+                      "offsetY": 0,
+                      "textAlign": "center",
+                      "textBaseline": "middle"
+                    }
+                  }
+                },
+                "location": {
+                  "mode": "auto"
+                },
+                "name": "Layer 1",
+                "tooltip": false,
+                "type": "markers"
+              }
+            ],
+            "tooltip": {
+              "mode": "details"
+            },
+            "view": {
+              "allLayers": true,
+              "id": "fit",
+              "lastOnly": false,
+              "lat": 0,
+              "layer": "Layer 1",
+              "lon": 0,
+              "shared": false,
+              "zoom": 15
+            }
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "builder",
+              "exemplar": false,
+              "expr": "user_location",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": false,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Users Geolocation",
+          "type": "geomap"
+        }
+      ],
+      "title": "User Login, EPT, Geolocation",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 106
+      },
+      "id": 23,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "dark-green",
+                "mode": "fixed"
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 4,
+            "x": 0,
+            "y": 107
+          },
+          "id": 11,
+          "interval": "5m",
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "text": {},
+            "textMode": "value_and_name",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "expr": "count(deployment_details{status=\"Succeeded\"}) or vector(0)\r\n",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "Successful Deployments",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 15,
+            "w": 15,
+            "x": 4,
+            "y": 107
+          },
+          "id": 12,
+          "interval": "30",
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "expr": "avg(avg_over_time(deployment_pending_time[30m]))",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "Avg Deployment Pending Time",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "expr": "avg(avg_over_time(deployment_time[30m]))",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "Avg Deployment Time",
+              "range": true,
+              "refId": "B",
+              "useBackend": false
+            }
+          ],
+          "title": "Average Deployment Time vs Average Pending Time",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "dark-red",
+                "mode": "fixed"
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 4,
+            "x": 0,
+            "y": 114
+          },
+          "id": 20,
+          "interval": "5m",
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "text": {},
+            "textMode": "value_and_name",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "expr": "count(deployment_details{status=\"Failed\"}) or vector(0)",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "Failed Deployments",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "transparent": true,
+          "type": "stat"
+        }
+      ],
+      "title": "Deployments",
+      "type": "row"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "o7MvocN7k"
+        },
+        "filters": [],
+        "hide": 0,
+        "name": "Filters",
+        "skipUrlSync": false,
+        "type": "adhoc"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {
+    "hidden": false
+  },
+  "timezone": "browser",
+  "title": "Salesforce Monitoring",
+  "uid": "edqq6je4aevb4b",
+  "version": 48,
+  "weekStart": ""
+}
