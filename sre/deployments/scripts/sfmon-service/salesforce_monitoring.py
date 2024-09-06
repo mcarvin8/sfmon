@@ -55,6 +55,7 @@ def monitor_salesforce_limits(limits):
     """
     Monitor all Salesforce limits.
     """
+    logging.info("Monitoring Salesforce limits...")
     for limit_name, limit_data in limits.items():
         max_limit = limit_data['Max']
         remaining = limit_data['Remaining']
@@ -75,6 +76,7 @@ def get_salesforce_licenses(sf):
     """
     Get all license data.
     """
+    logging.info("Getting Salesforce licenses...")
     result_user_license = sf.query("SELECT Name, Status, UsedLicenses, TotalLicenses FROM UserLicense")
     for entry in result_user_license['records']:
         status = dict(entry)['Status']
@@ -150,7 +152,7 @@ def get_salesforce_instance(sf):
     """
     Get instance info for the org.
     """
-    # At this stage, we're already authenticated to Prod for other monitoring checks
+    logging.info("Getting Salesforce instance info...")
     org_result = sf.query_all("Select FIELDS(ALL) From Organization LIMIT 1")
     pod = org_result['records'][0]['InstanceName']
 
@@ -203,6 +205,7 @@ def get_deployment_status(sf):
     """
     Get deployment related info from the org.
     """
+    logging.info("Getting deployment status...")
     query = """SELECT Id, Status, StartDate, CreatedBy.Name, CreatedDate, CompletedDate, CheckOnly FROM DeployRequest WHERE CheckOnly = false ORDER BY CompletedDate DESC"""
 
     status_mapping = {'Succeeded': 1,'Failed': 0,'InProgress': 2, 'Canceled': -1}
@@ -232,6 +235,7 @@ def get_salesforce_ept(sf):
     """
     Get EPT data from the org.
     """
+    logging.info("Monitoring Salesforce EPT...")
     # Query the Event Log Files for EPT data
     query = """SELECT EventType, LogDate, Id FROM EventLogFile WHERE Interval='Hourly' and EventType = 'LightningPageView' ORDER BY LogDate DESC LIMIT 1"""
     result = sf.query(query)
@@ -263,6 +267,7 @@ def monitor_login_events(sf):
     """
     Get login events from the org.
     """
+    logging.info("Monitoring login events...")
     try:
         query = "SELECT Id, LogDate, Interval FROM EventLogFile WHERE EventType = 'Login' and Interval = 'Hourly' ORDER BY LogDate DESC"
         event_log_file = sf.query(query)
@@ -302,6 +307,7 @@ def geolocation(sf, chunk_size=100):
     """
     Get geolocation data from login events.
     """
+    logging.info("Getting geolocation data...")
     try:
         end_time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
         start_time = (datetime.now(timezone.utc) - timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -340,6 +346,7 @@ def async_apex_job_status(sf):
     """
     Get async apex job status details from the org.
     """
+    logging.info("Getting Async Job status...")
     query = """
         SELECT Id, Status, JobType, ApexClassId, MethodName, NumberOfErrors FROM AsyncApexJob 
         WHERE CreatedDate = TODAY
@@ -395,7 +402,7 @@ def monitor_apex_execution(sf):
     Get apex job execution details from the org
     and expose run_time, cpu_time, execution_time, database_time, callout_time etc details.
     """
-
+    logging.info("Getting Apex executions...")
     try:
         log_query = (
             "SELECT Id FROM EventLogFile WHERE EventType = 'ApexExecution' and Interval = 'Hourly' "
@@ -432,7 +439,7 @@ def expose_apex_exception_metrics(sf):
         request ID, exception type, message, stack trace, and category fields.
     2. Metric that counts the total number of exceptions for each exception category.
     """
-
+    logging.info("Getting Apex unexpected execeptions...")
     apex_unexpected_exception_query = (
         "SELECT Id FROM EventLogFile WHERE EventType = 'ApexUnexpectedException' and Interval = 'Hourly' "
         "ORDER BY LogDate DESC LIMIT 1")
@@ -483,36 +490,16 @@ def main():
     while True:
         try:
             sf = get_salesforce_connection_url(url=os.getenv('SALESFORCE_AUTH_URL'))
-            logging.info("Monitoring Salesforce limits...")
             monitor_salesforce_limits(dict(sf.limits()))
-
-            logging.info("Getting Salesforce licenses...")
-            get_salesforce_licenses(sf)
-
-            logging.info("Getting Salesforce instance info...")
+            get_salesforce_licenses(sf)            
             get_salesforce_instance(sf)
-
-            logging.info("Getting deployment status...")
             get_deployment_status(sf)
-
-            logging.info("Monitoring Salesforce EPT...")
             get_salesforce_ept(sf)
-
-            logging.info("Monitoring login events...")
             monitor_login_events(sf)
-
-            logging.info("Getting geolocation data...")
             geolocation(sf, chunk_size=100)
-
-            logging.info("Getting Async Job status...")
             async_apex_job_status(sf)
-
-            logging.info("Getting Apex executions...")
             monitor_apex_execution(sf)
-
-            logging.info("Getting Apex unexpected execeptions...")
             expose_apex_exception_metrics(sf)
-
         except Exception as e:
             logging.error("An error occurred: %s", e)
         logging.info('Sleeping for 30 minutes...')
