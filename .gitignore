@@ -1,0 +1,16 @@
+.env
+.vscode/launch.json
+.DS_Store
+.bak*
+.env
+.idea
+.terraform\*
+.terraform*
+.vscode
+.vscode/launch.json
+*.plan
+*.out
+*.key
+*.tfstate
+*.tfstate.*backup
+*.sw[mnop]
