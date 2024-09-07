@@ -119,7 +119,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max_over_time(salesforce_incidents[30m])",
+          "expr": "max_over_time(salesforce_incidents[5m])",
           "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -225,7 +225,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max_over_time(salesforce_incidents[30m])",
+          "expr": "max_over_time(salesforce_incidents[5m])",
           "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -320,7 +320,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "max by(pod, severity, message) (max_over_time(salesforce_incidents[30m]))",
+          "expr": "max by(pod, severity, message) (max_over_time(salesforce_incidents[5m]))",
           "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -436,7 +436,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max by(limit_name) (max_over_time(salesforce_api_usage_percentage[30m])) > 0",
+          "expr": "max by(limit_name) (max_over_time(salesforce_api_usage_percentage[5m])) > 0",
           "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
@@ -447,7 +447,7 @@
           "useBackend": false
         }
       ],
-      "title": "Salesforce API Usage % (Data refreshes every 30 minutes)",
+      "title": "Salesforce API Usage %",
       "transformations": [
         {
           "id": "organize",
@@ -559,7 +559,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max by(limit_name) (max_over_time(salesforce_api_usage_percentage[30m])) > 0",
+          "expr": "max by(limit_name) (max_over_time(salesforce_api_usage_percentage[5m])) > 0",
           "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
@@ -570,7 +570,7 @@
           "useBackend": false
         }
       ],
-      "title": "Salesforce API Usage % (Data refreshes every 30 minutes)",
+      "title": "Salesforce API Usage %",
       "type": "timeseries"
     },
     {
@@ -680,7 +680,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "max by(license_name) (max_over_time(salesforce_user_licenses_usage_percentage[30m])) > 0",
+          "expr": "max by(license_name) (max_over_time(salesforce_user_licenses_usage_percentage[5m])) > 0",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -690,7 +690,7 @@
           "useBackend": false
         }
       ],
-      "title": "User Licenses Usage % (Data refreshes every 30 minutes)",
+      "title": "User Licenses Usage %",
       "type": "timeseries"
     },
     {
@@ -698,7 +698,7 @@
         "type": "prometheus",
         "uid": "o7MvocN7k"
       },
-      "description": "Active Licenses details, Data refreshes every 30 minutes",
+      "description": "Active Licenses details",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -784,7 +784,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": false,
-          "expr": "max by(license_name) (max_over_time(salesforce_used_user_licenses{status=\"Active\"}[30m]))",
+          "expr": "max by(license_name) (max_over_time(salesforce_used_user_licenses{status=\"Active\"}[5m]))",
           "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -802,7 +802,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": false,
-          "expr": "max by(license_name) (max_over_time(salesforce_total_user_licenses{status=\"Active\"}[30m]))",
+          "expr": "max by(license_name) (max_over_time(salesforce_total_user_licenses{status=\"Active\"}[5m]))",
           "format": "table",
           "fullMetaSearch": false,
           "hide": false,
@@ -821,7 +821,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max by(license_name) (max_over_time(salesforce_user_licenses_usage_percentage{status=\"Active\"}[30m]))",
+          "expr": "max by(license_name) (max_over_time(salesforce_user_licenses_usage_percentage{status=\"Active\"}[5m]))",
           "format": "table",
           "fullMetaSearch": false,
           "hide": false,
@@ -936,7 +936,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "max by(license_name) (max_over_time(salesforce_percent_used_usage_based_entitlements[30m])) > 0",
+          "expr": "max by(license_name) (max_over_time(salesforce_percent_used_usage_based_entitlements[5m])) > 0",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -946,7 +946,7 @@
           "useBackend": false
         }
       ],
-      "title": "Usage based entitlements Usage % (Data refreshes every 30 minutes)",
+      "title": "Usage based entitlements Usage %",
       "type": "timeseries"
     },
     {
@@ -954,7 +954,7 @@
         "type": "prometheus",
         "uid": "o7MvocN7k"
       },
-      "description": "Usage based entitlements Licenses details, Data refreshes every 30 minutes",
+      "description": "Usage based entitlements Licenses details",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1041,7 +1041,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max by(license_name) (max_over_time(salesforce_used_licenses_usage_based_entitlements[30m])) > 0",
+          "expr": "max by(license_name) (max_over_time(salesforce_used_licenses_usage_based_entitlements[5m])) > 0",
           "format": "table",
           "fullMetaSearch": false,
           "hide": false,
@@ -1060,7 +1060,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max by(license_name) (max_over_time(salesforce_total_licenses_usage_based_entitlements[30m]))",
+          "expr": "max by(license_name) (max_over_time(salesforce_total_licenses_usage_based_entitlements[5m]))",
           "format": "table",
           "fullMetaSearch": false,
           "hide": false,
@@ -1079,7 +1079,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max by(license_name) (max_over_time(salesforce_percent_used_usage_based_entitlements[30m]))",
+          "expr": "max by(license_name) (max_over_time(salesforce_percent_used_usage_based_entitlements[5m]))",
           "format": "table",
           "fullMetaSearch": false,
           "hide": true,
@@ -1190,7 +1190,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "max by(license_name) (max_over_time(salesforce_permissionset_license_usage_percentage[30m])) > 0",
+          "expr": "max by(license_name) (max_over_time(salesforce_permissionset_license_usage_percentage[5m])) > 0",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -1200,7 +1200,7 @@
           "useBackend": false
         }
       ],
-      "title": "Permission Set License Usage % (Data refreshes every 30mins)",
+      "title": "Permission Set License Usage %",
       "type": "timeseries"
     },
     {
@@ -1208,7 +1208,7 @@
         "type": "prometheus",
         "uid": "o7MvocN7k"
       },
-      "description": "Permissionset Active Licenses details, Data refreshes every 30 minutes",
+      "description": "Permissionset Active Licenses details",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1295,7 +1295,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max by(license_name) (max_over_time(salesforce_used_permissionset_licenses{status=\"Active\"}[30m]))",
+          "expr": "max by(license_name) (max_over_time(salesforce_used_permissionset_licenses{status=\"Active\"}[5m]))",
           "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -1313,7 +1313,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max by(license_name) (max_over_time(salesforce_total_permissionset_licenses{status=\"Active\"}[30m]))",
+          "expr": "max by(license_name) (max_over_time(salesforce_total_permissionset_licenses{status=\"Active\"}[5m]))",
           "format": "table",
           "fullMetaSearch": false,
           "hide": false,
@@ -1432,7 +1432,7 @@
                 "uid": "o7MvocN7k"
               },
               "editorMode": "code",
-              "expr": "max by(job_type) (max_over_time(salesforce_async_job_status_count[30m]))",
+              "expr": "max by(job_type) (max_over_time(salesforce_async_job_status_count[5m]))",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
@@ -1505,7 +1505,7 @@
                 "uid": "o7MvocN7k"
               },
               "editorMode": "code",
-              "expr": "max by(status) (max_over_time(salesforce_async_job_status_count[30m]))",
+              "expr": "max by(status) (max_over_time(salesforce_async_job_status_count[5m]))",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
@@ -1600,7 +1600,7 @@
                 "uid": "o7MvocN7k"
               },
               "editorMode": "code",
-              "expr": "max by(method) (max_over_time(salesforce_async_job_status_count[30m]))",
+              "expr": "max by(method) (max_over_time(salesforce_async_job_status_count[5m]))",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
@@ -1697,7 +1697,7 @@
                 "uid": "o7MvocN7k"
               },
               "editorMode": "code",
-              "expr": "max by(method, status) (max_over_time(salesforce_async_job_status_count[30m]))",
+              "expr": "max by(method, status) (max_over_time(salesforce_async_job_status_count[5m]))",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
@@ -4324,7 +4324,7 @@
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_run_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[30m])) / 1000",
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_run_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[5m])) / 1000",
               "format": "table",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -4342,7 +4342,7 @@
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_cpu_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[30m])) / 1000",
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_cpu_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[5m])) / 1000",
               "format": "table",
               "fullMetaSearch": false,
               "hide": false,
@@ -4361,7 +4361,7 @@
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_execution_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[30m])) / 1000",
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_execution_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[5m])) / 1000",
               "format": "table",
               "fullMetaSearch": false,
               "hide": false,
@@ -4380,7 +4380,7 @@
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_db_total_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[30m])) / 1000",
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_db_total_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[5m])) / 1000",
               "format": "table",
               "fullMetaSearch": false,
               "hide": false,
@@ -4399,7 +4399,7 @@
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_callout_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[30m])) / 1000",
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_callout_time_seconds{quiddity=~\"V|M|R|H|I|W|L|A|E|TD\"}[5m])) / 1000",
               "format": "table",
               "fullMetaSearch": false,
               "hide": false,
@@ -4551,7 +4551,7 @@
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_run_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[30m])) / 1000",
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_run_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[5m])) / 1000",
               "format": "table",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -4569,7 +4569,7 @@
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_cpu_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[30m])) / 1000",
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_cpu_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[5m])) / 1000",
               "format": "table",
               "fullMetaSearch": false,
               "hide": false,
@@ -4588,7 +4588,7 @@
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_execution_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[30m])) / 1000",
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_execution_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[5m])) / 1000",
               "format": "table",
               "fullMetaSearch": false,
               "hide": false,
@@ -4607,7 +4607,7 @@
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_db_total_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[30m])) / 1000",
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_db_total_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[5m])) / 1000",
               "format": "table",
               "fullMetaSearch": false,
               "hide": false,
@@ -4626,7 +4626,7 @@
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_callout_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[30m])) / 1000",
+              "expr": "avg by(quiddity) (avg_over_time(salesforce_apex_callout_time_seconds{quiddity=~\"F|S|Q|BA|C|K|QTXF|B\"}[5m])) / 1000",
               "format": "table",
               "fullMetaSearch": false,
               "hide": false,
@@ -4722,7 +4722,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "max by (exception_category) (max_over_time(apex_exception_category_count[30m]))",
+              "expr": "max by (exception_category) (max_over_time(apex_exception_category_count[5m]))",
               "format": "time_series",
               "instant": false,
               "legendFormat": "__auto",
@@ -4822,7 +4822,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "max by (exception_category) (max_over_time(apex_exception_category_count[30m]))",
+              "expr": "max by (exception_category) (max_over_time(apex_exception_category_count[5m]))",
               "format": "time_series",
               "instant": false,
               "legendFormat": "__auto",
@@ -4939,7 +4939,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "max by (exception_category, exception_type, exception_message, stack_trace) (max_over_time(apex_exception_details{exception_message=~\".*Apex CPU time limit exceeded.*\"}[30m]))",
+              "expr": "max by (exception_category, exception_type, exception_message, stack_trace) (max_over_time(apex_exception_details{exception_message=~\".*Apex CPU time limit exceeded.*\"}[5m]))",
               "format": "table",
               "instant": false,
               "legendFormat": "__auto",
@@ -5090,7 +5090,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "max by (exception_category, exception_type, exception_message, stack_trace) (max_over_time(apex_exception_details{exception_message=~\".*UNABLE_TO_LOCK_ROW.*\"}[30m]))",
+              "expr": "max by (exception_category, exception_type, exception_message, stack_trace) (max_over_time(apex_exception_details{exception_message=~\".*UNABLE_TO_LOCK_ROW.*\"}[5m]))",
               "format": "table",
               "instant": false,
               "legendFormat": "__auto",
