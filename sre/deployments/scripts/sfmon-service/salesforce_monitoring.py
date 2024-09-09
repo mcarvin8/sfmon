@@ -2,6 +2,7 @@
     Monitor critical Salesforce endpoints.
 """
 import csv
+from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 import io
 from io import StringIO
@@ -231,11 +232,11 @@ def get_deployment_status(sf):
             gauges.deployment_time_gauge.labels(deployment_id=record['Id'], deployed_by=record['CreatedBy']['Name'], status=record['Status']).set(deployment_time)
 
 
-def get_salesforce_ept(sf):
+def get_salesforce_ept_and_apt(sf):
     """
-    Get EPT data from the org.
+    Get EPT and APT data from the org.
     """
-    logging.info("Monitoring Salesforce EPT...")
+    logging.info("Monitoring Salesforce EPT and APT data...")
     # Query the Event Log Files for EPT data
     query = """SELECT EventType, LogDate, Id FROM EventLogFile WHERE Interval='Hourly' and EventType = 'LightningPageView' ORDER BY LogDate DESC LIMIT 1"""
     result = sf.query(query)
@@ -250,7 +251,18 @@ def get_salesforce_ept(sf):
             log_data = response.text
             csv_data = csv.DictReader(io.StringIO(log_data))
 
+            page_time_data = defaultdict(lambda: {'total_time': 0, 'count': 0, 'sessions': {}})
+
             for row in csv_data:
+
+                page_name = row['PAGE_APP_NAME'] if row['PAGE_APP_NAME'] else 'Unknown_Page'
+                page_duration = float(row['DURATION'])/1000 if row['DURATION'] else 0
+                page_time_data[page_name]['total_time'] += page_duration
+                page_time_data[page_name]['count'] += 1
+
+                average_page_time = {page: {'avg_time': data['total_time'] / data['count'],'count': data['count']}
+                                     for page, data in page_time_data.items()}
+
                 if row['EFFECTIVE_PAGE_TIME_DEVIATION']:
                     ept = float(row['EFFECTIVE_PAGE_TIME'])/1000 if row['EFFECTIVE_PAGE_TIME'] else 0
 
@@ -261,6 +273,9 @@ def get_salesforce_ept(sf):
                                       PAGE_ENTITY_TYPE=row['PAGE_ENTITY_TYPE'],
                                       PAGE_APP_NAME=row['PAGE_APP_NAME'],
                                       BROWSER_NAME=row['BROWSER_NAME']).set(ept)
+
+            for page_name, page_details in average_page_time.items():
+                gauges.apt_metric.labels(Page_name=page_name, Page_count=page_details['count']).set(page_details['avg_time'])
 
 
 def monitor_login_events(sf):
@@ -432,7 +447,6 @@ def monitor_apex_execution(sf):
 
 
 def expose_apex_exception_metrics(sf):
-
     """
     Processes list of Apex Unexpected Exception records and exposes two Prometheus metrics:
     1. Detailed metrics for each individual exception including 
@@ -467,11 +481,11 @@ def expose_apex_exception_metrics(sf):
             ).set(1)
 
         except KeyError as e:
-            logging.warning("Missing expected key: %s. Record: %s", e, row)
+            logging.error("Missing expected key: %s. Record: %s", e, row)
         except TypeError as e:
-            logging.warning("Type error encountered: %s. Record: %s", e, row)
+            logging.error("Type error encountered: %s. Record: %s", e, row)
         except Exception as e:
-            logging.warning("Unexpected error: %s. Record: %s", e, row)
+            logging.error("Unexpected error: %s. Record: %s", e, row)
 
     try:
         # Expose the metrics for each exception category
@@ -494,7 +508,7 @@ def main():
             get_salesforce_licenses(sf)            
             get_salesforce_instance(sf)
             get_deployment_status(sf)
-            get_salesforce_ept(sf)
+            get_salesforce_ept_and_apt(sf)
             monitor_login_events(sf)
             geolocation(sf, chunk_size=100)
             async_apex_job_status(sf)
