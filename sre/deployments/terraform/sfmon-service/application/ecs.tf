@@ -11,8 +11,8 @@ module "service" {
   container_name                = local.service_name
   container_imageTag            = var.docker_image_tag
   container_repositoryURL       = "${aws_ecr_repository.sfmon.repository_url}"
-  task_cpu                      = 256
-  task_memory                   = 1024
+  task_cpu                      = 2048
+  task_memory                   = 8192
   task_execution_role           = aws_iam_role.this.name
   container_portMappings        = [{ containerPort = 9001, hostPort = 0, Protocol = "tcp" }]
   containerDefinition_jsonFile  = templatefile("${path.module}/container-definitions.json", {
