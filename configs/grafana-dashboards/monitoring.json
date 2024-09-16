@@ -26,27 +26,57 @@
         "type": "prometheus",
         "uid": "o7MvocN7k"
       },
-      "description": "Source Code Management repository.",
+      "description": "",
       "gridPos": {
         "h": 3,
         "w": 3,
         "x": 0,
         "y": 0
       },
-      "id": 28,
+      "id": 58,
       "options": {
         "code": {
           "language": "plaintext",
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "Update link here for your SCM repo.",
+        "content": "Data refreshes every 5 minutes",
         "mode": "markdown"
       },
       "pluginVersion": "10.4.1",
-      "title": "SCM Link",
+      "title": "Data Refresh Interval",
       "transparent": true,
       "type": "text"
+    },
+    {
+      "gridPos": {
+        "h": 8,
+        "w": 11,
+        "x": 0,
+        "y": 3
+      },
+      "id": 60,
+      "options": {
+        "alertName": "Salesforce",
+        "dashboardAlerts": false,
+        "dashboardTitle": "Salesforce Monitoring",
+        "maxItems": 10,
+        "showOptions": "current",
+        "sortOrder": 1,
+        "stateFilter": {
+          "alerting": false,
+          "execution_error": false,
+          "no_data": false,
+          "ok": false,
+          "paused": false,
+          "pending": false
+        },
+        "tags": []
+      },
+      "pluginVersion": "10.4.1",
+      "title": "Alerts",
+      "transparent": true,
+      "type": "alertlist"
     },
     {
       "collapsed": false,
@@ -54,7 +84,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 3
+        "y": 11
       },
       "id": 22,
       "panels": [],
@@ -91,7 +121,7 @@
         "h": 12,
         "w": 11,
         "x": 0,
-        "y": 4
+        "y": 12
       },
       "id": 7,
       "options": {
@@ -135,6 +165,42 @@
       "type": "gauge"
     },
     {
+      "alert": {
+        "alertRuleTags": {},
+        "conditions": [
+          {
+            "evaluator": {
+              "params": [
+                0
+              ],
+              "type": "gt"
+            },
+            "operator": {
+              "type": "and"
+            },
+            "query": {
+              "params": [
+                "A",
+                "5m",
+                "now"
+              ]
+            },
+            "reducer": {
+              "params": [],
+              "type": "max"
+            },
+            "type": "query"
+          }
+        ],
+        "executionErrorState": "keep_state",
+        "for": "5m",
+        "frequency": "1m",
+        "handler": 1,
+        "message": "ALERT: A Salesforce Incident has been opened",
+        "name": "Salesforce Incidents Alert",
+        "noDataState": "keep_state",
+        "notifications": []
+      },
       "datasource": {
         "type": "prometheus",
         "uid": "o7MvocN7k"
@@ -179,6 +245,7 @@
           },
           "fieldMinMax": false,
           "mappings": [],
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -200,7 +267,7 @@
         "h": 12,
         "w": 13,
         "x": 11,
-        "y": 4
+        "y": 12
       },
       "id": 21,
       "options": {
@@ -234,6 +301,14 @@
           "range": true,
           "refId": "A",
           "useBackend": false
+        }
+      ],
+      "thresholds": [
+        {
+          "colorMode": "critical",
+          "op": "gt",
+          "value": 1,
+          "visible": true
         }
       ],
       "title": "Salesforce Incidents Over Time",
@@ -294,7 +369,7 @@
         "h": 11,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 24
       },
       "id": 9,
       "interval": "1800",
@@ -359,7 +434,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 27
+        "y": 35
       },
       "id": 24,
       "panels": [],
@@ -404,7 +479,7 @@
         "h": 16,
         "w": 24,
         "x": 0,
-        "y": 28
+        "y": 36
       },
       "id": 1,
       "interval": "15s",
@@ -436,7 +511,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max by(limit_name) (max_over_time(salesforce_api_usage_percentage[5m])) > 0",
+          "expr": "avg by(limit_name) (avg_over_time(salesforce_api_usage_percentage[5m])) > 0",
           "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
@@ -464,6 +539,42 @@
       "type": "gauge"
     },
     {
+      "alert": {
+        "alertRuleTags": {},
+        "conditions": [
+          {
+            "evaluator": {
+              "params": [
+                90
+              ],
+              "type": "gt"
+            },
+            "operator": {
+              "type": "and"
+            },
+            "query": {
+              "params": [
+                "A",
+                "5m",
+                "now"
+              ]
+            },
+            "reducer": {
+              "params": [],
+              "type": "avg"
+            },
+            "type": "query"
+          }
+        ],
+        "executionErrorState": "keep_state",
+        "for": "5m",
+        "frequency": "1m",
+        "handler": 1,
+        "message": "ALERT: Salesforce API usage is over 90% for ${limit_name}",
+        "name": "Salesforce API Usage % Alert",
+        "noDataState": "keep_state",
+        "notifications": []
+      },
       "datasource": {
         "type": "prometheus",
         "uid": "o7MvocN7k"
@@ -482,7 +593,7 @@
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 10,
+            "fillOpacity": 0,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
@@ -503,14 +614,14 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "off"
+              "mode": "area"
             }
           },
           "fieldMinMax": false,
           "mappings": [],
           "min": 0,
           "thresholds": {
-            "mode": "percentage",
+            "mode": "absolute",
             "steps": [
               {
                 "color": "green",
@@ -534,7 +645,7 @@
         "h": 16,
         "w": 24,
         "x": 0,
-        "y": 44
+        "y": 52
       },
       "id": 10,
       "options": {
@@ -559,7 +670,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max by(limit_name) (max_over_time(salesforce_api_usage_percentage[5m])) > 0",
+          "expr": "avg by(limit_name) (avg_over_time(salesforce_api_usage_percentage[5m])) > 0",
           "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
@@ -570,769 +681,16 @@
           "useBackend": false
         }
       ],
+      "thresholds": [
+        {
+          "colorMode": "critical",
+          "op": "gt",
+          "value": 90,
+          "visible": true
+        }
+      ],
       "title": "Salesforce API Usage %",
       "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 60
-      },
-      "id": 48,
-      "panels": [],
-      "title": "Licenses Usage",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "o7MvocN7k"
-      },
-      "description": "User licenses in Salesforce define the baseline level of features and permissions that a user can access within the Salesforce environment, determining what apps, objects, and functionalities are available to them based on their assigned license type.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "series",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "area"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 80
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 14,
-        "w": 7,
-        "x": 0,
-        "y": 61
-      },
-      "id": 4,
-      "interval": "1800",
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "10.4.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "o7MvocN7k"
-          },
-          "disableTextWrap": false,
-          "editorMode": "code",
-          "expr": "max by(license_name) (max_over_time(salesforce_user_licenses_usage_percentage[5m])) > 0",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "salesforce_user_licenses_usage_percentage",
-          "useBackend": false
-        }
-      ],
-      "title": "User Licenses Usage %",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "o7MvocN7k"
-      },
-      "description": "Active Licenses details",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "series",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "fillOpacity": 80,
-            "gradientMode": "hue",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineWidth": 1,
-            "scaleDistribution": {
-              "log": 2,
-              "type": "log"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "fieldMinMax": false,
-          "links": [],
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 14,
-        "w": 17,
-        "x": 7,
-        "y": 61
-      },
-      "id": 27,
-      "interval": "1800",
-      "options": {
-        "barRadius": 0,
-        "barWidth": 0.9,
-        "fullHighlight": true,
-        "groupWidth": 0.5,
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "orientation": "auto",
-        "showValue": "auto",
-        "stacking": "none",
-        "text": {
-          "valueSize": 9
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        },
-        "xField": "license_name",
-        "xTickLabelRotation": 30,
-        "xTickLabelSpacing": 0
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "o7MvocN7k"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "exemplar": false,
-          "expr": "max by(license_name) (max_over_time(salesforce_used_user_licenses{status=\"Active\"}[5m]))",
-          "format": "table",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "instant": true,
-          "legendFormat": "Used : {{license_name}}",
-          "range": false,
-          "refId": "Used User Licenses",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "o7MvocN7k"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "exemplar": false,
-          "expr": "max by(license_name) (max_over_time(salesforce_total_user_licenses{status=\"Active\"}[5m]))",
-          "format": "table",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": true,
-          "legendFormat": "Total : {{license_name}}",
-          "range": false,
-          "refId": "Total User Licenses",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "o7MvocN7k"
-          },
-          "disableTextWrap": false,
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "max by(license_name) (max_over_time(salesforce_user_licenses_usage_percentage{status=\"Active\"}[5m]))",
-          "format": "table",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": true,
-          "legendFormat": "Total : {{license_name}}",
-          "range": false,
-          "refId": "% Licenses Used",
-          "useBackend": false
-        }
-      ],
-      "title": "User Active Licenses Count (Used vs Total vs Percentage Utilized)",
-      "transformations": [
-        {
-          "id": "merge",
-          "options": {}
-        }
-      ],
-      "type": "barchart"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "o7MvocN7k"
-      },
-      "description": "Usage-based entitlements licenses in Salesforce are licenses that track and limit the consumption of specific features or services based on usage metrics, such as API calls or storage, rather than per-user allocations.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "series",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "area"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 80
-              },
-              {
-                "color": "#EAB839",
-                "value": 90
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 14,
-        "w": 7,
-        "x": 0,
-        "y": 75
-      },
-      "id": 50,
-      "interval": "1800",
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "10.4.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "o7MvocN7k"
-          },
-          "disableTextWrap": false,
-          "editorMode": "code",
-          "expr": "max by(license_name) (max_over_time(salesforce_percent_used_usage_based_entitlements[5m])) > 0",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "salesforce_usage_based_entitlements_licenses_usage_percentage",
-          "useBackend": false
-        }
-      ],
-      "title": "Usage based entitlements Usage %",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "o7MvocN7k"
-      },
-      "description": "Usage based entitlements Licenses details",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "series",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "fillOpacity": 80,
-            "gradientMode": "hue",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineWidth": 0,
-            "scaleDistribution": {
-              "log": 2,
-              "type": "log"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "fieldMinMax": false,
-          "links": [],
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 14,
-        "w": 17,
-        "x": 7,
-        "y": 75
-      },
-      "id": 51,
-      "interval": "1800",
-      "options": {
-        "barRadius": 0,
-        "barWidth": 0.9,
-        "fullHighlight": true,
-        "groupWidth": 0.6,
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "orientation": "auto",
-        "showValue": "never",
-        "stacking": "none",
-        "text": {
-          "valueSize": 10
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        },
-        "xField": "license_name",
-        "xTickLabelMaxLength": 50,
-        "xTickLabelRotation": 20,
-        "xTickLabelSpacing": 0
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "o7MvocN7k"
-          },
-          "disableTextWrap": false,
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "max by(license_name) (max_over_time(salesforce_used_licenses_usage_based_entitlements[5m])) > 0",
-          "format": "table",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": true,
-          "legendFormat": "Used : {{license_name}}",
-          "range": false,
-          "refId": "Used Licenses",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "o7MvocN7k"
-          },
-          "disableTextWrap": false,
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "max by(license_name) (max_over_time(salesforce_total_licenses_usage_based_entitlements[5m]))",
-          "format": "table",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": true,
-          "legendFormat": "Total : {{license_name}}",
-          "range": false,
-          "refId": "Total Licenses",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "o7MvocN7k"
-          },
-          "disableTextWrap": false,
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "max by(license_name) (max_over_time(salesforce_percent_used_usage_based_entitlements[5m]))",
-          "format": "table",
-          "fullMetaSearch": false,
-          "hide": true,
-          "includeNullMetadata": true,
-          "instant": true,
-          "legendFormat": "Total : {{license_name}}",
-          "range": false,
-          "refId": "% Licenses Used",
-          "useBackend": false
-        }
-      ],
-      "title": "Usage based entitlements Licenses Count(Used vs Total)",
-      "transformations": [
-        {
-          "id": "merge",
-          "options": {}
-        }
-      ],
-      "type": "barchart"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "o7MvocN7k"
-      },
-      "description": "Licenses to grants access to additional features or permissions beyond the standard Salesforce license. It allows administrators to assign specific sets of permissions to users on top of their existing user license, enabling more granular control over feature access and customization.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 14,
-        "w": 7,
-        "x": 0,
-        "y": 89
-      },
-      "id": 8,
-      "interval": "5m",
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "10.4.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "o7MvocN7k"
-          },
-          "disableTextWrap": false,
-          "editorMode": "code",
-          "expr": "max by(license_name) (max_over_time(salesforce_permissionset_license_usage_percentage[5m])) > 0",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A",
-          "useBackend": false
-        }
-      ],
-      "title": "Permission Set License Usage %",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "o7MvocN7k"
-      },
-      "description": "Permissionset Active Licenses details",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "series",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "fillOpacity": 80,
-            "gradientMode": "hue",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineWidth": 1,
-            "scaleDistribution": {
-              "log": 2,
-              "type": "log"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "fieldMinMax": false,
-          "links": [],
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 14,
-        "w": 17,
-        "x": 7,
-        "y": 89
-      },
-      "id": 52,
-      "interval": "1800",
-      "options": {
-        "barRadius": 0,
-        "barWidth": 0.9,
-        "fullHighlight": true,
-        "groupWidth": 0.6,
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "orientation": "auto",
-        "showValue": "never",
-        "stacking": "none",
-        "text": {
-          "valueSize": 9
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        },
-        "xField": "license_name",
-        "xTickLabelMaxLength": 40,
-        "xTickLabelRotation": 40,
-        "xTickLabelSpacing": 0
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "o7MvocN7k"
-          },
-          "disableTextWrap": false,
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "max by(license_name) (max_over_time(salesforce_used_permissionset_licenses{status=\"Active\"}[5m]))",
-          "format": "table",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "instant": true,
-          "legendFormat": "__auto",
-          "range": false,
-          "refId": "Used Licenses",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "o7MvocN7k"
-          },
-          "disableTextWrap": false,
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "max by(license_name) (max_over_time(salesforce_total_permissionset_licenses{status=\"Active\"}[5m]))",
-          "format": "table",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": true,
-          "legendFormat": "__auto",
-          "range": false,
-          "refId": "Total Licenses",
-          "useBackend": false
-        }
-      ],
-      "title": "Permissionset Licenses Count (Used vs Total)",
-      "transformations": [
-        {
-          "id": "merge",
-          "options": {}
-        }
-      ],
-      "type": "barchart"
     },
     {
       "collapsed": true,
@@ -1340,7 +698,1187 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 103
+        "y": 68
+      },
+      "id": 63,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Displays Top 10 Bulk API usage by entity type",
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [],
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 50
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 69
+          },
+          "id": 64,
+          "interval": "15s",
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [],
+              "fields": "",
+              "values": true
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": false,
+            "sizing": "auto"
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "topk(5, sum by(entity_type) (${interval}_entity_type_count))",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": false,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Top Bulk API Usage ($interval) by Entity Type",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "entity_type": false
+                },
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {}
+              }
+            }
+          ],
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Details of Top 5 Bulk API batches with respect to User ID,  Entity Type and Job ID",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "displayName": "Time",
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Number of Processed records"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 219
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Count of Processed records"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 224
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 75
+          },
+          "id": 61,
+          "interval": "1800",
+          "options": {
+            "cellHeight": "md",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "topk(5, ${interval}_bulk_api_batch_count)",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Bulk API usage (${interval}) detail",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": false,
+                  "Value": false,
+                  "__name__": true,
+                  "cluster_arn": true,
+                  "container_arn": true,
+                  "container_name": true,
+                  "docker_image": true,
+                  "instance": true,
+                  "job": true,
+                  "job_id": false,
+                  "task_arn": true,
+                  "task_group": true,
+                  "task_name": true,
+                  "task_revision": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 17,
+                  "__name__": 3,
+                  "cluster_arn": 4,
+                  "container_arn": 5,
+                  "container_name": 6,
+                  "docker_image": 7,
+                  "entity_type": 8,
+                  "instance": 9,
+                  "job": 10,
+                  "job_id": 2,
+                  "task_arn": 11,
+                  "task_group": 12,
+                  "task_name": 13,
+                  "task_revision": 14,
+                  "total_records_failed": 16,
+                  "total_records_processed": 15,
+                  "user_id": 1
+                },
+                "renameByName": {
+                  "Time": "",
+                  "Value": "Batch Count",
+                  "docker_image": "",
+                  "entity_type": "Entity Type",
+                  "environment": "Environment",
+                  "job_id": "Job ID",
+                  "message": "Incident Message",
+                  "pod": "POD Instance",
+                  "severity": "Severity",
+                  "total_records_failed": "Count of Failed records",
+                  "total_records_processed": "Count of Processed records",
+                  "user_id": "User ID"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Details of Top 5 Bulk API batches with respect to Entity Type and User ID",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "displayName": "Time",
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Number of Processed records"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 219
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Count of Processed records"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 224
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 84
+          },
+          "id": 62,
+          "interval": "1800",
+          "options": {
+            "cellHeight": "md",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "topk(5, ${interval}_entity_type_count)",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Bulk API usage (${interval}) detail by Entity Type",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": false,
+                  "Value": false,
+                  "__name__": true,
+                  "cluster_arn": true,
+                  "container_arn": true,
+                  "container_name": true,
+                  "docker_image": true,
+                  "instance": true,
+                  "job": true,
+                  "job_id": false,
+                  "task_arn": true,
+                  "task_group": true,
+                  "task_name": true,
+                  "task_revision": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 15,
+                  "__name__": 2,
+                  "cluster_arn": 3,
+                  "container_arn": 4,
+                  "container_name": 5,
+                  "docker_image": 6,
+                  "entity_type": 7,
+                  "instance": 8,
+                  "job": 9,
+                  "operation_type": 14,
+                  "task_arn": 10,
+                  "task_group": 11,
+                  "task_name": 12,
+                  "task_revision": 13,
+                  "user_id": 1
+                },
+                "renameByName": {
+                  "Time": "",
+                  "Value": "Batch Count",
+                  "docker_image": "",
+                  "entity_type": "Entity Type",
+                  "environment": "Environment",
+                  "job_id": "Job ID",
+                  "message": "Incident Message",
+                  "operation_type": "Operation Type",
+                  "pod": "POD Instance",
+                  "severity": "Severity",
+                  "total_records_failed": "Count of Failed records",
+                  "total_records_processed": "Count of Processed records",
+                  "user_id": "User ID"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        }
+      ],
+      "title": "Bulk API Analysis Details",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 69
+      },
+      "id": 48,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "User licenses in Salesforce define the baseline level of features and permissions that a user can access within the Salesforce environment, determining what apps, objects, and functionalities are available to them based on their assigned license type.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "series",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "area"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 80
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 14,
+            "w": 7,
+            "x": 0,
+            "y": 70
+          },
+          "id": 4,
+          "interval": "1800",
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "expr": "max by(license_name) (max_over_time(salesforce_user_licenses_usage_percentage[5m])) > 0",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "salesforce_user_licenses_usage_percentage",
+              "useBackend": false
+            }
+          ],
+          "title": "User Licenses Usage %",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Active Licenses details",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "series",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "fieldMinMax": false,
+              "links": [],
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 14,
+            "w": 17,
+            "x": 7,
+            "y": 70
+          },
+          "id": 27,
+          "interval": "1800",
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.9,
+            "fullHighlight": true,
+            "groupWidth": 0.5,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "orientation": "auto",
+            "showValue": "auto",
+            "stacking": "none",
+            "text": {
+              "valueSize": 9
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            },
+            "xField": "license_name",
+            "xTickLabelRotation": 30,
+            "xTickLabelSpacing": 0
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "builder",
+              "exemplar": false,
+              "expr": "max by(license_name) (max_over_time(salesforce_used_user_licenses{status=\"Active\"}[5m]))",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "Used : {{license_name}}",
+              "range": false,
+              "refId": "Used User Licenses",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "builder",
+              "exemplar": false,
+              "expr": "max by(license_name) (max_over_time(salesforce_total_user_licenses{status=\"Active\"}[5m]))",
+              "format": "table",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "Total : {{license_name}}",
+              "range": false,
+              "refId": "Total User Licenses",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max by(license_name) (max_over_time(salesforce_user_licenses_usage_percentage{status=\"Active\"}[5m]))",
+              "format": "table",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "Total : {{license_name}}",
+              "range": false,
+              "refId": "% Licenses Used",
+              "useBackend": false
+            }
+          ],
+          "title": "User Active Licenses Count (Used vs Total vs Percentage Utilized)",
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            }
+          ],
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Usage-based entitlements licenses in Salesforce are licenses that track and limit the consumption of specific features or services based on usage metrics, such as API calls or storage, rather than per-user allocations.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "series",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "area"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 80
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 14,
+            "w": 7,
+            "x": 0,
+            "y": 84
+          },
+          "id": 50,
+          "interval": "1800",
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "expr": "max by(license_name) (max_over_time(salesforce_percent_used_usage_based_entitlements[5m])) > 0",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "salesforce_usage_based_entitlements_licenses_usage_percentage",
+              "useBackend": false
+            }
+          ],
+          "title": "Usage based entitlements Usage %",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Usage based entitlements Licenses details",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "series",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 0,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "fieldMinMax": false,
+              "links": [],
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 14,
+            "w": 17,
+            "x": 7,
+            "y": 84
+          },
+          "id": 51,
+          "interval": "1800",
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.9,
+            "fullHighlight": true,
+            "groupWidth": 0.6,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "orientation": "auto",
+            "showValue": "never",
+            "stacking": "none",
+            "text": {
+              "valueSize": 10
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            },
+            "xField": "license_name",
+            "xTickLabelMaxLength": 50,
+            "xTickLabelRotation": 20,
+            "xTickLabelSpacing": 0
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max by(license_name) (max_over_time(salesforce_used_licenses_usage_based_entitlements[5m])) > 0",
+              "format": "table",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "Used : {{license_name}}",
+              "range": false,
+              "refId": "Used Licenses",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max by(license_name) (max_over_time(salesforce_total_licenses_usage_based_entitlements[5m]))",
+              "format": "table",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "Total : {{license_name}}",
+              "range": false,
+              "refId": "Total Licenses",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max by(license_name) (max_over_time(salesforce_percent_used_usage_based_entitlements[5m]))",
+              "format": "table",
+              "fullMetaSearch": false,
+              "hide": true,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "Total : {{license_name}}",
+              "range": false,
+              "refId": "% Licenses Used",
+              "useBackend": false
+            }
+          ],
+          "title": "Usage based entitlements Licenses Count(Used vs Total)",
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            }
+          ],
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Licenses to grants access to additional features or permissions beyond the standard Salesforce license. It allows administrators to assign specific sets of permissions to users on top of their existing user license, enabling more granular control over feature access and customization.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 14,
+            "w": 7,
+            "x": 0,
+            "y": 98
+          },
+          "id": 8,
+          "interval": "5m",
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "expr": "max by(license_name) (max_over_time(salesforce_permissionset_license_usage_percentage[5m])) > 0",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Permission Set License Usage %",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Permissionset Active Licenses details",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "series",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "fieldMinMax": false,
+              "links": [],
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 14,
+            "w": 17,
+            "x": 7,
+            "y": 98
+          },
+          "id": 52,
+          "interval": "1800",
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.9,
+            "fullHighlight": true,
+            "groupWidth": 0.6,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "orientation": "auto",
+            "showValue": "never",
+            "stacking": "none",
+            "text": {
+              "valueSize": 9
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            },
+            "xField": "license_name",
+            "xTickLabelMaxLength": 40,
+            "xTickLabelRotation": 40,
+            "xTickLabelSpacing": 0
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max by(license_name) (max_over_time(salesforce_used_permissionset_licenses{status=\"Active\"}[5m]))",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "Used Licenses",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max by(license_name) (max_over_time(salesforce_total_permissionset_licenses{status=\"Active\"}[5m]))",
+              "format": "table",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "Total Licenses",
+              "useBackend": false
+            }
+          ],
+          "title": "Permissionset Licenses Count (Used vs Total)",
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            }
+          ],
+          "type": "barchart"
+        }
+      ],
+      "title": "Licenses Usage",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 70
       },
       "id": 34,
       "panels": [
@@ -1406,7 +1944,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 109
+            "y": 123
           },
           "id": 29,
           "interval": "1800",
@@ -1469,7 +2007,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 109
+            "y": 123
           },
           "id": 30,
           "interval": "1800",
@@ -1574,7 +2112,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 119
+            "y": 133
           },
           "id": 33,
           "interval": "1800",
@@ -1669,7 +2207,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 119
+            "y": 133
           },
           "id": 32,
           "interval": "1800",
@@ -1767,7 +2305,7 @@
             "h": 12,
             "w": 24,
             "x": 0,
-            "y": 131
+            "y": 145
           },
           "id": 35,
           "interval": "1800",
@@ -1804,7 +2342,7 @@
               "useBackend": false
             }
           ],
-          "title": "Average Salesforce Synchronous Apex Run Time (Last 1hour) by Entry Point",
+          "title": "Average Salesforce Synchronous Apex Run Time (Last 1hr) by Entry Point",
           "type": "timeseries"
         },
         {
@@ -1812,7 +2350,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
-          "description": "Average Salesforce Synchronous Apex Run Time (Last 1hour) by Quiddity",
+          "description": "Average Salesforce Synchronous Apex Run Time (Last 1hr) by Quiddity",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1868,7 +2406,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 143
+            "y": 157
           },
           "id": 36,
           "interval": "1800",
@@ -1907,7 +2445,7 @@
               "useBackend": false
             }
           ],
-          "title": "Average Salesforce Synchronous Apex Run Time (Last 1hour) by Quiddity",
+          "title": "Average Salesforce Synchronous Apex Run Time (Last 1hr) by Quiddity",
           "transformations": [
             {
               "id": "renameByRegex",
@@ -2050,7 +2588,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
-          "description": "Average Salesforce Asynchronous Apex Run Time (Last 1hour) by Quiddity",
+          "description": "Average Salesforce Asynchronous Apex Run Time (Last 1hr) by Quiddity",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2106,7 +2644,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 143
+            "y": 157
           },
           "id": 37,
           "interval": "1800",
@@ -2145,7 +2683,7 @@
               "useBackend": false
             }
           ],
-          "title": "Average Salesforce Asynchronous Apex Run Time (Last 1hour) by Quiddity",
+          "title": "Average Salesforce Asynchronous Apex Run Time (Last 1hr) by Quiddity",
           "transformations": [
             {
               "id": "renameByRegex",
@@ -2288,7 +2826,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
-          "description": "Average Salesforce Synchronous Apex CPU Time (Last 1hour) by Quiddity",
+          "description": "Average Salesforce Synchronous Apex CPU Time (Last 1hr) by Quiddity",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2344,7 +2882,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 155
+            "y": 169
           },
           "id": 38,
           "interval": "1800",
@@ -2383,7 +2921,7 @@
               "useBackend": false
             }
           ],
-          "title": "Average Salesforce Synchronous Apex CPU Time (Last 1hour) by Quiddity",
+          "title": "Average Salesforce Synchronous Apex CPU Time (Last 1hr) by Quiddity",
           "transformations": [
             {
               "id": "renameByRegex",
@@ -2526,7 +3064,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
-          "description": "Average Salesforce Asynchronous Apex CPU Time (Last 1hour) by Quiddity",
+          "description": "Average Salesforce Asynchronous Apex CPU Time (Last 1hr) by Quiddity",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2582,7 +3120,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 155
+            "y": 169
           },
           "id": 39,
           "interval": "1800",
@@ -2621,7 +3159,7 @@
               "useBackend": false
             }
           ],
-          "title": "Average Salesforce Asynchronous Apex CPU Time (Last 1hour) by Quiddity",
+          "title": "Average Salesforce Asynchronous Apex CPU Time (Last 1hr) by Quiddity",
           "transformations": [
             {
               "id": "renameByRegex",
@@ -2764,7 +3302,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
-          "description": "Average Salesforce Synchronous Apex Execution Time (Last 1hour) by Quiddity",
+          "description": "Average Salesforce Synchronous Apex Execution Time (Last 1hr) by Quiddity",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2820,7 +3358,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 167
+            "y": 181
           },
           "id": 40,
           "interval": "1800",
@@ -2859,7 +3397,7 @@
               "useBackend": false
             }
           ],
-          "title": "Average Salesforce Synchronous Apex Execution Time (Last 1hour) by Quiddity",
+          "title": "Average Salesforce Synchronous Apex Execution Time (Last 1hr) by Quiddity",
           "transformations": [
             {
               "id": "renameByRegex",
@@ -3002,7 +3540,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
-          "description": "Average Salesforce Asynchronous Apex Execution Time (Last 1hour) by Quiddity",
+          "description": "Average Salesforce Asynchronous Apex Execution Time (Last 1hr) by Quiddity",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3058,7 +3596,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 167
+            "y": 181
           },
           "id": 41,
           "interval": "1800",
@@ -3097,7 +3635,7 @@
               "useBackend": false
             }
           ],
-          "title": "Average Salesforce Asynchronous Apex Execution Time (Last 1hour) by Quiddity",
+          "title": "Average Salesforce Asynchronous Apex Execution Time (Last 1hr) by Quiddity",
           "transformations": [
             {
               "id": "renameByRegex",
@@ -3240,7 +3778,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
-          "description": "Average Salesforce Synchronous Apex Database Time (Last 1hour) by Quiddity",
+          "description": "Average Salesforce Synchronous Apex Database Time (Last 1hr) by Quiddity",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3296,7 +3834,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 179
+            "y": 193
           },
           "id": 42,
           "options": {
@@ -3334,7 +3872,7 @@
               "useBackend": false
             }
           ],
-          "title": "Average Salesforce Synchronous Apex Database Time (Last 1hour) by Quiddity",
+          "title": "Average Salesforce Synchronous Apex Database Time (Last 1hr) by Quiddity",
           "transformations": [
             {
               "id": "renameByRegex",
@@ -3477,7 +4015,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
-          "description": "Average Salesforce Asynchronous Apex Database Time (Last 1hour) by Quiddity",
+          "description": "Average Salesforce Asynchronous Apex Database Time (Last 1hr) by Quiddity",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3533,7 +4071,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 179
+            "y": 193
           },
           "id": 43,
           "interval": "1800",
@@ -3572,7 +4110,7 @@
               "useBackend": false
             }
           ],
-          "title": "Average Salesforce Asynchronous Apex Database Time (Last 1hour) by Quiddity",
+          "title": "Average Salesforce Asynchronous Apex Database Time (Last 1hr) by Quiddity",
           "transformations": [
             {
               "id": "renameByRegex",
@@ -3715,7 +4253,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
-          "description": "Average Salesforce Synchronous Apex CalloutTime (Last 1hour) by Quiddity",
+          "description": "Average Salesforce Synchronous Apex CalloutTime (Last 1hr) by Quiddity",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3771,7 +4309,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 191
+            "y": 205
           },
           "id": 44,
           "options": {
@@ -3809,7 +4347,7 @@
               "useBackend": false
             }
           ],
-          "title": "Average Salesforce Synchronous Apex Callout Time (Last 1hour) by Quiddity",
+          "title": "Average Salesforce Synchronous Apex Callout Time (Last 1hr) by Quiddity",
           "transformations": [
             {
               "id": "renameByRegex",
@@ -3952,7 +4490,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
-          "description": "Average Salesforce Asynchronous Apex Callout Time (Last 1hour) by Quiddity",
+          "description": "Average Salesforce Asynchronous Apex Callout Time (Last 1hr) by Quiddity",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4008,7 +4546,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 191
+            "y": 205
           },
           "id": 45,
           "options": {
@@ -4046,7 +4584,7 @@
               "useBackend": false
             }
           ],
-          "title": "Average Salesforce Asynchronous Apex Callout Time (Last 1hour) by Quiddity",
+          "title": "Average Salesforce Asynchronous Apex Callout Time (Last 1hr) by Quiddity",
           "transformations": [
             {
               "id": "renameByRegex",
@@ -4286,7 +4824,7 @@
             "h": 13,
             "w": 12,
             "x": 0,
-            "y": 203
+            "y": 217
           },
           "id": 46,
           "interval": "1800",
@@ -4513,7 +5051,7 @@
             "h": 13,
             "w": 12,
             "x": 12,
-            "y": 203
+            "y": 217
           },
           "id": 47,
           "interval": "1800",
@@ -4649,6 +5187,233 @@
             }
           ],
           "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Experienced Page Time (EPT) for 'LightningPageView'.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds",
+                "seriesBy": "last"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 70
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 16,
+            "w": 24,
+            "x": 0,
+            "y": 230
+          },
+          "id": 14,
+          "interval": "30m",
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "builder",
+              "exemplar": false,
+              "expr": "salesforce_experienced_page_time{PAGE_APP_NAME='LightningSales'} and {PAGE_ENTITY_TYPE='Account'}",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "includeNullMetadata": false,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Experienced Page Time (EPT)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "The average time users spend on a specific page across all sessions",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds",
+                "seriesBy": "last"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "series",
+                "axisGridShow": false,
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "log": 2,
+                  "type": "log"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 70
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 16,
+            "w": 24,
+            "x": 0,
+            "y": 246
+          },
+          "id": 59,
+          "interval": "300",
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max by (Page_name) (max_over_time(salesforce_average_page_time[5m]))",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "includeNullMetadata": false,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Average Page Time (APT)",
+          "type": "timeseries"
         }
       ],
       "title": "Performance",
@@ -4660,7 +5425,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 104
+        "y": 71
       },
       "id": 49,
       "panels": [
@@ -4680,8 +5445,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -4693,7 +5457,7 @@
             "h": 13,
             "w": 24,
             "x": 0,
-            "y": 105
+            "y": 72
           },
           "id": 53,
           "options": {
@@ -4730,7 +5494,7 @@
               "refId": "A"
             }
           ],
-          "title": "Apex exceptions occurred in last 1hour",
+          "title": "Apex exceptions occurred in last 1hr",
           "type": "stat"
         },
         {
@@ -4738,7 +5502,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
-          "description": "Data categorized based on Types of exceptions occurred in last 1hour",
+          "description": "Data categorized based on Types of exceptions occurred in last 1hr",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4785,8 +5549,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -4798,7 +5561,7 @@
             "h": 14,
             "w": 24,
             "x": 0,
-            "y": 118
+            "y": 85
           },
           "id": 55,
           "options": {
@@ -4830,7 +5593,7 @@
               "refId": "A"
             }
           ],
-          "title": "Total Apex exceptions occurred in last 1hour",
+          "title": "Total Apex exceptions occurred in last 1hr",
           "type": "timeseries"
         },
         {
@@ -4838,7 +5601,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
-          "description": "Details displayed based on CPU Timeout exceptions occurred in last 1hour",
+          "description": "Details displayed based on CPU Timeout exceptions occurred in last 1hr",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4858,8 +5621,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               }
@@ -4907,7 +5669,7 @@
             "h": 12,
             "w": 24,
             "x": 0,
-            "y": 132
+            "y": 99
           },
           "id": 56,
           "interval": "1800",
@@ -4989,7 +5751,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
-          "description": "Details displayed based on Row Lock errors occurred in last 1hour",
+          "description": "Details displayed based on Row Lock errors occurred in last 1hr",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -5009,8 +5771,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               }
@@ -5058,7 +5819,7 @@
             "h": 12,
             "w": 24,
             "x": 0,
-            "y": 144
+            "y": 111
           },
           "id": 57,
           "interval": "1800",
@@ -5145,7 +5906,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 105
+        "y": 72
       },
       "id": 25,
       "panels": [
@@ -5180,7 +5941,7 @@
             "h": 7,
             "w": 4,
             "x": 0,
-            "y": 106
+            "y": 73
           },
           "id": 13,
           "interval": "5m",
@@ -5230,193 +5991,6 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
-          "description": "Experienced Page Time (EPT) for 'LightningPageView'.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds",
-                "seriesBy": "last"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "fieldMinMax": false,
-              "mappings": [],
-              "min": 0,
-              "thresholds": {
-                "mode": "percentage",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 70
-                  },
-                  {
-                    "color": "red",
-                    "value": 90
-                  }
-                ]
-              },
-              "unit": "s"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 16,
-            "w": 20,
-            "x": 4,
-            "y": 106
-          },
-          "id": 14,
-          "interval": "30m",
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "right",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "10.4.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "o7MvocN7k"
-              },
-              "disableTextWrap": false,
-              "editorMode": "builder",
-              "exemplar": false,
-              "expr": "salesforce_experienced_page_time{PAGE_APP_NAME='LightningSales'} and {PAGE_ENTITY_TYPE='Account'}",
-              "format": "time_series",
-              "fullMetaSearch": false,
-              "includeNullMetadata": false,
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A",
-              "useBackend": false
-            }
-          ],
-          "title": "Experienced Page Time (EPT)",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "o7MvocN7k"
-          },
-          "description": "",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "fixedColor": "dark-green",
-                "mode": "fixed"
-              },
-              "fieldMinMax": false,
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 4,
-            "x": 0,
-            "y": 113
-          },
-          "id": 19,
-          "interval": "5m",
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "value_and_name",
-            "wideLayout": true
-          },
-          "pluginVersion": "10.4.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "o7MvocN7k"
-              },
-              "disableTextWrap": false,
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "sum(salesforce_login_success_total{})",
-              "format": "time_series",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "Login Successes",
-              "range": true,
-              "refId": "A",
-              "useBackend": false
-            }
-          ],
-          "transparent": true,
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "o7MvocN7k"
-          },
           "description": "User location based on their login coordinates",
           "fieldConfig": {
             "defaults": {
@@ -5450,9 +6024,9 @@
           },
           "gridPos": {
             "h": 16,
-            "w": 24,
-            "x": 0,
-            "y": 122
+            "w": 20,
+            "x": 4,
+            "y": 73
           },
           "id": 15,
           "interval": "30m",
@@ -5554,9 +6128,84 @@
           ],
           "title": "Users Geolocation",
           "type": "geomap"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "dark-green",
+                "mode": "fixed"
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 4,
+            "x": 0,
+            "y": 80
+          },
+          "id": 19,
+          "interval": "5m",
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "value_and_name",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(salesforce_login_success_total{})",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "Login Successes",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "transparent": true,
+          "type": "stat"
         }
       ],
-      "title": "User Login, EPT, Geolocation",
+      "title": "User Login",
       "type": "row"
     },
     {
@@ -5565,7 +6214,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 106
+        "y": 73
       },
       "id": 23,
       "panels": [
@@ -5600,7 +6249,7 @@
             "h": 7,
             "w": 4,
             "x": 0,
-            "y": 107
+            "y": 74
           },
           "id": 11,
           "interval": "5m",
@@ -5707,7 +6356,7 @@
             "h": 15,
             "w": 15,
             "x": 4,
-            "y": 107
+            "y": 74
           },
           "id": 12,
           "interval": "30",
@@ -5761,7 +6410,7 @@
               "useBackend": false
             }
           ],
-          "title": "Average Deployment Time vs Average Pending Time",
+          "title": "Production Average Deployment Time vs Average Pending Time",
           "type": "timeseries"
         },
         {
@@ -5795,7 +6444,7 @@
             "h": 8,
             "w": 4,
             "x": 0,
-            "y": 114
+            "y": 81
           },
           "id": 20,
           "interval": "5m",
@@ -5842,6 +6491,173 @@
       ],
       "title": "Deployments",
       "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 74
+      },
+      "id": 67,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Monitors and lists users who query more than 10,000 records in Salesforce",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-RdYlGr"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "mappings": [],
+              "noValue": "No operation on >10k records",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Time"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 207
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Exception Cateogry"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 186
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Exception Type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 213
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 75
+          },
+          "id": 66,
+          "interval": "1800",
+          "options": {
+            "cellHeight": "md",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Time"
+              }
+            ]
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "count by (entity_name, method, query_type, rows_processed, user_id, user_name) (${interval}_user_querying_large_records)",
+              "format": "table",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "List of users querying large (>10k) records (${interval})",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": false,
+                  "Value": true,
+                  "exception_category": false,
+                  "exception_type": false
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 6,
+                  "entity_name": 3,
+                  "method": 4,
+                  "rows_processed": 5,
+                  "user_id": 2,
+                  "user_name": 1
+                },
+                "renameByName": {
+                  "cpu_time": "CPU Time",
+                  "entity_name": "Entity Name",
+                  "entry_point": "Entry Point",
+                  "exception_category": "Exception Cateogry",
+                  "exception_message": "Exception Message",
+                  "exception_type": "Exception Type",
+                  "method": "Operation",
+                  "rows_processed": "Rows processed",
+                  "run_time": "Run Time",
+                  "stack_trace": "Stack Trace",
+                  "user_id": "User ID",
+                  "user_name": "User Name"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        }
+      ],
+      "title": "Compliance",
+      "type": "row"
     }
   ],
   "refresh": "",
@@ -5859,6 +6675,33 @@
         "name": "Filters",
         "skipUrlSync": false,
         "type": "adhoc"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "hourly",
+          "value": "hourly"
+        },
+        "hide": 1,
+        "includeAll": false,
+        "multi": false,
+        "name": "interval",
+        "options": [
+          {
+            "selected": true,
+            "text": "hourly",
+            "value": "hourly"
+          },
+          {
+            "selected": false,
+            "text": "daily",
+            "value": "daily"
+          }
+        ],
+        "query": "hourly,daily",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
       }
     ]
   },
@@ -5872,6 +6715,6 @@
   "timezone": "browser",
   "title": "Salesforce Monitoring",
   "uid": "edqq6je4aevb4b",
-  "version": 48,
+  "version": 69,
   "weekStart": ""
 }
