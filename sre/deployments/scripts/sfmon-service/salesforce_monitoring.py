@@ -57,6 +57,8 @@ def monitor_salesforce_limits(limits):
     Monitor all Salesforce limits.
     """
     logging.info("Monitoring Salesforce limits...")
+    gauges.api_usage_gauge.clear()
+    gauges.api_usage_percentage_gauge.clear()
     for limit_name, limit_data in limits.items():
         max_limit = limit_data['Max']
         remaining = limit_data['Remaining']
