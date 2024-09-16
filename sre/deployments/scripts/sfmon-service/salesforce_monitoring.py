@@ -24,6 +24,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 # Constants
 REQUESTS_TIMEOUT_SECONDS = 300
+QUERY_TIMEOUT_SECONDS = 30
 
 
 def get_salesforce_connection_url(url):
@@ -73,6 +74,102 @@ def monitor_salesforce_limits(limits):
             if usage_percentage >= 90:
                 logging.warning('API usage for %s has exceeded %s percent of the total limit.',
                                 limit_name, usage_percentage)
+
+
+def daily_analyse_bulk_api(sf):
+    """
+    Analyse Bulk API usage with respect to user_id, entity_type, operation_type, number of rows processed, number of failures.
+    """    
+
+    logging.info("Getting Daily Bulk API details...")
+    try:
+        log_query = (
+            "SELECT Id FROM EventLogFile WHERE EventType = 'BulkAPI' and Interval = 'Daily' "
+            "ORDER BY LogDate DESC LIMIT 1")
+
+        bulk_api_logs = parse_logs(sf, log_query)
+
+        batch_counts = defaultdict(int)
+        total_records_failed = defaultdict(int)
+        total_records_processed = defaultdict(int)
+        entity_type_counts = defaultdict(int)
+
+        for row in bulk_api_logs:
+            job_id = row['JOB_ID'] if row['JOB_ID'] else None
+            user_id = row['USER_ID']
+            entity_type = row['ENTITY_TYPE'] if row['ENTITY_TYPE'] else None
+            operation_type = row['OPERATION_TYPE'] if row['OPERATION_TYPE'] else None
+            rows_processed = int(row['ROWS_PROCESSED']) if row['ROWS_PROCESSED'].isdigit() else 0
+            number_failures = int(row['NUMBER_FAILURES']) if row['NUMBER_FAILURES'].isdigit() else 0
+
+            if not entity_type or entity_type.lower() == 'none':
+                continue
+
+            batch_counts[(job_id, user_id, entity_type)] += 1
+            total_records_failed[(job_id, user_id, entity_type)] += number_failures
+            total_records_processed[(job_id, user_id, entity_type)] += rows_processed
+            entity_type_counts[(user_id, operation_type, entity_type)] += 1
+
+        for key, count in batch_counts.items():
+            job_id, user_id, entity_type = key
+            gauges.daily_batch_count_metric.labels(
+                job_id=job_id, user_id=user_id, entity_type=entity_type,
+                total_records_failed=total_records_failed[key],
+                total_records_processed=total_records_processed[key]).set(count)
+
+        for (user_id, operation_type, entity_type), count in entity_type_counts.items():
+            gauges.daily_entity_type_count_metric.labels(user_id=user_id, operation_type=operation_type, entity_type=entity_type).set(count)
+
+    except Exception as e:
+        logging.error("An unexpected error occurred: %s", e)
+
+
+def hourly_analyse_bulk_api(sf):
+    """
+    Analyse Bulk API usage with respect to user_id, entity_type, operation_type, number of rows processed, number of failures.
+    """    
+
+    logging.info("Getting Hourly based Bulk API details...")
+    try:
+        log_query = (
+            "SELECT Id FROM EventLogFile WHERE EventType = 'BulkAPI' and Interval = 'Hourly' "
+            "ORDER BY LogDate DESC LIMIT 1")
+
+        bulk_api_logs = parse_logs(sf, log_query)
+
+        batch_counts = defaultdict(int)
+        total_records_failed = defaultdict(int)
+        total_records_processed = defaultdict(int)
+        entity_type_counts = defaultdict(int)
+
+        for row in bulk_api_logs:
+            job_id = row['JOB_ID'] if row['JOB_ID'] else None
+            user_id = row['USER_ID']
+            entity_type = row['ENTITY_TYPE'] if row['ENTITY_TYPE'] else None
+            operation_type = row['OPERATION_TYPE'] if row['OPERATION_TYPE'] else None
+            rows_processed = int(row['ROWS_PROCESSED']) if row['ROWS_PROCESSED'].isdigit() else 0
+            number_failures = int(row['NUMBER_FAILURES']) if row['NUMBER_FAILURES'].isdigit() else 0
+
+            if not entity_type or entity_type.lower() == 'none':
+                continue
+
+            batch_counts[(job_id, user_id, entity_type)] += 1
+            total_records_failed[(job_id, user_id, entity_type)] += number_failures
+            total_records_processed[(job_id, user_id, entity_type)] += rows_processed
+            entity_type_counts[(user_id, operation_type, entity_type)] += 1
+
+        for key, count in batch_counts.items():
+            job_id, user_id, entity_type = key
+            gauges.hourly_batch_count_metric.labels(
+                job_id=job_id, user_id=user_id, entity_type=entity_type,
+                total_records_failed=total_records_failed[key],
+                total_records_processed=total_records_processed[key]).set(count)
+
+        for (user_id, operation_type, entity_type), count in entity_type_counts.items():
+            gauges.hourly_entity_type_count_metric.labels(user_id=user_id, operation_type=operation_type, entity_type=entity_type).set(count)
+
+    except Exception as e:
+        logging.error("An unexpected error occurred: %s", e)
 
 
 def get_salesforce_licenses(sf):
@@ -391,7 +488,7 @@ def parse_logs(sf, log_query):
     Fetch and parse logs from given query
     """
     try:
-        event_log_records = sf.query(log_query)
+        event_log_records = sf.query(log_query, timeout=QUERY_TIMEOUT_SECONDS)
         if not event_log_records['totalSize']:
             return None
 
@@ -497,6 +594,62 @@ def expose_apex_exception_metrics(sf):
         logging.error("Error while exposing category count metrics: %s", e)
 
 
+def get_user_name(sf, user_id):
+    """
+    Helper function to fetch user name by user ID.
+    """
+    try:
+        query = f"SELECT Name FROM User WHERE Id = '{user_id}'"
+        result = sf.query(query, timeout=QUERY_TIMEOUT_SECONDS)
+        return result['records'][0]['Name'] if result['records'] else 'Unknown User'
+    except Exception as e:
+        logging.error("Error fetching user name for ID %s: %s", user_id, e)
+        return 'Unknown User'
+
+
+def hourly_observe_user_querying_large_records(sf):
+    '''
+    Observe user activity who querries more than 10k records
+    '''
+    logging.info("Getting Compliance data - User details querying large records...")
+
+    try:
+        log_query = (
+            "SELECT Id FROM EventLogFile WHERE EventType = 'API' and Interval = 'Hourly' "
+            "ORDER BY LogDate DESC LIMIT 1")
+
+        api_log_records = parse_logs(sf, log_query)
+        large_query_counts = {}
+
+        gauges.hourly_large_query_metric.clear()
+
+        for row in api_log_records:
+            rows_processed = int(row['ROWS_PROCESSED']) if row['ROWS_PROCESSED'].isdigit() else 0
+
+            if rows_processed > 10000:
+                user_id = row['USER_ID'] if row['USER_ID'] else None
+                method = row['METHOD_NAME'] if row['METHOD_NAME'] else None
+                entity_name = row['ENTITY_NAME'] if row['ENTITY_NAME'] else None
+
+                if not user_id:
+                    continue
+
+                user_name = get_user_name(sf, user_id)
+
+                key = (user_id, user_name, method, entity_name, rows_processed)
+                large_query_counts[key] = large_query_counts.get(key, 0) + 1
+
+        for (user_id, user_name, method, entity_name, rows_processed), count in large_query_counts.items():
+            gauges.hourly_large_query_metric.labels(
+                user_id=user_id,user_name=user_name,
+                method=method,entity_name=entity_name,
+                rows_processed=rows_processed
+            ).set(count)
+
+    except Exception as e:
+        logging.error("An error occurred: %s", e)
+
+
 def main():
     """
     Main function.
@@ -507,7 +660,9 @@ def main():
         try:
             sf = get_salesforce_connection_url(url=os.getenv('SALESFORCE_AUTH_URL'))
             monitor_salesforce_limits(dict(sf.limits()))
-            get_salesforce_licenses(sf)            
+            daily_analyse_bulk_api(sf)
+            hourly_analyse_bulk_api(sf)
+            get_salesforce_licenses(sf)
             get_salesforce_instance(sf)
             get_deployment_status(sf)
             get_salesforce_ept_and_apt(sf)
@@ -516,11 +671,13 @@ def main():
             async_apex_job_status(sf)
             monitor_apex_execution(sf)
             expose_apex_exception_metrics(sf)
+            hourly_observe_user_querying_large_records(sf)
         except Exception as e:
             logging.error("An error occurred: %s", e)
-        logging.info('Sleeping for 30 minutes...')
-        time.sleep(1800)
+        logging.info('Sleeping for 5 minutes...')
+        time.sleep(300)
         logging.info('Resuming...')
+
 
 if __name__ == '__main__':
     main()
