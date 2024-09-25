@@ -12,11 +12,13 @@ import time
 import requests
 from prometheus_client import start_http_server
 from simple_salesforce import SalesforceMalformedRequest
+import schedule
 
 from cloudwatch_logging import logger
 from connection_sf import get_salesforce_connection_url
 import gauges
 from limits import salesforce_limits_descriptions
+
 
 # Constants
 REQUESTS_TIMEOUT_SECONDS = 300
@@ -49,7 +51,7 @@ def monitor_salesforce_limits(limits):
 def daily_analyse_bulk_api(sf):
     """
     Analyse Bulk API usage with respect to user_id, entity_type, operation_type, number of rows processed, number of failures.
-    """    
+    """
 
     logger.info("Getting Daily Bulk API details...")
     try:
@@ -97,7 +99,7 @@ def daily_analyse_bulk_api(sf):
 def hourly_analyse_bulk_api(sf):
     """
     Analyse Bulk API usage with respect to user_id, entity_type, operation_type, number of rows processed, number of failures.
-    """    
+    """
 
     logger.info("Getting Hourly based Bulk API details...")
     try:
@@ -620,33 +622,87 @@ def hourly_observe_user_querying_large_records(sf):
         logger.error("An error occurred: %s", e)
 
 
-def main():
+def community_login_error_logger_details(sf):
     """
-    Main function.
+    Monitors Apex failure for login (PRM and GSP) from SFDC Logger records where source = 'Community - Login'
+    and Log level is Error or Fatal
     """
-    start_http_server(9001)
 
+    try:
+        query = """
+        SELECT Id, Name, Source_Name__c, CreatedDate, Log_Message__c, Record_Id__c, Log_Level__c 
+        FROM SFDC_Logger__c 
+        WHERE Source_Name__c = 'Community - Login' 
+        AND Log_Level__c IN ('Error','Fatal') 
+        AND CreatedDate = LAST_N_DAYS:7 
+        ORDER BY CreatedDate DESC
+        """
+        results = sf.query_all(query)
+
+        gauges.community_login_error_metric.clear()
+
+        if results['totalSize'] > 0:
+            for record in results['records']:
+                # Expose logger details as Prometheus metrics
+                gauges.community_login_error_metric.labels(
+                    id=record['Id'],
+                    name=record['Name'],
+                    log_level=record['Log_Level__c'],
+                    log_message=record['Log_Message__c'],
+                    record_id=record['Record_Id__c'],
+                    created_date=record['CreatedDate']
+                ).set(1)  # Set value to 1 (or any other constant value)
+
+    except Exception as e:
+        logger.error("Error fetching SFDC Logger records: %s", e)
+
+
+def schedule_tasks(sf):
+    """
+    Schedule all tasks as per the required intervals.
+    """
+    # Every 5 minutes
+    schedule.every(5).minutes.do(lambda: monitor_salesforce_limits(dict(sf.limits())))
+    schedule.every(5).minutes.do(lambda: get_salesforce_licenses(sf))
+    schedule.every(5).minutes.do(lambda: get_salesforce_instance(sf))
+
+    # Twice a day
+    schedule.every().day.at("08:00").do(lambda: daily_analyse_bulk_api(sf))
+    schedule.every().day.at("20:00").do(lambda: daily_analyse_bulk_api(sf))
+    schedule.every().day.at("08:00").do(lambda: get_deployment_status(sf))
+    schedule.every().day.at("20:00").do(lambda: get_deployment_status(sf))
+    schedule.every().day.at("08:00").do(lambda: geolocation(sf, chunk_size=100))
+    schedule.every().day.at("20:00").do(lambda: geolocation(sf, chunk_size=100))
+    schedule.every().day.at("08:00").do(lambda: community_login_error_logger_details(sf))
+    schedule.every().day.at("20:00").do(lambda: community_login_error_logger_details(sf))
+
+    # Every 30 minutes
+    schedule.every(30).minutes.do(lambda: hourly_analyse_bulk_api(sf))
+    schedule.every(30).minutes.do(lambda: get_salesforce_ept_and_apt(sf))
+    schedule.every(30).minutes.do(lambda: monitor_login_events(sf))
+    schedule.every(30).minutes.do(lambda: async_apex_job_status(sf))
+    schedule.every(30).minutes.do(lambda: monitor_apex_execution(sf))
+    schedule.every(30).minutes.do(lambda: expose_apex_exception_metrics(sf))
+    schedule.every(30).minutes.do(lambda: hourly_observe_user_querying_large_records(sf))
+
+    # Infinite loop to run pending tasks
     while True:
-        try:
-            sf = get_salesforce_connection_url(url=os.getenv('SALESFORCE_AUTH_URL'))
-            monitor_salesforce_limits(dict(sf.limits()))
-            daily_analyse_bulk_api(sf)
-            hourly_analyse_bulk_api(sf)
-            get_salesforce_licenses(sf)
-            get_salesforce_instance(sf)
-            get_deployment_status(sf)
-            get_salesforce_ept_and_apt(sf)
-            monitor_login_events(sf)
-            geolocation(sf, chunk_size=100)
-            async_apex_job_status(sf)
-            monitor_apex_execution(sf)
-            expose_apex_exception_metrics(sf)
-            hourly_observe_user_querying_large_records(sf)
-        except Exception as e:
-            logger.error("An error occurred: %s", e)
+        schedule.run_pending()
         logger.info('Sleeping for 5 minutes...')
         time.sleep(300)
         logger.info('Resuming...')
+
+
+def main():
+    """
+    Main function. Initializes and runs tasks according to their respective schedules.
+    """
+    try:
+        start_http_server(9001)
+        sf = get_salesforce_connection_url(url=os.getenv('PRODUCTION_AUTH_URL'))
+        schedule_tasks(sf)
+    except Exception as e:
+        logger.error("An error occurred: %s", e)
 
 
 if __name__ == '__main__':

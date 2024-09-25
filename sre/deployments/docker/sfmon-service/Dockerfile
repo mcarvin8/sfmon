@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y curl python3 python3-pip python3-venv &
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/* && \
     npm install --global @salesforce/cli@latest && \
-    /opt/venv/bin/pip install --no-cache-dir simple_salesforce prometheus_client requests && \
+    /opt/venv/bin/pip install --no-cache-dir simple_salesforce prometheus_client requests schedule && \
     sf version --verbose --json && \
     /opt/venv/bin/pip list
 
