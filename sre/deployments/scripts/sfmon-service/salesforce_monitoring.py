@@ -1,63 +1,33 @@
 """
     Monitor critical Salesforce endpoints.
 """
-import csv
 from collections import defaultdict
+import csv
 from datetime import datetime, timedelta, timezone
 import io
 from io import StringIO
-import json
-import logging
 import os
-import subprocess
 import time
 
 import requests
 from prometheus_client import start_http_server
-from simple_salesforce import SalesforceMalformedRequest, Salesforce
+from simple_salesforce import SalesforceMalformedRequest
 
+from cloudwatch_logging import logger
+from connection_sf import get_salesforce_connection_url
 import gauges
 from limits import salesforce_limits_descriptions
-
-# Set up logging for CloudWatch
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Constants
 REQUESTS_TIMEOUT_SECONDS = 300
 QUERY_TIMEOUT_SECONDS = 30
 
 
-def get_salesforce_connection_url(url):
-    """
-    Connect to Salesforce using the Salesforce CLI and Simple Salesforce via a URL
-    Requires `sf` CLI v2.24.4/newer
-    """
-    try:
-        login_cmd = f'echo {url} | sf org login sfdx-url --set-default --sfdx-url-stdin -'
-        subprocess.run(login_cmd, check=True, shell=True)
-        display_cmd = subprocess.run('sf org display --json', check=True,
-                                     shell=True, stdout=subprocess.PIPE)
-        sfdx_info = json.loads(display_cmd.stdout)
-
-        access_token = sfdx_info['result']['accessToken']
-        instance_url = sfdx_info['result']['instanceUrl']
-        api_version = sfdx_info['result']['apiVersion']
-        domain = 'test' if 'sandbox' in instance_url else 'login'
-        return Salesforce(instance_url=instance_url, session_id=access_token, domain=domain, version=api_version)
-
-    except subprocess.CalledProcessError as e:
-        logging.error("Error logging into Salesforce: %s", e)
-        raise
-    except KeyError as e:
-        logging.error("Missing expected key in Salesforce CLI output: %s", e)
-        raise
-
-
 def monitor_salesforce_limits(limits):
     """
     Monitor all Salesforce limits.
     """
-    logging.info("Monitoring Salesforce limits...")
+    logger.info("Monitoring Salesforce limits...")
     gauges.api_usage_gauge.clear()
     gauges.api_usage_percentage_gauge.clear()
     for limit_name, limit_data in limits.items():
@@ -72,7 +42,7 @@ def monitor_salesforce_limits(limits):
             gauges.api_usage_percentage_gauge.labels(limit_name=limit_name, limit_description=salesforce_limits_descriptions.get(limit_name, 'Description not available'), limit_utilized=used, max_limit=max_limit).set(usage_percentage)
 
             if usage_percentage >= 90:
-                logging.warning('API usage for %s has exceeded %s percent of the total limit.',
+                logger.warning('API usage for %s has exceeded %s percent of the total limit.',
                                 limit_name, usage_percentage)
 
 
@@ -81,7 +51,7 @@ def daily_analyse_bulk_api(sf):
     Analyse Bulk API usage with respect to user_id, entity_type, operation_type, number of rows processed, number of failures.
     """    
 
-    logging.info("Getting Daily Bulk API details...")
+    logger.info("Getting Daily Bulk API details...")
     try:
         log_query = (
             "SELECT Id FROM EventLogFile WHERE EventType = 'BulkAPI' and Interval = 'Daily' "
@@ -121,7 +91,7 @@ def daily_analyse_bulk_api(sf):
             gauges.daily_entity_type_count_metric.labels(user_id=user_id, operation_type=operation_type, entity_type=entity_type).set(count)
 
     except Exception as e:
-        logging.error("An unexpected error occurred: %s", e)
+        logger.error("An unexpected error occurred: %s", e)
 
 
 def hourly_analyse_bulk_api(sf):
@@ -129,7 +99,7 @@ def hourly_analyse_bulk_api(sf):
     Analyse Bulk API usage with respect to user_id, entity_type, operation_type, number of rows processed, number of failures.
     """    
 
-    logging.info("Getting Hourly based Bulk API details...")
+    logger.info("Getting Hourly based Bulk API details...")
     try:
         log_query = (
             "SELECT Id FROM EventLogFile WHERE EventType = 'BulkAPI' and Interval = 'Hourly' "
@@ -169,14 +139,14 @@ def hourly_analyse_bulk_api(sf):
             gauges.hourly_entity_type_count_metric.labels(user_id=user_id, operation_type=operation_type, entity_type=entity_type).set(count)
 
     except Exception as e:
-        logging.error("An unexpected error occurred: %s", e)
+        logger.error("An unexpected error occurred: %s", e)
 
 
 def get_salesforce_licenses(sf):
     """
     Get all license data.
     """
-    logging.info("Getting Salesforce licenses...")
+    logger.info("Getting Salesforce licenses...")
     result_user_license = sf.query("SELECT Name, Status, UsedLicenses, TotalLicenses FROM UserLicense")
     for entry in result_user_license['records']:
         status = dict(entry)['Status']
@@ -192,7 +162,7 @@ def get_salesforce_licenses(sf):
             gauges.percent_user_licenses_used_gauge.labels(license_name=license_name, status=status, used_licenses=used_licenses, total_licenses=total_licenses).set(percent_used)
 
             if percent_used >= 90:
-                logging.warning('License usage for %s has exceeded %s percent of the total limit.',
+                logger.warning('License usage for %s has exceeded %s percent of the total limit.',
                                 license_name, percent_used)
 
     result_perm_set_license = sf.query("SELECT MasterLabel, Status, ExpirationDate, TotalLicenses, UsedLicenses FROM PermissionSetLicense")
@@ -211,14 +181,14 @@ def get_salesforce_licenses(sf):
             gauges.percent_permissionset_used_gauge.labels(license_name=license_name, status=status, expiration_date=expiration_date, used_licenses=used_licenses, total_licenses=total_licenses).set(percent_used)
 
             if percent_used >= 90:
-                logging.warning('License usage for %s has exceeded %s percent of the total limit.', license_name, percent_used)
+                logger.warning('License usage for %s has exceeded %s percent of the total limit.', license_name, percent_used)
 
         if expiration_date:
             expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d')
             days_until_expiration = (expiration_date - datetime.now()).days
 
             if days_until_expiration < 30 and status != 'Disabled':
-                logging.warning("License %s with status %s is expiring in less than 30 days: %s days left.", license_name, status, days_until_expiration)
+                logger.warning("License %s with status %s is expiring in less than 30 days: %s days left.", license_name, status, days_until_expiration)
 
     result_usage_based_entitlements = sf.query("SELECT MasterLabel, AmountUsed, CurrentAmountAllowed, EndDate FROM TenantUsageEntitlement")
     for entry in result_usage_based_entitlements['records']:
@@ -236,7 +206,7 @@ def get_salesforce_licenses(sf):
             gauges.percent_usage_based_entitlements_used_gauge.labels(license_name=license_name, expiration_date=expiration_date, used_licenses=used_licenses, total_licenses=total_licenses).set(percent_used)
 
             if percent_used >= 90:
-                logging.warning('License usage for %s has exceeded %s percent of the total limit.',
+                logger.warning('License usage for %s has exceeded %s percent of the total limit.',
                                 license_name, percent_used)
 
         if expiration_date:
@@ -244,7 +214,7 @@ def get_salesforce_licenses(sf):
             days_until_expiration = (expiration_date - datetime.now()).days
 
             if days_until_expiration < 30 and days_until_expiration >= 0:
-                logging.warning("License %s is expiring in less than 30 days: %s days left.",
+                logger.warning("License %s is expiring in less than 30 days: %s days left.",
                                 license_name, days_until_expiration)
 
 
@@ -252,7 +222,7 @@ def get_salesforce_instance(sf):
     """
     Get instance info for the org.
     """
-    logging.info("Getting Salesforce instance info...")
+    logger.info("Getting Salesforce instance info...")
     org_result = sf.query_all("Select FIELDS(ALL) From Organization LIMIT 1")
     pod = org_result['records'][0]['InstanceName']
 
@@ -263,13 +233,13 @@ def get_salesforce_instance(sf):
         release_version = data['releaseVersion']
         release_number = data['releaseNumber']
         next_maintenance = data['maintenanceWindow']
-        logging.info("%s - Release: %s, Number: %s, Maintenance: %s",
+        logger.info("%s - Release: %s, Number: %s, Maintenance: %s",
                         pod, release_version, release_number, next_maintenance)
         get_salesforce_incidents(pod)
     except requests.RequestException as e:
-        logging.error("Error getting Salesforce instance status: %s", e)
+        logger.error("Error getting Salesforce instance status: %s", e)
     except SalesforceMalformedRequest as e:
-        logging.error("Salesforce malformed request error: %s", e)
+        logger.error("Salesforce malformed request error: %s", e)
 
 
 def get_salesforce_incidents(instancepod):
@@ -293,11 +263,11 @@ def get_salesforce_incidents(instancepod):
                     gauges.incident_gauge.labels(pod=instancepod, severity=severity, message=message).set(1)
                     incident_cnt += 1
             except (KeyError, IndexError) as e:
-                logging.warning("Error processing incident element: %s", e)
+                logger.warning("Error processing incident element: %s", e)
         if incident_cnt == 0:
             gauges.incident_gauge.labels(pod=instancepod, severity='ok', message=None).set(0)
     except requests.RequestException as e:
-        logging.error("Error fetching incidents: %s", e)
+        logger.error("Error fetching incidents: %s", e)
         gauges.incident_gauge.clear()
 
 
@@ -305,7 +275,7 @@ def get_deployment_status(sf):
     """
     Get deployment related info from the org.
     """
-    logging.info("Getting deployment status...")
+    logger.info("Getting deployment status...")
     query = """SELECT Id, Status, StartDate, CreatedBy.Name, CreatedDate, CompletedDate, CheckOnly FROM DeployRequest WHERE CheckOnly = false ORDER BY CompletedDate DESC"""
 
     status_mapping = {'Succeeded': 1,'Failed': 0,'InProgress': 2, 'Canceled': -1}
@@ -335,7 +305,7 @@ def get_salesforce_ept_and_apt(sf):
     """
     Get EPT and APT data from the org.
     """
-    logging.info("Monitoring Salesforce EPT and APT data...")
+    logger.info("Monitoring Salesforce EPT and APT data...")
     # Query the Event Log Files for EPT data
     query = """SELECT EventType, LogDate, Id FROM EventLogFile WHERE Interval='Hourly' and EventType = 'LightningPageView' ORDER BY LogDate DESC LIMIT 1"""
     result = sf.query(query)
@@ -381,7 +351,7 @@ def monitor_login_events(sf):
     """
     Get login events from the org.
     """
-    logging.info("Monitoring login events...")
+    logger.info("Monitoring login events...")
     try:
         query = "SELECT Id, LogDate, Interval FROM EventLogFile WHERE EventType = 'Login' and Interval = 'Hourly' ORDER BY LogDate DESC"
         event_log_file = sf.query(query)
@@ -421,7 +391,7 @@ def geolocation(sf, chunk_size=100):
     """
     Get geolocation data from login events.
     """
-    logging.info("Getting geolocation data...")
+    logger.info("Getting geolocation data...")
     try:
         end_time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
         start_time = (datetime.now(timezone.utc) - timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -451,16 +421,16 @@ def geolocation(sf, chunk_size=100):
                 gauges.geolocation_gauge.labels(user=username, longitude=longitude, latitude=latitude, browser=browser, status=login_status).set(1)
 
     except KeyError as e:
-        logging.error("Key error: %s", e)
+        logger.error("Key error: %s", e)
     except Exception as e:
-        logging.error("Unexpected error: %s", e)
+        logger.error("Unexpected error: %s", e)
 
 
 def async_apex_job_status(sf):
     """
     Get async apex job status details from the org.
     """
-    logging.info("Getting Async Job status...")
+    logger.info("Getting Async Job status...")
     query = """
         SELECT Id, Status, JobType, ApexClassId, MethodName, NumberOfErrors FROM AsyncApexJob 
         WHERE CreatedDate = TODAY
@@ -504,11 +474,11 @@ def parse_logs(sf, log_query):
         return csv.DictReader(StringIO(log_content))
 
     except requests.RequestException as req_err:
-        logging.error("Request error occurred: %s", req_err)
+        logger.error("Request error occurred: %s", req_err)
     except csv.Error as csv_err:
-        logging.error("CSV processing error: %s", csv_err)
+        logger.error("CSV processing error: %s", csv_err)
     except Exception as e:
-        logging.error("An unexpected error occurred: %s", e)
+        logger.error("An unexpected error occurred: %s", e)
 
 
 def monitor_apex_execution(sf):
@@ -516,7 +486,7 @@ def monitor_apex_execution(sf):
     Get apex job execution details from the org
     and expose run_time, cpu_time, execution_time, database_time, callout_time etc details.
     """
-    logging.info("Getting Apex executions...")
+    logger.info("Getting Apex executions...")
     try:
         log_query = (
             "SELECT Id FROM EventLogFile WHERE EventType = 'ApexExecution' and Interval = 'Hourly' "
@@ -542,7 +512,7 @@ def monitor_apex_execution(sf):
             gauges.long_running_requests_metric.labels(entry_point=entry_point, quiddity=quiddity).set(is_long_running)
 
     except Exception as e:
-        logging.error("An unexpected error occurred: %s", e)
+        logger.error("An unexpected error occurred: %s", e)
 
 
 def expose_apex_exception_metrics(sf):
@@ -552,7 +522,7 @@ def expose_apex_exception_metrics(sf):
         request ID, exception type, message, stack trace, and category fields.
     2. Metric that counts the total number of exceptions for each exception category.
     """
-    logging.info("Getting Apex unexpected execeptions...")
+    logger.info("Getting Apex unexpected execeptions...")
     apex_unexpected_exception_query = (
         "SELECT Id FROM EventLogFile WHERE EventType = 'ApexUnexpectedException' and Interval = 'Hourly' "
         "ORDER BY LogDate DESC LIMIT 1")
@@ -580,18 +550,18 @@ def expose_apex_exception_metrics(sf):
             ).set(1)
 
         except KeyError as e:
-            logging.error("Missing expected key: %s. Record: %s", e, row)
+            logger.error("Missing expected key: %s. Record: %s", e, row)
         except TypeError as e:
-            logging.error("Type error encountered: %s. Record: %s", e, row)
+            logger.error("Type error encountered: %s. Record: %s", e, row)
         except Exception as e:
-            logging.error("Unexpected error: %s. Record: %s", e, row)
+            logger.error("Unexpected error: %s. Record: %s", e, row)
 
     try:
         # Expose the metrics for each exception category
         for category, count in exception_category_counts.items():
             gauges.apex_exception_category_count_gauge.labels(exception_category=category).set(count)
     except Exception as e:
-        logging.error("Error while exposing category count metrics: %s", e)
+        logger.error("Error while exposing category count metrics: %s", e)
 
 
 def get_user_name(sf, user_id):
@@ -603,7 +573,7 @@ def get_user_name(sf, user_id):
         result = sf.query(query, timeout=QUERY_TIMEOUT_SECONDS)
         return result['records'][0]['Name'] if result['records'] else 'Unknown User'
     except Exception as e:
-        logging.error("Error fetching user name for ID %s: %s", user_id, e)
+        logger.error("Error fetching user name for ID %s: %s", user_id, e)
         return 'Unknown User'
 
 
@@ -611,7 +581,7 @@ def hourly_observe_user_querying_large_records(sf):
     '''
     Observe user activity who querries more than 10k records
     '''
-    logging.info("Getting Compliance data - User details querying large records...")
+    logger.info("Getting Compliance data - User details querying large records...")
 
     try:
         log_query = (
@@ -647,7 +617,7 @@ def hourly_observe_user_querying_large_records(sf):
             ).set(count)
 
     except Exception as e:
-        logging.error("An error occurred: %s", e)
+        logger.error("An error occurred: %s", e)
 
 
 def main():
@@ -673,10 +643,10 @@ def main():
             expose_apex_exception_metrics(sf)
             hourly_observe_user_querying_large_records(sf)
         except Exception as e:
-            logging.error("An error occurred: %s", e)
-        logging.info('Sleeping for 5 minutes...')
+            logger.error("An error occurred: %s", e)
+        logger.info('Sleeping for 5 minutes...')
         time.sleep(300)
-        logging.info('Resuming...')
+        logger.info('Resuming...')
 
 
 if __name__ == '__main__':
