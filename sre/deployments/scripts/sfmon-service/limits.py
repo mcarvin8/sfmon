@@ -1,14 +1,14 @@
 """
-    Descriptions for Salesforce limits.
+    Descriptions for all Salesforce limits.
 """
 salesforce_limits_descriptions = {
     'ActiveScratchOrgs': 'Number of active scratch orgs in use.',
     'AnalyticsExternalDataSizeMB': 'Storage size used by external analytics data in MB.',
     'CdpAiInferenceApiMonthlyLimit': 'Monthly limit for CDP AI Inference API calls.',
     'ConcurrentAsyncGetReportInstances': 'Number of concurrent asynchronous report instances.',
-    'ConcurrentEinsteinDataInsightsStoryCreation':
+    'ConcurrentEinsteinDataInsightsStoryCreation': 
         'Concurrent creation limit for Einstein Data Insights stories.',
-    'ConcurrentEinsteinDiscoveryStoryCreation':
+    'ConcurrentEinsteinDiscoveryStoryCreation': 
         'Concurrent creation limit for Einstein Discovery stories.',
     'ConcurrentSyncReportRuns': 'Number of concurrent synchronous report runs.',
     'DailyAnalyticsDataflowJobExecutions': 'Daily limit for executing analytics dataflow jobs.',
@@ -17,21 +17,20 @@ salesforce_limits_descriptions = {
     'DailyAsyncApexExecutions': 'Daily limit for asynchronous Apex executions.',
     'DailyAsyncApexTests': 'Daily limit for asynchronous Apex test executions.',
     'DailyBulkApiBatches': 'Daily limit on bulk API batches.',
-    'DailyBulkV2QueryFileStorageMB':
+    'DailyBulkV2QueryFileStorageMB': 
         'Daily limit on storage size for Bulk API v2 query files in MB.',
     'DailyBulkV2QueryJobs': 'Daily limit on Bulk API v2 query jobs.',
     'DailyDeliveredPlatformEvents': 'Daily limit for delivered platform events.',
     'DailyDurableGenericStreamingApiEvents': 
         'Daily limit for durable generic streaming API events.',
-    'DailyDurableStreamingApiEvents':
-        'Daily limit for durable streaming API events.',
-    'DailyEinsteinDataInsightsStoryCreation':
+    'DailyDurableStreamingApiEvents': 'Daily limit for durable streaming API events.',
+    'DailyEinsteinDataInsightsStoryCreation': 
         'Daily limit for Einstein Data Insights story creation.',
-    'DailyEinsteinDiscoveryOptimizationJobRuns':
+    'DailyEinsteinDiscoveryOptimizationJobRuns': 
         'Daily limit for Einstein Discovery optimization job runs.',
-    'DailyEinsteinDiscoveryPredictAPICalls':
+    'DailyEinsteinDiscoveryPredictAPICalls': 
         'Daily limit for Einstein Discovery Predict API calls.',
-    'DailyEinsteinDiscoveryPredictionsByCDC':
+    'DailyEinsteinDiscoveryPredictionsByCDC': 
         'Daily limit for Einstein Discovery predictions by CDC.',
     'DailyEinsteinDiscoveryStoryCreation': 'Daily limit for Einstein Discovery story creation.',
     'DailyFunctionsApiCallLimit': 'Daily limit for Salesforce Functions API calls.',
@@ -53,7 +52,7 @@ salesforce_limits_descriptions = {
     'HourlyManagedContentPublicRequests': 'Hourly limit for managed content public requests.',
     'HourlyODataCallout': 'Hourly limit for OData callouts.',
     'HourlyPublishedPlatformEvents': 'Hourly limit for published platform events.',
-    'HourlyPublishedStandardVolumePlatformEvents':
+    'HourlyPublishedStandardVolumePlatformEvents': 
         'Hourly limit for published standard volume platform events.',
     'HourlyShortTermIdMapping': 'Hourly limit for short-term ID mapping.',
     'HourlySyncReportRuns': 'Hourly limit for synchronous report runs.',
@@ -62,10 +61,10 @@ salesforce_limits_descriptions = {
     'MonthlyEinsteinDiscoveryStoryCreation': 'Monthly limit for Einstein Discovery story creation.',
     'MonthlyPlatformEventsUsageEntitlement': 'Monthly limit for platform events usage.',
     'Package2VersionCreates': 'Limit for creating package versions.',
-    'Package2VersionCreatesWithoutValidation':
+    'Package2VersionCreatesWithoutValidation': 
         'Limit for creating package versions without validation.',
     'PermissionSets': 'Total number of permission sets allowed.',
-    'PrivateConnectOutboundCalloutHourlyLimitMB':
+    'PrivateConnectOutboundCalloutHourlyLimitMB': 
         'Hourly limit on Private Connect outbound callout data in MB.',
     'PublishCallbackUsageInApex': 'Limit for publish callback usage in Apex.',
     'SingleEmail': 'Daily limit for sending single emails.',

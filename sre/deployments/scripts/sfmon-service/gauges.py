@@ -15,6 +15,22 @@ api_usage_percentage_gauge = Gauge('salesforce_api_usage_percentage',
                                    ['limit_name', 'limit_description',
                                     'limit_utilized', 'max_limit'])
 
+daily_batch_count_metric = Gauge('daily_bulk_api_batch_count',
+                           'Count of batches by job_id, user_id, and entity_type', 
+                           ['job_id', 'user_id', 'entity_type', 'total_records_failed', 'total_records_processed'])
+
+daily_entity_type_count_metric = Gauge('daily_entity_type_count',
+                                'Counts of ENTITY_TYPE by user_id and OPERATION_TYPE',
+                                ['user_id', 'operation_type', 'entity_type'])
+
+hourly_batch_count_metric = Gauge('hourly_bulk_api_batch_count',
+                           'Count of batches by job_id, user_id, and entity_type', 
+                           ['job_id', 'user_id', 'entity_type', 'total_records_failed', 'total_records_processed'])
+
+hourly_entity_type_count_metric = Gauge('hourly_entity_type_count',
+                                'Counts of ENTITY_TYPE by user_id and OPERATION_TYPE',
+                                ['user_id', 'operation_type', 'entity_type'])
+
 total_user_licenses_gauge = Gauge('salesforce_total_user_licenses',
                                   TOTAL_LICENSES, ['license_name', 'status'])
 used_user_licenses_gauge = Gauge('salesforce_used_user_licenses',
@@ -48,7 +64,12 @@ percent_usage_based_entitlements_used_gauge = Gauge('salesforce_percent_used_usa
 
 incident_gauge = Gauge('salesforce_incidents',
                        'Number of active Salesforce incidents',
-                       ['pod', 'severity', 'message'])
+                       ['environment', 'pod', 'severity', 'message'])
+
+maintenance_gauge = Gauge('salesforce_maintenance', 'Ongoing or Planned Salesforce Maintenance',
+                          ['environment', 'maintenance_id', 'status',
+                           'planned_start_time', 'planned_end_time'])
+
 login_count_gauge = Gauge('salesforce_login_count',
                           'Number of logins',
                           ['geohash', 'latitude', 'longitude'])
@@ -73,12 +94,16 @@ ept_metric = Gauge('salesforce_experienced_page_time',
 
 apt_metric = Gauge('salesforce_average_page_time',
                    'Average Page Time (APT) in seconds',
-                   ['Page_name', 'Page_count'])
+                   ['Page_name'])
 
 login_success_gauge = Gauge('salesforce_login_success_total',
                             'Total number of successful Salesforce logins')
+
 login_failure_gauge = Gauge('salesforce_login_failure_total',
                             'Total number of failed Salesforce logins')
+
+unique_login_attempts_guage = Gauge('unique_login_count_total',
+                            'Total number of Unique Salesforce logins')
 
 geolocation_gauge = Gauge('user_location',
                           'Longitude and Latitude of user location',
@@ -103,14 +128,39 @@ db_total_time_metric = Gauge('salesforce_apex_db_total_time_seconds',
 callout_time_metric = Gauge('salesforce_apex_callout_time_seconds',
                             'Total callout time',
                             ['entry_point', 'quiddity'])
-long_running_requests_metric = Gauge('salesforce_apex_long_running_requests_total',
-                                     'Number of long-running requests',
-                                     ['entry_point', 'quiddity'])
+
+top_apex_concurrent_errors_sorted_by_avg_runtime = Gauge('most_apex_concurrent_errors_sorted_by_runtime',
+                                                         'Top Long Running Requests by Average Runtime with Runtime > 5 seconds',
+                                                         ['entry_point', 'count', 'avg_exec_time', 'avg_db_time'])
+
+top_apex_concurrent_errors_sorted_by_count = Gauge('most_apex_concurrent_errors_sorted_by_count',
+                                                         'Top Long Running Requests by Count with Runtime > 5 seconds',
+                                                         ['entry_point', 'avg_run_time', 'avg_exec_time', 'avg_db_time'])
+
+concurrent_errors_count_gauge =  Gauge('concurrent_request_error_count', 'Count of non-blank REQUEST_ID entries in CSV file', ['event_type'])
 
 apex_exception_details_gauge = Gauge('apex_exception_details',
                                      'Details of each Apex exception',
-                                     ['request_id', 'exception_category',
+                                     ['request_id', 'exception_category', 'timestamp',
                                       'exception_type', 'exception_message', 'stack_trace'])
 apex_exception_category_count_gauge = Gauge('apex_exception_category_count',
                                             'Total count of Apex exceptions by category',
                                             ['exception_category'])
+
+hourly_large_query_metric = Gauge('hourly_user_querying_large_records', 'Number of large queries by user',
+                           ['user_id', 'user_name', 'method', 'entity_name', 'rows_processed'])
+
+community_login_error_metric = Gauge('community_login_error_details', 'Details of SFDC logger entries', ['id', 'name', 'log_level', 'log_message', 'record_id', 'created_date'])
+
+community_registration_error_metric = Gauge('community_registration_error_details', 'Details of SFDC logger entries', ['id', 'name', 'source_name', 'log_level', 'log_message', 'callout_response', 'record_id', 'created_date'])
+
+# Define Prometheus metrics
+apex_entry_point_count = Gauge('apex_entry_point_count', 'Count of apex executions by entry point', ['entry_point', 'quiddity'])
+apex_avg_runtime = Gauge('apex_avg_runtime', 'Average runtime by entry point', ['entry_point', 'quiddity'])
+apex_max_runtime = Gauge('apex_max_runtime', 'Maximum runtime by entry point', ['entry_point', 'quiddity'])
+apex_total_runtime = Gauge('apex_total_runtime', 'Total runtime by entry point', ['entry_point', 'quiddity'])
+apex_avg_cputime = Gauge('apex_avg_cputime', 'Average CPU time by entry point', ['entry_point', 'quiddity'])
+apex_max_cputime = Gauge('apex_max_cputime', 'Maximum CPU time by entry point', ['entry_point', 'quiddity'])
+apex_runtime_gt_5s_count = Gauge('apex_runtime_gt_5s_count', 'Count of apex executions with runtime > 5s', ['entry_point', 'quiddity'])
+apex_runtime_gt_10s_count = Gauge('apex_runtime_gt_10s_count', 'Count of apex executions with runtime > 10s', ['entry_point', 'quiddity'])
+apex_runtime_gt_5s_percentage = Gauge('apex_runtime_gt_5s_percentage', 'Percentage of apex executions with runtime > 5s', ['entry_point', 'quiddity'])
