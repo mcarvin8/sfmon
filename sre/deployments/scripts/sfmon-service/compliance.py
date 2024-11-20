@@ -1,10 +1,10 @@
 """
     Compliance functions.
 """
-from constants import QUERY_TIMEOUT_SECONDS
+from constants import QUERY_TIMEOUT_SECONDS, EXCLUDE_USERS, ALLOWED_SECTIONS_ACTIONS
 from cloudwatch_logging import logger
 from log_parser import parse_logs
-from gauges import hourly_large_query_metric
+from gauges import hourly_large_query_metric, suspicious_records_gauge
 
 
 def get_user_name(sf, user_id):
@@ -61,3 +61,79 @@ def hourly_observe_user_querying_large_records(sf):
 
     except Exception as e:
         logger.error("An error occurred in hourly_observe_user_querying_large_records : %s", e)
+
+
+def build_audit_trail_query(excluded_user_list):
+    """Build the Salesforce audit trail query string."""
+
+    base_query = """
+        SELECT Action, Section, CreatedById, CreatedBy.Name, 
+               CreatedDate, Display, DelegateUser 
+        FROM SetupAuditTrail 
+        WHERE CreatedDate=YESTERDAY
+    """
+
+    if excluded_user_list:
+        excluded_users = "', '".join(excluded_user_list)
+        base_query += f" AND CreatedBy.Name NOT IN ('{excluded_users}')"
+
+    return f"{base_query} ORDER BY CreatedDate DESC"
+
+
+def extract_record_data(record):
+    """Extract and normalize record data."""
+    return {
+        'action': record.get('Action', 'Unknown'),
+        'section': record.get('Section', 'Unknown'),
+        'user': (record.get('CreatedBy', {}).get('Name', 'Unknown') 
+                if isinstance(record.get('CreatedBy'), dict) else 'Unknown'),
+        'created_date': record.get('CreatedDate', 'Unknown'),
+        'display': record.get('Display', 'Unknown'),
+        'delegate_user': record.get('DelegateUser', 'Unknown')
+    }
+
+
+def expose_record_metric(record_data):
+    """Expose the record data as a metric."""
+    suspicious_records_gauge.labels(**record_data).set(1)
+
+
+def process_suspicious_records(records):
+    """Process records of audit trail logs."""
+    for record in records:
+        if not is_allowed_action(record):
+            record_data = extract_record_data(record)
+            expose_record_metric(record_data)
+
+
+def is_allowed_action(record):
+    """Determines if particular action is allowed based on predefined allowed actions"""
+
+    action = record.get('Action', 'Unknown')
+    section = record.get('Section', 'Unknown')
+    user = record.get('CreatedBy', {}).get('Name', 'Unknown') if isinstance(record.get('CreatedBy'), dict) else 'Unknown'
+
+    if user in EXCLUDE_USERS:
+        return True
+
+    allowed_actions = ALLOWED_SECTIONS_ACTIONS.get(section, [])
+    return action.lower() in [a.lower() for a in allowed_actions]
+
+
+def expose_suspicious_records(sf):
+    '''
+    monitor Audit Trail logs and expose non-compliant change record
+    '''
+
+    logger.info("Getting Audit Trail logs...")
+
+    try:
+        suspicious_records_gauge.clear()
+
+        audittrail_query = build_audit_trail_query(EXCLUDE_USERS)
+        result = sf.query(audittrail_query, timeout=QUERY_TIMEOUT_SECONDS)
+
+        process_suspicious_records(result.get('records', []))
+
+    except Exception as e:
+        logger.error("An unexpected error occurred during monitoring suspicious records: %s", e)

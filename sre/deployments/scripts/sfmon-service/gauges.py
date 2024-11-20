@@ -164,3 +164,20 @@ apex_max_cputime = Gauge('apex_max_cputime', 'Maximum CPU time by entry point', 
 apex_runtime_gt_5s_count = Gauge('apex_runtime_gt_5s_count', 'Count of apex executions with runtime > 5s', ['entry_point', 'quiddity'])
 apex_runtime_gt_10s_count = Gauge('apex_runtime_gt_10s_count', 'Count of apex executions with runtime > 10s', ['entry_point', 'quiddity'])
 apex_runtime_gt_5s_percentage = Gauge('apex_runtime_gt_5s_percentage', 'Percentage of apex executions with runtime > 5s', ['entry_point', 'quiddity'])
+
+org_wide_sharing__setting_changes = Gauge('org_wide_sharing_changes', 'Track changes in Org-Wide Sharing Settings', ['date', 'user', 'action', 'display'])
+
+hourly_report_export_metric = Gauge('hourly_report_export', 'Report export details',
+                           ['user_name', 'timestamp', 'report_name', 'report_type_api_name'])
+
+suspicious_records_gauge = Gauge(
+    'suspicious_records','suspicious records from Audit Trail logs',
+    ['action', 'section', 'user', 'created_date', 'display', 'delegate_user'])
+
+payment_method_status_gauge = Gauge('payment_method_status', 'Payment Methods Status',
+                                    ['billing_active_status', 'billing_autopay_status', 'billing_payment_gateway_name',
+                                    'payment_gateway_token', 'payment_method_id', 'payment_method_name', 'user_name', 'last_modified_date'])
+
+payment_gateway_status_gauge = Gauge('payment_gateway_status', 'Payment Gateways Status',
+                                    ['billing_active_status', 'billing_default_status', 'billing_gateway_type',
+                                    'payment_gateway_name', 'record_id', 'user_name', 'last_modified_date'])

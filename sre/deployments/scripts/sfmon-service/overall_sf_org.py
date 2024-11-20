@@ -110,18 +110,20 @@ def get_salesforce_licenses(sf):
                                 license_name, days_until_expiration)
 
 
-def get_salesforce_instance(sf):
+def get_salesforce_instance(sf, sf_fqa):
     """
     Get instance info for the org.
     """
     logger.info("Getting Salesforce instance info...")
     prod_org_result = sf.query_all("Select FIELDS(ALL) From Organization LIMIT 1")
     prod_pod = prod_org_result['records'][0]['InstanceName']
+    fqa_org_result = sf_fqa.query_all("Select FIELDS(ALL) From Organization LIMIT 1")
+    fqa_pod = fqa_org_result['records'][0]['InstanceName']
     gauges.incident_gauge.clear()
 
     pod_map = {
         "Production": prod_pod,
-        "FullQA": "USA654S",
+        "FullQA": fqa_pod,
         "Dev": "USA662S"
     }
 

@@ -18,7 +18,7 @@ The `docker-login` folder can be used to login to the Elastic Container Registry
 
 The ECS service depends on a Docker container image published to the ECR. This container image contains the required Python and Salesforce dependencies such as the Salesforce CLI. The container image runs a Python script when launched which connects to the desired Salesforce org and collects the required metrics for monitoring.
 
-The Python script looks for an environment variable named `SALESFORCE_AUTH_URL` containing the Force Auth URL for your org. I recommend creating a new Monitoring user profile in your Salesforce org solely for the purpose of this service. The `SALESFORCE_AUTH_URL` is added to the Docker container as a Docker build argument, but you could update this if you want to store this Auth URL in an AWS Secrets Manager. 
+The Python script looks for environment variables named `PRODUCTION_AUTH_URL` and `FULLQA_AUTH_URL` containing the Force Auth URLS for your production org and Full QA/UAT org. I recommend creating a new Monitoring user profile in your Salesforce org solely for the purpose of this service. The Auth URLs are added to the Docker containers as a Docker build arguments, but you could update this if you want to store this Auth URL in an AWS Secrets Manager. 
 
 You must deploy the following infrastructure to use SFMon:
 1. Monitoring ECS Cluster (or use a pre-existing ECS cluster if you'd like)

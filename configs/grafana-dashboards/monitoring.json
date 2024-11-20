@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 4222,
+  "id": 4381,
   "links": [],
   "panels": [
     {
@@ -29,7 +29,7 @@
       "description": "",
       "gridPos": {
         "h": 3,
-        "w": 3,
+        "w": 7,
         "x": 0,
         "y": 0
       },
@@ -40,11 +40,65 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "Data refreshes every 5 minutes",
+        "content": "The panels will update on different intervals. \r\nPlease see [Data Refresh Intervals](https://avalara.atlassian.net/wiki/spaces/AVATECH/pages/638415603972/Salesforce+Monitoring#Data-Refresh-Intervals) for more details.",
         "mode": "markdown"
       },
       "pluginVersion": "10.4.1",
       "title": "Data Refresh Interval",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "o7MvocN7k"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 7,
+        "y": 0
+      },
+      "id": 65,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "[Salesforce Monitoring](https://avalara.atlassian.net/wiki/spaces/AVATECH/pages/638415603972/Salesforce+Monitoring)",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.4.1",
+      "title": "Wiki Page",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "o7MvocN7k"
+      },
+      "description": "Source Code Management repository.",
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 10,
+        "y": 0
+      },
+      "id": 28,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "[Salesforce Monitoring](https://scm.platform.us-west-2.avalara.io/it-crm/salesforce-monitoring)",
+        "mode": "markdown"
+      },
+      "pluginVersion": "10.4.1",
+      "title": "SCM Link",
       "transparent": true,
       "type": "text"
     },
@@ -149,7 +203,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max_over_time(salesforce_incidents[5m])",
+          "expr": "max by(environment) (max_over_time(salesforce_incidents[5m]))",
           "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -196,10 +250,17 @@
         "for": "5m",
         "frequency": "1m",
         "handler": 1,
-        "message": "ALERT: A Salesforce Incident has been opened",
+        "message": "<!channel> ALERT: A Salesforce Incident has been opened against ${environment}\n\nDashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1",
         "name": "Salesforce Incidents Alert",
         "noDataState": "keep_state",
-        "notifications": []
+        "notifications": [
+          {
+            "uid": "it-crm-prd-opsgenie"
+          },
+          {
+            "uid": "it-crm-prd-slack"
+          }
+        ]
       },
       "datasource": {
         "type": "prometheus",
@@ -292,7 +353,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max_over_time(salesforce_incidents[5m])",
+          "expr": "max by(environment) (max_over_time(salesforce_incidents[5m]))",
           "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -395,7 +456,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "max by(pod, severity, message) (max_over_time(salesforce_incidents[5m]))",
+          "expr": "max by(pod, severity, message, environment) (max_over_time(salesforce_incidents[5m]))",
           "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -418,6 +479,106 @@
             "indexByName": {},
             "renameByName": {
               "Time": "",
+              "environment": "Environment",
+              "message": "Incident Message",
+              "pod": "POD Instance",
+              "severity": "Severity"
+            }
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "o7MvocN7k"
+      },
+      "description": "Maintenance event details against each Salesforce org.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "color-text"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "displayName": "Time",
+          "fieldMinMax": false,
+          "mappings": [],
+          "noValue": "No Salesforce maintenance events are currently scheduled for Production, FullQA, or Dev.",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 35
+      },
+      "id": 73,
+      "interval": "1800",
+      "options": {
+        "cellHeight": "md",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "count"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.4.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "max by(pod, severity, message, environment) (max_over_time(salesforce_maintenance[5m]))",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Maintenance details",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Value": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "Time": "",
+              "environment": "Environment",
               "message": "Incident Message",
               "pod": "POD Instance",
               "severity": "Severity"
@@ -434,7 +595,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 35
+        "y": 43
       },
       "id": 24,
       "panels": [],
@@ -479,7 +640,7 @@
         "h": 16,
         "w": 24,
         "x": 0,
-        "y": 36
+        "y": 44
       },
       "id": 1,
       "interval": "15s",
@@ -509,9 +670,9 @@
             "uid": "o7MvocN7k"
           },
           "disableTextWrap": false,
-          "editorMode": "code",
+          "editorMode": "builder",
           "exemplar": false,
-          "expr": "avg by(limit_name) (avg_over_time(salesforce_api_usage_percentage[5m])) > 0",
+          "expr": "sort_desc(avg by(limit_name) (avg_over_time(salesforce_api_usage_percentage[5m])) > 0)",
           "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
@@ -570,10 +731,17 @@
         "for": "5m",
         "frequency": "1m",
         "handler": 1,
-        "message": "ALERT: Salesforce API usage is over 90% for ${limit_name}",
+        "message": "<!channel> ALERT: Salesforce API usage is over 90% for ${limit_name}\n\nDashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1",
         "name": "Salesforce API Usage % Alert",
         "noDataState": "keep_state",
-        "notifications": []
+        "notifications": [
+          {
+            "uid": "it-crm-prd-opsgenie"
+          },
+          {
+            "uid": "it-crm-prd-slack"
+          }
+        ]
       },
       "datasource": {
         "type": "prometheus",
@@ -645,7 +813,7 @@
         "h": 16,
         "w": 24,
         "x": 0,
-        "y": 52
+        "y": 60
       },
       "id": 10,
       "options": {
@@ -698,7 +866,731 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 68
+        "y": 76
+      },
+      "id": 97,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Monitor Default and Active billing fields for CyberSource (CC) and CyberSource (ACH) payment gateways",
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 4,
+            "x": 0,
+            "y": 77
+          },
+          "id": 93,
+          "interval": "5m",
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "text": {},
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "payment_gateway_status",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Check Payment Gateway status",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "alert": {
+            "alertRuleTags": {},
+            "conditions": [
+              {
+                "evaluator": {
+                  "params": [
+                    0
+                  ],
+                  "type": "gt"
+                },
+                "operator": {
+                  "type": "and"
+                },
+                "query": {
+                  "params": [
+                    "A",
+                    "5m",
+                    "now"
+                  ]
+                },
+                "reducer": {
+                  "params": [],
+                  "type": "max"
+                },
+                "type": "query"
+              }
+            ],
+            "executionErrorState": "keep_state",
+            "for": "5m",
+            "frequency": "1m",
+            "handler": 1,
+            "message": "<!channel> ALERT: Payment Gateway status changed in FullQA\n\nPlease review details under section \"Observe Payment Gateway Status change for FullQA\" on Dashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1\n\nuser_name: {{ .CommonLabels.user_name }}\npayment_gateway_name: {{ .CommonLabels.payment_gateway_name }}\nrecord_id: https://avalara--fullqa.sandbox.lightning.force.com/lightning/r/blng__PaymentMethod__c/{{ .CommonLabels.record_id }}/view",
+            "name": "Salesforce Payment Gateway status change alert",
+            "noDataState": "ok",
+            "notifications": [
+              {
+                "uid": "it-crm-prd-opsgenie"
+              },
+              {
+                "uid": "it-crm-prd-slack"
+              }
+            ]
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Monitor Default and Active billing fields for CyberSource (CC) and CyberSource (ACH) payment gateways.\nFields must be 'false' at any time.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "fieldMinMax": false,
+              "links": [],
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "dark-red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 10,
+            "x": 4,
+            "y": 77
+          },
+          "id": 96,
+          "interval": "5m",
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "payment_gateway_status",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "thresholds": [
+            {
+              "colorMode": "critical",
+              "op": "gt",
+              "value": 0,
+              "visible": true
+            }
+          ],
+          "title": "Payment Method using Valid Payment Gayeways in FullQA",
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "alert": {
+            "alertRuleTags": {},
+            "conditions": [
+              {
+                "evaluator": {
+                  "params": [
+                    0
+                  ],
+                  "type": "gt"
+                },
+                "operator": {
+                  "type": "and"
+                },
+                "query": {
+                  "params": [
+                    "A",
+                    "5m",
+                    "now"
+                  ]
+                },
+                "reducer": {
+                  "params": [],
+                  "type": "max"
+                },
+                "type": "query"
+              }
+            ],
+            "executionErrorState": "keep_state",
+            "for": "5m",
+            "frequency": "1m",
+            "handler": 1,
+            "message": "<!channel> ALERT: Active Billing field for Payment method changed in FullQA\n\nPlease review details under section \"Observe Payment Gateway Status change for FullQA\" on Dashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1\n\nuser_name: {{ .CommonLabels.user_name }}\ngateway_name : {{ .CommonLabels.billing_payment_gateway_name}}\npayment_method_name : {{ .CommonLabels.payment_method_name}}\nrecord_id: https://avalara--fullqa.sandbox.lightning.force.com/lightning/r/blng__PaymentMethod__c/{{ .CommonLabels.record_id }}/view",
+            "name": "Salesforce Alert for Active Billing Payment Methods in FullQA",
+            "noDataState": "ok",
+            "notifications": [
+              {
+                "uid": "it-crm-prd-opsgenie"
+              },
+              {
+                "uid": "it-crm-prd-slack"
+              }
+            ]
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Monitor Active billing field for payment methods in FullQA.\nActive billing field must be 'false' at any time.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "fieldMinMax": false,
+              "links": [],
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "dark-red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 10,
+            "x": 14,
+            "y": 77
+          },
+          "id": 98,
+          "interval": "5m",
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "payment_method_status",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "thresholds": [
+            {
+              "colorMode": "critical",
+              "op": "gt",
+              "value": 0,
+              "visible": true
+            }
+          ],
+          "title": "Payment Method where Active billing is True ",
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Payment Gateway status change details",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "displayName": "Time",
+              "fieldMinMax": false,
+              "mappings": [
+                {
+                  "options": {
+                    "True": {
+                      "color": "red",
+                      "index": 0
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "noValue": "No change in Payment Gateway status",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Record Id"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "${__data.fields[\"Method Id\"]}",
+                        "url": "https://avalara--fullqa.sandbox.lightning.force.com/lightning/r/blng__PaymentMethod__c/${__data.fields[\"Method Id\"]}/view"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 85
+          },
+          "id": 99,
+          "interval": "10m",
+          "options": {
+            "cellHeight": "md",
+            "footer": {
+              "countRows": true,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Last modified Date"
+              }
+            ]
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "label_replace(count by(billing_active_status, billing_default_status, billing_gateway_type, payment_gateway_name, record_id, user_name, last_modified_date) (payment_gateway_status{billing_active_status!=\"N/A\"}), \"last_modified_date\", \"$1\", \"last_modified_date\", \"(.+)\\\\.[0-9]+\\\\+[0-9]+\")",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Details of Payment method using valid payment gateway",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "created_date": false
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 8,
+                  "billing_active_status": 3,
+                  "billing_autopay_status": 4,
+                  "last_modified_date": 1,
+                  "payment_gateway_token": 5,
+                  "payment_method_id": 6,
+                  "payment_method_name": 7,
+                  "user_name": 2
+                },
+                "renameByName": {
+                  "Time": "",
+                  "Value": "",
+                  "billing_active_status": "Billing Active Status",
+                  "billing_autopay_status": "Billing Autopay Status",
+                  "billing_default_status": "Billing Default Status",
+                  "billing_gateway_type": "Gateway type",
+                  "environment": "Environment",
+                  "last_modified_date": "Last modified Date",
+                  "message": "Incident Message",
+                  "payment_gateway_name": "gateway Name",
+                  "payment_gateway_token": "Gateway Token",
+                  "payment_method_id": "Method Id",
+                  "payment_method_name": "Method Name",
+                  "pod": "POD Instance",
+                  "record_id": "Record Id",
+                  "severity": "Severity",
+                  "user_name": "User"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Monitor records if Active billing is True for Payment methods.\nActive billing must be False at any time.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "displayName": "Time",
+              "fieldMinMax": false,
+              "mappings": [
+                {
+                  "options": {
+                    "True": {
+                      "color": "red",
+                      "index": 0
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "noValue": "No change in Payment Gateway status",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Method Id"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "${__data.fields[\"Method Id\"]}",
+                        "url": "https://avalara--fullqa.sandbox.lightning.force.com/lightning/r/blng__PaymentMethod__c/${__data.fields[\"Method Id\"]}/view"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 93
+          },
+          "id": 95,
+          "interval": "10m",
+          "options": {
+            "cellHeight": "md",
+            "footer": {
+              "countRows": true,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Last modified Date"
+              }
+            ]
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "label_replace(count by(billing_active_status, billing_autopay_status, billing_payment_gateway_name, payment_gateway_token, payment_method_id, payment_method_name, user_name, last_modified_date) (payment_method_status{billing_active_status!=\"N/A\"}), \"last_modified_date\", \"$1\", \"last_modified_date\", \"(.+)\\\\.[0-9]+\\\\+[0-9]+\")",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Active billing Payment Method Status Overview",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "created_date": false,
+                  "payment_gateway_token": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 9,
+                  "billing_active_status": 3,
+                  "billing_autopay_status": 4,
+                  "billing_payment_gateway_name": 5,
+                  "last_modified_date": 1,
+                  "payment_gateway_token": 6,
+                  "payment_method_id": 7,
+                  "payment_method_name": 8,
+                  "user_name": 2
+                },
+                "renameByName": {
+                  "Time": "",
+                  "Value": "",
+                  "billing_active_status": "Billing Active Status",
+                  "billing_autopay_status": "Billing Autopay Status",
+                  "billing_payment_gateway_name": "Payment Gateway Name",
+                  "environment": "Environment",
+                  "last_modified_date": "Last modified Date",
+                  "message": "Incident Message",
+                  "payment_gateway_token": "Gateway Token",
+                  "payment_method_id": "Method Id",
+                  "payment_method_name": "Method Name",
+                  "pod": "POD Instance",
+                  "severity": "Severity",
+                  "user_name": "User"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        }
+      ],
+      "title": "Full QA - Payment Gateway and Method Status",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 77
       },
       "id": 63,
       "panels": [
@@ -734,7 +1626,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 69
+            "y": 85
           },
           "id": 64,
           "interval": "15s",
@@ -851,7 +1743,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 75
+            "y": 91
           },
           "id": 61,
           "interval": "1800",
@@ -1012,7 +1904,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 84
+            "y": 100
           },
           "id": 62,
           "interval": "1800",
@@ -1122,7 +2014,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 69
+        "y": 78
       },
       "id": 48,
       "panels": [
@@ -1194,7 +2086,7 @@
             "h": 14,
             "w": 7,
             "x": 0,
-            "y": 70
+            "y": 86
           },
           "id": 4,
           "interval": "1800",
@@ -1284,7 +2176,7 @@
             "h": 14,
             "w": 17,
             "x": 7,
-            "y": 70
+            "y": 86
           },
           "id": 27,
           "interval": "1800",
@@ -1448,7 +2340,7 @@
             "h": 14,
             "w": 7,
             "x": 0,
-            "y": 84
+            "y": 100
           },
           "id": 50,
           "interval": "1800",
@@ -1538,7 +2430,7 @@
             "h": 14,
             "w": 17,
             "x": 7,
-            "y": 84
+            "y": 100
           },
           "id": 51,
           "interval": "1800",
@@ -1700,7 +2592,7 @@
             "h": 14,
             "w": 7,
             "x": 0,
-            "y": 98
+            "y": 114
           },
           "id": 8,
           "interval": "5m",
@@ -1790,7 +2682,7 @@
             "h": 14,
             "w": 17,
             "x": 7,
-            "y": 98
+            "y": 114
           },
           "id": 52,
           "interval": "1800",
@@ -1878,7 +2770,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 70
+        "y": 79
       },
       "id": 34,
       "panels": [
@@ -1936,7 +2828,8 @@
                     "color": "green"
                   }
                 ]
-              }
+              },
+              "unit": "none"
             },
             "overrides": []
           },
@@ -1944,7 +2837,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 123
+            "y": 87
           },
           "id": 29,
           "interval": "1800",
@@ -2007,7 +2900,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 123
+            "y": 87
           },
           "id": 30,
           "interval": "1800",
@@ -2112,7 +3005,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 133
+            "y": 97
           },
           "id": 33,
           "interval": "1800",
@@ -2207,7 +3100,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 133
+            "y": 97
           },
           "id": 32,
           "interval": "1800",
@@ -2297,7 +3190,7 @@
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "ms"
             },
             "overrides": []
           },
@@ -2305,7 +3198,7 @@
             "h": 12,
             "w": 24,
             "x": 0,
-            "y": 145
+            "y": 109
           },
           "id": 35,
           "interval": "1800",
@@ -2398,7 +3291,7 @@
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "ms"
             },
             "overrides": []
           },
@@ -2406,7 +3299,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 157
+            "y": 121
           },
           "id": 36,
           "interval": "1800",
@@ -2636,7 +3529,7 @@
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "ms"
             },
             "overrides": []
           },
@@ -2644,7 +3537,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 157
+            "y": 121
           },
           "id": 37,
           "interval": "1800",
@@ -2874,7 +3767,7 @@
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "ms"
             },
             "overrides": []
           },
@@ -2882,7 +3775,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 169
+            "y": 133
           },
           "id": 38,
           "interval": "1800",
@@ -3112,7 +4005,7 @@
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "ms"
             },
             "overrides": []
           },
@@ -3120,7 +4013,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 169
+            "y": 133
           },
           "id": 39,
           "interval": "1800",
@@ -3350,7 +4243,7 @@
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "ms"
             },
             "overrides": []
           },
@@ -3358,7 +4251,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 181
+            "y": 145
           },
           "id": 40,
           "interval": "1800",
@@ -3588,7 +4481,7 @@
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "ms"
             },
             "overrides": []
           },
@@ -3596,7 +4489,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 181
+            "y": 145
           },
           "id": 41,
           "interval": "1800",
@@ -3826,7 +4719,7 @@
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "ms"
             },
             "overrides": []
           },
@@ -3834,7 +4727,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 193
+            "y": 157
           },
           "id": 42,
           "options": {
@@ -4063,7 +4956,7 @@
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "ms"
             },
             "overrides": []
           },
@@ -4071,7 +4964,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 193
+            "y": 157
           },
           "id": 43,
           "interval": "1800",
@@ -4301,7 +5194,7 @@
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "ms"
             },
             "overrides": []
           },
@@ -4309,7 +5202,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 205
+            "y": 169
           },
           "id": 44,
           "options": {
@@ -4538,7 +5431,7 @@
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "ms"
             },
             "overrides": []
           },
@@ -4546,7 +5439,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 205
+            "y": 169
           },
           "id": 45,
           "options": {
@@ -4816,7 +5709,7 @@
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "ms"
             },
             "overrides": []
           },
@@ -4824,7 +5717,7 @@
             "h": 13,
             "w": 12,
             "x": 0,
-            "y": 217
+            "y": 181
           },
           "id": 46,
           "interval": "1800",
@@ -5043,7 +5936,7 @@
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "ms"
             },
             "overrides": []
           },
@@ -5051,7 +5944,7 @@
             "h": 13,
             "w": 12,
             "x": 12,
-            "y": 217
+            "y": 181
           },
           "id": 47,
           "interval": "1800",
@@ -5196,9 +6089,197 @@
           "description": "Experienced Page Time (EPT) for 'LightningPageView'.",
           "fieldConfig": {
             "defaults": {
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 5,
+            "x": 0,
+            "y": 194
+          },
+          "id": 76,
+          "interval": "30m",
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by (BROWSER_NAME) (salesforce_experienced_page_time{PAGE_APP_NAME=\"$page_app_name\"})",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "includeNullMetadata": false,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "EPT for Page App : $page_app_name listed by Browser",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Experienced Page Time (EPT) for 'LightningPageView'.",
+          "fieldConfig": {
+            "defaults": {
               "color": {
                 "mode": "thresholds",
-                "seriesBy": "last"
+                "seriesBy": "max"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 70
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 9,
+            "x": 5,
+            "y": 194
+          },
+          "id": 74,
+          "interval": "30m",
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg(salesforce_experienced_page_time{PAGE_APP_NAME=\"$page_app_name\"}) by (EFFECTIVE_PAGE_TIME_DEVIATION_REASON)",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "includeNullMetadata": false,
+              "instant": false,
+              "legendFormat": "{{EFFECTIVE_PAGE_TIME_DEVIATION_REASON}}",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "EPT for Page App : $page_app_name listed by Deviation reason",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Experienced Page Time (EPT) for 'LightningPageView'.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "green",
+                "mode": "thresholds",
+                "seriesBy": "max"
               },
               "custom": {
                 "axisBorderShow": false,
@@ -5256,18 +6337,18 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 16,
-            "w": 24,
-            "x": 0,
-            "y": 230
+            "h": 12,
+            "w": 10,
+            "x": 14,
+            "y": 194
           },
-          "id": 14,
+          "id": 77,
           "interval": "30m",
           "options": {
             "legend": {
               "calcs": [],
               "displayMode": "list",
-              "placement": "right",
+              "placement": "bottom",
               "showLegend": true
             },
             "tooltip": {
@@ -5283,9 +6364,9 @@
                 "uid": "o7MvocN7k"
               },
               "disableTextWrap": false,
-              "editorMode": "builder",
+              "editorMode": "code",
               "exemplar": false,
-              "expr": "salesforce_experienced_page_time{PAGE_APP_NAME='LightningSales'} and {PAGE_ENTITY_TYPE='Account'}",
+              "expr": "avg by (PAGE_APP_NAME) (avg_over_time(salesforce_experienced_page_time[30m]))",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": false,
@@ -5296,7 +6377,7 @@
               "useBackend": false
             }
           ],
-          "title": "Experienced Page Time (EPT)",
+          "title": "EPT for Page App : $page_app_name listed by Page APP Name",
           "type": "timeseries"
         },
         {
@@ -5307,20 +6388,92 @@
           "description": "The average time users spend on a specific page across all sessions",
           "fieldConfig": {
             "defaults": {
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 13,
+            "w": 5,
+            "x": 0,
+            "y": 206
+          },
+          "id": 59,
+          "interval": "300",
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "salesforce_average_page_time{Page_name='$page_app_name'}",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "includeNullMetadata": false,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Average Page Time (APT) for $page_app_name",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Experienced Page Time (EPT) for 'LightningPageView'.",
+          "fieldConfig": {
+            "defaults": {
               "color": {
                 "mode": "thresholds",
-                "seriesBy": "last"
+                "seriesBy": "max"
               },
               "custom": {
                 "axisBorderShow": false,
                 "axisCenteredZero": false,
-                "axisColorMode": "series",
-                "axisGridShow": false,
+                "axisColorMode": "text",
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
                 "drawStyle": "line",
-                "fillOpacity": 0,
+                "fillOpacity": 10,
                 "gradientMode": "none",
                 "hideFrom": {
                   "legend": false,
@@ -5329,14 +6482,10 @@
                 },
                 "insertNulls": false,
                 "lineInterpolation": "linear",
-                "lineStyle": {
-                  "fill": "solid"
-                },
                 "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
-                  "log": 2,
-                  "type": "log"
+                  "type": "linear"
                 },
                 "showPoints": "auto",
                 "spanNulls": false,
@@ -5372,17 +6521,17 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 16,
-            "w": 24,
-            "x": 0,
-            "y": 246
+            "h": 13,
+            "w": 19,
+            "x": 5,
+            "y": 206
           },
-          "id": 59,
-          "interval": "300",
+          "id": 75,
+          "interval": "30m",
           "options": {
             "legend": {
               "calcs": [],
-              "displayMode": "table",
+              "displayMode": "list",
               "placement": "right",
               "showLegend": true
             },
@@ -5399,21 +6548,427 @@
                 "uid": "o7MvocN7k"
               },
               "disableTextWrap": false,
-              "editorMode": "code",
+              "editorMode": "builder",
               "exemplar": false,
-              "expr": "max by (Page_name) (max_over_time(salesforce_average_page_time[5m]))",
+              "expr": "avg by(PAGE_APP_NAME, PAGE_ENTITY_TYPE) (salesforce_experienced_page_time{PAGE_APP_NAME=\"$page_app_name\"})",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": false,
               "instant": false,
-              "legendFormat": "__auto",
+              "legendFormat": " {{PAGE_ENTITY_TYPE}}",
               "range": true,
               "refId": "A",
               "useBackend": false
             }
           ],
-          "title": "Average Page Time (APT)",
+          "title": "EPT for Page App : '$page_app_name' listed by Entity type",
           "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-GrYlRd"
+              },
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 60
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Time"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 162
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Entry Point"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 394
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Quiddity"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 98
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "EntryPoint counts"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 162
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg Runtime"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 110
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Max Runtime"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 124
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Total Runtime"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 134
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg CPUtime"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 131
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg Runtime"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Max Runtime"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Total Runtime"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg CPUtime"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Max CPUtime"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 134
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "% of Runtime > 5"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percent"
+                  },
+                  {
+                    "id": "color"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 15,
+            "w": 24,
+            "x": 0,
+            "y": 219
+          },
+          "id": 83,
+          "interval": "1h",
+          "options": {
+            "cellHeight": "md",
+            "footer": {
+              "countRows": true,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "frameIndex": 0,
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "sum(apex_entry_point_count) by (entry_point, quiddity)",
+              "format": "table",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "sum(apex_avg_runtime) by (entry_point, quiddity)",
+              "format": "table",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "sum(apex_max_runtime) by (entry_point, quiddity)",
+              "format": "table",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "sum(apex_total_runtime) by (entry_point, quiddity)",
+              "format": "table",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "sum(apex_avg_cputime) by (entry_point, quiddity)",
+              "format": "table",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "E"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "sum(apex_max_cputime) by (entry_point, quiddity)",
+              "format": "table",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "F"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "sum(apex_runtime_gt_5s_count) by (entry_point, quiddity)",
+              "format": "table",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "G"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "sum(apex_runtime_gt_5s_percentage) by (entry_point, quiddity)",
+              "format": "table",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "H"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "sum(apex_runtime_gt_10s_count) by (entry_point, quiddity)",
+              "format": "table",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "I"
+            }
+          ],
+          "title": "async_apex_execution_summary",
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {},
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "Value #A": "EntryPoint counts",
+                  "Value #B": "Avg Runtime",
+                  "Value #C": "Max Runtime",
+                  "Value #D": "Total Runtime",
+                  "Value #E": "Avg CPUtime",
+                  "Value #F": "Max CPUtime",
+                  "Value #G": "Count of Runtime > 5",
+                  "Value #H": "% of Runtime > 5",
+                  "Value #I": "Count of Runtime > 10",
+                  "entry_point": "Entry Point",
+                  "quiddity": "Quiddity"
+                }
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "desc": true,
+                    "field": "Max Runtime"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "limit",
+              "options": {}
+            }
+          ],
+          "type": "table"
         }
       ],
       "title": "Performance",
@@ -5425,7 +6980,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 71
+        "y": 80
       },
       "id": 49,
       "panels": [
@@ -5457,7 +7012,7 @@
             "h": 13,
             "w": 24,
             "x": 0,
-            "y": 72
+            "y": 96
           },
           "id": 53,
           "options": {
@@ -5561,7 +7116,7 @@
             "h": 14,
             "w": 24,
             "x": 0,
-            "y": 85
+            "y": 109
           },
           "id": 55,
           "options": {
@@ -5587,10 +7142,26 @@
               "exemplar": false,
               "expr": "max by (exception_category) (max_over_time(apex_exception_category_count[5m]))",
               "format": "time_series",
+              "hide": false,
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "count by (exception_category) (count_over_time(apex_exception_details{exception_message=~\".*UNABLE_TO_LOCK_ROW.*\"}[5m]))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{exception_category}} : RowLock",
+              "range": true,
+              "refId": "B"
             }
           ],
           "title": "Total Apex exceptions occurred in last 1hr",
@@ -5669,10 +7240,10 @@
             "h": 12,
             "w": 24,
             "x": 0,
-            "y": 99
+            "y": 123
           },
           "id": 56,
-          "interval": "1800",
+          "interval": "3600",
           "options": {
             "cellHeight": "md",
             "footer": {
@@ -5701,7 +7272,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "max by (exception_category, exception_type, exception_message, stack_trace) (max_over_time(apex_exception_details{exception_message=~\".*Apex CPU time limit exceeded.*\"}[5m]))",
+              "expr": "count by (exception_category, exception_type, exception_message, stack_trace) (count_over_time(apex_exception_details{exception_message=~\".*Apex CPU time limit exceeded.*\"}[5m]))",
               "format": "table",
               "instant": false,
               "legendFormat": "__auto",
@@ -5819,10 +7390,10 @@
             "h": 12,
             "w": 24,
             "x": 0,
-            "y": 111
+            "y": 135
           },
           "id": 57,
-          "interval": "1800",
+          "interval": "3600",
           "options": {
             "cellHeight": "md",
             "footer": {
@@ -5851,7 +7422,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "max by (exception_category, exception_type, exception_message, stack_trace) (max_over_time(apex_exception_details{exception_message=~\".*UNABLE_TO_LOCK_ROW.*\"}[5m]))",
+              "expr": "count by (exception_category, exception_type, exception_message, stack_trace) (count_over_time(apex_exception_details{exception_message=~\".*UNABLE_TO_LOCK_ROW.*\"}[5m]))",
               "format": "table",
               "instant": false,
               "legendFormat": "__auto",
@@ -5906,7 +7477,640 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 72
+        "y": 81
+      },
+      "id": 79,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "green",
+                "mode": "fixed"
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 24,
+            "x": 0,
+            "y": 97
+          },
+          "id": 13,
+          "interval": "1h",
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "sum"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "value_and_name",
+            "wideLayout": false
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(concurrent_request_error_count)",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Concurrent Apex Error request count",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Top Long Running Requests by Average Runtime with Runtime > 5 seconds",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "noValue": "No long-running requests found in last hour logs",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Number of Processed records"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 219
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Count of Processed records"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 224
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Entry point Count"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 167
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Entry Point"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 451
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg DB Time"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 213
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg Exec Time"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 201
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg Run Time"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "red",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg Run Time"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg Apex Exec Time"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg DB Time"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 100
+          },
+          "id": 78,
+          "interval": "1800",
+          "options": {
+            "cellHeight": "md",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Avg Run Time"
+              }
+            ]
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max_over_time(most_apex_concurrent_errors_sorted_by_runtime[30m])",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Top Long Running Requests by Average Runtime with Runtime > 5sec",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": false,
+                  "Value": false,
+                  "__name__": true,
+                  "cluster_arn": true,
+                  "container_arn": true,
+                  "container_name": true,
+                  "docker_image": true,
+                  "instance": true,
+                  "job": true,
+                  "job_id": false,
+                  "task_arn": true,
+                  "task_group": true,
+                  "task_name": true,
+                  "task_revision": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 13,
+                  "__name__": 2,
+                  "avg_db_time": 16,
+                  "avg_exec_time": 15,
+                  "avg_run_time": 14,
+                  "cluster_arn": 3,
+                  "container_arn": 4,
+                  "container_name": 5,
+                  "docker_image": 6,
+                  "entry_point": 1,
+                  "instance": 7,
+                  "job": 8,
+                  "task_arn": 9,
+                  "task_group": 10,
+                  "task_name": 11,
+                  "task_revision": 12
+                },
+                "renameByName": {
+                  "Time": "",
+                  "Value": "Avg Run Time",
+                  "avg_db_time": "Avg DB Time",
+                  "avg_exec_time": "Avg Apex Exec Time",
+                  "avg_run_time": "Avg Run Time",
+                  "docker_image": "",
+                  "entity_type": "Entity Type",
+                  "entry_point": "Entry Point",
+                  "environment": "Environment",
+                  "job_id": "Job ID",
+                  "message": "Incident Message",
+                  "operation_type": "Operation Type",
+                  "pod": "POD Instance",
+                  "severity": "Severity",
+                  "total_records_failed": "Count of Failed records",
+                  "total_records_processed": "Count of Processed records",
+                  "user_id": "User ID"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Top Long Running Requests by Count with Runtime > 5 seconds",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "noValue": "No long-running requests found in last hour logs",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Number of Processed records"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 219
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Count of Processed records"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 224
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Entry point Count"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 167
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Entry Point"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 451
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg DB Time"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 213
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg Exec Time"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 201
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Entry point Count"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "red",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg Run Time"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg Apex Exec Time"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg DB Time"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 109
+          },
+          "id": 80,
+          "interval": "1800",
+          "options": {
+            "cellHeight": "md",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Entry point Count"
+              }
+            ]
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max_over_time(most_apex_concurrent_errors_sorted_by_count[30m])",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Top Long Running Requests by Count with Runtime > 5sec",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": false,
+                  "Value": false,
+                  "__name__": true,
+                  "cluster_arn": true,
+                  "container_arn": true,
+                  "container_name": true,
+                  "docker_image": true,
+                  "instance": true,
+                  "job": true,
+                  "job_id": false,
+                  "task_arn": true,
+                  "task_group": true,
+                  "task_name": true,
+                  "task_revision": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 13,
+                  "__name__": 2,
+                  "avg_db_time": 16,
+                  "avg_exec_time": 15,
+                  "avg_run_time": 14,
+                  "cluster_arn": 3,
+                  "container_arn": 4,
+                  "container_name": 5,
+                  "docker_image": 6,
+                  "entry_point": 1,
+                  "instance": 7,
+                  "job": 8,
+                  "task_arn": 9,
+                  "task_group": 10,
+                  "task_name": 11,
+                  "task_revision": 12
+                },
+                "renameByName": {
+                  "Time": "",
+                  "Value": "Entry point Count",
+                  "avg_db_time": "Avg DB Time",
+                  "avg_exec_time": "Avg Apex Exec Time",
+                  "avg_run_time": "Avg Run Time",
+                  "docker_image": "",
+                  "entity_type": "Entity Type",
+                  "entry_point": "Entry Point",
+                  "environment": "Environment",
+                  "job_id": "Job ID",
+                  "message": "Incident Message",
+                  "operation_type": "Operation Type",
+                  "pod": "POD Instance",
+                  "severity": "Severity",
+                  "total_records_failed": "Count of Failed records",
+                  "total_records_processed": "Count of Processed records",
+                  "user_id": "User ID"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        }
+      ],
+      "title": "Concurrent Apex Errors",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 82
       },
       "id": 25,
       "panels": [
@@ -5919,7 +8123,7 @@
           "fieldConfig": {
             "defaults": {
               "color": {
-                "fixedColor": "dark-red",
+                "fixedColor": "dark-green",
                 "mode": "fixed"
               },
               "fieldMinMax": false,
@@ -5928,8 +8132,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -5938,13 +8141,13 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 7,
+            "h": 6,
             "w": 4,
             "x": 0,
-            "y": 73
+            "y": 119
           },
-          "id": 13,
-          "interval": "5m",
+          "id": 19,
+          "interval": "1h",
           "options": {
             "colorMode": "value",
             "graphMode": "none",
@@ -5952,14 +8155,14 @@
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
-                "lastNotNull"
+                "sum"
               ],
               "fields": "",
               "values": false
             },
             "showPercentChange": false,
             "textMode": "value_and_name",
-            "wideLayout": true
+            "wideLayout": false
           },
           "pluginVersion": "10.4.1",
           "targets": [
@@ -5971,13 +8174,12 @@
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum(salesforce_login_failure_total{})",
+              "expr": "sum(salesforce_login_success_total)",
               "format": "time_series",
               "fullMetaSearch": false,
-              "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "Login Failures",
+              "legendFormat": "Login Success",
               "range": true,
               "refId": "A",
               "useBackend": false
@@ -6013,8 +8215,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -6023,13 +8224,13 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 16,
+            "h": 18,
             "w": 20,
             "x": 4,
-            "y": 73
+            "y": 119
           },
           "id": 15,
-          "interval": "30m",
+          "interval": "12h",
           "options": {
             "basemap": {
               "config": {},
@@ -6113,15 +8314,15 @@
                 "uid": "o7MvocN7k"
               },
               "disableTextWrap": false,
-              "editorMode": "builder",
+              "editorMode": "code",
               "exemplar": false,
               "expr": "user_location",
               "format": "table",
               "fullMetaSearch": false,
               "includeNullMetadata": false,
-              "instant": true,
+              "instant": false,
               "legendFormat": "__auto",
-              "range": false,
+              "range": true,
               "refId": "A",
               "useBackend": false
             }
@@ -6138,7 +8339,7 @@
           "fieldConfig": {
             "defaults": {
               "color": {
-                "fixedColor": "dark-green",
+                "fixedColor": "red",
                 "mode": "fixed"
               },
               "fieldMinMax": false,
@@ -6147,8 +8348,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -6157,13 +8357,13 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 9,
+            "h": 6,
             "w": 4,
             "x": 0,
-            "y": 80
+            "y": 125
           },
-          "id": 19,
-          "interval": "5m",
+          "id": 81,
+          "interval": "1h",
           "options": {
             "colorMode": "value",
             "graphMode": "none",
@@ -6171,14 +8371,14 @@
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
-                "lastNotNull"
+                "sum"
               ],
               "fields": "",
               "values": false
             },
             "showPercentChange": false,
             "textMode": "value_and_name",
-            "wideLayout": true
+            "wideLayout": false
           },
           "pluginVersion": "10.4.1",
           "targets": [
@@ -6190,12 +8390,86 @@
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum(salesforce_login_success_total{})",
+              "expr": "sum(salesforce_login_failure_total)",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "Login Successes",
+              "legendFormat": "Login Failure",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "orange",
+                "mode": "fixed"
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "orange"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 4,
+            "x": 0,
+            "y": 131
+          },
+          "id": 82,
+          "interval": "1h",
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "sum"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "value_and_name",
+            "wideLayout": false
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(unique_login_count_total)",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "Unique Logins",
               "range": true,
               "refId": "A",
               "useBackend": false
@@ -6214,7 +8488,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 73
+        "y": 83
       },
       "id": 23,
       "panels": [
@@ -6223,40 +8497,43 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
-          "description": "",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "fixedColor": "dark-green",
-                "mode": "fixed"
+                "mode": "thresholds"
               },
-              "fieldMinMax": false,
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
+                    "color": "red"
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 50
+                  },
+                  {
                     "color": "green",
-                    "value": null
+                    "value": 90
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "percent"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 7,
+            "h": 6,
             "w": 4,
             "x": 0,
-            "y": 74
+            "y": 83
           },
-          "id": 11,
-          "interval": "5m",
+          "id": 88,
           "options": {
             "colorMode": "value",
             "graphMode": "none",
-            "justifyMode": "center",
+            "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
@@ -6266,8 +8543,7 @@
               "values": false
             },
             "showPercentChange": false,
-            "text": {},
-            "textMode": "value_and_name",
+            "textMode": "auto",
             "wideLayout": true
           },
           "pluginVersion": "10.4.1",
@@ -6277,21 +8553,145 @@
                 "type": "prometheus",
                 "uid": "o7MvocN7k"
               },
-              "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "count(deployment_details{status=\"Succeeded\"}) or vector(0)\r\n",
-              "format": "time_series",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
+              "expr": "count(deployment_details{status=\"Succeeded\"}) / count(deployment_details{}) * 100",
               "instant": false,
-              "legendFormat": "Successful Deployments",
+              "legendFormat": "__auto",
               "range": true,
-              "refId": "A",
-              "useBackend": false
+              "refId": "A"
             }
           ],
+          "title": "Production Deployment Success Rate",
           "transparent": true,
           "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "area"
+                }
+              },
+              "mappings": [],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red"
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 50
+                  },
+                  {
+                    "color": "green",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 15,
+            "x": 7,
+            "y": 83
+          },
+          "id": 89,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "count(deployment_details{status=\"Succeeded\"}) / count(deployment_details{}) * 100",
+              "instant": false,
+              "legendFormat": "Production Success Rate %",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Production Deployment Success Rate",
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "",
+          "gridPos": {
+            "h": 8,
+            "w": 7,
+            "x": 0,
+            "y": 89
+          },
+          "id": 26,
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "# GitLab Deployment Metrics\n\nPlease refer to the [Hex report](https://app.hex.tech/avalara/app/55b1430d-a9e3-4eaf-a227-6e4f766daf55/latest?) to view comprehensive metrics for the complete GitLab deployment pipeline.\n\nThe deployment metrics in this Grafana dashboard show the deployment metrics from Salesforce. Salesforce deployment metrics include GitLab deployments, Change-Sets, and Package Installs.\n\nThey do not include the entire GitLab deployment process, which includes validations/check-only deployments for Apex packages. This process optimizes the deployments for Apex.\n\nValidation metrics are not included in this Grafana dashboard, but they are included in the Hex report for Apex deployments.",
+            "mode": "markdown"
+          },
+          "pluginVersion": "10.4.1",
+          "type": "text"
         },
         {
           "datasource": {
@@ -6344,8 +8744,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               }
@@ -6355,8 +8754,8 @@
           "gridPos": {
             "h": 15,
             "w": 15,
-            "x": 4,
-            "y": 74
+            "x": 7,
+            "y": 94
           },
           "id": 12,
           "interval": "30",
@@ -6411,82 +8810,104 @@
             }
           ],
           "title": "Production Average Deployment Time vs Average Pending Time",
+          "transparent": true,
           "type": "timeseries"
         },
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "o7MvocN7k"
+            "uid": "ZzXJ8BYGz"
           },
-          "description": "",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "fixedColor": "dark-red",
-                "mode": "fixed"
-              },
-              "fieldMinMax": false,
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
+          "description": "Deployment annotations from GitLab pipeline events made in the Grafana time range.",
           "gridPos": {
-            "h": 8,
-            "w": 4,
+            "h": 7,
+            "w": 7,
             "x": 0,
-            "y": 81
+            "y": 97
           },
-          "id": 20,
-          "interval": "5m",
+          "id": 16,
           "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "text": {},
-            "textMode": "value_and_name",
-            "wideLayout": true
+            "limit": 30,
+            "navigateAfter": "10m",
+            "navigateBefore": "10m",
+            "navigateToPanel": true,
+            "onlyFromThisDashboard": false,
+            "onlyInTimeRange": true,
+            "showTags": false,
+            "showTime": true,
+            "showUser": false,
+            "tags": [
+              "project:it-crm",
+              "environment:prd"
+            ]
           },
-          "pluginVersion": "10.4.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "o7MvocN7k"
-              },
-              "disableTextWrap": false,
-              "editorMode": "code",
-              "expr": "count(deployment_details{status=\"Failed\"}) or vector(0)",
-              "format": "time_series",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "Failed Deployments",
-              "range": true,
-              "refId": "A",
-              "useBackend": false
-            }
-          ],
+          "title": "Production Deployment Annotations ",
           "transparent": true,
-          "type": "stat"
+          "type": "annolist"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ZzXJ8BYGz"
+          },
+          "description": "Deployment annotations from GitLab pipeline events made in the Grafana time range.",
+          "gridPos": {
+            "h": 7,
+            "w": 7,
+            "x": 0,
+            "y": 104
+          },
+          "id": 17,
+          "options": {
+            "limit": 30,
+            "navigateAfter": "10m",
+            "navigateBefore": "10m",
+            "navigateToPanel": true,
+            "onlyFromThisDashboard": false,
+            "onlyInTimeRange": true,
+            "showTags": false,
+            "showTime": true,
+            "showUser": false,
+            "tags": [
+              "project:it-crm",
+              "environment:fqa"
+            ]
+          },
+          "title": "Full QA Deployment Annotations",
+          "transparent": true,
+          "type": "annolist"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ZzXJ8BYGz"
+          },
+          "description": "Deployment annotations from GitLab pipeline events made in the Grafana time range.",
+          "gridPos": {
+            "h": 7,
+            "w": 7,
+            "x": 0,
+            "y": 111
+          },
+          "id": 18,
+          "options": {
+            "limit": 30,
+            "navigateAfter": "10m",
+            "navigateBefore": "10m",
+            "navigateToPanel": true,
+            "onlyFromThisDashboard": false,
+            "onlyInTimeRange": true,
+            "showTags": false,
+            "showTime": true,
+            "showUser": false,
+            "tags": [
+              "project:it-crm",
+              "environment:dev"
+            ]
+          },
+          "title": "Common Dev Deployment Annotations",
+          "transparent": true,
+          "type": "annolist"
         }
       ],
       "title": "Deployments",
@@ -6498,7 +8919,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 74
+        "y": 84
       },
       "id": 67,
       "panels": [
@@ -6575,7 +8996,7 @@
             "h": 12,
             "w": 24,
             "x": 0,
-            "y": 75
+            "y": 84
           },
           "id": 66,
           "interval": "1800",
@@ -6654,9 +9075,1661 @@
             }
           ],
           "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Monitors and lists users exporting Reports",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "mappings": [],
+              "noValue": "No Report was exported in Last hour",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Time"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 207
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Exception Cateogry"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 186
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Exception Type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 213
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Timestamp"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 228
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "User Name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 255
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Report Name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 518
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 96
+          },
+          "id": 86,
+          "interval": "1h",
+          "options": {
+            "cellHeight": "md",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "count by (user_name, timestamp, report_name, report_type_api_name) (hourly_report_export)",
+              "format": "table",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "List of users exporting Reports",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "exception_category": false,
+                  "exception_type": false
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 3,
+                  "report_name": 4,
+                  "report_type_api_name": 5,
+                  "timestamp": 1,
+                  "user_name": 2
+                },
+                "renameByName": {
+                  "cpu_time": "CPU Time",
+                  "entity_name": "Entity Name",
+                  "entry_point": "Entry Point",
+                  "exception_category": "Exception Cateogry",
+                  "exception_message": "Exception Message",
+                  "exception_type": "Exception Type",
+                  "method": "Operation",
+                  "report_name": "Report Name",
+                  "report_type_api_name": "Report Type API Name",
+                  "rows_processed": "Rows processed",
+                  "run_time": "Run Time",
+                  "stack_trace": "Stack Trace",
+                  "timestamp": "Timestamp",
+                  "user_id": "User ID",
+                  "user_name": "User Name"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Count of possible suspicious activities from Audit Trail logs",
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red"
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 4,
+            "x": 0,
+            "y": 108
+          },
+          "id": 90,
+          "interval": "1h",
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(suspicious_records)",
+              "format": "table",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Number of suspicious activities",
+          "transformations": [
+            {
+              "disabled": true,
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "exception_category": false,
+                  "exception_type": false
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 4,
+                  "Value": 5,
+                  "action": 2,
+                  "created_date": 0,
+                  "delegate_user": 6,
+                  "display": 7,
+                  "section": 3,
+                  "user": 1
+                },
+                "renameByName": {
+                  "Time": "",
+                  "action": "Action",
+                  "cpu_time": "CPU Time",
+                  "created_date": "Created Date",
+                  "delegate_user": "Delegate User",
+                  "display": "Display message",
+                  "entity_name": "Entity Name",
+                  "entry_point": "Entry Point",
+                  "exception_category": "Exception Cateogry",
+                  "exception_message": "Exception Message",
+                  "exception_type": "Exception Type",
+                  "method": "Operation",
+                  "report_name": "Report Name",
+                  "report_type_api_name": "Report Type API Name",
+                  "rows_processed": "Rows processed",
+                  "run_time": "Run Time",
+                  "section": "Section",
+                  "stack_trace": "Stack Trace",
+                  "timestamp": "Timestamp",
+                  "user": "User Name",
+                  "user_id": "User ID",
+                  "user_name": "User Name"
+                }
+              }
+            }
+          ],
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Count of possible suspicious activities from Audit Trail logs",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "noValue": "No Audit Trail log captured for selected Interval",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red"
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 20,
+            "x": 4,
+            "y": 108
+          },
+          "id": 92,
+          "interval": "1h",
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "count(suspicious_records)",
+              "format": "table",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Count of possible suspicious activities from Audit Trail logs",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "List of possible suspicious activities from Audit Trail logs",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "mappings": [],
+              "noValue": "No Audit Trail log captured for selected Interval",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Created Date"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 231
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "User Name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 213
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 261
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Delegate User"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 211
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Section"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 241
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 116
+          },
+          "id": 91,
+          "interval": "1h",
+          "options": {
+            "cellHeight": "md",
+            "footer": {
+              "countRows": false,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Created Date"
+              }
+            ]
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "label_replace(count by (action, section, user, created_date, display, delegate_user) (suspicious_records), \"created_date\", \"$1\", \"created_date\", \"(.+)\\\\.[0-9]+\\\\+[0-9]+\")",
+              "format": "table",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "List of possible suspicious activities from Audit Trail logs",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "exception_category": false,
+                  "exception_type": false
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 4,
+                  "Value": 5,
+                  "action": 2,
+                  "created_date": 0,
+                  "delegate_user": 6,
+                  "display": 7,
+                  "section": 3,
+                  "user": 1
+                },
+                "renameByName": {
+                  "Time": "",
+                  "action": "Action",
+                  "cpu_time": "CPU Time",
+                  "created_date": "Created Date",
+                  "delegate_user": "Delegate User",
+                  "display": "Display message",
+                  "entity_name": "Entity Name",
+                  "entry_point": "Entry Point",
+                  "exception_category": "Exception Cateogry",
+                  "exception_message": "Exception Message",
+                  "exception_type": "Exception Type",
+                  "method": "Operation",
+                  "report_name": "Report Name",
+                  "report_type_api_name": "Report Type API Name",
+                  "rows_processed": "Rows processed",
+                  "run_time": "Run Time",
+                  "section": "Section",
+                  "stack_trace": "Stack Trace",
+                  "timestamp": "Timestamp",
+                  "user": "User Name",
+                  "user_id": "User ID",
+                  "user_name": "User Name"
+                }
+              }
+            }
+          ],
+          "type": "table"
         }
       ],
       "title": "Compliance",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 85
+      },
+      "id": 68,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Apex errors occurring during login attempts for Partner Relationship Management (PRM) and Global Service Platform (GSP) systems",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "red",
+                "mode": "fixed"
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 5,
+            "x": 0,
+            "y": 85
+          },
+          "id": 69,
+          "interval": "43200",
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "value_and_name",
+            "wideLayout": false
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "count by (log_level) (count_over_time(community_login_error_details[30m]))",
+              "format": "time_series",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Login Failures for PRM and GSP (Past Week Data)",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "SFDC Logger details of Login Failure for PRM and GSP",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "semi-dark-green",
+                "mode": "fixed"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "mappings": [],
+              "noValue": "There were no login failures in the past week.",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Time"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 207
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Exception Cateogry"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 186
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Exception Type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 213
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "__name__"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 285
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Log level"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 98
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "SFDC Logger Name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 190
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Created Date"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 265
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Log Message"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 415
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Log level"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "red",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 19,
+            "x": 5,
+            "y": 85
+          },
+          "id": 70,
+          "interval": "43200",
+          "options": {
+            "cellHeight": "md",
+            "footer": {
+              "countRows": false,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Created Date"
+              }
+            ]
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "community_login_error_details",
+              "format": "table",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Login Failure Details of PRM and GSP platforms (Past Week Data)",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "__name__": true,
+                  "cluster_arn": true,
+                  "container_arn": true,
+                  "container_name": true,
+                  "docker_image": true,
+                  "exception_category": false,
+                  "exception_type": false,
+                  "instance": true,
+                  "job": true,
+                  "task_arn": true,
+                  "task_group": true,
+                  "task_name": true,
+                  "task_revision": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 1,
+                  "Value": 2,
+                  "__name__": 3,
+                  "cluster_arn": 4,
+                  "container_arn": 5,
+                  "container_name": 6,
+                  "created_date": 0,
+                  "docker_image": 7,
+                  "id": 12,
+                  "instance": 13,
+                  "job": 14,
+                  "log_level": 9,
+                  "log_message": 10,
+                  "name": 8,
+                  "record_id": 11,
+                  "task_arn": 15,
+                  "task_group": 16,
+                  "task_name": 17,
+                  "task_revision": 18
+                },
+                "renameByName": {
+                  "cpu_time": "CPU Time",
+                  "created_date": "Created Date",
+                  "entry_point": "Entry Point",
+                  "exception_category": "Exception Cateogry",
+                  "exception_message": "Exception Message",
+                  "exception_type": "Exception Type",
+                  "id": "Record ID",
+                  "instance": "",
+                  "log_level": "Log level",
+                  "log_message": "Log Message",
+                  "name": "SFDC Logger Name",
+                  "record_id": "User ID",
+                  "run_time": "Run Time",
+                  "stack_trace": "Stack Trace"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Apex errors occurring during Registration attempts for Partner Relationship Management (PRM) and Global Service Platform (GSP) systems",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "red",
+                "mode": "fixed"
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 5,
+            "x": 0,
+            "y": 95
+          },
+          "id": 72,
+          "interval": "43200",
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "value_and_name",
+            "wideLayout": false
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "count by (source_name) (count_over_time(community_registration_error_details[30m]))",
+              "format": "time_series",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Registration Failure for PRM and GSP (Past Week Data)",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "SFDC Logger details of Registration Failure for PRM and GSP",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "semi-dark-green",
+                "mode": "fixed"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "mappings": [],
+              "noValue": "There were no login failures in the past week.",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Time"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 207
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Exception Cateogry"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 186
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Exception Type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 213
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "__name__"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 285
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Log level"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 94
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "SFDC Logger Name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 176
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Created Date"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 244
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Log Message"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 214
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Log level"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "red",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "callout_response"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 236
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 19,
+            "x": 5,
+            "y": 95
+          },
+          "id": 71,
+          "interval": "43200",
+          "options": {
+            "cellHeight": "md",
+            "footer": {
+              "countRows": false,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Created Date"
+              }
+            ]
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "community_registration_error_details",
+              "format": "table",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Registration Failure Details of PRM and GSP platforms (Past Week Data)",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "__name__": true,
+                  "cluster_arn": true,
+                  "container_arn": true,
+                  "container_name": true,
+                  "docker_image": true,
+                  "exception_category": false,
+                  "exception_type": false,
+                  "instance": true,
+                  "job": true,
+                  "task_arn": true,
+                  "task_group": true,
+                  "task_name": true,
+                  "task_revision": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 1,
+                  "Value": 2,
+                  "__name__": 3,
+                  "callout_response": 11,
+                  "cluster_arn": 4,
+                  "container_arn": 5,
+                  "container_name": 6,
+                  "created_date": 0,
+                  "docker_image": 7,
+                  "id": 13,
+                  "instance": 14,
+                  "job": 15,
+                  "log_level": 9,
+                  "log_message": 10,
+                  "name": 8,
+                  "record_id": 12,
+                  "source_name": 20,
+                  "task_arn": 16,
+                  "task_group": 17,
+                  "task_name": 18,
+                  "task_revision": 19
+                },
+                "renameByName": {
+                  "callout_response": "Response Callout",
+                  "cpu_time": "CPU Time",
+                  "created_date": "Created Date",
+                  "entry_point": "Entry Point",
+                  "exception_category": "Exception Cateogry",
+                  "exception_message": "Exception Message",
+                  "exception_type": "Exception Type",
+                  "id": "Record ID",
+                  "instance": "",
+                  "log_level": "Log level",
+                  "log_message": "Log Message",
+                  "name": "SFDC Logger Name",
+                  "record_id": "User ID",
+                  "run_time": "Run Time",
+                  "source_name": "Source Name",
+                  "stack_trace": "Stack Trace"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Org-Wide Object's External Sharing Settings",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "red",
+                "mode": "fixed"
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 5,
+            "x": 0,
+            "y": 105
+          },
+          "id": 84,
+          "interval": "12h",
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "value_and_name",
+            "wideLayout": false
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "count by (action) (count_over_time(org_wide_sharing_changes{action!~\"owd(Update(Started|Finished)|ExternalUpdateStartedForEntity)\"}[30m]))",
+              "format": "time_series",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Count of Org-Wide Sharing Settings changes",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Org-Wide Sharing Settings",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "semi-dark-green",
+                "mode": "fixed"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "mappings": [],
+              "noValue": "No changes found in Org-Wide External Sharing Settings for today",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Time"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 207
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Exception Cateogry"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 186
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Exception Type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 213
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "__name__"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 285
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Log level"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 94
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "SFDC Logger Name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 176
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Created Date"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 244
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Log Message"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 214
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Log level"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "red",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "callout_response"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 236
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "date"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 239
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 231
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "user"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 110
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Change Action"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 267
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 19,
+            "x": 5,
+            "y": 105
+          },
+          "id": 85,
+          "interval": "12h",
+          "options": {
+            "cellHeight": "md",
+            "footer": {
+              "countRows": false,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "org_wide_sharing_changes{action!~\"owd(Update(Started|Finished)|ExternalUpdateStartedForEntity)\"}",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Org-Wide Sharing Settings",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "__name__": true,
+                  "cluster_arn": true,
+                  "container_arn": true,
+                  "container_name": true,
+                  "docker_image": true,
+                  "exception_category": false,
+                  "exception_type": false,
+                  "instance": true,
+                  "job": true,
+                  "task_arn": true,
+                  "task_group": true,
+                  "task_name": true,
+                  "task_revision": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 1,
+                  "__name__": 2,
+                  "action": 15,
+                  "cluster_arn": 3,
+                  "container_arn": 4,
+                  "container_name": 5,
+                  "date": 13,
+                  "display": 16,
+                  "docker_image": 6,
+                  "instance": 7,
+                  "job": 8,
+                  "task_arn": 9,
+                  "task_group": 10,
+                  "task_name": 11,
+                  "task_revision": 12,
+                  "user": 14
+                },
+                "renameByName": {
+                  "action": "Change Action",
+                  "callout_response": "Response Callout",
+                  "cpu_time": "CPU Time",
+                  "created_date": "Created Date",
+                  "date": "Date changed",
+                  "display": "Message",
+                  "entry_point": "Entry Point",
+                  "exception_category": "Exception Cateogry",
+                  "exception_message": "Exception Message",
+                  "exception_type": "Exception Type",
+                  "id": "Record ID",
+                  "instance": "",
+                  "log_level": "Log level",
+                  "log_message": "Log Message",
+                  "name": "SFDC Logger Name",
+                  "record_id": "User ID",
+                  "run_time": "Run Time",
+                  "source_name": "Source Name",
+                  "stack_trace": "Stack Trace",
+                  "user": "User Name"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        }
+      ],
+      "title": "Community Custom Metrics",
       "type": "row"
     }
   ],
@@ -6702,11 +10775,278 @@
         "queryValue": "",
         "skipUrlSync": false,
         "type": "custom"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "LightningSales",
+          "value": "LightningSales"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "page_app_name",
+        "options": [
+          {
+            "selected": false,
+            "text": "LightningSalesConsole",
+            "value": "LightningSalesConsole"
+          },
+          {
+            "selected": false,
+            "text": "LightningService",
+            "value": "LightningService"
+          },
+          {
+            "selected": false,
+            "text": "PSA_Project_Manager",
+            "value": "PSA_Project_Manager"
+          },
+          {
+            "selected": true,
+            "text": "LightningSales",
+            "value": "LightningSales"
+          },
+          {
+            "selected": false,
+            "text": "Collections_Management",
+            "value": "Collections_Management"
+          },
+          {
+            "selected": false,
+            "text": "CAM_Lightning",
+            "value": "CAM_Lightning"
+          },
+          {
+            "selected": false,
+            "text": "Customer_Excellence",
+            "value": "Customer_Excellence"
+          },
+          {
+            "selected": false,
+            "text": "PSA_Consultant",
+            "value": "PSA_Consultant"
+          },
+          {
+            "selected": false,
+            "text": "Ava2_GoLive_Lightning",
+            "value": "Ava2_GoLive_Lightning"
+          },
+          {
+            "selected": false,
+            "text": "Loyalty_Lightning",
+            "value": "Loyalty_Lightning"
+          },
+          {
+            "selected": false,
+            "text": "all",
+            "value": "all"
+          },
+          {
+            "selected": false,
+            "text": "Service",
+            "value": "Service"
+          },
+          {
+            "selected": false,
+            "text": "Composer",
+            "value": "Composer"
+          },
+          {
+            "selected": false,
+            "text": "ProdlyMoover_Lightning",
+            "value": "ProdlyMoover_Lightning"
+          },
+          {
+            "selected": false,
+            "text": "Avalara_Sales_Q2C",
+            "value": "Avalara_Sales_Q2C"
+          },
+          {
+            "selected": false,
+            "text": "Billing_Management",
+            "value": "Billing_Management"
+          },
+          {
+            "selected": false,
+            "text": "ZoomClean",
+            "value": "ZoomClean"
+          },
+          {
+            "selected": false,
+            "text": "BETA_Avalara_Service_Support_Console",
+            "value": "BETA_Avalara_Service_Support_Console"
+          },
+          {
+            "selected": false,
+            "text": "PSE_Operations",
+            "value": "PSE_Operations"
+          },
+          {
+            "selected": false,
+            "text": "Community",
+            "value": "Community"
+          },
+          {
+            "selected": false,
+            "text": "Chatter",
+            "value": "Chatter"
+          },
+          {
+            "selected": false,
+            "text": "QuotetoCash_Q2C",
+            "value": "QuotetoCash_Q2C"
+          },
+          {
+            "selected": false,
+            "text": "LicenseManagementApp",
+            "value": "LicenseManagementApp"
+          },
+          {
+            "selected": false,
+            "text": "Distribution_Engine",
+            "value": "Distribution_Engine"
+          },
+          {
+            "selected": false,
+            "text": "PSA_PMO",
+            "value": "PSA_PMO"
+          },
+          {
+            "selected": false,
+            "text": "Avalara_Sales_Admin_Q2C",
+            "value": "Avalara_Sales_Admin_Q2C"
+          },
+          {
+            "selected": false,
+            "text": "iSell_for_Salesforce",
+            "value": "iSell_for_Salesforce"
+          },
+          {
+            "selected": false,
+            "text": "LinkedIn_Admin_Portal",
+            "value": "LinkedIn_Admin_Portal"
+          },
+          {
+            "selected": false,
+            "text": "Edit_Quotas",
+            "value": "Edit_Quotas"
+          },
+          {
+            "selected": false,
+            "text": "Partner_Order",
+            "value": "Partner_Order"
+          },
+          {
+            "selected": false,
+            "text": "CventLightningApp",
+            "value": "CventLightningApp"
+          },
+          {
+            "selected": false,
+            "text": "NEO_Collections_Management",
+            "value": "NEO_Collections_Management"
+          },
+          {
+            "selected": false,
+            "text": "Excise_Tax_Division",
+            "value": "Excise_Tax_Division"
+          },
+          {
+            "selected": false,
+            "text": "Compliance",
+            "value": "Compliance"
+          },
+          {
+            "selected": false,
+            "text": "FFCentral",
+            "value": "FFCentral"
+          },
+          {
+            "selected": false,
+            "text": "CSM_Lightning",
+            "value": "CSM_Lightning"
+          },
+          {
+            "selected": false,
+            "text": "QuotetoCash",
+            "value": "QuotetoCash"
+          },
+          {
+            "selected": false,
+            "text": "OnlineSales",
+            "value": "OnlineSales"
+          },
+          {
+            "selected": false,
+            "text": "ZoomInfo",
+            "value": "ZoomInfo"
+          },
+          {
+            "selected": false,
+            "text": "CameleonCPQ",
+            "value": "CameleonCPQ"
+          },
+          {
+            "selected": false,
+            "text": "SalesforceBillingConfiguration",
+            "value": "SalesforceBillingConfiguration"
+          },
+          {
+            "selected": false,
+            "text": "Setup",
+            "value": "Setup"
+          },
+          {
+            "selected": false,
+            "text": "ConnectorForce_Management",
+            "value": "ConnectorForce_Management"
+          },
+          {
+            "selected": false,
+            "text": "DocuSignForSalesforceCore",
+            "value": "DocuSignForSalesforceCore"
+          },
+          {
+            "selected": false,
+            "text": "DocuSign_for_Salesforce_CPQ",
+            "value": "DocuSign_for_Salesforce_CPQ"
+          },
+          {
+            "selected": false,
+            "text": "Marketing_Operations",
+            "value": "Marketing_Operations"
+          },
+          {
+            "selected": false,
+            "text": "Activity_Management",
+            "value": "Activity_Management"
+          },
+          {
+            "selected": false,
+            "text": "Skilljar",
+            "value": "Skilljar"
+          },
+          {
+            "selected": false,
+            "text": "Continuous",
+            "value": "Continuous"
+          },
+          {
+            "selected": false,
+            "text": "FieldPro",
+            "value": "FieldPro"
+          }
+        ],
+        "query": "LightningSalesConsole, LightningService, PSA_Project_Manager, LightningSales, Collections_Management, CAM_Lightning, Customer_Excellence, PSA_Consultant, Ava2_GoLive_Lightning, Loyalty_Lightning, all, Service, Composer, ProdlyMoover_Lightning, Avalara_Sales_Q2C, Billing_Management, ZoomClean, BETA_Avalara_Service_Support_Console, PSE_Operations, Community, Chatter, QuotetoCash_Q2C, LicenseManagementApp, Distribution_Engine, PSA_PMO, Avalara_Sales_Admin_Q2C, iSell_for_Salesforce, LinkedIn_Admin_Portal, Edit_Quotas, Partner_Order, CventLightningApp, NEO_Collections_Management, Excise_Tax_Division, Compliance, FFCentral, CSM_Lightning, QuotetoCash, OnlineSales, ZoomInfo, CameleonCPQ, SalesforceBillingConfiguration, Setup, ConnectorForce_Management, DocuSignForSalesforceCore, DocuSign_for_Salesforce_CPQ, Marketing_Operations, Activity_Management, Skilljar, Continuous, FieldPro",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
       }
     ]
   },
   "time": {
-    "from": "now-30m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
@@ -6715,6 +11055,6 @@
   "timezone": "browser",
   "title": "Salesforce Monitoring",
   "uid": "edqq6je4aevb4b",
-  "version": 69,
+  "version": 25,
   "weekStart": ""
 }

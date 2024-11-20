@@ -1,9 +1,11 @@
 FROM ubuntu:latest
 
 # Pull in build arguments
-ARG SALESFORCE_AUTH_URL
+ARG PRODUCTION_AUTH_URL
+ARG FULLQA_AUTH_URL
 
 # Set Salesforce CLI Environment Variables
+# https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_dev_cli_env_variables.htm
 ENV SF_AUTOUPDATE_DISABLE=true \
     SF_USE_GENERIC_UNIX_KEYCHAIN=true \
     SF_DOMAIN_RETRY=300 \
@@ -11,7 +13,12 @@ ENV SF_AUTOUPDATE_DISABLE=true \
     SF_PROJECT_AUTOUPDATE_DISABLE_FOR_PACKAGE_VERSION_CREATE=true \
     SF_DISABLE_DNS_CHECK=true \
     SF_DISABLE_SOURCE_MEMBER_POLLING=true \
-    SALESFORCE_AUTH_URL=${SALESFORCE_AUTH_URL}
+    SF_HIDE_RELEASE_NOTES=true \
+    SF_HIDE_RELEASE_NOTES_FOOTER=true \
+    SF_SKIP_NEW_VERSION_CHECK=true \
+    SF_CONTAINER_MODE=true \
+    PRODUCTION_AUTH_URL=${PRODUCTION_AUTH_URL} \
+    FULLQA_AUTH_URL=${FULLQA_AUTH_URL}
 
 # Set working directory to script
 WORKDIR /app/sfmon

@@ -11,6 +11,9 @@ from gauges import (async_job_status_gauge, run_time_metric, cpu_time_metric,
                     apex_runtime_gt_10s_count, apex_runtime_gt_5s_percentage)
 from log_parser import parse_logs
 import pandas as pd
+import requests
+from constants import QUERY_TIMEOUT_SECONDS
+
 
 
 def async_apex_job_status(sf):
@@ -22,8 +25,12 @@ def async_apex_job_status(sf):
         SELECT Id, Status, JobType, ApexClassId, MethodName, NumberOfErrors FROM AsyncApexJob 
         WHERE CreatedDate = TODAY
     """
+    try:
+        result = sf.query_all(query, timeout=QUERY_TIMEOUT_SECONDS)
+    except requests.exceptions.Timeout:
+        logger.error("Query timed out after : %s seconds.", QUERY_TIMEOUT_SECONDS)
+        return None
 
-    result = sf.query_all(query)
     overall_status_counts = {}
 
     for record in result['records']:
@@ -247,13 +254,14 @@ def expose_concurrent_long_running_apex_errors(sf):
 
         concurrent_long_running_apex_logs = parse_logs(sf, log_query)
 
-        if concurrent_long_running_apex_logs:
-            df = pd.DataFrame(concurrent_long_running_apex_logs)
+        if not concurrent_long_running_apex_logs:
+            logger.info("No concurrent long running apex error occurred yesterday")
+            return
 
-            requests_made = df['REQUEST_ID'].dropna().shape[0]
-            event_type = df['EVENT_TYPE'].iloc[0]
-
-            concurrent_errors_count_gauge.labels(event_type=event_type).set(requests_made)
+        df = pd.DataFrame(concurrent_long_running_apex_logs)
+        requests_made = df['REQUEST_ID'].dropna().shape[0]
+        event_type = df['EVENT_TYPE'].iloc[0] if not df.empty else 'ConcurrentLongRunningApexLimit'
+        concurrent_errors_count_gauge.labels(event_type=event_type).set(requests_made)
 
     except Exception as e:
         logger.error("An unexpected error occurred in exposing concurrent_longrunning_apex_limits: %s", e)
