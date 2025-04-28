@@ -1,6 +1,8 @@
 # Salesforce Monitoring (SFMon)
 
-This project provides the necessary resources to deploy a Salesforce Monitoring (SFMon) service on AWS ECS. SFMon monitors your Salesforce orgs by leveraging a custom Docker image hosted in AWS Elastic Container Registry (ECR).
+This project provides the necessary resources to deploy a Salesforce Monitoring (SFMon) service on AWS ECS. SFMon monitors your Salesforce orgs by leveraging a custom Docker image hosted in AWS Elastic Container Registry (ECR) and creates Prometheus targets for a Prometheus ECS.
+
+A Grafana dashboard can be used to visualize the Prometheus targets created by SFMon.
 
 ## Overview
 
@@ -33,7 +35,7 @@ docker build \
   --build-arg FULLQAB_AUTH_URL="https://test.salesforce.com/services/oauth2/authorize?..." \
   --build-arg DEV_AUTH_URL="https://test.salesforce.com/services/oauth2/authorize?..." \
   -t <your-ecr-repo>/sfmon:latest .
-
+```
 
 Once built, push the image to your ECR:
 
@@ -49,6 +51,10 @@ After your image is published to ECR:
 1. Create or update your ECS Task Definition to use the new Docker image.
 2. Deploy the SFMon service to your ECS cluster.
 3. Ensure the ECS service has the necessary permissions to pull the image from ECR and execute commands.
+
+## Grafana
+
+`configs\grafana` contains a sample Grafana dashboard you can update for your orgs.
 
 ## Notes
 
