@@ -6,6 +6,14 @@ data "aws_security_group" "sfmon_service_sg" {
   name = "${local.environment_name}-${local.application_context}-${local.service_name}-container-sg"
 }
 
+data "aws_ecr_repository" "sfmon_service_repo" {
+  name = local.service_name
+}
+
+data "aws_iam_role" "sfmon_service_role" {
+  name = "${local.environment_name}-${local.application_context}-${local.service_name}-exec-role"
+} 
+
 module "service" {
   source                        = "../../ecs-service"
   name                          = local.service_name
@@ -14,10 +22,10 @@ module "service" {
   launchType                    = "FARGATE"
   container_name                = local.service_name
   container_imageTag            = var.docker_image_tag
-  container_repositoryURL       = "${aws_account}.dkr.ecr.${aws_region}.amazonaws.com/${service_name}"
+  container_repositoryURL       = data.aws_ecr_repository.sfmon_service_repo.repository_url
   task_cpu                      = 2048
   task_memory                   = 8192
-  task_execution_role           = aws_iam_role.this.name
+  task_execution_role           = data.aws_iam_role.sfmon_service_role.name
   container_portMappings        = [{ containerPort = 9001, hostPort = 0, Protocol = "tcp" }]
   containerDefinition_jsonFile  = templatefile("${path.module}/container-definitions.json", {
                                                   service_name      = local.service_name,
