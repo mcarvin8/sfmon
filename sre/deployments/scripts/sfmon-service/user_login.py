@@ -16,52 +16,68 @@ def monitor_login_events(sf):
     """
     Get login events from the org.
     """
+    reset_login_gauges()
+    logger.info("Monitoring login events...")
+
+    try:
+        log_data = fetch_latest_login_log(sf)
+        if log_data:
+            process_login_log(log_data)
+    # pylint: disable=broad-except
+    except Exception:
+        logger.exception("Failed to monitor login events")
+
+
+def reset_login_gauges():
+    '''
+        Reset gauges before querying.
+    '''
     login_success_gauge.set(0)
     login_failure_gauge.set(0)
     unique_login_attempts_guage.set(0)
 
-    logger.info("Monitoring login events...")
-    try:
-        query = "SELECT Id, LogDate, Interval FROM EventLogFile WHERE EventType = 'Login' and Interval = 'Hourly' ORDER BY LogDate DESC"
-        event_log_file = sf.query(query)
 
-        if event_log_file['totalSize'] > 0:
-            log_id = event_log_file['records'][0]['Id']
-            log_data_url = sf.base_url + f"/sobjects/EventLogFile/{log_id}/LogFile"
-            log_data = requests.get(log_data_url,
-                                    headers={"Authorization": f"Bearer {sf.session_id}"},
-                                    timeout=REQUESTS_TIMEOUT_SECONDS)
-            log_data.raise_for_status()  # Raise an error if the request failed
-
-            if log_data.text:
-                csv_reader = csv.DictReader(StringIO(log_data.text))
-                success_count = 0
-                failure_count = 0
-
-                for row in csv_reader:
-                    status = row.get('LOGIN_STATUS')
-                    if status == 'LOGIN_NO_ERROR':
-                        success_count += 1
-                    else:
-                        failure_count += 1
-
-                login_success_gauge.set(success_count)
-                login_failure_gauge.set(failure_count)
-
-                df = pd.read_csv(StringIO(log_data.text))
-
-                if 'USER_ID' in df.columns:
-                    unique_login_attempts = df['USER_ID'].nunique()
-                    unique_login_attempts_guage.set(unique_login_attempts)
-                else:
-                    logger.warning("USER_ID field is not present in the log data")
-
-            else:
-                return None
-        else:
-            return None
-    except Exception:
+def fetch_latest_login_log(sf):
+    '''
+        Query log file for events.
+    '''
+    query = "SELECT Id, LogDate, Interval FROM EventLogFile WHERE EventType = 'Login' and Interval = 'Hourly' ORDER BY LogDate DESC"
+    event_log_file = sf.query(query)
+    if event_log_file['totalSize'] == 0:
         return None
+
+    log_id = event_log_file['records'][0]['Id']
+    log_data_url = sf.base_url + f"/sobjects/EventLogFile/{log_id}/LogFile"
+    response = requests.get(log_data_url,
+                            headers={"Authorization": f"Bearer {sf.session_id}"},
+                            timeout=REQUESTS_TIMEOUT_SECONDS)
+    response.raise_for_status()
+    return response.text if response.text else None
+
+
+def process_login_log(log_text):
+    '''
+        Process login log for successes and failures.
+    '''
+    success_count = 0
+    failure_count = 0
+    csv_reader = csv.DictReader(StringIO(log_text))
+
+    for row in csv_reader:
+        status = row.get('LOGIN_STATUS')
+        if status == 'LOGIN_NO_ERROR':
+            success_count += 1
+        else:
+            failure_count += 1
+
+    login_success_gauge.set(success_count)
+    login_failure_gauge.set(failure_count)
+
+    df = pd.read_csv(StringIO(log_text))
+    if 'USER_ID' in df.columns:
+        unique_login_attempts_guage.set(df['USER_ID'].nunique())
+    else:
+        logger.warning("USER_ID field is not present in the log data")
 
 
 def geolocation(sf, chunk_size=100):
@@ -95,9 +111,12 @@ def geolocation(sf, chunk_size=100):
                 username = record['UserName']
                 browser = record['Browser']
                 login_status = record['Status']
-                geolocation_gauge.labels(user=username, longitude=longitude, latitude=latitude, browser=browser, status=login_status).set(1)
+                geolocation_gauge.labels(user=username, longitude=longitude,
+                                         latitude=latitude, browser=browser,
+                                         status=login_status).set(1)
 
     except KeyError as e:
         logger.error("Key error: %s", e)
+    # pylint: disable=broad-except
     except Exception as e:
         logger.error("Unexpected error: %s", e)

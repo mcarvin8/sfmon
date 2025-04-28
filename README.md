@@ -1,36 +1,57 @@
 # Salesforce Monitoring (SFMon)
 
-This project contains Terraform files required to build an AWS ECS to monitor your Salesforce org.
+This project provides the necessary resources to deploy a Salesforce Monitoring (SFMon) service on AWS ECS. SFMon monitors your Salesforce orgs by leveraging a custom Docker image hosted in AWS Elastic Container Registry (ECR).
+
+## Overview
+
+SFMon runs as an ECS service using a Docker image that contains the required Python environment and Salesforce dependencies. It periodically authenticates with your Salesforce orgs and collects monitoring data.
 
 ## Authors
 
-This SFMon service was originally developed by Deep Suthar and myself.
+Originally developed by Deep Suthar and Matt Carvin.
 
-## Terraform Structure
+## Prerequisites
 
-The terraform files are found in `sre/deployments/terraform`.
+Before you can deploy SFMon, you must provision the following AWS infrastructure:
 
-The core infrastructure to deploy is found in the `ecs-cluster`, `ecs-exec-command-policy`, `prometheus-service`, and `sfmon-service` folders. Each of these folders contains an `application` sub-folder with templates for reusable modules. Each of these folders contains an `env` sub-folder with examples for environment specific files that import the reusable modules. You should update these for your environment and add your own backend configuration with your Terraform state file. You should run terraform commands in the `env` sub-folders after you update these for your accounts.
+- An ECS Cluster to host the SFMon service
+- A Prometheus ECS Service to scrape and store metrics
+- The ECS Exec Command IAM policy to allow troubleshooting access into containers if needed
 
-The `docker-login` folder can be used to login to the Elastic Container Registry (ECR) so you can publish Docker images to it. The `ecs-service` folder contains reusable modules which is used to create the sfmon service. The `tags` folder contains reusable modules with the base tags for all assets.
+## Building and Publishing the Docker Image
 
-## SFMon ECS Service
+SFMon depends on a custom Docker image that needs to be built and pushed to your ECR repository.
 
-The ECS service depends on a Docker container image published to the ECR. This container image contains the required Python and Salesforce dependencies such as the Salesforce CLI. The container image runs a Python script when launched which connects to the desired Salesforce org and collects the required metrics for monitoring.
+When building the image, you must provide authentication URLs for each Salesforce org you intend to monitor. These URLs are passed as build arguments during the Docker build process.
 
-The Python script looks for environment variables named `PRODUCTION_AUTH_URL` and `FULLQA_AUTH_URL` containing the Force Auth URLS for your production org and Full QA/UAT org. I recommend creating a new Monitoring user profile in your Salesforce org solely for the purpose of this service. The Auth URLs are added to the Docker containers as a Docker build arguments, but you could update this if you want to store this Auth URL in an AWS Secrets Manager. 
+Example Docker build command:
 
-You must deploy the following infrastructure to use SFMon:
-1. Monitoring ECS Cluster (or use a pre-existing ECS cluster if you'd like)
-1. SFMon ECR
-1. SFMon ECS Service
-1. Prometheus ECS Service (or use a pre-existing Prometheus ECS if you'd like )
-1. ECS Exec Command policy
+```
+docker build \
+  --build-arg PRODUCTION_AUTH_URL="https://login.salesforce.com/services/oauth2/authorize?..." \
+  --build-arg FULLQA_AUTH_URL="https://test.salesforce.com/services/oauth2/authorize?..." \
+  --build-arg FULLQAB_AUTH_URL="https://test.salesforce.com/services/oauth2/authorize?..." \
+  --build-arg DEV_AUTH_URL="https://test.salesforce.com/services/oauth2/authorize?..." \
+  -t <your-ecr-repo>/sfmon:latest .
 
-After all of the infrastructure is created in AWS, you can then create a Grafana dashboard which uses your Prometheus data source.
 
-## Prometheus ECS Service
+Once built, push the image to your ECR:
 
-An example Prometheus ECS service is provided.
+```
+aws ecr get-login-password --region <your-region> | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.<your-region>.amazonaws.com
+docker push <your-ecr-repo>/sfmon:latest
+```
 
-The configuration for Prometheus is defined in a YAML file maintained in `configs\dev-prometheus-us-west-2\prometheus.yml`. This Prometheus service uses file-based service discovery to scrape Prometheus targets within the ECS cluster using the [Prometheus ECS Discovery](https://github.com/teralytics/prometheus-ecs-discovery) docker image. The Prometheus ECS Discovery container is configured to discover ECS instances in the `monitoring` ECS cluster which can be created from this repo.
+## Deploying SFMon to ECS
+
+After your image is published to ECR:
+
+1. Create or update your ECS Task Definition to use the new Docker image.
+2. Deploy the SFMon service to your ECS cluster.
+3. Ensure the ECS service has the necessary permissions to pull the image from ECR and execute commands.
+
+## Notes
+
+- Each Salesforce org to be monitored must have a corresponding AUTH URL.
+- Keep your authentication URLs secure and updated as needed.
+- This setup assumes you are running Prometheus and scraping targets from the ECS cluster that the SFMon ECS lives in.

@@ -33,5 +33,7 @@ ALLOWED_SECTIONS_ACTIONS = {
     ],
     "Mobile Administration": ["assigneduserstomobileconfig"]
 }
-
-EXCLUDE_USERS = ['Salesforce Admin User']
+EXCLUDE_USERS = ['Salesforce Admin User', 'GitlabIntegration Prod', 'Rajnandini Chavan',
+                 'MindMatrix Integration User', 'Okta Integration User',
+                 'Matthew Forsyth', 'Matt Carvin', 'Deep Suthar']
+EMAIL_DELIVERABILITY_STR = 'Email Deliverability Change'

@@ -1,8 +1,10 @@
-FROM ubuntu:latest
+FROM artifacts.platform.avalara.io/docker/ubuntu
 
 # Pull in build arguments
 ARG PRODUCTION_AUTH_URL
 ARG FULLQA_AUTH_URL
+ARG FULLQAB_AUTH_URL
+ARG DEV_AUTH_URL
 
 # Set Salesforce CLI Environment Variables
 # https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_dev_cli_env_variables.htm
@@ -18,7 +20,9 @@ ENV SF_AUTOUPDATE_DISABLE=true \
     SF_SKIP_NEW_VERSION_CHECK=true \
     SF_CONTAINER_MODE=true \
     PRODUCTION_AUTH_URL=${PRODUCTION_AUTH_URL} \
-    FULLQA_AUTH_URL=${FULLQA_AUTH_URL}
+    FULLQA_AUTH_URL=${FULLQA_AUTH_URL} \
+    FULLQAB_AUTH_URL=${FULLQAB_AUTH_URL} \
+    DEV_AUTH_URL=${DEV_AUTH_URL}
 
 # Set working directory to script
 WORKDIR /app/sfmon

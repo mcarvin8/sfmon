@@ -1,3 +1,6 @@
+'''
+    Org-wide sharing setting functions
+'''
 from cloudwatch_logging import logger
 from compliance import get_user_name
 from gauges import org_wide_sharing__setting_changes
@@ -37,6 +40,6 @@ def monitor_org_wide_sharing_settings(sf):
                 user_name = get_user_name(sf, user_id)
                 details = change.get('Display', 'Unknown')
                 org_wide_sharing__setting_changes.labels(date=created_date, user=user_name, action=action, display=details).set(1)
-
+    # pylint: disable=broad-except
     except Exception as e:
         logger.error("An unexpected error occurred during monitoring Org-Wide Sharing Settings: %s", e)

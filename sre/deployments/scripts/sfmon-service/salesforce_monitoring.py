@@ -7,23 +7,36 @@ import time
 from prometheus_client import start_http_server
 import schedule
 
-from apex_jobs import (async_apex_job_status, monitor_apex_execution_time, expose_apex_exception_metrics,
-                       concurrent_apex_errors, expose_concurrent_long_running_apex_errors, async_apex_execution_summary)
+from apex_jobs import (async_apex_job_status, monitor_apex_execution_time,
+                       expose_apex_exception_metrics,
+                       concurrent_apex_errors,
+                       expose_concurrent_long_running_apex_errors,
+                       async_apex_execution_summary)
 from bulk_api import daily_analyse_bulk_api, hourly_analyse_bulk_api
 from cloudwatch_logging import logger
-from community import community_login_error_logger_details, community_Registration_error_logger_details
-from compliance import hourly_observe_user_querying_large_records, expose_suspicious_records
+from community import (community_login_error_logger_details,
+                       community_registration_error_logger_details)
+from compliance import (hourly_observe_user_querying_large_records,
+                        expose_suspicious_records,
+                        track_email_deliverability_change)
 from connection_sf import get_salesforce_connection_url
 from deployments import get_deployment_status
 from ept_apt import get_salesforce_ept_and_apt
-from overall_sf_org import monitor_salesforce_limits, get_salesforce_licenses, get_salesforce_instance
+from gauges import (payment_method_status_gauge,
+                    payment_gateway_status_gauge,
+                    payment_method_status_gauge_fqab,
+                    payment_gateway_status_gauge_fqab)
+from overall_sf_org import (monitor_salesforce_limits,
+                            get_salesforce_licenses,
+                            get_salesforce_instance)
 from user_login import monitor_login_events, geolocation
 from org_wide_sharing_setting import monitor_org_wide_sharing_settings
 from report_export import hourly_report_export_records
-from payment_gateways_and_methods import monitor_payment_method_status, monitor_payment_gateway_status
+from payment_gateways_and_methods import (monitor_payment_method_status,
+                                          monitor_payment_gateway_status)
 
 
-def schedule_tasks(sf, sf_fqa):
+def schedule_tasks(sf, sf_fqa, sf_fqab, sf_dev):
     """
     Schedule all tasks as per the required intervals.
     """
@@ -32,12 +45,12 @@ def schedule_tasks(sf, sf_fqa):
     logger.info("Executing tasks at startup...")
     monitor_salesforce_limits(dict(sf.limits()))
     get_salesforce_licenses(sf)
-    get_salesforce_instance(sf, sf_fqa)
+    get_salesforce_instance(sf, sf_fqa, sf_fqab, sf_dev)
     daily_analyse_bulk_api(sf)
     get_deployment_status(sf)
     geolocation(sf, chunk_size=100)
     community_login_error_logger_details(sf)
-    community_Registration_error_logger_details(sf)
+    community_registration_error_logger_details(sf)
     hourly_analyse_bulk_api(sf)
     get_salesforce_ept_and_apt(sf)
     monitor_login_events(sf)
@@ -50,17 +63,34 @@ def schedule_tasks(sf, sf_fqa):
     hourly_observe_user_querying_large_records(sf)
     monitor_org_wide_sharing_settings(sf)
     expose_suspicious_records(sf)
+    track_email_deliverability_change(sf_dev, sf_fqa, sf_fqab, minutes=5)
     hourly_report_export_records(sf)
-    monitor_payment_gateway_status(sf_fqa, minutes=5)
-    monitor_payment_method_status(sf_fqa, minutes=5)
+    monitor_payment_gateway_status(sf_fqa, payment_gateway_status_gauge, minutes=5)
+    monitor_payment_method_status(sf_fqa, payment_method_status_gauge, minutes=5)
+    monitor_payment_gateway_status(sf_fqab, payment_gateway_status_gauge_fqab, minutes=5)
+    monitor_payment_method_status(sf_fqab, payment_method_status_gauge_fqab, minutes=5)
     logger.info("Initial execution completed, scheduling tasks...")
 
     # Every 5 minutes
     schedule.every(5).minutes.do(lambda: monitor_salesforce_limits(dict(sf.limits())))
     schedule.every(5).minutes.do(lambda: get_salesforce_licenses(sf))
-    schedule.every(5).minutes.do(lambda: get_salesforce_instance(sf, sf_fqa))
-    schedule.every(5).minutes.do(lambda: monitor_payment_gateway_status(sf_fqa, minutes=5))
-    schedule.every(5).minutes.do(lambda: monitor_payment_method_status(sf_fqa, minutes=5))
+    schedule.every(5).minutes.do(lambda: get_salesforce_instance(sf, sf_fqa, sf_fqab, sf_dev))
+    schedule.every(5).minutes.do(lambda: monitor_payment_gateway_status(sf_fqa,
+                                                                        payment_gateway_status_gauge,
+                                                                        minutes=5))
+    schedule.every(5).minutes.do(lambda: monitor_payment_method_status(sf_fqa,
+                                                                       payment_method_status_gauge,
+                                                                       minutes=5))
+    schedule.every(5).minutes.do(lambda: monitor_payment_gateway_status(sf_fqab,
+                                                                        payment_gateway_status_gauge_fqab,
+                                                                        minutes=5))
+    schedule.every(5).minutes.do(lambda: monitor_payment_method_status(sf_fqab,
+                                                                       payment_method_status_gauge_fqab,
+                                                                       minutes=5))
+    schedule.every(5).minutes.do(lambda: track_email_deliverability_change(sf_dev,
+                                                                           sf_fqa,
+                                                                           sf_fqab,
+                                                                           minutes=5))
 
     # Twice a day
     schedule.every().day.at("08:00").do(lambda: daily_analyse_bulk_api(sf))
@@ -71,8 +101,8 @@ def schedule_tasks(sf, sf_fqa):
     schedule.every().day.at("20:00").do(lambda: geolocation(sf, chunk_size=100))
     schedule.every().day.at("08:00").do(lambda: community_login_error_logger_details(sf))
     schedule.every().day.at("20:00").do(lambda: community_login_error_logger_details(sf))
-    schedule.every().day.at("08:00").do(lambda: community_Registration_error_logger_details(sf))
-    schedule.every().day.at("20:00").do(lambda: community_Registration_error_logger_details(sf))
+    schedule.every().day.at("08:00").do(lambda: community_registration_error_logger_details(sf))
+    schedule.every().day.at("20:00").do(lambda: community_registration_error_logger_details(sf))
     schedule.every().day.at("08:00").do(lambda: monitor_org_wide_sharing_settings(sf))
     schedule.every().day.at("20:00").do(lambda: monitor_org_wide_sharing_settings(sf))
 
@@ -101,7 +131,9 @@ def main():
     start_http_server(9001)
     sf = get_salesforce_connection_url(url=os.getenv('PRODUCTION_AUTH_URL'))
     sf_fqa = get_salesforce_connection_url(url=os.getenv('FULLQA_AUTH_URL'))
-    schedule_tasks(sf, sf_fqa)
+    sf_fqab = get_salesforce_connection_url(url=os.getenv('FULLQAB_AUTH_URL'))
+    sf_dev = get_salesforce_connection_url(url=os.getenv('DEV_AUTH_URL'))
+    schedule_tasks(sf, sf_fqa, sf_fqab, sf_dev)
     while True:
         schedule.run_pending()
         logger.info('Sleeping for 5 minutes...')

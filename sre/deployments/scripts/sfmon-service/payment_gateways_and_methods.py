@@ -1,12 +1,16 @@
+'''
+    Payment gateway and method functions.
+'''
+from datetime import datetime, timedelta
+
 from cloudwatch_logging import logger
-from gauges import payment_method_status_gauge, payment_gateway_status_gauge
 from constants import QUERY_TIMEOUT_SECONDS
-from datetime import datetime, timedelta, timezone
 import pytz
 
 
 def get_time_threshold(minutes=5):
-    '''Returns a formatted string of the time threshold for the last specified number of minutes in GMT timezone.'''
+    '''Returns a formatted string of the time threshold
+    for the last specified number of minutes in GMT timezone.'''
     gmt_timezone = pytz.timezone('GMT')
     current_time = datetime.now(gmt_timezone)
     time_threshold = current_time - timedelta(minutes=minutes)
@@ -21,11 +25,11 @@ def query_records(sf, soql_query):
     return result['records'] if 'records' in result else []
 
 
-def monitor_payment_method_status(sf, minutes):
+def monitor_payment_method_status(sf, pms_gauge, minutes):
     '''monitors changes in Payment method status for FullQA'''
 
     logger.info("Getting Payment Methods status from FullQA...")
-    payment_method_status_gauge.clear()
+    pms_gauge.clear()
 
     time_threshold_str = get_time_threshold(minutes)
 
@@ -42,7 +46,7 @@ def monitor_payment_method_status(sf, minutes):
         if not changes:
             logger.info("No recent changes in Active billing field for Payment method.")
             # Set default label with value 0 to indicate no data
-            payment_method_status_gauge.labels(
+            pms_gauge.labels(
                 billing_active_status='N/A',
                 billing_autopay_status='N/A',
                 billing_payment_gateway_name='N/A',
@@ -64,7 +68,7 @@ def monitor_payment_method_status(sf, minutes):
             user_name=change.get('CreatedBy', {}).get('Name', 'Unknown')
             last_modified_date=change.get('LastModifiedDate', 'Unknown')
 
-            payment_method_status_gauge.labels(
+            pms_gauge.labels(
                 billing_active_status=billing_active_status,
                 billing_autopay_status=billing_autopay_status,
                 billing_payment_gateway_name=billing_payment_gateway_name,
@@ -74,16 +78,16 @@ def monitor_payment_method_status(sf, minutes):
                 user_name=user_name,
                 last_modified_date=last_modified_date
             ).set(1)
-
+    # pylint: disable=broad-except
     except Exception as e:
         logger.error("An unexpected error occurred during monitoring Payment method status: %s", e)
 
 
-def monitor_payment_gateway_status(sf, minutes):
+def monitor_payment_gateway_status(sf, pgs_gauge, minutes):
     '''monitors changes in Payment Gateway status for FullQA'''
 
     logger.info("Getting Payment Gateways status from FullQA...")
-    payment_gateway_status_gauge.clear()
+    pgs_gauge.clear()
 
     time_threshold_str = get_time_threshold(minutes)
 
@@ -99,7 +103,7 @@ def monitor_payment_gateway_status(sf, minutes):
         if not changes:
             logger.info("No Payment Gateways found.")
             # Set default label with value 0 to indicate no data
-            payment_gateway_status_gauge.labels(
+            pgs_gauge.labels(
                 billing_active_status='N/A',
                 billing_default_status='N/A',
                 billing_gateway_type='N/A',
@@ -128,7 +132,7 @@ def monitor_payment_gateway_status(sf, minutes):
             user_name=change.get('LastModifiedBy', {}).get('Name', 'Unknown')
             last_modified_date=change.get('LastModifiedDate', 'Unknown')
 
-            payment_gateway_status_gauge.labels(
+            pgs_gauge.labels(
                 billing_active_status=billing_active_status,
                 billing_default_status=billing_default_status,
                 billing_gateway_type=billing_gateway_type,
@@ -137,6 +141,6 @@ def monitor_payment_gateway_status(sf, minutes):
                 user_name=user_name,
                 last_modified_date=last_modified_date
             ).set(metric_value)
-
+    # pylint: disable=broad-except
     except Exception as e:
         logger.error("An unexpected error occurred during monitoring Payment Gateway status: %s", e)

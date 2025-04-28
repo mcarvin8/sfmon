@@ -35,5 +35,6 @@ def parse_logs(sf, log_query):
         logger.error("Request error occurred in parse_logs : %s", req_err)
     except csv.Error as csv_err:
         logger.error("CSV processing error: %s", csv_err)
+    # pylint: disable=broad-except
     except Exception as e:
         logger.error("An unexpected error occurred in parse_logs : %s", e)

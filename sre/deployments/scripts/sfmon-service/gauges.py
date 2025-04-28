@@ -2,6 +2,7 @@
     Define all Prometheus gauges.
 """
 from prometheus_client import Gauge
+from constants import EMAIL_DELIVERABILITY_STR
 
 # Constants
 TOTAL_LICENSES = 'Total Salesforce licenses'
@@ -17,7 +18,8 @@ api_usage_percentage_gauge = Gauge('salesforce_api_usage_percentage',
 
 daily_batch_count_metric = Gauge('daily_bulk_api_batch_count',
                            'Count of batches by job_id, user_id, and entity_type', 
-                           ['job_id', 'user_id', 'entity_type', 'total_records_failed', 'total_records_processed'])
+                           ['job_id', 'user_id', 'entity_type',
+                            'total_records_failed', 'total_records_processed'])
 
 daily_entity_type_count_metric = Gauge('daily_entity_type_count',
                                 'Counts of ENTITY_TYPE by user_id and OPERATION_TYPE',
@@ -25,7 +27,8 @@ daily_entity_type_count_metric = Gauge('daily_entity_type_count',
 
 hourly_batch_count_metric = Gauge('hourly_bulk_api_batch_count',
                            'Count of batches by job_id, user_id, and entity_type', 
-                           ['job_id', 'user_id', 'entity_type', 'total_records_failed', 'total_records_processed'])
+                           ['job_id', 'user_id', 'entity_type',
+                            'total_records_failed', 'total_records_processed'])
 
 hourly_entity_type_count_metric = Gauge('hourly_entity_type_count',
                                 'Counts of ENTITY_TYPE by user_id and OPERATION_TYPE',
@@ -64,7 +67,8 @@ percent_usage_based_entitlements_used_gauge = Gauge('salesforce_percent_used_usa
 
 incident_gauge = Gauge('salesforce_incidents',
                        'Number of active Salesforce incidents',
-                       ['environment', 'pod', 'severity', 'message'])
+                       ['environment', 'pod', 'severity',
+                        'message', 'original_message'])
 
 maintenance_gauge = Gauge('salesforce_maintenance', 'Ongoing or Planned Salesforce Maintenance',
                           ['environment', 'maintenance_id', 'status',
@@ -131,13 +135,17 @@ callout_time_metric = Gauge('salesforce_apex_callout_time_seconds',
 
 top_apex_concurrent_errors_sorted_by_avg_runtime = Gauge('most_apex_concurrent_errors_sorted_by_runtime',
                                                          'Top Long Running Requests by Average Runtime with Runtime > 5 seconds',
-                                                         ['entry_point', 'count', 'avg_exec_time', 'avg_db_time'])
+                                                         ['entry_point', 'count',
+                                                          'avg_exec_time', 'avg_db_time'])
 
 top_apex_concurrent_errors_sorted_by_count = Gauge('most_apex_concurrent_errors_sorted_by_count',
                                                          'Top Long Running Requests by Count with Runtime > 5 seconds',
-                                                         ['entry_point', 'avg_run_time', 'avg_exec_time', 'avg_db_time'])
+                                                         ['entry_point', 'avg_run_time',
+                                                          'avg_exec_time', 'avg_db_time'])
 
-concurrent_errors_count_gauge =  Gauge('concurrent_request_error_count', 'Count of non-blank REQUEST_ID entries in CSV file', ['event_type'])
+concurrent_errors_count_gauge =  Gauge('concurrent_request_error_count',
+                                       'Count of non-blank REQUEST_ID entries in CSV file',
+                                       ['event_type'])
 
 apex_exception_details_gauge = Gauge('apex_exception_details',
                                      'Details of each Apex exception',
@@ -147,37 +155,96 @@ apex_exception_category_count_gauge = Gauge('apex_exception_category_count',
                                             'Total count of Apex exceptions by category',
                                             ['exception_category'])
 
-hourly_large_query_metric = Gauge('hourly_user_querying_large_records', 'Number of large queries by user',
+hourly_large_query_metric = Gauge('hourly_user_querying_large_records',
+                                  'Number of large queries by user',
                            ['user_id', 'user_name', 'method', 'entity_name', 'rows_processed'])
 
-community_login_error_metric = Gauge('community_login_error_details', 'Details of SFDC logger entries', ['id', 'name', 'log_level', 'log_message', 'record_id', 'created_date'])
+community_login_error_metric = Gauge('community_login_error_details',
+                                     'Details of SFDC logger entries', 
+                                     ['id', 'name', 'log_level', 'log_message',
+                                      'record_id', 'created_date'])
 
-community_registration_error_metric = Gauge('community_registration_error_details', 'Details of SFDC logger entries', ['id', 'name', 'source_name', 'log_level', 'log_message', 'callout_response', 'record_id', 'created_date'])
+community_registration_error_metric = Gauge('community_registration_error_details',
+                                            'Details of SFDC logger entries',
+                                            ['id', 'name', 'source_name', 'log_level',
+                                             'log_message', 'callout_response',
+                                             'record_id', 'created_date'])
 
 # Define Prometheus metrics
-apex_entry_point_count = Gauge('apex_entry_point_count', 'Count of apex executions by entry point', ['entry_point', 'quiddity'])
-apex_avg_runtime = Gauge('apex_avg_runtime', 'Average runtime by entry point', ['entry_point', 'quiddity'])
-apex_max_runtime = Gauge('apex_max_runtime', 'Maximum runtime by entry point', ['entry_point', 'quiddity'])
-apex_total_runtime = Gauge('apex_total_runtime', 'Total runtime by entry point', ['entry_point', 'quiddity'])
-apex_avg_cputime = Gauge('apex_avg_cputime', 'Average CPU time by entry point', ['entry_point', 'quiddity'])
-apex_max_cputime = Gauge('apex_max_cputime', 'Maximum CPU time by entry point', ['entry_point', 'quiddity'])
-apex_runtime_gt_5s_count = Gauge('apex_runtime_gt_5s_count', 'Count of apex executions with runtime > 5s', ['entry_point', 'quiddity'])
-apex_runtime_gt_10s_count = Gauge('apex_runtime_gt_10s_count', 'Count of apex executions with runtime > 10s', ['entry_point', 'quiddity'])
-apex_runtime_gt_5s_percentage = Gauge('apex_runtime_gt_5s_percentage', 'Percentage of apex executions with runtime > 5s', ['entry_point', 'quiddity'])
+apex_entry_point_count = Gauge('apex_entry_point_count',
+                               'Count of apex executions by entry point',
+                               ['entry_point', 'quiddity'])
+apex_avg_runtime = Gauge('apex_avg_runtime',
+                         'Average runtime by entry point',
+                         ['entry_point', 'quiddity'])
+apex_max_runtime = Gauge('apex_max_runtime',
+                         'Maximum runtime by entry point',
+                         ['entry_point', 'quiddity'])
+apex_total_runtime = Gauge('apex_total_runtime',
+                           'Total runtime by entry point',
+                           ['entry_point', 'quiddity'])
+apex_avg_cputime = Gauge('apex_avg_cputime',
+                         'Average CPU time by entry point',
+                         ['entry_point', 'quiddity'])
+apex_max_cputime = Gauge('apex_max_cputime',
+                         'Maximum CPU time by entry point',
+                         ['entry_point', 'quiddity'])
+apex_runtime_gt_5s_count = Gauge('apex_runtime_gt_5s_count',
+                                 'Count of apex executions with runtime > 5s', 
+                                 ['entry_point', 'quiddity'])
+apex_runtime_gt_10s_count = Gauge('apex_runtime_gt_10s_count',
+                                  'Count of apex executions with runtime > 10s',
+                                  ['entry_point', 'quiddity'])
+apex_runtime_gt_5s_percentage = Gauge('apex_runtime_gt_5s_percentage',
+                                      'Percentage of apex executions with runtime > 5s',
+                                      ['entry_point', 'quiddity'])
 
-org_wide_sharing__setting_changes = Gauge('org_wide_sharing_changes', 'Track changes in Org-Wide Sharing Settings', ['date', 'user', 'action', 'display'])
+org_wide_sharing__setting_changes = Gauge('org_wide_sharing_changes',
+                                          'Track changes in Org-Wide Sharing Settings',
+                                          ['date', 'user', 'action', 'display'])
 
 hourly_report_export_metric = Gauge('hourly_report_export', 'Report export details',
                            ['user_name', 'timestamp', 'report_name', 'report_type_api_name'])
 
-suspicious_records_gauge = Gauge(
-    'suspicious_records','suspicious records from Audit Trail logs',
-    ['action', 'section', 'user', 'created_date', 'display', 'delegate_user'])
+suspicious_records_gauge = Gauge('suspicious_records','suspicious records from Audit Trail logs',
+                                ['action', 'section', 'user',
+                                 'created_date', 'display', 'delegate_user'])
+
+dev_email_deliverability_change_gauge = Gauge('dev_email_deliverability_change',
+                                              EMAIL_DELIVERABILITY_STR,
+                                                ['action', 'section', 'user',
+                                                 'created_date', 'display', 'delegate_user'])
+
+fullqa_email_deliverability_change_gauge = Gauge('fullqa_email_deliverability_change',
+                                                 EMAIL_DELIVERABILITY_STR,
+                                                ['action', 'section', 'user',
+                                                 'created_date', 'display', 'delegate_user'])
+
+fullqab_email_deliverability_change_gauge = Gauge('fullqab_email_deliverability_change',
+                                                  EMAIL_DELIVERABILITY_STR,
+                                                ['action', 'section', 'user',
+                                                 'created_date', 'display', 'delegate_user'])
 
 payment_method_status_gauge = Gauge('payment_method_status', 'Payment Methods Status',
-                                    ['billing_active_status', 'billing_autopay_status', 'billing_payment_gateway_name',
-                                    'payment_gateway_token', 'payment_method_id', 'payment_method_name', 'user_name', 'last_modified_date'])
+                                    ['billing_active_status', 'billing_autopay_status',
+                                     'billing_payment_gateway_name',
+                                    'payment_gateway_token', 'payment_method_id',
+                                    'payment_method_name', 'user_name', 'last_modified_date'])
 
 payment_gateway_status_gauge = Gauge('payment_gateway_status', 'Payment Gateways Status',
-                                    ['billing_active_status', 'billing_default_status', 'billing_gateway_type',
-                                    'payment_gateway_name', 'record_id', 'user_name', 'last_modified_date'])
+                                    ['billing_active_status', 'billing_default_status',
+                                     'billing_gateway_type',
+                                    'payment_gateway_name', 'record_id',
+                                    'user_name', 'last_modified_date'])
+
+payment_method_status_gauge_fqab = Gauge('payment_method_status_fqab', 'Payment Methods Status',
+                                    ['billing_active_status', 'billing_autopay_status',
+                                     'billing_payment_gateway_name',
+                                    'payment_gateway_token', 'payment_method_id',
+                                    'payment_method_name', 'user_name', 'last_modified_date'])
+
+payment_gateway_status_gauge_fqab = Gauge('payment_gateway_status_fqab', 'Payment Gateways Status',
+                                    ['billing_active_status', 'billing_default_status',
+                                     'billing_gateway_type',
+                                    'payment_gateway_name', 'record_id',
+                                    'user_name', 'last_modified_date'])

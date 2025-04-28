@@ -1,13 +1,16 @@
+'''
+    Community monitoring functions.
+'''
 from cloudwatch_logging import logger
 from gauges import community_login_error_metric, community_registration_error_metric
 
 
 def community_login_error_logger_details(sf):
     """
-    Monitors Apex failure for login (PRM and GSP) from SFDC Logger records where source = 'Community - Login'
+    Monitors Apex failure for login (PRM and GSP)
+    from SFDC Logger records where source = 'Community - Login'
     and Log level is Error or Fatal
     """
-
     try:
         query = """
         SELECT Id, Name, Source_Name__c, CreatedDate, Log_Message__c, Record_Id__c, Log_Level__c 
@@ -32,15 +35,17 @@ def community_login_error_logger_details(sf):
                     record_id=record['Record_Id__c'],
                     created_date=record['CreatedDate']
                 ).set(1)  # Set value to 1 (or any other constant value)
-
+    # pylint: disable=broad-except
     except Exception as e:
         logger.error("Error fetching SFDC Logger Login records: %s", e)
 
 
-def community_Registration_error_logger_details(sf):
+def community_registration_error_logger_details(sf):
     """
     Monitors Apex failure for Registration (PRM and GSP) from SFDC Logger records
-    where source = ('Community - Conversation Id', 'Community - Registration', 'GSP - Registration PRMP')
+    where source = ('Community - Conversation Id',
+                    'Community - Registration',
+                    'GSP - Registration PRMP')
     and Log level is Error or Fatal
     """
 
@@ -70,6 +75,6 @@ def community_Registration_error_logger_details(sf):
                     record_id=record['Record_Id__c'],
                     created_date=record['CreatedDate']
                 ).set(1)  # Set value to 1 (or any other constant value)
-
+    # pylint: disable=broad-except
     except Exception as e:
         logger.error("Error fetching SFDC Logger Registration records: %s", e)

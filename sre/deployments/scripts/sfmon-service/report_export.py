@@ -1,5 +1,6 @@
-# Utilise : SELECT Id, Name, DeveloperName, FolderName, ReportTypeApiName FROM Report USING SCOPE allPrivate where Name = 'accounts' or 'revenue' or 'contacts'
-
+'''
+    Report export functins.
+'''
 from constants import QUERY_TIMEOUT_SECONDS
 from cloudwatch_logging import logger
 from log_parser import parse_logs
@@ -26,22 +27,12 @@ def hourly_report_export_records(sf):
 
             modified_id = row['URI'][1:] if row['URI'].startswith("/") else row['URI']
 
-            # url = f"{sf.base_url}analytics/reports/{modified_id}/describe"
-            # log_file_response = requests.get(url,
-            #                                 headers={"Authorization": f"Bearer {sf.session_id}"},
-            #                                 timeout=REQUESTS_TIMEOUT_SECONDS)
-            # if log_file_response.raise_for_status() == '200':
-            #     data = json.loads(log_file_response.text)
-            #     print(data)
-            #     print(data['reportName'])
-            #     print(data['objectRelationships']['relatedEntity'])
-
             # Add validation for the report ID format
             if not modified_id or len(modified_id) < 15:  # Salesforce IDs are typically 15 or 18 characters
                 logger.warning("Invalid report ID format: %s", modified_id)
                 continue
 
-            report_detail_query = (f"SELECT Id, Name, ReportTypeApiName FROM Report WHERE Id = '{modified_id}'")
+            report_detail_query = f"SELECT Id, Name, ReportTypeApiName FROM Report WHERE Id = '{modified_id}'"
             result = sf.query(report_detail_query, timeout=QUERY_TIMEOUT_SECONDS)
 
             hourly_report_export_metric.labels(
@@ -50,6 +41,6 @@ def hourly_report_export_records(sf):
                 report_name=result.get('records', [])[0].get('Name') if result.get('records') else None,
                 report_type_api_name = result.get('records', [])[0].get('ReportTypeApiName') if result.get('records') else None
             ).set(1)
-
+    # pylint: disable=broad-except
     except Exception as e:
         logger.error("An error occurred in report_export_records : %s", e)
