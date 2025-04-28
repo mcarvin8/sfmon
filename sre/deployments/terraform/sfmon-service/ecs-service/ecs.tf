@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 module "service" {
-  source                        = "git::https://scm.platform.avalara.io/sre-public/tf-core-modules//aws/ecs/service-service?ref=v3.16.0"
+  source                        = "../../ecs-service"
   name                          = local.service_name
   cluster_name                  = local.cluster_name
   desired_count                 = 1
@@ -30,7 +30,6 @@ module "service" {
 
   project             = local.application_context
   contact             = local.sre_owner_email
-  environment_billing = local.environment_name
   environment_runtime = local.environment_name
   repo                = local.repo_name
 }

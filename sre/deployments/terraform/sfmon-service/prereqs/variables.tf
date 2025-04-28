@@ -1,8 +1,3 @@
-variable "docker_image_tag" {
-  type        = string
-  description = "The Docker image tag to be appended to the image URL"
-}
-
 variable "ecs_exec_command_policy_name" {
   type        = string
   description = "The name of the pre-existing IAM policy for enabling ECS exec-command (optional)"
