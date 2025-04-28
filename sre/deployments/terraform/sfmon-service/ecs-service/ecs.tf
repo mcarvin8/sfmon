@@ -2,6 +2,10 @@ provider "aws" {
   region = "us-west-2"
 }
 
+data "aws_security_group" "sfmon_service_sg" {
+  name = "${local.environment_name}-${local.application_context}-${local.service_name}-container-sg"
+}
+
 module "service" {
   source                        = "../../ecs-service"
   name                          = local.service_name
@@ -10,7 +14,7 @@ module "service" {
   launchType                    = "FARGATE"
   container_name                = local.service_name
   container_imageTag            = var.docker_image_tag
-  container_repositoryURL       = "${aws_ecr_repository.sfmon.repository_url}"
+  container_repositoryURL       = "${aws_account}.dkr.ecr.${aws_region}.amazonaws.com/${service_name}"
   task_cpu                      = 2048
   task_memory                   = 8192
   task_execution_role           = aws_iam_role.this.name
@@ -24,7 +28,7 @@ module "service" {
   container_logDriver           = var.container_logDriver
 
   network_config = {
-    security_group_ids = [aws_security_group.sfmon_service_sg.id]
+    security_group_ids = [data.aws_security_group.sfmon_service_sg.id]
     subnet_ids         = local.subnet_ids_ecs
   }
 
