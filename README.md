@@ -14,15 +14,20 @@ Originally developed by Deep Suthar and Matt Carvin.
 
 ## Prerequisites
 
-Before you can deploy SFMon, you must provision the following AWS infrastructure:
+Before you can deploy SFMon ECS, you must provision the following AWS infrastructure:
 
 - An ECS Cluster to host the SFMon service
 - A Prometheus ECS Service to scrape and store metrics
 - The ECS Exec Command IAM policy to allow troubleshooting access into containers if needed
+- `sre/deployments/terraform/sfmon-service/env/us-west-2/dev/prereqs`
+    - ECR for SFMon images
+    - IAM role for SFMon
+    - Security Groups for SFMon
+    - Cloudwatch logging group for SFMon
 
 ## Building and Publishing the Docker Image
 
-SFMon depends on a custom Docker image that needs to be built and pushed to your ECR repository.
+SFMon depends on a custom Docker image that needs to be built and pushed to the SFMon ECR repository.
 
 When building the image, you must provide authentication URLs for each Salesforce org you intend to monitor. These URLs are passed as build arguments during the Docker build process.
 
@@ -46,7 +51,9 @@ docker push <your-ecr-repo>/sfmon:latest
 
 ## Deploying SFMon to ECS
 
-After your image is published to ECR:
+`sre\deployments\terraform\sfmon-service\env\us-west-2\dev\ecs-service`
+
+After your image is published to ECR and the other AWS infrastructure is created to run the ECS:
 
 1. Create or update your ECS Task Definition to use the new Docker image.
 2. Deploy the SFMon service to your ECS cluster.

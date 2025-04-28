@@ -1,7 +1,7 @@
 resource "aws_security_group" "sfmon_service_sg" {
-  name        = "${var.environment_name}-${local.application_context}-${local.service_name}-container-sg"
+  name        = "${local.environment_name}-${local.application_context}-${local.service_name}-container-sg"
   description = "Security group for sfmon service"
-  vpc_id      = var.vpc_id
+  vpc_id      = local.vpc_id
 
   ingress {
     from_port   = 0
@@ -19,6 +19,7 @@ resource "aws_security_group" "sfmon_service_sg" {
 
   tags = merge(
     module.tags.tags,
-    { Name = "${var.environment_name}-${local.application_context}-${local.service_name}-container-sg" }
+    { Name = "${local.environment_name}-${local.application_context}-${local.service_name}-container-sg" }
   )
 }
+

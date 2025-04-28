@@ -18,24 +18,24 @@ data "aws_iam_policy_document" "this" {
 data "aws_iam_policy_document" "pass_role" {
   statement {
     actions = ["iam:PassRole"]
-    resources = ["arn:aws:iam::${var.aws_account}:role/${var.environment_name}-${local.application_context}-${local.service_name}-exec-role"]
+    resources = ["arn:aws:iam::${local.aws_account}:role/${local.environment_name}-${local.application_context}-${local.service_name}-exec-role"]
   }
 }
 
 resource "aws_iam_policy" "pass_role_policy" {
-  name        = "${var.environment_name}-${local.application_context}-${local.service_name}-pass-role"
+  name        = "${local.environment_name}-${local.application_context}-${local.service_name}-pass-role"
   description = "Policy to allow passing the ECS execution role"
   policy      = data.aws_iam_policy_document.pass_role.json
 
   tags = merge(
     module.tags.tags,
-    { Name = "${var.environment_name}-${local.application_context}-${local.service_name}-pass-role"}
+    { Name = "${local.environment_name}-${local.application_context}-${local.service_name}-pass-role"}
   )
 }
 
 resource "aws_iam_role" "this" {
-  name                 = "${var.environment_name}-${local.application_context}-${local.service_name}-exec-role"
-  description          = "ECS task execution for ${var.environment_name} ${local.service_name}."
+  name                 = "${local.environment_name}-${local.application_context}-${local.service_name}-exec-role"
+  description          = "ECS task execution for ${local.environment_name} ${local.application_context} ${local.service_name}."
   assume_role_policy   = data.aws_iam_policy_document.this.json
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
@@ -46,6 +46,6 @@ resource "aws_iam_role" "this" {
   ]
   tags = merge(
     module.tags.tags,
-    { Name = "${var.environment_name}-${local.application_context}-${local.service_name}-exec-role" }
+    { Name = "${local.environment_name}-${local.application_context}-${local.service_name}-exec-role" }
   )
 }
