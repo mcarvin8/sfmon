@@ -130,7 +130,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "The panels will update on different intervals. \r\nPlease see Data Refresh Intervals on the [doc](https://avalara.atlassian.net/wiki/spaces/AVATECH/pages/638415603972/Salesforce+Monitoring).",
+        "content": "The panels will update on different intervals. \r\nPlease see Data Refresh Intervals on the doc.",
         "mode": "markdown"
       },
       "pluginVersion": "10.4.1",
@@ -257,7 +257,7 @@
         "for": "5m",
         "frequency": "1m",
         "handler": 1,
-        "message": "<!channel> ALERT: A Salesforce Incident has been opened against Production\n\nDashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1",
+        "message": "<!channel> ALERT: A Salesforce Incident has been opened against Production",
         "name": "Salesforce Production Incidents Alert",
         "noDataState": "keep_state",
         "notifications": [
@@ -415,7 +415,7 @@
         "for": "5m",
         "frequency": "1m",
         "handler": 1,
-        "message": "<!channel> ALERT: A Salesforce Incident has been opened against ${environment}\n\nDashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1",
+        "message": "<!channel> ALERT: A Salesforce Incident has been opened against ${environment}",
         "name": "Salesforce Sandbox Incidents Alert",
         "noDataState": "keep_state",
         "notifications": [
@@ -807,7 +807,7 @@
         "for": "5m",
         "frequency": "1m",
         "handler": 1,
-        "message": "<!channel> ALERT: Salesforce API Usage is over 80% for ${limit_name}\n\nDashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1",
+        "message": "<!channel> ALERT: Salesforce API Usage is over 80% for ${limit_name}",
         "name": "Salesforce API Usage Alert",
         "noDataState": "keep_state",
         "notifications": [
@@ -2449,7 +2449,7 @@
             "for": "5m",
             "frequency": "1m",
             "handler": 1,
-            "message": "<!channel> ALERT: Payment Gateway Status has changed in the orgs below. \n\nPlease review details under section \"Observe Payment Gateway Status change for FullQA\" on Dashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1\n\n",
+            "message": "<!channel> ALERT: Payment Gateway Status has changed in the orgs below.",
             "name": "Payment Gateway Status Change Alert",
             "noDataState": "ok",
             "notifications": [
@@ -2621,7 +2621,7 @@
             "for": "5m",
             "frequency": "1m",
             "handler": 1,
-            "message": "<!channel> ALERT: Active Billing Field for Payment Methods has changed in the orgs below. \n\nPlease review details under section \"Observe Payment Gateway Status change for FullQA\" on Dashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1\n\n**",
+            "message": "<!channel> ALERT: Active Billing Field for Payment Methods has changed in the orgs below.",
             "name": "Active Billing Payment Methods Alert",
             "noDataState": "ok",
             "notifications": [
@@ -3583,7 +3583,7 @@
             "for": "5m",
             "frequency": "1m",
             "handler": 1,
-            "message": "<!channel> ALERT: Email Deliverability Status changed in the orgs below. \nPlease review details under section \"Email Deliverability status\" on Dashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1",
+            "message": "<!channel> ALERT: Email Deliverability Status changed in the orgs below.",
             "name": "Email Deliverability Change Alert",
             "noDataState": "ok",
             "notifications": [
@@ -10134,7 +10134,7 @@
               "showLineNumbers": false,
               "showMiniMap": false
             },
-            "content": "# Deployment Metric Disclaimers\n\nThe production deployment metrics in this dashboard are retrieved directly from Salesforce Production, not GitLab. Salesforce deployment metrics include GitLab deployments, change-set deployments, and package installations.\n\nSalesforce only retains deployment records for about 30 days, thus the metrics here will only be from the current month.\n\nThese metrics do NOT include the entire GitLab deployment process, which includes validations/check-only deployments for Apex packages. This process optimizes the Apex deployment process.\n\nValidation metrics are NOT included in this dashboard, but they are included in the Hex report.\n\nPlease refer to the [Hex report](https://app.hex.tech/avalara/app/55b1430d-a9e3-4eaf-a227-6e4f766daf55/latest?) to view complete metrics for the complete GitLab deployment pipeline over a longer period of time.",
+            "content": "# Deployment Metric Disclaimers\n\nThe production deployment metrics in this dashboard are retrieved directly from Salesforce Production, not GitLab. Salesforce deployment metrics include GitLab deployments, change-set deployments, and package installations.\n\nSalesforce only retains deployment records for about 30 days, thus the metrics here will only be from the current month.",
             "mode": "markdown"
           },
           "pluginVersion": "10.4.1",
