@@ -17,7 +17,7 @@ Originally developed by Deep Suthar and Matt Carvin.
 Before you can deploy SFMon ECS, you must provision the following AWS infrastructure:
 
 - An ECS Cluster to host the SFMon service
-- A Prometheus ECS Service to scrape and store metrics
+- A Prometheus ECS Service to scrape and store metrics from the ECS cluster
 - The ECS Exec Command IAM policy to allow troubleshooting access into containers if needed
 - `sre/deployments/terraform/sfmon-service/prereqs`
     - ECR for SFMon images
