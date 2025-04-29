@@ -47,7 +47,7 @@ The 3 sandboxes are monitored for incidents, email deliverability setting change
 
 ## Building and Publishing the Docker Image
 
-SFMon depends on a custom Docker image that needs to be built and pushed to the SFMon AWS ECR repository.
+SFMon depends on a custom Docker image that needs to be built and pushed to the SFMon AWS ECR repository. **The Docker image exposes Port 9001 for Prometheus metrics.**
 
 When building the image, you must provide the SFDX authorization URLs for each Salesforce org you intend to monitor. These URLs are passed as build arguments during the Docker build process.
 
@@ -91,7 +91,7 @@ After your image is published to ECR and the other AWS infrastructure is created
 
 The heart of this repository is the Python scripts in `sre/deployments/scripts/sfmon-service` and the Dockerfile in `sre/deployments/docker/sfmon-service` which copies the Python scripts and launches the main script at run-time to schedule/run the monitoring functions.
 
-The Docker image exposes Port 9001 for Prometheus metrics. The Docker container with the scripts can easily be deployed to other container registries and uses in services like Google Cloud Managed Service for Prometheus.
+The Docker container with the scripts can easily be deployed to other container registries and uses in services like Google Cloud Managed Service for Prometheus.
 
 - If you're running in GKE, add a PodMonitor or use Kubernetes annotations to enable scraping.
 - For Cloud Run or VM users, run a Prometheus agent or OpenTelemetry Collector configured to scrape the metrics endpoint and forward data to Google Cloud Monitoring.
