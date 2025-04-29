@@ -34,20 +34,20 @@ When building the image, you must provide the SFDX authorization URLs for each S
 Example Docker build command:
 
 ```
-cd sre/deployments/docker/sfmon-service
 docker build \
-  --build-arg PRODUCTION_AUTH_URL="..." \
-  --build-arg FULLQA_AUTH_URL="..." \
-  --build-arg FULLQAB_AUTH_URL="..." \
-  --build-arg DEV_AUTH_URL="..." \
-  -t <your-ecr-repo>/sfmon:latest .
+  --file "./sre/deployments/docker/sfmon-service/Dockerfile"
+  --build-arg PRODUCTION_AUTH_URL=$PRODUCTION_AUTH_URL \
+  --build-arg FULLQA_AUTH_URL=$FULLQA_AUTH_URL \
+  --build-arg FULLQAB_AUTH_URL=$FULLQAB_AUTH_URL \
+  --build-arg DEV_AUTH_URL=$DEV_AUTH_URL \
+  --tag $ECR_REPO:$CI_COMMIT_SHORT_SHA .
 ```
 
 Once built, push the image to your ECR:
 
 ```
 aws ecr get-login-password --region <your-region> | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.<your-region>.amazonaws.com
-docker push <your-ecr-repo>/sfmon:latest
+docker push $ECR_REPO:$CI_COMMIT_SHORT_SHA
 ```
 
 ## Deploying SFMon to ECS
