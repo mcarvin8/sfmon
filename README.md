@@ -25,6 +25,25 @@ Before you can deploy SFMon ECS, you must provision the following AWS infrastruc
     - Security Groups for SFMon
     - Cloudwatch logging group for SFMon
 
+## Modifying Scripts
+
+The Python scripts which runs the monitoring services are hosted in `sre/deployments/scripts/sfmon-service`.
+
+The primary script is `salesforce_monitoring.py` which is what the Docker image runs at launch.
+
+This script imports all monitoring functions, authenticates to each Salesforce org with Simple Salesforce/Salesforce CLI, runs all monitoring functions at launch, and then schedules each function to run at different intervals.
+
+You should update `salesforce_monitoring.py` as such for your orgs:
+- Update the Force Auth URL variables stored in the environment before authenticating to each org, if you wish to use other variables besides the 4 variables provided
+- Remove any monitoring functions you do not want to use
+- Add any monitoring functions you would like to add not covered
+
+I would recommend going through all other scripts to verify they are what you want to use and modify the queries as needed for your orgs.
+
+Currently, the production org is the primary org monitored by these scripts.
+
+The 3 sandboxes are monitored for incidents, email deliverability settings, and payment gateway/method status changes.
+
 ## Building and Publishing the Docker Image
 
 SFMon depends on a custom Docker image that needs to be built and pushed to the SFMon ECR repository.
@@ -64,13 +83,15 @@ After your image is published to ECR and the other AWS infrastructure is created
 
 ## Notes
 
-- Each Salesforce org to be monitored must have a corresponding AUTH URL.
-- Keep your authentication URLs secure and updated as needed.
+- Each Salesforce org to be monitored must have a corresponding SFDX AUTH URL.
+- Keep your SFDX authentication URLs secure and updated as needed.
 - This setup assumes you are running Prometheus and scraping targets from the ECS cluster that the SFMon ECS lives in.
 
 ## Alternatives
 
-This container exposes Prometheus metrics that can be scraped using Google Cloud Managed Service for Prometheus.
+The heart of this repository is the Python scripts in `sre/deployments/scripts/sfmon-service` and the Dockerfile in `sre/deployments/docker/sfmon-service` which copies the Python scripts and launches the main script at run-time to schedule/run the monitoring functions.
+
+The Docker image exposes Port 9001 for Prometheus metrics. The Docker container with the scripts can easily be deployed to other container registries and uses in services like Google Cloud Managed Service for Prometheus.
 
 - If you're running in GKE, add a PodMonitor or use Kubernetes annotations to enable scraping.
 - For Cloud Run or VM users, run a Prometheus agent or OpenTelemetry Collector configured to scrape the metrics endpoint and forward data to Google Cloud Monitoring.
