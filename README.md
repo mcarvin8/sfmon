@@ -37,12 +37,13 @@ You should update `salesforce_monitoring.py` as such for your orgs:
 - Update the Force Auth URL variables stored in the environment before authenticating to each org, if you wish to use other variables besides the 4 variables provided
 - Remove any monitoring functions you do not want to use
 - Add any monitoring functions you would like to add not covered
+- Update the schedules which the monitoring functions run on
 
 I would recommend going through all other scripts to verify they are what you want to use and modify the queries as needed for your orgs.
 
 Currently, the production org is the primary org monitored by these scripts.
 
-The 3 sandboxes are monitored for incidents, email deliverability settings, and payment gateway/method status changes.
+The 3 sandboxes are monitored for incidents, email deliverability setting changes, and payment gateway/method status changes.
 
 ## Building and Publishing the Docker Image
 
