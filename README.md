@@ -70,4 +70,7 @@ After your image is published to ECR and the other AWS infrastructure is created
 
 ## Alternatives
 
-You can run this Docker image on Google Cloud using Cloud Run for a fully managed, serverless experience. Just push the image to Google Artifact Registry (or Docker Hub) and deploy it with a few clicks or a simple command.
+This container exposes Prometheus metrics that can be scraped using Google Cloud Managed Service for Prometheus.
+
+- If you're running in GKE, add a PodMonitor or use Kubernetes annotations to enable scraping.
+- For Cloud Run or VM users, run a Prometheus agent or OpenTelemetry Collector configured to scrape the metrics endpoint and forward data to Google Cloud Monitoring.
