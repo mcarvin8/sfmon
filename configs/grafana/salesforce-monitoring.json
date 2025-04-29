@@ -130,7 +130,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "The panels will update on different intervals. \r\nPlease see Data Refresh Intervals on the doc.",
+        "content": "The panels will update on different intervals. \r\nPlease see Data Refresh Intervals on the [doc](https://avalara.atlassian.net/wiki/spaces/AVATECH/pages/638415603972/Salesforce+Monitoring).",
         "mode": "markdown"
       },
       "pluginVersion": "10.4.1",
@@ -257,7 +257,7 @@
         "for": "5m",
         "frequency": "1m",
         "handler": 1,
-        "message": "<!channel> ALERT: A Salesforce Incident has been opened against Production",
+        "message": "<!channel> ALERT: A Salesforce Incident has been opened against Production\n\nDashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1",
         "name": "Salesforce Production Incidents Alert",
         "noDataState": "keep_state",
         "notifications": [
@@ -415,7 +415,7 @@
         "for": "5m",
         "frequency": "1m",
         "handler": 1,
-        "message": "<!channel> ALERT: A Salesforce Incident has been opened against ${environment}",
+        "message": "<!channel> ALERT: A Salesforce Incident has been opened against ${environment}\n\nDashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1",
         "name": "Salesforce Sandbox Incidents Alert",
         "noDataState": "keep_state",
         "notifications": [
@@ -807,7 +807,7 @@
         "for": "5m",
         "frequency": "1m",
         "handler": 1,
-        "message": "<!channel> ALERT: Salesforce API Usage is over 80% for ${limit_name}",
+        "message": "<!channel> ALERT: Salesforce API Usage is over 80% for ${limit_name}\n\nDashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1",
         "name": "Salesforce API Usage Alert",
         "noDataState": "keep_state",
         "notifications": [
@@ -967,7 +967,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "yellow",
@@ -1055,7 +1056,8 @@
             "mode": "percentage",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -1078,7 +1080,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "green"
+                      "color": "green",
+                      "value": null
                     },
                     {
                       "color": "#EAB839",
@@ -1276,7 +1279,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "yellow",
@@ -1366,7 +1370,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -1389,7 +1394,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "green"
+                      "color": "green",
+                      "value": null
                     },
                     {
                       "color": "#EAB839",
@@ -1596,7 +1602,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "#EAB839",
@@ -1688,7 +1695,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -1711,7 +1719,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "green"
+                      "color": "green",
+                      "value": null
                     },
                     {
                       "color": "#EAB839",
@@ -2449,7 +2458,7 @@
             "for": "5m",
             "frequency": "1m",
             "handler": 1,
-            "message": "<!channel> ALERT: Payment Gateway Status has changed in the orgs below.",
+            "message": "<!channel> ALERT: Payment Gateway Status has changed in the orgs below. \n\nPlease review details under section \"Observe Payment Gateway Status change for FullQA\" on Dashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1\n\n",
             "name": "Payment Gateway Status Change Alert",
             "noDataState": "ok",
             "notifications": [
@@ -2621,7 +2630,7 @@
             "for": "5m",
             "frequency": "1m",
             "handler": 1,
-            "message": "<!channel> ALERT: Active Billing Field for Payment Methods has changed in the orgs below.",
+            "message": "<!channel> ALERT: Active Billing Field for Payment Methods has changed in the orgs below. \n\nPlease review details under section \"Observe Payment Gateway Status change for FullQA\" on Dashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1\n\n**",
             "name": "Active Billing Payment Methods Alert",
             "noDataState": "ok",
             "notifications": [
@@ -3583,7 +3592,7 @@
             "for": "5m",
             "frequency": "1m",
             "handler": 1,
-            "message": "<!channel> ALERT: Email Deliverability Status changed in the orgs below.",
+            "message": "<!channel> ALERT: Email Deliverability Status changed in the orgs below. \nPlease review details under section \"Email Deliverability status\" on Dashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1",
             "name": "Email Deliverability Change Alert",
             "noDataState": "ok",
             "notifications": [
@@ -9766,7 +9775,7 @@
             "h": 6,
             "w": 4,
             "x": 0,
-            "y": 98
+            "y": 90
           },
           "id": 19,
           "interval": "1h",
@@ -9849,7 +9858,7 @@
             "h": 18,
             "w": 20,
             "x": 4,
-            "y": 98
+            "y": 90
           },
           "id": 15,
           "interval": "12h",
@@ -9983,7 +9992,7 @@
             "h": 6,
             "w": 4,
             "x": 0,
-            "y": 104
+            "y": 96
           },
           "id": 81,
           "interval": "1h",
@@ -10057,7 +10066,7 @@
             "h": 6,
             "w": 4,
             "x": 0,
-            "y": 110
+            "y": 102
           },
           "id": 82,
           "interval": "1h",
@@ -10122,10 +10131,10 @@
           },
           "description": "",
           "gridPos": {
-            "h": 10,
+            "h": 20,
             "w": 5,
             "x": 0,
-            "y": 114
+            "y": 91
           },
           "id": 26,
           "options": {
@@ -10134,7 +10143,7 @@
               "showLineNumbers": false,
               "showMiniMap": false
             },
-            "content": "# Deployment Metric Disclaimers\n\nThe production deployment metrics in this dashboard are retrieved directly from Salesforce Production, not GitLab. Salesforce deployment metrics include GitLab deployments, change-set deployments, and package installations.\n\nSalesforce only retains deployment records for about 30 days, thus the metrics here will only be from the current month.",
+            "content": "# Deployment Metric Disclaimers\n\nThe production deployment metrics in this dashboard are retrieved directly from Salesforce Production, not GitLab. Salesforce deployment metrics include GitLab deployments/validations, change-set deployments, and package installations.\n\nSalesforce only retains deployment records for about 30 days, so the metrics shown will only reflect recent activity within the current month.\n\nThese metrics do NOT capture the full GitLab deployment process, which includes additional validations and check-only deployments for Apex packages that optimize the Apex deployment process.\n\nValidation metrics are now included in this dashboard. These validations include:\n\n- Standalone validations run from GitLab Merge Requests (MRs), which may be run multiple times before changes are ultimately deployed to Production.\n- Pre-deployment validations which run automatically in deployment pipelines prior to quick-deployments for Apex packages.\n\nFor more detailed metrics covering the full GitLab deployment pipeline over a longer period of time, please refer to the [Hex report](https://app.hex.tech/avalara/app/55b1430d-a9e3-4eaf-a227-6e4f766daf55/latest?).",
             "mode": "markdown"
           },
           "pluginVersion": "10.4.1",
@@ -10192,7 +10201,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               }
@@ -10201,9 +10211,9 @@
           },
           "gridPos": {
             "h": 10,
-            "w": 8,
+            "w": 9,
             "x": 5,
-            "y": 114
+            "y": 91
           },
           "id": 12,
           "interval": "30",
@@ -10255,6 +10265,32 @@
               "range": true,
               "refId": "B",
               "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "avg(avg_over_time(deployment_time{status=\"Succeeded\"}[30m]))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Avg Successful Deployment Time",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "avg(avg_over_time(deployment_pending_time{status=\"Succeeded\"}[30m]))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Avg Successful Deployment Pending Time",
+              "range": true,
+              "refId": "D"
             }
           ],
           "title": "Production Average Deployment Time vs Average Pending Time - Past Month",
@@ -10310,7 +10346,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "red"
+                    "color": "red",
+                    "value": null
                   },
                   {
                     "color": "yellow",
@@ -10328,9 +10365,9 @@
           },
           "gridPos": {
             "h": 10,
-            "w": 7,
-            "x": 13,
-            "y": 114
+            "w": 10,
+            "x": 14,
+            "y": 91
           },
           "id": 89,
           "options": {
@@ -10355,7 +10392,7 @@
               "editorMode": "code",
               "expr": "count(deployment_details{status=\"Succeeded\"}) / count(deployment_details{}) * 100",
               "instant": false,
-              "legendFormat": "Production Success Rate %",
+              "legendFormat": "Deployment Success Rate %",
               "range": true,
               "refId": "A"
             }
@@ -10369,6 +10406,259 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
+          "description": "Time-series of average validation times and average validation pending times.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 9,
+            "x": 5,
+            "y": 101
+          },
+          "id": 119,
+          "interval": "30",
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "expr": "avg(avg_over_time(validation_pending_time[30m]))",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "Avg Validation Pending Time",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "expr": "avg(avg_over_time(validation_time[30m]))",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "hide": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "Avg Validation Time",
+              "range": true,
+              "refId": "B",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "avg(avg_over_time(validation_pending_time{status=\"Succeeded\"}[30m]))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Avg Successful Validation Pending Time",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "avg(avg_over_time(validation_time{status=\"Succeeded\"}[30m]))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Avg Successful Validation Time",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "title": "Production Average Validation Time vs Average Pending Time - Past Month",
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Success rates for validations against production. Validations are either standalone validations from a merge request or run before quick-deployments in Apex pipelines.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "area"
+                }
+              },
+              "mappings": [],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 50
+                  },
+                  {
+                    "color": "green",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 10,
+            "x": 14,
+            "y": 101
+          },
+          "id": 120,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "count(validation_details{status=\"Succeeded\"}) / count(validation_details{}) * 100",
+              "instant": false,
+              "legendFormat": "Validation Success Rate %",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Production Validation Success Rate - Past Month",
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Success rate of production deployments over the past month.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -10379,7 +10669,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "red"
+                    "color": "red",
+                    "value": null
                   },
                   {
                     "color": "yellow",
@@ -10399,7 +10690,7 @@
             "h": 6,
             "w": 4,
             "x": 0,
-            "y": 124
+            "y": 111
           },
           "id": 88,
           "options": {
@@ -10433,7 +10724,7 @@
               "refId": "A"
             }
           ],
-          "title": "Production Deployment Success Rate - Past Month",
+          "title": "Production Deployment Success Rate",
           "transparent": true,
           "type": "stat"
         },
@@ -10442,6 +10733,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
+          "description": "Total production deployments over the past month.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -10452,7 +10744,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "orange"
+                    "color": "orange",
+                    "value": null
                   }
                 ]
               },
@@ -10462,9 +10755,9 @@
           },
           "gridPos": {
             "h": 6,
-            "w": 4,
-            "x": 5,
-            "y": 124
+            "w": 3,
+            "x": 4,
+            "y": 111
           },
           "id": 116,
           "options": {
@@ -10498,7 +10791,7 @@
               "refId": "A"
             }
           ],
-          "title": "Total Production Deployments - Past Month",
+          "title": "Total Production Deployments",
           "transparent": true,
           "type": "stat"
         },
@@ -10507,6 +10800,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
+          "description": "Total successful production deployments over the past month.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -10517,7 +10811,75 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "orange"
+                    "color": "orange",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 4,
+            "x": 7,
+            "y": 111
+          },
+          "id": 125,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "count(deployment_details{status=\"Succeeded\"})",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Total Successful Production Deployments",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Average production deployment time over the past month.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "orange",
+                    "value": null
                   }
                 ]
               },
@@ -10528,8 +10890,8 @@
           "gridPos": {
             "h": 6,
             "w": 4,
-            "x": 9,
-            "y": 124
+            "x": 11,
+            "y": 111
           },
           "id": 117,
           "options": {
@@ -10563,7 +10925,7 @@
               "refId": "A"
             }
           ],
-          "title": "Production Average Deployment Time - Past Month",
+          "title": "Production Average Deployment Time",
           "transparent": true,
           "type": "stat"
         },
@@ -10572,6 +10934,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
+          "description": "Average successful production deployment time over the past month.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -10582,7 +10945,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "orange"
+                    "color": "orange",
+                    "value": null
                   }
                 ]
               },
@@ -10593,8 +10957,75 @@
           "gridPos": {
             "h": 6,
             "w": 4,
-            "x": 13,
-            "y": 124
+            "x": 15,
+            "y": 111
+          },
+          "id": 127,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "avg(avg_over_time(deployment_time{status=\"Succeeded\"}[30m]))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Production Average Successful Deployment Time",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Average production deployment pending time over the past month.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "orange",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "m"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 4,
+            "x": 19,
+            "y": 111
           },
           "id": 118,
           "options": {
@@ -10628,7 +11059,411 @@
               "refId": "A"
             }
           ],
-          "title": "Production Average Deployment Pending Time - Past Month",
+          "title": "Production Average Deployment Pending Time",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Success rate of production validations over the past month.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red"
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 50
+                  },
+                  {
+                    "color": "green",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 4,
+            "x": 0,
+            "y": 117
+          },
+          "id": 121,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "count(validation_details{status=\"Succeeded\"}) / count(validation_details{}) * 100",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Production Validation Success Rate",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Total production validations over the past month.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "orange"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 3,
+            "x": 4,
+            "y": 117
+          },
+          "id": 122,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "count(validation_details)",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Total Production Validations",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Total successful production validations over the past month.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "orange"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 4,
+            "x": 7,
+            "y": 117
+          },
+          "id": 126,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "count(validation_details{status=\"Succeeded\"})",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Total Successful Production Validations",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Average production validation time over the past month.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "orange"
+                  }
+                ]
+              },
+              "unit": "m"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 4,
+            "x": 11,
+            "y": 117
+          },
+          "id": 123,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "avg(avg_over_time(validation_time[30m]))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Production Average Validation Time",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Average successful production validation time over the past month.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "orange"
+                  }
+                ]
+              },
+              "unit": "m"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 4,
+            "x": 15,
+            "y": 117
+          },
+          "id": 128,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "avg(avg_over_time(validation_time{status=\"Succeeded\"}[30m]))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Production Average Successful Validation Time",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "o7MvocN7k"
+          },
+          "description": "Average production validation pending time over the past month.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "orange"
+                  }
+                ]
+              },
+              "unit": "m"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 4,
+            "x": 19,
+            "y": 117
+          },
+          "id": 124,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "10.4.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "avg(avg_over_time(validation_pending_time[30m]))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Production Average Validation Pending Time",
           "transparent": true,
           "type": "stat"
         },
@@ -10640,9 +11475,9 @@
           "description": "Deployment annotations from GitLab pipeline events made in the Grafana time range.",
           "gridPos": {
             "h": 7,
-            "w": 5,
+            "w": 7,
             "x": 0,
-            "y": 130
+            "y": 123
           },
           "id": 16,
           "options": {
@@ -10672,9 +11507,9 @@
           "description": "Deployment annotations from GitLab pipeline events made in the Grafana time range.",
           "gridPos": {
             "h": 7,
-            "w": 5,
-            "x": 5,
-            "y": 130
+            "w": 8,
+            "x": 7,
+            "y": 123
           },
           "id": 17,
           "options": {
@@ -10704,9 +11539,9 @@
           "description": "Deployment annotations from GitLab pipeline events made in the Grafana time range.",
           "gridPos": {
             "h": 7,
-            "w": 6,
-            "x": 10,
-            "y": 130
+            "w": 9,
+            "x": 15,
+            "y": 123
           },
           "id": 18,
           "options": {
@@ -12885,6 +13720,6 @@
   "timezone": "browser",
   "title": "Salesforce Monitoring",
   "uid": "edqq6je4aevb4b",
-  "version": 98,
+  "version": 102,
   "weekStart": ""
 }

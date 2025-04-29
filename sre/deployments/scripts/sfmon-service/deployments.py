@@ -4,7 +4,10 @@
 from datetime import datetime
 
 from cloudwatch_logging import logger
-from gauges import deployment_details_gauge, pending_time_gauge, deployment_time_gauge
+from gauges import (
+    deployment_details_gauge, pending_time_gauge, deployment_time_gauge,
+    validation_details_gauge, validation_pending_time_gauge, validation_time_gauge
+)
 
 
 def get_deployment_status(sf):
@@ -16,7 +19,6 @@ def get_deployment_status(sf):
     query = """
         SELECT Id, Status, StartDate, CreatedBy.Name, CreatedDate, CompletedDate, CheckOnly 
         FROM DeployRequest 
-        WHERE CheckOnly = false 
         ORDER BY CompletedDate DESC
     """
 
@@ -32,13 +34,14 @@ def get_deployment_status(sf):
         for record in result.get('records', []):
             if record.get('Status') == 'InProgress':
                 continue
-            process_deployment_record(record, status_mapping)
+            is_validation = record.get('CheckOnly', False)
+            process_deployment_record(record, status_mapping, is_validation)
     # pylint: disable=broad-except
     except Exception as e:
         logger.error("Failed to retrieve deployment status: %s", e)
 
 
-def process_deployment_record(record, status_mapping):
+def process_deployment_record(record, status_mapping, is_validation=False):
     """
     Process a single deployment record and report metrics.
 
@@ -53,7 +56,7 @@ def process_deployment_record(record, status_mapping):
     deployment_time = calculate_minutes_difference(start_date, completed_date)
     pending_time = calculate_minutes_difference(created_date, start_date)
 
-    report_deployment_metrics(record, deployment_time, pending_time, status_mapping)
+    report_deployment_metrics(record, deployment_time, pending_time, status_mapping, is_validation)
 
 
 def parse_datetime(date_str):
@@ -87,7 +90,7 @@ def calculate_minutes_difference(start, end):
     return 0.0
 
 
-def report_deployment_metrics(record, deployment_time, pending_time, status_mapping):
+def report_deployment_metrics(record, deployment_time, pending_time, status_mapping, is_validation):
     """
     Send deployment-related metrics to CloudWatch gauges.
 
@@ -101,22 +104,43 @@ def report_deployment_metrics(record, deployment_time, pending_time, status_mapp
     deployed_by = record['CreatedBy']['Name']
     status = record['Status']
 
-    deployment_details_gauge.labels(
-        pending_time=pending_time,
-        deployment_time=deployment_time,
-        deployment_id=deployment_id,
-        deployed_by=deployed_by,
-        status=status
-    ).set(status_mapping.get(status, -1))
+    if is_validation:
+        validation_details_gauge.labels(
+            pending_time=pending_time,
+            deployment_time=deployment_time,
+            deployment_id=deployment_id,
+            deployed_by=deployed_by,
+            status=status
+        ).set(status_mapping.get(status, -1))
 
-    pending_time_gauge.labels(
-        deployment_id=deployment_id,
-        deployed_by=deployed_by,
-        status=status
-    ).set(pending_time)
+        validation_pending_time_gauge.labels(
+            deployment_id=deployment_id,
+            deployed_by=deployed_by,
+            status=status
+        ).set(pending_time)
 
-    deployment_time_gauge.labels(
-        deployment_id=deployment_id,
-        deployed_by=deployed_by,
-        status=status
-    ).set(deployment_time)
+        validation_time_gauge.labels(
+            deployment_id=deployment_id,
+            deployed_by=deployed_by,
+            status=status
+        ).set(deployment_time)
+    else:
+        deployment_details_gauge.labels(
+            pending_time=pending_time,
+            deployment_time=deployment_time,
+            deployment_id=deployment_id,
+            deployed_by=deployed_by,
+            status=status
+        ).set(status_mapping.get(status, -1))
+
+        pending_time_gauge.labels(
+            deployment_id=deployment_id,
+            deployed_by=deployed_by,
+            status=status
+        ).set(pending_time)
+
+        deployment_time_gauge.labels(
+            deployment_id=deployment_id,
+            deployed_by=deployed_by,
+            status=status
+        ).set(deployment_time)

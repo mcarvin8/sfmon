@@ -89,6 +89,17 @@ deployment_time_gauge = Gauge('deployment_time',
                               'Time taken for the deployment',
                               ['deployment_id', 'deployed_by', 'status'])
 
+validation_details_gauge = Gauge('validation_details',
+                                 'Salesforce Validation Deployment details',
+                                 ['pending_time', 'deployment_time',
+                                  'deployed_by', 'status', 'deployment_id'])
+validation_pending_time_gauge = Gauge('validation_pending_time',
+                           'Pending time before starting the validation',
+                           ['deployment_id', 'deployed_by', 'status'])
+validation_time_gauge = Gauge('validation_time',
+                              'Time taken for the validation',
+                              ['deployment_id', 'deployed_by', 'status'])
+
 ept_metric = Gauge('salesforce_experienced_page_time',
                    'Experienced Page Time (EPT) in seconds', 
                    ['EFFECTIVE_PAGE_TIME_DEVIATION_REASON',
