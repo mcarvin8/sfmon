@@ -47,13 +47,15 @@ The 3 sandboxes are monitored for incidents, email deliverability setting change
 
 ## Building and Publishing the Docker Image
 
-SFMon depends on a custom Docker image that needs to be built and pushed to the SFMon ECR repository.
+SFMon depends on a custom Docker image that needs to be built and pushed to the SFMon AWS ECR repository.
 
 When building the image, you must provide the SFDX authorization URLs for each Salesforce org you intend to monitor. These URLs are passed as build arguments during the Docker build process.
 
-Example Docker build command:
+Example Docker build and push commands:
 
 ```
+# Login to the AWS ECR using the docker-login tf files
+cd sre/deployments/terraform/docker-login && terraform init -input=false && terraform apply -input=false -auto-approve
 docker build \
   --file "./sre/deployments/docker/sfmon-service/Dockerfile"
   --build-arg PRODUCTION_AUTH_URL=$PRODUCTION_AUTH_URL \
@@ -61,12 +63,6 @@ docker build \
   --build-arg FULLQAB_AUTH_URL=$FULLQAB_AUTH_URL \
   --build-arg DEV_AUTH_URL=$DEV_AUTH_URL \
   --tag $ECR_REPO:$CI_COMMIT_SHORT_SHA .
-```
-
-Once built, push the image to your ECR:
-
-```
-aws ecr get-login-password --region <your-region> | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.<your-region>.amazonaws.com
 docker push $ECR_REPO:$CI_COMMIT_SHORT_SHA
 ```
 
