@@ -29,16 +29,16 @@ Before you can deploy SFMon ECS, you must provision the following AWS infrastruc
 
 SFMon depends on a custom Docker image that needs to be built and pushed to the SFMon ECR repository.
 
-When building the image, you must provide authentication URLs for each Salesforce org you intend to monitor. These URLs are passed as build arguments during the Docker build process.
+When building the image, you must provide the SFDX authorization URLs for each Salesforce org you intend to monitor. These URLs are passed as build arguments during the Docker build process.
 
 Example Docker build command:
 
 ```
 docker build \
-  --build-arg PRODUCTION_AUTH_URL="https://login.salesforce.com/services/oauth2/authorize?..." \
-  --build-arg FULLQA_AUTH_URL="https://test.salesforce.com/services/oauth2/authorize?..." \
-  --build-arg FULLQAB_AUTH_URL="https://test.salesforce.com/services/oauth2/authorize?..." \
-  --build-arg DEV_AUTH_URL="https://test.salesforce.com/services/oauth2/authorize?..." \
+  --build-arg PRODUCTION_AUTH_URL="..." \
+  --build-arg FULLQA_AUTH_URL="..." \
+  --build-arg FULLQAB_AUTH_URL="..." \
+  --build-arg DEV_AUTH_URL="..." \
   -t <your-ecr-repo>/sfmon:latest .
 ```
 
