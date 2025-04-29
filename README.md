@@ -67,3 +67,7 @@ After your image is published to ECR and the other AWS infrastructure is created
 - Each Salesforce org to be monitored must have a corresponding AUTH URL.
 - Keep your authentication URLs secure and updated as needed.
 - This setup assumes you are running Prometheus and scraping targets from the ECS cluster that the SFMon ECS lives in.
+
+## Alternatives
+
+You can run this Docker image on Google Cloud using Cloud Run for a fully managed, serverless experience. Just push the image to Google Artifact Registry (or Docker Hub) and deploy it with a few clicks or a simple command.
