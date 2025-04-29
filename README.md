@@ -54,6 +54,9 @@ When building the image, you must provide the SFDX authorization URLs for each S
 Example Docker build and push commands:
 
 ```
+# set ECR Repo URL variable and AWS region variables
+TF_VAR_ecr_repo="${ECR_REPO}"
+TF_VAR_aws_region: "${AWS_REGION}"
 # Login to the AWS ECR using the docker-login tf files
 cd sre/deployments/terraform/docker-login && terraform init -input=false && terraform apply -input=false -auto-approve
 docker build \
