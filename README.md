@@ -74,8 +74,15 @@ docker push $ECR_REPO:$CI_COMMIT_SHORT_SHA
 After your image is published to ECR and the other AWS infrastructure is created to run the ECS:
 
 1. Create or update your ECS Task Definition to use the new Docker image.
-2. Deploy the SFMon service using Terraform to your ECS cluster.
-    - `sre\deployments\terraform\sfmon-service\ecs-service`
+2. Deploy the SFMon service using Terraform to your ECS cluster. Ensure you create a `backend.tf` in `sre/deployments/terraform/sfmon-service/ecs-service` with the state file path.
+
+```
+# set env variable for docker image tag - default use commit sha as image name
+TF_VAR_docker_image_tag="$CI_COMMIT_SHORT_SHA"
+cd sre/deployments/terraform/sfmon-service/ecs-service
+terraform init -input=false
+terraform apply -input=false -auto-approve
+```
 
 ## Grafana
 
