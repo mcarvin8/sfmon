@@ -34,6 +34,7 @@ When building the image, you must provide the SFDX authorization URLs for each S
 Example Docker build command:
 
 ```
+cd sre/deployments/docker/sfmon-service
 docker build \
   --build-arg PRODUCTION_AUTH_URL="..." \
   --build-arg FULLQA_AUTH_URL="..." \
