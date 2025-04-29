@@ -52,13 +52,11 @@ docker push <your-ecr-repo>/sfmon:latest
 
 ## Deploying SFMon to ECS
 
-`sre\deployments\terraform\sfmon-service\ecs-service`
-
 After your image is published to ECR and the other AWS infrastructure is created to run the ECS:
 
 1. Create or update your ECS Task Definition to use the new Docker image.
-2. Deploy the SFMon service to your ECS cluster.
-3. Ensure the ECS service has the necessary permissions to pull the image from ECR and execute commands.
+2. Deploy the SFMon service using Terraform to your ECS cluster.
+    - `sre\deployments\terraform\sfmon-service\ecs-service`
 
 ## Grafana
 
