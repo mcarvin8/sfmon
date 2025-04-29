@@ -6,7 +6,7 @@ A Grafana dashboard can be used to visualize the Prometheus targets created by S
 
 ## Overview
 
-SFMon runs as an ECS service using a Docker image that contains the required Python environment and Salesforce dependencies (Simple Salesforce & Salesforce CLI. It periodically authenticates with your Salesforce orgs and collects monitoring data.
+SFMon runs as an ECS service using a Docker image that contains the required Python environment and Salesforce dependencies (Simple Salesforce & Salesforce CLI). It periodically authenticates with your Salesforce orgs and collects monitoring data.
 
 ## Authors
 
