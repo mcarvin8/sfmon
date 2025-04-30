@@ -257,7 +257,7 @@
         "for": "5m",
         "frequency": "1m",
         "handler": 1,
-        "message": "<!channel> ALERT: A Salesforce Incident has been opened against Production\n\nDashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1",
+        "message": "<!channel> ALERT: A Salesforce Incident has been opened against Production\n\nDashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1\n\nIncident Message:\n${original_message}",
         "name": "Salesforce Production Incidents Alert",
         "noDataState": "keep_state",
         "notifications": [
@@ -415,7 +415,7 @@
         "for": "5m",
         "frequency": "1m",
         "handler": 1,
-        "message": "<!channel> ALERT: A Salesforce Incident has been opened against ${environment}\n\nDashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1",
+        "message": "<!channel> ALERT: A Salesforce Incident has been opened against ${environment}\n\nDashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1\n\nIncident Message:\n${original_message}",
         "name": "Salesforce Sandbox Incidents Alert",
         "noDataState": "keep_state",
         "notifications": [
@@ -2458,7 +2458,7 @@
             "for": "5m",
             "frequency": "1m",
             "handler": 1,
-            "message": "<!channel> ALERT: Payment Gateway Status has changed in the orgs below. \n\nPlease review details under section \"Observe Payment Gateway Status change for FullQA\" on Dashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1\n\n",
+            "message": "<!channel> ALERT: Payment Gateway Status has changed in the orgs below. \n\nPlease review details under section \"Payment Gateway and Method Status - Sandboxes\" on Dashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1\n\n",
             "name": "Payment Gateway Status Change Alert",
             "noDataState": "ok",
             "notifications": [
@@ -2630,7 +2630,7 @@
             "for": "5m",
             "frequency": "1m",
             "handler": 1,
-            "message": "<!channel> ALERT: Active Billing Field for Payment Methods has changed in the orgs below. \n\nPlease review details under section \"Observe Payment Gateway Status change for FullQA\" on Dashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1\n\n**",
+            "message": "<!channel> ALERT: Active Billing Field for Payment Methods has changed in the orgs below. \n\nPlease review details under section \"Payment Gateway and Method Status - Sandboxes\" on Dashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1\n\n**",
             "name": "Active Billing Payment Methods Alert",
             "noDataState": "ok",
             "notifications": [
@@ -3592,7 +3592,7 @@
             "for": "5m",
             "frequency": "1m",
             "handler": 1,
-            "message": "<!channel> ALERT: Email Deliverability Status changed in the orgs below. \nPlease review details under section \"Email Deliverability status\" on Dashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1",
+            "message": "<!channel> ALERT: Email Deliverability Status changed in the orgs below. \nPlease review details under section \"Email Deliverability Status - Sandboxes\" on Dashboard: https://metrics.platform.avalara.io/d/edqq6je4aevb4b/salesforce-monitoring?orgId=1",
             "name": "Email Deliverability Change Alert",
             "noDataState": "ok",
             "notifications": [
@@ -10131,7 +10131,7 @@
           },
           "description": "",
           "gridPos": {
-            "h": 20,
+            "h": 10,
             "w": 5,
             "x": 0,
             "y": 91
@@ -10155,7 +10155,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
-          "description": "",
+          "description": "Average deployment times and average pending times for production deployments/validations over the past month.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -10205,7 +10205,8 @@
                     "value": null
                   }
                 ]
-              }
+              },
+              "unit": "m"
             },
             "overrides": []
           },
@@ -10291,9 +10292,61 @@
               "legendFormat": "Avg Successful Deployment Pending Time",
               "range": true,
               "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "avg(avg_over_time(validation_pending_time[30m]))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Avg Validation Pending Time",
+              "range": true,
+              "refId": "E"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "avg(avg_over_time(validation_time[30m]))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Avg Validation Time",
+              "range": true,
+              "refId": "F"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "avg(avg_over_time(validation_time{status=\"Succeeded\"}[30m]))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Avg Successful Validation Time",
+              "range": true,
+              "refId": "G"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "o7MvocN7k"
+              },
+              "editorMode": "code",
+              "expr": "avg(avg_over_time(validation_pending_time{status=\"Succeeded\"}[30m]))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Avg Successful Validation Pending Time",
+              "range": true,
+              "refId": "H"
             }
           ],
-          "title": "Production Average Deployment Time vs Average Pending Time - Past Month",
+          "title": "Production Average Deployment Time vs Average Pending Time",
           "transparent": true,
           "type": "timeseries"
         },
@@ -10302,6 +10355,7 @@
             "type": "prometheus",
             "uid": "o7MvocN7k"
           },
+          "description": "Success rates for deployments and validations in production over the month.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -10395,247 +10449,7 @@
               "legendFormat": "Deployment Success Rate %",
               "range": true,
               "refId": "A"
-            }
-          ],
-          "title": "Production Deployment Success Rate - Past Month",
-          "transparent": true,
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "o7MvocN7k"
-          },
-          "description": "Time-series of average validation times and average validation pending times.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineStyle": {
-                  "fill": "solid"
-                },
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              }
             },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 10,
-            "w": 9,
-            "x": 5,
-            "y": 101
-          },
-          "id": 119,
-          "interval": "30",
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "10.4.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "o7MvocN7k"
-              },
-              "disableTextWrap": false,
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_pending_time[30m]))",
-              "format": "time_series",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "Avg Validation Pending Time",
-              "range": true,
-              "refId": "A",
-              "useBackend": false
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "o7MvocN7k"
-              },
-              "disableTextWrap": false,
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_time[30m]))",
-              "format": "time_series",
-              "fullMetaSearch": false,
-              "hide": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "Avg Validation Time",
-              "range": true,
-              "refId": "B",
-              "useBackend": false
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "o7MvocN7k"
-              },
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_pending_time{status=\"Succeeded\"}[30m]))",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Avg Successful Validation Pending Time",
-              "range": true,
-              "refId": "C"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "o7MvocN7k"
-              },
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_time{status=\"Succeeded\"}[30m]))",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Avg Successful Validation Time",
-              "range": true,
-              "refId": "D"
-            }
-          ],
-          "title": "Production Average Validation Time vs Average Pending Time - Past Month",
-          "transparent": true,
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "o7MvocN7k"
-          },
-          "description": "Success rates for validations against production. Validations are either standalone validations from a merge request or run before quick-deployments in Apex pipelines.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "area"
-                }
-              },
-              "mappings": [],
-              "max": 100,
-              "min": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "red",
-                    "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 50
-                  },
-                  {
-                    "color": "green",
-                    "value": 90
-                  }
-                ]
-              },
-              "unit": "percent"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 10,
-            "w": 10,
-            "x": 14,
-            "y": 101
-          },
-          "id": 120,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "10.4.1",
-          "targets": [
             {
               "datasource": {
                 "type": "prometheus",
@@ -10643,13 +10457,14 @@
               },
               "editorMode": "code",
               "expr": "count(validation_details{status=\"Succeeded\"}) / count(validation_details{}) * 100",
+              "hide": false,
               "instant": false,
               "legendFormat": "Validation Success Rate %",
               "range": true,
-              "refId": "A"
+              "refId": "B"
             }
           ],
-          "title": "Production Validation Success Rate - Past Month",
+          "title": "Production Deployment Success Rate",
           "transparent": true,
           "type": "timeseries"
         },
@@ -10690,7 +10505,7 @@
             "h": 6,
             "w": 4,
             "x": 0,
-            "y": 111
+            "y": 101
           },
           "id": 88,
           "options": {
@@ -10757,7 +10572,7 @@
             "h": 6,
             "w": 3,
             "x": 4,
-            "y": 111
+            "y": 101
           },
           "id": 116,
           "options": {
@@ -10824,7 +10639,7 @@
             "h": 6,
             "w": 4,
             "x": 7,
-            "y": 111
+            "y": 101
           },
           "id": 125,
           "options": {
@@ -10891,7 +10706,7 @@
             "h": 6,
             "w": 4,
             "x": 11,
-            "y": 111
+            "y": 101
           },
           "id": 117,
           "options": {
@@ -10958,7 +10773,7 @@
             "h": 6,
             "w": 4,
             "x": 15,
-            "y": 111
+            "y": 101
           },
           "id": 127,
           "options": {
@@ -11025,7 +10840,7 @@
             "h": 6,
             "w": 4,
             "x": 19,
-            "y": 111
+            "y": 101
           },
           "id": 118,
           "options": {
@@ -11079,7 +10894,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "red"
+                    "color": "red",
+                    "value": null
                   },
                   {
                     "color": "yellow",
@@ -11099,7 +10915,7 @@
             "h": 6,
             "w": 4,
             "x": 0,
-            "y": 117
+            "y": 107
           },
           "id": 121,
           "options": {
@@ -11153,7 +10969,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "orange"
+                    "color": "orange",
+                    "value": null
                   }
                 ]
               },
@@ -11165,7 +10982,7 @@
             "h": 6,
             "w": 3,
             "x": 4,
-            "y": 117
+            "y": 107
           },
           "id": 122,
           "options": {
@@ -11219,7 +11036,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "orange"
+                    "color": "orange",
+                    "value": null
                   }
                 ]
               },
@@ -11231,7 +11049,7 @@
             "h": 6,
             "w": 4,
             "x": 7,
-            "y": 117
+            "y": 107
           },
           "id": 126,
           "options": {
@@ -11285,7 +11103,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "orange"
+                    "color": "orange",
+                    "value": null
                   }
                 ]
               },
@@ -11297,7 +11116,7 @@
             "h": 6,
             "w": 4,
             "x": 11,
-            "y": 117
+            "y": 107
           },
           "id": 123,
           "options": {
@@ -11351,7 +11170,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "orange"
+                    "color": "orange",
+                    "value": null
                   }
                 ]
               },
@@ -11363,7 +11183,7 @@
             "h": 6,
             "w": 4,
             "x": 15,
-            "y": 117
+            "y": 107
           },
           "id": 128,
           "options": {
@@ -11417,7 +11237,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "orange"
+                    "color": "orange",
+                    "value": null
                   }
                 ]
               },
@@ -11429,7 +11250,7 @@
             "h": 6,
             "w": 4,
             "x": 19,
-            "y": 117
+            "y": 107
           },
           "id": 124,
           "options": {
@@ -11477,7 +11298,7 @@
             "h": 7,
             "w": 7,
             "x": 0,
-            "y": 123
+            "y": 113
           },
           "id": 16,
           "options": {
@@ -11509,7 +11330,7 @@
             "h": 7,
             "w": 8,
             "x": 7,
-            "y": 123
+            "y": 113
           },
           "id": 17,
           "options": {
@@ -11541,7 +11362,7 @@
             "h": 7,
             "w": 9,
             "x": 15,
-            "y": 123
+            "y": 113
           },
           "id": 18,
           "options": {
@@ -13720,6 +13541,6 @@
   "timezone": "browser",
   "title": "Salesforce Monitoring",
   "uid": "edqq6je4aevb4b",
-  "version": 102,
+  "version": 106,
   "weekStart": ""
 }
