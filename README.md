@@ -66,10 +66,17 @@ To customize for your orgs:
 
 📌 **Examples of current monitoring functions:**
 
-- Deployment and validation tracking
-- Email deliverability settings
-- Incident detection from status endpoints
-- Payment gateway and method health checks
+- Incidents (all orgs)
+- API limits (production)
+- License counts/limits (production)
+- Bulk API analysis details (production)
+- Deployment and validation tracking (production)
+- Performance metrics (production)
+- Errors (production)
+- User login metrics (production)
+- Compliance panels (production)
+- Email deliverability settings (sandboxes)
+- Payment gateway and method health checks (full-copy sandboxes)
 
 Currently, the production org is the primary monitoring target, with 3 sandboxes monitored for specific configuration or incident-related checks.
 
