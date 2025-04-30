@@ -142,11 +142,11 @@ While this repo focuses on deploying SFMon to AWS ECS, the core functionality is
 
 The heart of this repository is:
 
-- The Python monitoring scripts (sre/deployments/scripts/sfmon-service)
-- The Dockerfile (sre/deployments/docker/sfmon-service)
+- The Python monitoring scripts (`sre/deployments/scripts/sfmon-service`)
+- The Dockerfile (`sre/deployments/docker/sfmon-service`)
 
 These can be reused in other environments:
 
-- Google Kubernetes Engine (GKE): Add a PodMonitor or use scraping annotations.
-- Google Cloud Run / VMs: Run a Prometheus agent or OpenTelemetry Collector to scrape the container’s metrics endpoint and forward data to Google Cloud Monitoring or another backend.
+- **Google Kubernetes Engine (GKE)**: Add a `PodMonitor` or use scraping annotations.
+- **Google Cloud Run / VMs**: Run a Prometheus agent or OpenTelemetry Collector to scrape the container’s metrics endpoint and forward data to Google Cloud Monitoring or another backend.
 
