@@ -105,7 +105,6 @@ def report_large_queries(large_query_counts):
     Args:
         large_query_counts (dict): Aggregated large query counts.
     """
-    hourly_large_query_metric.clear()
     for (user_id, user_name, method, entity_name, rows_processed), count in large_query_counts.items():
         hourly_large_query_metric.labels(
             user_id=user_id,
@@ -181,8 +180,6 @@ def expose_suspicious_records(sf):
     logger.info("Getting Audit Trail logs...")
 
     try:
-        suspicious_records_gauge.clear()
-
         audittrail_query = build_audit_trail_query(EXCLUDE_USERS)
         result = sf.query(audittrail_query, timeout=QUERY_TIMEOUT_SECONDS)
 
@@ -241,10 +238,6 @@ def track_email_deliverability_change(sf_dev, sf_fqa, sf_fqab, minutes):
     time_threshold_str = get_time_threshold(minutes)
 
     try:
-        dev_email_deliverability_change_gauge.clear()
-        fullqa_email_deliverability_change_gauge.clear()
-        fullqab_email_deliverability_change_gauge.clear()
-
         email_deliverability_change_query = (
                 f"SELECT Action, Section, CreatedById, CreatedBy.Name, CreatedDate, Display, DelegateUser "
                 f"FROM SetupAuditTrail WHERE Action='sendEmailAccessControl' AND CreatedDate > {time_threshold_str} "

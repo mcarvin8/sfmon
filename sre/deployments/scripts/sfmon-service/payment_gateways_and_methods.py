@@ -29,7 +29,6 @@ def monitor_payment_method_status(sf, pms_gauge, minutes):
     '''monitors changes in Payment method status for FullQA'''
 
     logger.info("Getting Payment Methods status from FullQA...")
-    pms_gauge.clear()
 
     time_threshold_str = get_time_threshold(minutes)
 
@@ -87,8 +86,6 @@ def monitor_payment_gateway_status(sf, pgs_gauge, minutes):
     '''monitors changes in Payment Gateway status for FullQA'''
 
     logger.info("Getting Payment Gateways status from FullQA...")
-    pgs_gauge.clear()
-
     time_threshold_str = get_time_threshold(minutes)
 
     try:

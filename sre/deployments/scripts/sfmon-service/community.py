@@ -22,8 +22,6 @@ def community_login_error_logger_details(sf):
         """
         results = sf.query_all(query)
 
-        community_login_error_metric.clear()
-
         if results['totalSize'] > 0:
             for record in results['records']:
                 # Expose logger details as Prometheus metrics
@@ -60,7 +58,6 @@ def community_registration_error_logger_details(sf):
         """
         results = sf.query_all(query)
 
-        community_registration_error_metric.clear()
 
         if results['totalSize'] > 0:
             for record in results['records']:

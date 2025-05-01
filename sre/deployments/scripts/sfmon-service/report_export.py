@@ -14,8 +14,6 @@ def hourly_report_export_records(sf):
     logger.info("Getting report export records...")
 
     try:
-        hourly_report_export_metric.clear()
-
         log_query = (
             "SELECT Id FROM EventLogFile WHERE EventType = 'ReportExport' and Interval = 'Hourly' ORDER BY LogDate DESC LIMIT 1")
 

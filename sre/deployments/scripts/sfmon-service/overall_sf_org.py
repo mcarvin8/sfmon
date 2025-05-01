@@ -21,8 +21,6 @@ def monitor_salesforce_limits(limits):
     """
     Monitor all Salesforce limits.
     """
-    api_usage_gauge.clear()
-    api_usage_percentage_gauge.clear()
     for limit_name, limit_data in limits.items():
         max_limit = limit_data['Max']
         remaining = limit_data['Remaining']
@@ -40,16 +38,6 @@ def get_salesforce_licenses(sf):
     Get all license data.
     """
     logger.info("Getting Salesforce licenses...")
-    total_user_licenses_gauge.clear()
-    used_user_licenses_gauge.clear()
-    percent_user_licenses_used_gauge.clear()
-    percent_permissionset_used_gauge.clear()
-    total_permissionset_licenses_gauge.clear()
-    used_permissionset_licenses_gauge.clear()
-    total_usage_based_entitlements_licenses_gauge.clear()
-    used_usage_based_entitlements_licenses_gauge.clear()
-    percent_usage_based_entitlements_used_gauge.clear()
-
     result_user_license = sf.query("SELECT Name, Status, UsedLicenses, TotalLicenses FROM UserLicense")
     for entry in result_user_license['records']:
         status = dict(entry)['Status']
@@ -115,7 +103,6 @@ def get_salesforce_instance(sf, sf_fqa, sf_fqab, sf_dev):
         "FullQAB": fetch_pod(sf_fqab),
         "Dev": fetch_pod(sf_dev)
     }
-    incident_gauge.clear()
     for org in ("Production", "Dev", "FullQA", "FullQAB"):
         try:
             pod = pod_map.get(org)
@@ -216,4 +203,3 @@ def get_salesforce_maintenances(pod_map):
 
     except requests.RequestException as e:
         logger.error("Error fetching incidents: %s", e)
-        incident_gauge.clear()

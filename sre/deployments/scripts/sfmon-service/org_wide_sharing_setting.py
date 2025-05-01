@@ -24,7 +24,6 @@ def monitor_org_wide_sharing_settings(sf):
     logger.info("Getting Org-Wide Sharing Settings...")
 
     try:
-        org_wide_sharing__setting_changes.clear()
         changes = query_setup_audit_trail(sf)
 
         if not changes:
