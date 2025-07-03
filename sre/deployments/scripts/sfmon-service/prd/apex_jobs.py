@@ -40,6 +40,7 @@ def async_apex_job_status(sf):
         return None
 
     overall_status_counts = {}
+    async_job_status_gauge.clear()
 
     for record in result['records']:
         status = record['Status']
@@ -62,7 +63,6 @@ def monitor_apex_execution_time(sf):
     """
     logger.info("Getting Apex executions...")
     try:
-
         run_time_metric.clear()
         cpu_time_metric.clear()
         exec_time_metric.clear()
@@ -99,10 +99,10 @@ def expose_apex_exception_metrics(sf):
         request ID, exception type, message, stack trace, and category fields.
     2. Metric that counts the total number of exceptions for each exception category.
     """
+    logger.info("Getting Apex unexpected execeptions...")
     apex_exception_details_gauge.clear()
     apex_exception_category_count_gauge.clear()
 
-    logger.info("Getting Apex unexpected execeptions...")
     apex_unexpected_exception_query = (
         "SELECT Id FROM EventLogFile WHERE EventType = 'ApexUnexpectedException' and Interval = 'Hourly' "
         "ORDER BY LogDate DESC LIMIT 1")
@@ -153,7 +153,6 @@ def expose_concurrent_errors_metrics_sorted_by_average_runtime(df_filtered):
     """
     try:
         top_apex_concurrent_errors_sorted_by_avg_runtime.clear()
-
         average_metrics = df_filtered.groupby('ENTRY_POINT').agg({
             'RUN_TIME': 'mean',
             'EXEC_TIME': 'mean',
@@ -195,7 +194,6 @@ def expose_concurrent_errors_metrics_sorted_by_request_count(df_filtered):
     """
     try:
         top_apex_concurrent_errors_sorted_by_count.clear()
-
         request_count = df_filtered.groupby('ENTRY_POINT').agg({
             'RUN_TIME': ['count', 'mean'],
             'EXEC_TIME': 'mean',
@@ -255,6 +253,7 @@ def expose_concurrent_long_running_apex_errors(sf):
     Count and expose total requests made from ConcurrentLongRunningApexLimit log
     """
     try:
+        concurrent_errors_count_gauge.clear()
         log_query = (
             "SELECT Id FROM EventLogFile WHERE EventType = 'ConcurrentLongRunningApexLimit' AND Interval = 'Daily' "
             "AND LogDate = TODAY ORDER BY LogDate DESC LIMIT 1")
@@ -281,6 +280,16 @@ def async_apex_execution_summary(sf):
 
     logger.info("Getting Apex executions summary...")
     try:
+        apex_entry_point_count.clear()
+        apex_avg_runtime.clear()
+        apex_max_runtime.clear()
+        apex_total_runtime.clear()
+        apex_avg_cputime.clear()
+        apex_max_cputime.clear()
+        apex_runtime_gt_5s_count.clear()
+        apex_runtime_gt_10s_count.clear()
+        apex_runtime_gt_5s_percentage.clear()
+
         apex_execution_logs = parse_logs(sf, APEX_EXECUTION_EVENT_QUERY)
 
         df = pd.DataFrame(apex_execution_logs)

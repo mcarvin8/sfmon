@@ -4,7 +4,7 @@
 from datetime import datetime, timedelta
 
 from cloudwatch_logging import logger
-from constants import QUERY_TIMEOUT_SECONDS
+from query import run_sf_cli_query
 import pytz
 
 
@@ -21,14 +21,15 @@ def get_time_threshold(minutes=5):
 def query_records(sf, soql_query):
     '''fetch payment gateways for FullQA'''
 
-    result = sf.query(soql_query, timeout=QUERY_TIMEOUT_SECONDS)
-    return result['records'] if 'records' in result else []
+    result = run_sf_cli_query(query=soql_query, alias=sf)
+    return result
 
 
 def monitor_payment_method_status(sf, pms_gauge, minutes):
     '''monitors changes in Payment method status for FullQA'''
 
     logger.info("Getting Payment Methods status from FullQA...")
+    pms_gauge.clear()
 
     time_threshold_str = get_time_threshold(minutes)
 
@@ -86,6 +87,8 @@ def monitor_payment_gateway_status(sf, pgs_gauge, minutes):
     '''monitors changes in Payment Gateway status for FullQA'''
 
     logger.info("Getting Payment Gateways status from FullQA...")
+    pgs_gauge.clear()
+
     time_threshold_str = get_time_threshold(minutes)
 
     try:

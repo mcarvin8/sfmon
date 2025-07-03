@@ -8,6 +8,7 @@ from gauges import (
     deployment_details_gauge, pending_time_gauge, deployment_time_gauge,
     validation_details_gauge, validation_pending_time_gauge, validation_time_gauge
 )
+from query import run_sf_cli_query
 
 
 def get_deployment_status(sf):
@@ -16,11 +17,7 @@ def get_deployment_status(sf):
     """
     logger.info("Getting deployment status...")
 
-    query = """
-        SELECT Id, Status, StartDate, CreatedBy.Name, CreatedDate, CompletedDate, CheckOnly 
-        FROM DeployRequest 
-        ORDER BY CompletedDate DESC
-    """
+    query = 'SELECT Id, Status, StartDate, CreatedBy.Name, CreatedDate, CompletedDate, CheckOnly FROM DeployRequest ORDER BY CompletedDate DESC'
 
     status_mapping = {
         'Succeeded': 1,
@@ -30,8 +27,9 @@ def get_deployment_status(sf):
     }
 
     try:
-        result = sf.toolingexecute(f'query/?q={query}')
-        for record in result.get('records', []):
+        result = run_sf_cli_query(query=query,
+                                  alias=sf,use_tooling_api=True)
+        for record in result:
             if record.get('Status') == 'InProgress':
                 continue
             is_validation = record.get('CheckOnly', False)

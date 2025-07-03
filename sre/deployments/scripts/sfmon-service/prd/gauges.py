@@ -2,7 +2,6 @@
     Define all Prometheus gauges.
 """
 from prometheus_client import Gauge
-from constants import EMAIL_DELIVERABILITY_STR
 
 # Constants
 TOTAL_LICENSES = 'Total Salesforce licenses'
@@ -180,6 +179,12 @@ community_registration_error_metric = Gauge('community_registration_error_detail
                                             ['id', 'name', 'source_name', 'log_level',
                                              'log_message', 'callout_response',
                                              'record_id', 'created_date'])
+unused_permissionsets = Gauge('unused_permissionsets',
+                                            'unused permissionsets',
+                                            ['name', 'id'])
+five_or_less_profile_assignees = Gauge('five_or_less_profile_assignees',
+                                            'five_or_less_profile_assignees',
+                                            ['profileId'])
 
 # Define Prometheus metrics
 apex_entry_point_count = Gauge('apex_entry_point_count',
@@ -220,42 +225,3 @@ hourly_report_export_metric = Gauge('hourly_report_export', 'Report export detai
 suspicious_records_gauge = Gauge('suspicious_records','suspicious records from Audit Trail logs',
                                 ['action', 'section', 'user',
                                  'created_date', 'display', 'delegate_user'])
-
-dev_email_deliverability_change_gauge = Gauge('dev_email_deliverability_change',
-                                              EMAIL_DELIVERABILITY_STR,
-                                                ['action', 'section', 'user',
-                                                 'created_date', 'display', 'delegate_user'])
-
-fullqa_email_deliverability_change_gauge = Gauge('fullqa_email_deliverability_change',
-                                                 EMAIL_DELIVERABILITY_STR,
-                                                ['action', 'section', 'user',
-                                                 'created_date', 'display', 'delegate_user'])
-
-fullqab_email_deliverability_change_gauge = Gauge('fullqab_email_deliverability_change',
-                                                  EMAIL_DELIVERABILITY_STR,
-                                                ['action', 'section', 'user',
-                                                 'created_date', 'display', 'delegate_user'])
-
-payment_method_status_gauge = Gauge('payment_method_status', 'Payment Methods Status',
-                                    ['billing_active_status', 'billing_autopay_status',
-                                     'billing_payment_gateway_name',
-                                    'payment_gateway_token', 'payment_method_id',
-                                    'payment_method_name', 'user_name', 'last_modified_date'])
-
-payment_gateway_status_gauge = Gauge('payment_gateway_status', 'Payment Gateways Status',
-                                    ['billing_active_status', 'billing_default_status',
-                                     'billing_gateway_type',
-                                    'payment_gateway_name', 'record_id',
-                                    'user_name', 'last_modified_date'])
-
-payment_method_status_gauge_fqab = Gauge('payment_method_status_fqab', 'Payment Methods Status',
-                                    ['billing_active_status', 'billing_autopay_status',
-                                     'billing_payment_gateway_name',
-                                    'payment_gateway_token', 'payment_method_id',
-                                    'payment_method_name', 'user_name', 'last_modified_date'])
-
-payment_gateway_status_gauge_fqab = Gauge('payment_gateway_status_fqab', 'Payment Gateways Status',
-                                    ['billing_active_status', 'billing_default_status',
-                                     'billing_gateway_type',
-                                    'payment_gateway_name', 'record_id',
-                                    'user_name', 'last_modified_date'])

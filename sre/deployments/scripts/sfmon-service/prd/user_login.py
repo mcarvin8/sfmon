@@ -9,7 +9,8 @@ import pandas as pd
 
 from cloudwatch_logging import logger
 from constants import REQUESTS_TIMEOUT_SECONDS
-from gauges import login_failure_gauge, login_success_gauge, geolocation_gauge, unique_login_attempts_guage
+from gauges import (login_failure_gauge, login_success_gauge,
+                    geolocation_gauge, unique_login_attempts_guage)
 
 
 def monitor_login_events(sf):

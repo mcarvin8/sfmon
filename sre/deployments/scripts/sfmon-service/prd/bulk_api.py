@@ -71,6 +71,9 @@ def process_bulk_api_logs(bulk_api_logs, batch_metric, entity_metric):
     total_records_processed = defaultdict(int)
     entity_type_counts = defaultdict(int)
 
+    batch_metric.clear()
+    entity_metric.clear()
+
     for row in bulk_api_logs:
         if not is_valid_entity(row):
             continue

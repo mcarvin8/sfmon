@@ -51,7 +51,9 @@ Before you can deploy SFMon ECS, you must provision the following AWS infrastruc
 
 The Python scripts that run the monitoring service are located in `sre/deployments/scripts/sfmon-service`.
 
-The primary script is `salesforce_monitoring.py`, which the Docker image runs at launch. This script:
+The scripts are separated into 2 folders for 2 ECS services. `prd` for production monitoring and `sbx` for sandbox monitoring. There's overlap in some monitoring between production and sandboxes, which you can obviously tailor for your specific orgs.
+
+The primary scheduler script is `salesforce_monitoring.py`, which the Docker image runs at launch. This script:
 
 - Imports and schedules monitoring functions
 - Authenticates to each Salesforce org via CLI or Simple Salesforce

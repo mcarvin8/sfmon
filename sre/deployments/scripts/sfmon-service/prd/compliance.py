@@ -1,19 +1,10 @@
 """
     Compliance functions.
 """
-from datetime import datetime, timedelta
-import re
-
-import pytz
-
 from constants import QUERY_TIMEOUT_SECONDS, EXCLUDE_USERS, ALLOWED_SECTIONS_ACTIONS
 from cloudwatch_logging import logger
 from log_parser import parse_logs
-from gauges import (hourly_large_query_metric, suspicious_records_gauge,
-                    dev_email_deliverability_change_gauge,
-                    fullqa_email_deliverability_change_gauge,
-                    fullqab_email_deliverability_change_gauge)
-
+from gauges import (hourly_large_query_metric, suspicious_records_gauge)
 
 def get_user_name(sf, user_id):
     """
@@ -105,6 +96,7 @@ def report_large_queries(large_query_counts):
     Args:
         large_query_counts (dict): Aggregated large query counts.
     """
+    hourly_large_query_metric.clear()
     for (user_id, user_name, method, entity_name, rows_processed), count in large_query_counts.items():
         hourly_large_query_metric.labels(
             user_id=user_id,
@@ -180,6 +172,7 @@ def expose_suspicious_records(sf):
     logger.info("Getting Audit Trail logs...")
 
     try:
+        suspicious_records_gauge.clear()
         audittrail_query = build_audit_trail_query(EXCLUDE_USERS)
         result = sf.query(audittrail_query, timeout=QUERY_TIMEOUT_SECONDS)
 
@@ -187,75 +180,3 @@ def expose_suspicious_records(sf):
     # pylint: disable=broad-except
     except Exception as e:
         logger.error("An unexpected error occurred during monitoring suspicious records: %s", e)
-
-
-def get_time_threshold(minutes):
-    '''Returns a formatted string of the time threshold
-    for the last specified number of minutes in PST timezone.'''
-    pst_timezone = pytz.timezone('US/Pacific')
-    current_time = datetime.now(pst_timezone)
-    time_threshold = current_time - timedelta(minutes=minutes)
-
-    return time_threshold.strftime("%Y-%m-%dT%H:%M:%S%z")
-
-
-def process_env_records(sf_instance, email_deliverability_change_query, gauge, environment):
-    """Process records for a specific Salesforce environment."""
-    records = sf_instance.query(email_deliverability_change_query, timeout=QUERY_TIMEOUT_SECONDS)
-
-    if records['records']:
-        for record in records['records']:
-            display_value = record.get('Display', '')
-            # Filter records based on specific display values
-            # if display_value.strip().lower() in [
-            #     "changed access to send email level from no access to all email".lower(),
-            #     "changed access to send email level from no access to system email only".lower()
-            # ]:
-            if re.match(r"Changed Access to Send Email level from No access to (All email|System email only)", display_value):
-                record_data = extract_record_data(record)
-                expose_record_metric(gauge, record_data)
-            else:
-                logger.info("Skipping record in %s due to unmatched display value: %s",
-                            environment, display_value)
-    else:
-        logger.info("No email deliverability change found in %s.", environment)
-        gauge.labels(
-            action='N/A',
-            section='N/A',
-            user='N/A',
-            created_date='N/A',
-            display='N/A',
-            delegate_user='N/A'
-        ).set(0)
-
-
-def track_email_deliverability_change(sf_dev, sf_fqa, sf_fqab, minutes):
-    '''
-    monitor email deliverability change
-    '''
-    logger.info("Track Email Deliverability Change...")
-
-    time_threshold_str = get_time_threshold(minutes)
-
-    try:
-        email_deliverability_change_query = (
-                f"SELECT Action, Section, CreatedById, CreatedBy.Name, CreatedDate, Display, DelegateUser "
-                f"FROM SetupAuditTrail WHERE Action='sendEmailAccessControl' AND CreatedDate > {time_threshold_str} "
-                f"ORDER BY CreatedDate DESC"
-            )
-
-        process_env_records(sf_dev,
-                            email_deliverability_change_query,
-                            dev_email_deliverability_change_gauge,
-                            "Dev")
-        process_env_records(sf_fqa,
-                            email_deliverability_change_query,
-                            fullqa_email_deliverability_change_gauge,
-                            "FullQA")
-        process_env_records(sf_fqab,
-                            email_deliverability_change_query,
-                            fullqab_email_deliverability_change_gauge,
-                            "FullQAB")
-    # pylint: disable=broad-except
-    except Exception as e:
-        logger.error("An error occurred in track_email_deliverability_change : %s", e)

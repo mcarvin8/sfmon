@@ -4,7 +4,7 @@
 from cloudwatch_logging import logger
 from compliance import get_user_name
 from gauges import org_wide_sharing__setting_changes
-from constants import QUERY_TIMEOUT_SECONDS
+from query import run_sf_cli_query
 
 
 def query_setup_audit_trail(sf):
@@ -12,9 +12,9 @@ def query_setup_audit_trail(sf):
     fetch audit trail records from today's date
     '''
     soql_query = "SELECT Action, CreatedById, CreatedDate, Display, Section FROM SetupAuditTrail WHERE CreatedDate=YESTERDAY ORDER BY CreatedDate DESC"
-    result = sf.query(soql_query, timeout=QUERY_TIMEOUT_SECONDS)
+    result = run_sf_cli_query(query=soql_query, alias=sf)
 
-    return result['records'] if 'records' in result else []
+    return result
 
 def monitor_org_wide_sharing_settings(sf):
     '''
@@ -24,6 +24,7 @@ def monitor_org_wide_sharing_settings(sf):
     logger.info("Getting Org-Wide Sharing Settings...")
 
     try:
+        org_wide_sharing__setting_changes.clear()
         changes = query_setup_audit_trail(sf)
 
         if not changes:
