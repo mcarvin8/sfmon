@@ -7,6 +7,7 @@ This project provides the necessary resources to deploy a SFMon service on AWS E
 A Grafana dashboard can be used to visualize the Prometheus targets created by SFMon.
 
 While this project provides the files to run on AWS ECS, you could run the custom Docker container on other cloud platforms.
+
 ---
 
 ## 🚀 Quick Start
