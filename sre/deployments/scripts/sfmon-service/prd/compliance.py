@@ -1,10 +1,11 @@
 """
     Compliance functions.
 """
-from constants import QUERY_TIMEOUT_SECONDS, EXCLUDE_USERS, ALLOWED_SECTIONS_ACTIONS
+from constants import EXCLUDE_USERS, ALLOWED_SECTIONS_ACTIONS
 from cloudwatch_logging import logger
 from log_parser import parse_logs
 from gauges import (hourly_large_query_metric, suspicious_records_gauge)
+from query import run_sf_cli_query
 
 def get_user_name(sf, user_id):
     """
@@ -12,8 +13,8 @@ def get_user_name(sf, user_id):
     """
     try:
         query = f"SELECT Name FROM User WHERE Id = '{user_id}'"
-        result = sf.query(query, timeout=QUERY_TIMEOUT_SECONDS)
-        return result['records'][0]['Name'] if result['records'] else 'Unknown User'
+        result = run_sf_cli_query(alias=sf, query=query)
+        return result['Name'] if result else 'Unknown User'
     except Exception as e: # pylint: disable=broad-except
         logger.error("Error fetching user name for ID %s: %s", user_id, e)
         return 'Unknown User'
@@ -174,9 +175,9 @@ def expose_suspicious_records(sf):
     try:
         suspicious_records_gauge.clear()
         audittrail_query = build_audit_trail_query(EXCLUDE_USERS)
-        result = sf.query(audittrail_query, timeout=QUERY_TIMEOUT_SECONDS)
+        result = run_sf_cli_query(query=audittrail_query, alias=sf)
 
-        process_suspicious_records(result.get('records', []))
+        process_suspicious_records(result)
     # pylint: disable=broad-except
     except Exception as e:
         logger.error("An unexpected error occurred during monitoring suspicious records: %s", e)

@@ -14,14 +14,13 @@ from gauges import (async_job_status_gauge, run_time_metric, cpu_time_metric,
                     apex_runtime_gt_10s_count, apex_runtime_gt_5s_percentage)
 from log_parser import parse_logs
 import pandas as pd
-import requests
-from constants import QUERY_TIMEOUT_SECONDS
+from query import run_sf_cli_query
 
 
-APEX_EXECUTION_EVENT_QUERY = (
-    "SELECT Id FROM EventLogFile WHERE EventType = 'ApexExecution' and Interval = 'Hourly' "
-    "ORDER BY LogDate DESC LIMIT 1"
-)
+APEX_EXECUTION_EVENT_QUERY = """
+    SELECT Id FROM EventLogFile WHERE EventType = 'ApexExecution' and Interval = 'Hourly' 
+    ORDER BY LogDate DESC LIMIT 1
+"""
 
 
 def async_apex_job_status(sf):
@@ -33,16 +32,12 @@ def async_apex_job_status(sf):
         SELECT Id, Status, JobType, ApexClassId, MethodName, NumberOfErrors FROM AsyncApexJob 
         WHERE CreatedDate = TODAY
     """
-    try:
-        result = sf.query_all(query, timeout=QUERY_TIMEOUT_SECONDS)
-    except requests.exceptions.Timeout:
-        logger.error("Query timed out after : %s seconds.", QUERY_TIMEOUT_SECONDS)
-        return None
+    result = run_sf_cli_query(query=query, alias=sf)
 
     overall_status_counts = {}
     async_job_status_gauge.clear()
 
-    for record in result['records']:
+    for record in result:
         status = record['Status']
         job_type = record['JobType']
         method = record['MethodName']
@@ -103,9 +98,10 @@ def expose_apex_exception_metrics(sf):
     apex_exception_details_gauge.clear()
     apex_exception_category_count_gauge.clear()
 
-    apex_unexpected_exception_query = (
-        "SELECT Id FROM EventLogFile WHERE EventType = 'ApexUnexpectedException' and Interval = 'Hourly' "
-        "ORDER BY LogDate DESC LIMIT 1")
+    apex_unexpected_exception_query = """
+        SELECT Id FROM EventLogFile WHERE EventType = 'ApexUnexpectedException' and Interval = 'Hourly' 
+        ORDER BY LogDate DESC LIMIT 1
+    """
     apex_unexpected_exception_records = list(parse_logs(sf, apex_unexpected_exception_query))
 
     exception_category_counts = {}
@@ -254,9 +250,10 @@ def expose_concurrent_long_running_apex_errors(sf):
     """
     try:
         concurrent_errors_count_gauge.clear()
-        log_query = (
-            "SELECT Id FROM EventLogFile WHERE EventType = 'ConcurrentLongRunningApexLimit' AND Interval = 'Daily' "
-            "AND LogDate = TODAY ORDER BY LogDate DESC LIMIT 1")
+        log_query = """
+            SELECT Id FROM EventLogFile WHERE EventType = 'ConcurrentLongRunningApexLimit' AND Interval = 'Daily' 
+            AND LogDate = TODAY ORDER BY LogDate DESC LIMIT 1
+        """
 
         concurrent_long_running_apex_logs = parse_logs(sf, log_query)
 

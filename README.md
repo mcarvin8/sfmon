@@ -19,7 +19,7 @@ A Grafana dashboard can be used to visualize the Prometheus targets created by S
 
 ## Overview
 
-SFMon runs as an ECS service using a Docker image that contains the required Python environment and Salesforce dependencies (`Simple Salesforce` and `Salesforce CLI`). It periodically authenticates with your Salesforce orgs and collects monitoring data.
+SFMon runs as an ECS service using a Docker image that contains the required Python environment and Salesforce dependencies (`Salesforce CLI`). It periodically authenticates with your Salesforce orgs and collects monitoring data.
 
 ---
 
@@ -56,7 +56,7 @@ The scripts are separated into 2 folders for 2 ECS services. `prd` for productio
 The primary scheduler script is `salesforce_monitoring.py`, which the Docker image runs at launch. This script:
 
 - Imports and schedules monitoring functions
-- Authenticates to each Salesforce org via CLI or Simple Salesforce
+- Authenticates to each Salesforce org via Salesforce CLI
 - Runs each monitoring function on a defined schedule
 
 To customize for your orgs:

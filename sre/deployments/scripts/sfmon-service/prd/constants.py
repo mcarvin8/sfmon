@@ -1,6 +1,5 @@
 """ Constants."""
 REQUESTS_TIMEOUT_SECONDS = 300
-QUERY_TIMEOUT_SECONDS = 30
 ALLOWED_SECTIONS_ACTIONS = {
     "": ["createScratchOrg", "changedsenderemail", "deleteScratchOrg", "loginasgrantedtopartnerbt"],
     "Certificate and Key Management": ["insertCertificate"],

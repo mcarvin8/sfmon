@@ -3,8 +3,7 @@ Functions to monitor tech debt.
 """
 from cloudwatch_logging import logger
 from gauges import (unused_permissionsets, five_or_less_profile_assignees,
-                    unassigned_profiles, limited_permissionsets,
-                    deprecated_apex_class_gauge)
+                    unassigned_profiles, limited_permissionsets)
 from query import run_sf_cli_query
 
 def unassigned_permission_sets(sf):
@@ -122,27 +121,3 @@ def profile_no_active_users(sf):
     # pylint: disable=broad-except
     except Exception as e:
         logger.error("Error fetching profiles with no active users: %s", e)
-
-def deprecated_apex_classes(sf):
-    """
-    Query all local apex classes running on deprecated API versions.
-    """
-    try:
-        logger.info("Querying all local apex classes running on deprecated API versions...")
-        query = """
-        SELECT Id,Name,ApiVersion
-        FROM ApexClass
-        WHERE NamespacePrefix = null AND ApiVersion <= 30
-        """
-        results = run_sf_cli_query(query=query, alias=sf)
-        # Clear existing Prometheus gauge labels
-        deprecated_apex_class_gauge.clear()
-
-        for record in results:
-            deprecated_apex_class_gauge.labels(
-                id=record['Id'],
-                name=record['Name']
-            ).set(int(record['ApiVersion']))
-    # pylint: disable=broad-except
-    except Exception as e:
-        logger.error("Error fetching local apex classes running on deprecated API versions: %s", e)

@@ -10,6 +10,8 @@ import requests
 from cloudwatch_logging import logger
 from constants import REQUESTS_TIMEOUT_SECONDS
 from gauges import ept_metric, apt_metric
+from query import run_sf_cli_query
+from log_parser import get_salesforce_base_url
 
 
 def get_salesforce_ept_and_apt(sf):
@@ -58,8 +60,8 @@ def fetch_latest_lightning_pageview_log(sf):
         ORDER BY LogDate DESC 
         LIMIT 1
     """
-    result = sf.query(query)
-    return result['records'][0] if result['records'] else None
+    result = run_sf_cli_query(query=query, alias=sf)
+    return result[0] if result else None
 
 
 def download_log_file(sf, log_id):
@@ -73,9 +75,10 @@ def download_log_file(sf, log_id):
     Returns:
         str: The raw CSV log data as a string, or None if the request failed.
     """
-    url = sf.base_url + f"/sobjects/EventLogFile/{log_id}/LogFile"
+    (base_url, access_token) = get_salesforce_base_url(sf)
+    url = base_url + f"/sobjects/EventLogFile/{log_id}/LogFile"
     response = requests.get(url,
-                            headers={"Authorization": f"Bearer {sf.session_id}"},
+                            headers={"Authorization": f"Bearer {access_token}"},
                             timeout=REQUESTS_TIMEOUT_SECONDS)
     if response.status_code == 200:
         return response.text

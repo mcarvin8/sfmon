@@ -28,10 +28,9 @@ from user_login import monitor_login_events, geolocation
 from org_wide_sharing_setting import monitor_org_wide_sharing_settings
 from report_export import hourly_report_export_records
 from tech_debt import (unassigned_permission_sets, profile_assignment_under5,
-                       profile_no_active_users, perm_sets_limited_users,
-                       deprecated_apex_classes)
+                       profile_no_active_users, perm_sets_limited_users)
 
-def schedule_tasks(sf):
+def schedule_tasks():
     """
     Schedule all tasks as per the required intervals.
     """
@@ -40,28 +39,27 @@ def schedule_tasks(sf):
     monitor_salesforce_limits(PRD_ALIAS)
     get_salesforce_licenses(PRD_ALIAS)
     get_salesforce_instance(PRD_ALIAS)
-    daily_analyse_bulk_api(sf)
+    daily_analyse_bulk_api(PRD_ALIAS)
     get_deployment_status(PRD_ALIAS)
-    geolocation(sf, chunk_size=100)
+    geolocation(PRD_ALIAS, chunk_size=100)
     community_login_error_logger_details(PRD_ALIAS)
     community_registration_error_logger_details(PRD_ALIAS)
-    hourly_analyse_bulk_api(sf)
-    get_salesforce_ept_and_apt(sf)
-    monitor_login_events(sf)
-    async_apex_job_status(sf)
-    monitor_apex_execution_time(sf)
-    async_apex_execution_summary(sf)
-    concurrent_apex_errors(sf)
-    expose_concurrent_long_running_apex_errors(sf)
-    expose_apex_exception_metrics(sf)
-    hourly_observe_user_querying_large_records(sf)
+    hourly_analyse_bulk_api(PRD_ALIAS)
+    get_salesforce_ept_and_apt(PRD_ALIAS)
+    monitor_login_events(PRD_ALIAS)
+    async_apex_job_status(PRD_ALIAS)
+    monitor_apex_execution_time(PRD_ALIAS)
+    async_apex_execution_summary(PRD_ALIAS)
+    concurrent_apex_errors(PRD_ALIAS)
+    expose_concurrent_long_running_apex_errors(PRD_ALIAS)
+    expose_apex_exception_metrics(PRD_ALIAS)
+    hourly_observe_user_querying_large_records(PRD_ALIAS)
     monitor_org_wide_sharing_settings(PRD_ALIAS)
-    expose_suspicious_records(sf)
+    expose_suspicious_records(PRD_ALIAS)
     unassigned_permission_sets(PRD_ALIAS)
     profile_assignment_under5(PRD_ALIAS)
     profile_no_active_users(PRD_ALIAS)
     perm_sets_limited_users(PRD_ALIAS)
-    deprecated_apex_classes(PRD_ALIAS)
     logger.info("Initial execution completed, scheduling tasks...")
 
     # Every 5 minutes
@@ -70,12 +68,12 @@ def schedule_tasks(sf):
     schedule.every(5).minutes.do(lambda: get_salesforce_instance(PRD_ALIAS))
 
     # Twice a day
-    schedule.every().day.at("08:00").do(lambda: daily_analyse_bulk_api(sf))
-    schedule.every().day.at("20:00").do(lambda: daily_analyse_bulk_api(sf))
+    schedule.every().day.at("08:00").do(lambda: daily_analyse_bulk_api(PRD_ALIAS))
+    schedule.every().day.at("20:00").do(lambda: daily_analyse_bulk_api(PRD_ALIAS))
     schedule.every().day.at("08:00").do(lambda: get_deployment_status(PRD_ALIAS))
     schedule.every().day.at("20:00").do(lambda: get_deployment_status(PRD_ALIAS))
-    schedule.every().day.at("08:00").do(lambda: geolocation(sf, chunk_size=100))
-    schedule.every().day.at("20:00").do(lambda: geolocation(sf, chunk_size=100))
+    schedule.every().day.at("08:00").do(lambda: geolocation(PRD_ALIAS, chunk_size=100))
+    schedule.every().day.at("20:00").do(lambda: geolocation(PRD_ALIAS, chunk_size=100))
     schedule.every().day.at("08:00").do(lambda: community_login_error_logger_details(PRD_ALIAS))
     schedule.every().day.at("20:00").do(lambda: community_login_error_logger_details(PRD_ALIAS))
     schedule.every().day.at("08:00").do(lambda: community_registration_error_logger_details(PRD_ALIAS))
@@ -84,25 +82,24 @@ def schedule_tasks(sf):
     schedule.every().day.at("20:00").do(lambda: monitor_org_wide_sharing_settings(PRD_ALIAS))
 
     # Once in a day
-    schedule.every().day.at("00:05").do(lambda: expose_concurrent_long_running_apex_errors(sf))
-    schedule.every().day.at("00:00").do(lambda: expose_suspicious_records(sf))
+    schedule.every().day.at("00:05").do(lambda: expose_concurrent_long_running_apex_errors(PRD_ALIAS))
+    schedule.every().day.at("00:00").do(lambda: expose_suspicious_records(PRD_ALIAS))
     schedule.every().day.at("00:00").do(lambda: unassigned_permission_sets(PRD_ALIAS))
     schedule.every().day.at("00:00").do(lambda: profile_assignment_under5(PRD_ALIAS))
     schedule.every().day.at("00:00").do(lambda: profile_no_active_users(PRD_ALIAS))
     schedule.every().day.at("00:00").do(lambda: perm_sets_limited_users(PRD_ALIAS))
-    schedule.every().day.at("00:00").do(lambda: deprecated_apex_classes(PRD_ALIAS))
 
     # Every 30 minutes
-    schedule.every(30).minutes.do(lambda: hourly_analyse_bulk_api(sf))
-    schedule.every(30).minutes.do(lambda: get_salesforce_ept_and_apt(sf))
-    schedule.every(30).minutes.do(lambda: monitor_login_events(sf))
-    schedule.every(30).minutes.do(lambda: async_apex_job_status(sf))
-    schedule.every(30).minutes.do(lambda: monitor_apex_execution_time(sf))
-    schedule.every(30).minutes.do(lambda: async_apex_execution_summary(sf))
-    schedule.every(30).minutes.do(lambda: concurrent_apex_errors(sf))
-    schedule.every(30).minutes.do(lambda: expose_apex_exception_metrics(sf))
-    schedule.every(30).minutes.do(lambda: hourly_observe_user_querying_large_records(sf))
-    schedule.every(30).minutes.do(lambda: hourly_report_export_records(sf))
+    schedule.every(30).minutes.do(lambda: hourly_analyse_bulk_api(PRD_ALIAS))
+    schedule.every(30).minutes.do(lambda: get_salesforce_ept_and_apt(PRD_ALIAS))
+    schedule.every(30).minutes.do(lambda: monitor_login_events(PRD_ALIAS))
+    schedule.every(30).minutes.do(lambda: async_apex_job_status(PRD_ALIAS))
+    schedule.every(30).minutes.do(lambda: monitor_apex_execution_time(PRD_ALIAS))
+    schedule.every(30).minutes.do(lambda: async_apex_execution_summary(PRD_ALIAS))
+    schedule.every(30).minutes.do(lambda: concurrent_apex_errors(PRD_ALIAS))
+    schedule.every(30).minutes.do(lambda: expose_apex_exception_metrics(PRD_ALIAS))
+    schedule.every(30).minutes.do(lambda: hourly_observe_user_querying_large_records(PRD_ALIAS))
+    schedule.every(30).minutes.do(lambda: hourly_report_export_records(PRD_ALIAS))
 
 
 def main():
@@ -110,8 +107,8 @@ def main():
     Main function. Runs tasks according to their respective schedules.
     """
     start_http_server(9001)
-    sf = get_salesforce_connection_url(url=os.getenv('PRODUCTION_AUTH_URL'), alias=PRD_ALIAS)
-    schedule_tasks(sf)
+    get_salesforce_connection_url(url=os.getenv('PRODUCTION_AUTH_URL'), alias=PRD_ALIAS)
+    schedule_tasks()
     while True:
         schedule.run_pending()
         logger.info('Sleeping for 5 minutes...')
