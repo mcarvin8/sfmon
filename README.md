@@ -1,8 +1,8 @@
 # Salesforce Monitoring (SFMon)
 
-SFMon is an AWS-hosted service which runs a Docker container that scrapes Salesforce org metrics and exposes them to Prometheus for observability and alerting.
+Salesforce Monitoring (SFMon) is a custom Docker container that scrapes Salesforce org metrics and exposes them to Prometheus for observability and alerting.
 
-This project provides the necessary resources to deploy a Salesforce Monitoring (SFMon) service on AWS ECS.
+This project provides the necessary resources to deploy a SFMon service on AWS ECS.
 
 A Grafana dashboard can be used to visualize the Prometheus targets created by SFMon.
 
