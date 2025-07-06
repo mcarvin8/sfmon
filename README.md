@@ -2,11 +2,11 @@
 
 Salesforce Monitoring (SFMon) is a custom Docker container that scrapes Salesforce org metrics and exposes them to Prometheus for observability and alerting.
 
-This project provides the necessary resources to deploy a SFMon service on AWS ECS.
+This project provides the necessary resources to run a SFMon image on AWS ECS.
 
 A Grafana dashboard can be used to visualize the Prometheus targets created by SFMon.
 
-While this project provides the files to run on AWS ECS, you could run the custom Docker container on other cloud platforms.
+While this project provides the files to run on AWS ECS, you could run the custom Docker container on other cloud platforms that can run a Prometheus service.
 
 ---
 
@@ -15,7 +15,7 @@ While this project provides the files to run on AWS ECS, you could run the custo
 1. **Provision AWS Infrastructure** – ECS Cluster, ECR, Prometheus service, IAM roles, security groups.
 2. **Build & Push Docker Image** – Include your Salesforce auth URLs as build arguments.
 3. **Deploy to ECS** – Use Terraform to launch the service into your cluster.
-4. **Configure Grafana** – Import the sample dashboard and start visualizing metrics.
+4. **Configure Grafana** – Import the sample dashboard, update the Prometheus data source, and start visualizing metrics.
 
 ---
 
