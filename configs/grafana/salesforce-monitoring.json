@@ -173,8 +173,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -339,8 +338,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "dark-red",
@@ -497,8 +495,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "dark-red",
@@ -596,8 +593,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               }
@@ -810,8 +806,7 @@
                 "mode": "percentage",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "#EAB839",
@@ -986,8 +981,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "#EAB839",
@@ -2509,7 +2503,7 @@
             "type": "prometheus",
             "uid": "d4MDocHnk"
           },
-          "description": "Permission sets developed by FTE in production which are not assigned to any active users.",
+          "description": "Permission sets developed by FTE in production with 10 or less active users.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2520,7 +2514,7 @@
                 "cellOptions": {
                   "type": "color-text"
                 },
-                "filterable": false,
+                "filterable": true,
                 "inspect": false
               },
               "fieldMinMax": false,
@@ -2540,7 +2534,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               }
@@ -2636,16 +2631,50 @@
               "range": false,
               "refId": "A",
               "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "d4MDocHnk"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "limited_permissionsets",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "B"
             }
           ],
-          "title": "Unassigned Permission Sets",
+          "title": "Permission Sets with ≤10 Active Users",
           "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "mode": "reduceRow",
+                "reduce": {
+                  "include": [
+                    "Value #A",
+                    "Value #B"
+                  ],
+                  "reducer": "sum"
+                }
+              }
+            },
             {
               "id": "organize",
               "options": {
                 "excludeByName": {
                   "Time": true,
                   "Value": true,
+                  "Value #A": true,
+                  "Value #B": true,
                   "__name__": true,
                   "cluster_arn": true,
                   "contact_id": false,
@@ -2676,7 +2705,9 @@
                 },
                 "renameByName": {
                   "Time": "",
+                  "Total": "User Count",
                   "Value": "",
+                  "Value #B": "",
                   "action": "Action",
                   "billing_active_status": "Billing Active Status",
                   "billing_autopay_status": "Billing Autopay Status",
@@ -2722,7 +2753,7 @@
                 "cellOptions": {
                   "type": "color-text"
                 },
-                "filterable": false,
+                "filterable": true,
                 "inspect": false
               },
               "fieldMinMax": false,
@@ -2742,7 +2773,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               }
@@ -2791,7 +2823,7 @@
             "sortBy": [
               {
                 "desc": false,
-                "displayName": "API Name"
+                "displayName": "Profile Name"
               }
             ]
           },
@@ -2814,16 +2846,50 @@
               "range": false,
               "refId": "A",
               "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "d4MDocHnk"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "unassigned_profiles",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "B"
             }
           ],
-          "title": "Profiles Assigned to 5 or less active users",
+          "title": "Profiles with ≤5 Active Users",
           "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "mode": "reduceRow",
+                "reduce": {
+                  "include": [
+                    "Value #A",
+                    "Value #B"
+                  ],
+                  "reducer": "sum"
+                }
+              }
+            },
             {
               "id": "organize",
               "options": {
                 "excludeByName": {
                   "Time": true,
-                  "Value": true,
+                  "Value": false,
+                  "Value #A": true,
+                  "Value #B": true,
                   "__name__": true,
                   "cluster_arn": true,
                   "contact_id": false,
@@ -2843,18 +2909,26 @@
                 },
                 "includeByName": {},
                 "indexByName": {
-                  "Time": 0,
-                  "Value": 1,
-                  "action": 3,
-                  "created_date": 2,
-                  "delegate_user": 6,
-                  "display": 7,
-                  "section": 4,
-                  "user": 5
+                  "Time": 2,
+                  "Value": 3,
+                  "__name__": 4,
+                  "cluster_arn": 5,
+                  "container_arn": 6,
+                  "container_name": 7,
+                  "docker_image": 8,
+                  "instance": 9,
+                  "job": 10,
+                  "profileId": 0,
+                  "profileName": 1,
+                  "task_arn": 11,
+                  "task_group": 12,
+                  "task_name": 13,
+                  "task_revision": 14
                 },
                 "renameByName": {
                   "Time": "",
-                  "Value": "",
+                  "Total": "User Count",
+                  "Value": "User Count",
                   "action": "Action",
                   "billing_active_status": "Billing Active Status",
                   "billing_autopay_status": "Billing Autopay Status",
@@ -2876,6 +2950,7 @@
                   "payment_method_name": "Method Name",
                   "pod": "POD Instance",
                   "profileId": "Profile ID",
+                  "profileName": "Profile Name",
                   "section": "Section",
                   "severity": "Severity",
                   "user": "User",
@@ -15118,6 +15193,6 @@
   "timezone": "browser",
   "title": "Salesforce Monitoring",
   "uid": "edqq6je4aevb4b",
-  "version": 157,
+  "version": 163,
   "weekStart": ""
 }
