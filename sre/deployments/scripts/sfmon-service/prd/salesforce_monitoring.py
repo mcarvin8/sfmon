@@ -27,7 +27,9 @@ from overall_sf_org import (monitor_salesforce_limits,
 from user_login import monitor_login_events, geolocation
 from org_wide_sharing_setting import monitor_org_wide_sharing_settings
 from report_export import hourly_report_export_records
-from tech_debt import unassigned_permission_sets, profile_assignment_under5
+from tech_debt import (unassigned_permission_sets, profile_assignment_under5,
+                       profile_no_active_users, perm_sets_limited_users,
+                       deprecated_apex_classes)
 
 def schedule_tasks(sf):
     """
@@ -57,6 +59,9 @@ def schedule_tasks(sf):
     expose_suspicious_records(sf)
     unassigned_permission_sets(PRD_ALIAS)
     profile_assignment_under5(PRD_ALIAS)
+    profile_no_active_users(PRD_ALIAS)
+    perm_sets_limited_users(PRD_ALIAS)
+    deprecated_apex_classes(PRD_ALIAS)
     logger.info("Initial execution completed, scheduling tasks...")
 
     # Every 5 minutes
@@ -83,6 +88,9 @@ def schedule_tasks(sf):
     schedule.every().day.at("00:00").do(lambda: expose_suspicious_records(sf))
     schedule.every().day.at("00:00").do(lambda: unassigned_permission_sets(PRD_ALIAS))
     schedule.every().day.at("00:00").do(lambda: profile_assignment_under5(PRD_ALIAS))
+    schedule.every().day.at("00:00").do(lambda: profile_no_active_users(PRD_ALIAS))
+    schedule.every().day.at("00:00").do(lambda: perm_sets_limited_users(PRD_ALIAS))
+    schedule.every().day.at("00:00").do(lambda: deprecated_apex_classes(PRD_ALIAS))
 
     # Every 30 minutes
     schedule.every(30).minutes.do(lambda: hourly_analyse_bulk_api(sf))
