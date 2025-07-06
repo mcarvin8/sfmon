@@ -182,9 +182,16 @@ community_registration_error_metric = Gauge('community_registration_error_detail
 unused_permissionsets = Gauge('unused_permissionsets',
                                             'unused permissionsets',
                                             ['name', 'id'])
+limited_permissionsets = Gauge('limited_permissionsets',
+                                            'Permission sets assigned to 10 or less active users.',
+                                            ['name', 'id'])
 five_or_less_profile_assignees = Gauge('five_or_less_profile_assignees',
                                             'five_or_less_profile_assignees',
-                                            ['profileId'])
+                                            ['profileId', 'profileName'])
+
+unassigned_profiles = Gauge('unassigned_profiles',
+                                            'Profiles with no active users.',
+                                            ['profileId', 'profileName'])
 
 # Define Prometheus metrics
 apex_entry_point_count = Gauge('apex_entry_point_count',
