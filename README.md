@@ -68,7 +68,7 @@ Located in `sre/deployments/docker/sfmon-service`, it:
 
 You'll need to build and push the image to your preferred container registry (e.g., ECR, GCR, Docker Hub).
 
-**Required build argument**: Salesforce org SFDX auth URL.
+**Required build argument**: Salesforce org SFDX auth URL (`SALESFORCE_AUTH_URL`)
 
 Example:
 
