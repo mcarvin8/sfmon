@@ -7,7 +7,7 @@ from cloudwatch_logging import logger
 
 def get_salesforce_connection_url(url, alias):
     """
-    Connect to Salesforce using the Salesforce CLI and Simple Salesforce via a URL
+    Connect to Salesforce using the Salesforce CLI via a URL
     Requires `sf` CLI v2.24.4/newer
     """
     try:

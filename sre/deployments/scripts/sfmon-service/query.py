@@ -20,7 +20,8 @@ def run_sf_cli_query(alias, query, use_tooling_api=False):
             capture_output=True,
             text=True,
             check=False,
-            shell=True
+            shell=True,
+            encoding='utf-8'
         )
         data = json.loads(result.stdout)
         return data.get("result", {}).get("records", [])
