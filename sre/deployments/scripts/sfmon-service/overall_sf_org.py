@@ -127,12 +127,12 @@ def get_salesforce_instance(sf):
     """
     Get instance info.
     """
-    logger.info("Getting Salesforce instance info for Production...")
+    logger.info("Getting Salesforce instance info for %s...", sf)
     try:
         pod = fetch_pod(sf)
         incident_gauge.clear()
-        get_salesforce_incidents("Production", pod)
-        get_salesforce_maintenances({"Production": pod})
+        get_salesforce_incidents(sf, pod)
+        get_salesforce_maintenances({sf: pod})
     except requests.RequestException as e:
         logger.error("Error getting Salesforce instance status: %s", e)
     except Exception as e:
@@ -198,7 +198,7 @@ def get_salesforce_incidents(org, instancepod):
 
 def get_salesforce_maintenances(pod_map):
     """
-    Get all scheduled maintenance details for the Production org only.
+    Get all scheduled maintenance details.
     """
     try:
         response = requests.get("https://api.status.salesforce.com/v1/maintenances",

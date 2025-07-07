@@ -1,116 +1,151 @@
 # Salesforce Monitoring (SFMon)
 
-**SFMon** is a portable, custom-built Docker container that collects Salesforce org metrics and exposes them via an HTTP endpoint for scraping by **Prometheus**. It enables teams to gain visibility into Salesforce performance, usage, configuration, and incidents—no matter what cloud platform they use.
+SFMon is an AWS-hosted service that scrapes Salesforce org metrics and exposes them to Prometheus for observability and alerting.
 
-> While this repository provides configuration for AWS ECS, **SFMon can be deployed on any platform** that supports Docker and Prometheus, including GCP, Azure, or Kubernetes-based environments.
+This project provides the necessary resources to deploy a Salesforce Monitoring (SFMon) service on AWS ECS. SFMon monitors your Salesforce org by leveraging a custom Docker image hosted in AWS Elastic Container Registry (ECR) and creates Prometheus targets for a Prometheus ECS.
 
-A prebuilt **Grafana dashboard** is included to help you visualize metrics right away.
-
----
-
-## ☁️ Platform-Agnostic Design
-
-The SFMon container can be deployed in any of the following environments:
-
-- **AWS ECS (default example in this repo)**
-- **Google Kubernetes Engine (GKE)** — using `PodMonitor` or scraping annotations
-- **Google Cloud Run or Compute Engine VMs** — with Prometheus agent or OpenTelemetry collector
-- **Azure Container Instances / AKS**
-- **Self-hosted Docker environments**
-
-The core components that make this possible:
-
-- **Custom Dockerfile** exposing metrics on port `9001`
-- **Python monitoring scripts** that authenticate to your Salesforce orgs and run scheduled checks
-- **Prometheus-compatible metrics format**
+A Grafana dashboard can be used to visualize the Prometheus targets created by SFMon.
 
 ---
 
-## 🚀 Quick Start (with AWS ECS)
+## 🚀 Quick Start
 
-This project includes Terraform configurations for running SFMon on **AWS ECS**:
-
-1. **Provision AWS Infrastructure** – ECS Cluster, Prometheus service, IAM roles, security groups.
+1. **Provision AWS Infrastructure** – ECS Cluster, ECR, Prometheus service, IAM roles, security groups.
 2. **Build & Push Docker Image** – Include your Salesforce auth URLs as build arguments.
-3. **Deploy to ECS** – Launch the containerized service using Terraform.
-4. **Configure Grafana** – Import the sample dashboard and connect it to your Prometheus instance.
+3. **Deploy to ECS** – Use Terraform to launch the service into your cluster.
+4. **Configure Grafana** – Import the sample dashboard and start visualizing metrics.
 
 ---
 
-## 📦 Core Components
+## Overview
 
-### Python Monitoring Scripts
-
-Located in `sre/deployments/scripts/sfmon-service`, these scripts:
-
-- Authenticate to Salesforce using the CLI
-- Schedule and run custom monitoring jobs
-- Export Prometheus-formatted metrics
-
-You can customize:
-
-- Auth URLs
-- Monitoring intervals
-- Org-specific logic
-- Additional checks
-
-### Dockerfile
-
-Located in `sre/deployments/docker/sfmon-service`, it:
-
-- Installs Python and dependencies
-- Copies in the monitoring scripts
-- Sets the entrypoint to run `salesforce_monitoring.py`
-- Exposes port `9001` for Prometheus scraping
+SFMon runs as an ECS service using a Docker image that contains the required Python environment and Salesforce dependencies (`Salesforce CLI`). It periodically authenticates with your Salesforce org and collects monitoring data.
 
 ---
 
-## 🔨 Building the Docker Image
+## Authors
 
-You'll need to build and push the image to your preferred container registry (e.g., ECR, GCR, Docker Hub).
+Originally developed by Deep Suthar and Matt Carvin.
 
-**Required build arguments**: Salesforce org SFDX auth URLs.
+---
 
-Example:
+## Prerequisites
 
-```bash
+Before you can deploy SFMon ECS, you must provision the following AWS infrastructure:
+
+- An ECS Cluster to host the SFMon service  
+  _(you can deploy one using `sre/deployments/terraform/ecs-cluster`)_
+- A Prometheus ECS Service to scrape and store metrics  
+  _(deploy using `sre/deployments/terraform/prometheus-service`)_
+- The ECS Exec Command IAM policy to allow container access  
+  _(deploy using `sre/deployments/terraform/ecs-exec-command-policy`)_
+- `sre/deployments/terraform/sfmon-service/prereqs` includes:
+  - ECR for SFMon images
+  - IAM role for SFMon
+  - Security Groups for SFMon
+  - CloudWatch log group for SFMon
+
+---
+
+## Modifying Scripts
+
+The Python scripts that run the monitoring service are located in `sre/deployments/scripts/sfmon-service`.
+
+The primary scheduler script is `salesforce_monitoring.py`, which the Docker image runs at launch. This script:
+
+- Imports and schedules monitoring functions
+- Authenticates to each Salesforce org via Salesforce CLI
+- Runs each monitoring function on a defined schedule
+
+To customize for your orgs:
+
+- Update the SFDX authorization URL (see Notes below)
+- Remove monitoring functions you don't need
+- Add or customize monitoring functions for your use case
+- Adjust execution intervals as needed
+
+📌 **Examples of current monitoring functions:**
+
+- Incidents
+- API limits
+- License counts/limits
+- Bulk API analysis details
+- Deployment and validation tracking
+- Performance metrics
+- Errors
+- User login metrics
+- Compliance panels
+
+---
+
+## Building and Publishing the Docker Image
+
+SFMon depends on a custom Docker image that must be built and pushed to your ECR.  
+**The image exposes Port 9001 for Prometheus metrics.**
+
+When building the image, you must provide the SFDX authorization URL for the Salesforce org you intend to monitor. These are the `sfdx auth:sfdxurl:store` or web login URLs generated by the Salesforce CLI.
+
+Example Docker build and push commands:
+
+```
+# Set ECR repo URL and AWS region variables
+TF_VAR_ecr_repo="${ECR_REPO}"
+TF_VAR_aws_region="${AWS_REGION}"
+
+# Login to ECR using Terraform
+cd sre/deployments/terraform/docker-login
+terraform init -input=false
+terraform apply -input=false -auto-approve
+
+# Build Docker image with auth URLs as build arguments
 docker build \
   --file "./sre/deployments/docker/sfmon-service/Dockerfile" \
-  --build-arg PRODUCTION_AUTH_URL=$PRODUCTION_AUTH_URL \
-  --build-arg FULLQA_AUTH_URL=$FULLQA_AUTH_URL \
-  --build-arg FULLQAB_AUTH_URL=$FULLQAB_AUTH_URL \
-  --build-arg DEV_AUTH_URL=$DEV_AUTH_URL \
-  --tag your-repo/sfmon:latest .
+  --build-arg SALESFORCE_AUTH_URL=$SALESFORCE_AUTH_URL \
+  --tag $ECR_REPO:$CI_COMMIT_SHORT_SHA .
 
-docker push your-repo/sfmon:latest
+# Push image to ECR
+docker push $ECR_REPO:$CI_COMMIT_SHORT_SHA
 ```
 
----
+## Deploying SFMon to ECS
 
-## 📊 Grafana Dashboard
+Once your image is published and infrastructure is ready:
 
-Import the JSON file in `configs/grafana` to get started with a ready-to-use SFMon dashboard. Customize based on your orgs and alerting requirements.
+1. Create or update your ECS Task Definition to use the new Docker image.
+1. Deploy SFMon to your ECS cluster using Terraform.
 
----
+Ensure that you create a backend.tf file in sre/deployments/terraform/sfmon-service/ecs-service with the appropriate state file configuration.
 
-## 🔐 Security Notes
+```
+# Set environment variable for Docker image tag
+TF_VAR_docker_image_tag="$CI_COMMIT_SHORT_SHA"
 
-- Never commit your **SFDX auth URLs**.
-- Use secrets management systems (e.g., AWS Secrets Manager, GCP Secret Manager, or Kubernetes Secrets).
-- Ensure your Prometheus server can access port `9001` of the SFMon container.
+cd sre/deployments/terraform/sfmon-service/ecs-service
+terraform init -input=false
+terraform apply -input=false -auto-approve
+```
 
----
+## Grafana
 
-## ✍️ Authors
+The `configs/grafana` directory contains a sample Grafana dashboard JSON file. You can import this into your Grafana instance and customize it based on your orgs and alerting needs.
 
-Originally developed by **Deep Suthar** and **Matt Carvin** for ECS deployment at Avalara.
+## Notes
 
----
+- The Salesforce org to be monitored must have a corresponding SFDX AUTH URL.
+    - These are generated via `sf org display --target-org {alias} --verbose`
+- ⚠️ **Security Note:** Do not commit or expose your SFDX AUTH URLs in source control. Use environment variables or secrets management solutions (e.g., AWS Secrets Manager) to handle credentials securely.
+- This setup assumes Prometheus is scraping from the same ECS cluster where SFMon is deployed.
 
-## 🔄 Alternatives & Extensions
+## Alternatives
 
-If you’re not on AWS, you can:
+While this repo focuses on deploying SFMon to AWS ECS, the core functionality is portable.
 
-- Replace ECS with Kubernetes and expose the metrics endpoint as a service
-- Run SFMon as a sidecar or standalone Docker container on GCP/Azure
-- Push metrics to alternative backends (e.g., Google Cloud Monitoring) via an OpenTelemetry Collector
+The heart of this repository is:
+
+- The Python monitoring scripts (`sre/deployments/scripts/sfmon-service`)
+- The Dockerfile (`sre/deployments/docker/sfmon-service`)
+
+These can be reused in other environments:
+
+- **Google Kubernetes Engine (GKE)**: Add a `PodMonitor` or use scraping annotations.
+- **Google Cloud Run / VMs**: Run a Prometheus agent or OpenTelemetry Collector to scrape the container’s metrics endpoint and forward data to Google Cloud Monitoring or another backend.
