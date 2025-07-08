@@ -193,7 +193,10 @@ unassigned_profiles = Gauge('unassigned_profiles',
                                             'Profiles with no active users.',
                                             ['profileId', 'profileName'])
 
-# Define Prometheus metrics
+deprecated_apex_class_gauge = Gauge('deprecated_apex_classes',
+                                            'Apex classes running on deprecated API versions.',
+                                            ['id', 'name'])
+
 apex_entry_point_count = Gauge('apex_entry_point_count',
                                'Count of apex executions by entry point',
                                ['entry_point', 'quiddity'])

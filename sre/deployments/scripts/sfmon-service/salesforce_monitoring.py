@@ -28,7 +28,8 @@ from user_login import monitor_login_events, geolocation
 from org_wide_sharing_setting import monitor_org_wide_sharing_settings
 from report_export import hourly_report_export_records
 from tech_debt import (unassigned_permission_sets, profile_assignment_under5,
-                       profile_no_active_users, perm_sets_limited_users)
+                       profile_no_active_users, perm_sets_limited_users,
+                       apex_classes_api_version)
 
 def schedule_tasks():
     """
@@ -60,6 +61,7 @@ def schedule_tasks():
     profile_assignment_under5(SF_ALIAS)
     profile_no_active_users(SF_ALIAS)
     perm_sets_limited_users(SF_ALIAS)
+    apex_classes_api_version(SF_ALIAS)
     logger.info("Initial execution completed, scheduling tasks...")
 
     # Every 5 minutes
@@ -88,6 +90,7 @@ def schedule_tasks():
     schedule.every().day.at("00:00").do(lambda: profile_assignment_under5(SF_ALIAS))
     schedule.every().day.at("00:00").do(lambda: profile_no_active_users(SF_ALIAS))
     schedule.every().day.at("00:00").do(lambda: perm_sets_limited_users(SF_ALIAS))
+    schedule.every().day.at("00:00").do(lambda: apex_classes_api_version(SF_ALIAS))
 
     # Every 30 minutes
     schedule.every(30).minutes.do(lambda: hourly_analyse_bulk_api(SF_ALIAS))

@@ -1099,7 +1099,7 @@
             "h": 11,
             "w": 7,
             "x": 0,
-            "y": 21
+            "y": 32
           },
           "id": 4,
           "interval": "1800",
@@ -1247,7 +1247,7 @@
             "h": 11,
             "w": 17,
             "x": 7,
-            "y": 21
+            "y": 32
           },
           "id": 27,
           "interval": "1800",
@@ -1408,7 +1408,7 @@
             "h": 14,
             "w": 7,
             "x": 0,
-            "y": 32
+            "y": 43
           },
           "id": 50,
           "interval": "1800",
@@ -1558,7 +1558,7 @@
             "h": 14,
             "w": 17,
             "x": 7,
-            "y": 32
+            "y": 43
           },
           "id": 51,
           "interval": "1800",
@@ -1728,7 +1728,7 @@
             "h": 14,
             "w": 7,
             "x": 0,
-            "y": 46
+            "y": 57
           },
           "id": 8,
           "interval": "5m",
@@ -1880,7 +1880,7 @@
             "h": 14,
             "w": 17,
             "x": 7,
-            "y": 46
+            "y": 57
           },
           "id": 52,
           "interval": "1800",
@@ -2032,7 +2032,8 @@
                 "mode": "percentage",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "#EAB839",
@@ -2051,7 +2052,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 42
+            "y": 14
           },
           "id": 64,
           "interval": "15s",
@@ -2133,7 +2134,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               }
@@ -2205,7 +2207,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 48
+            "y": 20
           },
           "id": 61,
           "interval": "1800",
@@ -2384,7 +2386,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 57
+            "y": 29
           },
           "id": 62,
           "interval": "1800",
@@ -2544,30 +2546,6 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Contact ID"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 202
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "ID"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 241
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
                   "options": "ID"
                 },
                 "properties": [
@@ -2587,7 +2565,7 @@
           },
           "gridPos": {
             "h": 19,
-            "w": 7,
+            "w": 14,
             "x": 0,
             "y": 15
           },
@@ -2801,10 +2779,10 @@
             ]
           },
           "gridPos": {
-            "h": 19,
-            "w": 7,
-            "x": 7,
-            "y": 15
+            "h": 16,
+            "w": 14,
+            "x": 0,
+            "y": 34
           },
           "id": 138,
           "interval": "5m",
@@ -2929,6 +2907,200 @@
                   "Time": "",
                   "Total": "User Count",
                   "Value": "User Count",
+                  "action": "Action",
+                  "billing_active_status": "Billing Active Status",
+                  "billing_autopay_status": "Billing Autopay Status",
+                  "billing_payment_gateway_name": "Payment Gateway Name",
+                  "contact_id": "Contact ID",
+                  "created_date": "Created Date",
+                  "delegate_user": "Delegate User",
+                  "display": "Message",
+                  "email": "Email",
+                  "environment": "Environment",
+                  "id": "ID",
+                  "instance": "",
+                  "job": "",
+                  "last_modified_date": "Last modified Date",
+                  "message": "Incident Message",
+                  "name": "API Name",
+                  "payment_gateway_token": "Gateway Token",
+                  "payment_method_id": "Method Id",
+                  "payment_method_name": "Method Name",
+                  "pod": "POD Instance",
+                  "profileId": "Profile ID",
+                  "profileName": "Profile Name",
+                  "section": "Section",
+                  "severity": "Severity",
+                  "user": "User",
+                  "user_name": "User"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "d4MDocHnk"
+          },
+          "description": "Apex classes developed by FTE in production running on API version 30.0 and older.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "fieldMinMax": false,
+              "mappings": [
+                {
+                  "options": {
+                    "True": {
+                      "color": "red",
+                      "index": 0
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "noValue": "No unassigned permission sets in production",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "ID"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "${__data.fields[\"ID\"]}",
+                        "url": "https://avalara.my.salesforce.com/${__data.fields[\"ID\"]}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 16,
+            "w": 14,
+            "x": 0,
+            "y": 50
+          },
+          "id": 139,
+          "interval": "5m",
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "API Name"
+              }
+            ]
+          },
+          "pluginVersion": "10.4.18",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "d4MDocHnk"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "deprecated_apex_classes\r\n",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Apex Classes API Version <=30",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": false,
+                  "Value #A": true,
+                  "Value #B": true,
+                  "__name__": true,
+                  "cluster_arn": true,
+                  "contact_id": false,
+                  "container_arn": true,
+                  "container_name": true,
+                  "created_date": false,
+                  "delegate_user": false,
+                  "docker_image": true,
+                  "instance": true,
+                  "job": true,
+                  "org": true,
+                  "payment_gateway_token": true,
+                  "task_arn": true,
+                  "task_group": true,
+                  "task_name": true,
+                  "task_revision": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 3,
+                  "__name__": 4,
+                  "cluster_arn": 5,
+                  "container_arn": 6,
+                  "container_name": 7,
+                  "docker_image": 8,
+                  "id": 1,
+                  "instance": 9,
+                  "job": 10,
+                  "name": 2,
+                  "task_arn": 11,
+                  "task_group": 12,
+                  "task_name": 13,
+                  "task_revision": 14
+                },
+                "renameByName": {
+                  "Time": "",
+                  "Total": "User Count",
+                  "Value": "API Version",
+                  "__name__": "",
                   "action": "Action",
                   "billing_active_status": "Billing Active Status",
                   "billing_autopay_status": "Billing Autopay Status",
@@ -15193,6 +15365,6 @@
   "timezone": "browser",
   "title": "Salesforce Monitoring",
   "uid": "edqq6je4aevb4b",
-  "version": 163,
+  "version": 165,
   "weekStart": ""
 }
