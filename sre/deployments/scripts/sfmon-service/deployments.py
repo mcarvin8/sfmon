@@ -4,6 +4,7 @@
 from datetime import datetime
 
 from cloudwatch_logging import logger
+from query import tooling_query_records_all
 from gauges import (
     deployment_details_gauge, pending_time_gauge, deployment_time_gauge,
     validation_details_gauge, validation_pending_time_gauge, validation_time_gauge
@@ -26,8 +27,8 @@ def get_deployment_status(sf):
     }
 
     try:
-        result = sf.toolingexecute(f'query/?q={query}')
-        for record in result.get('records', []):
+        result = tooling_query_records_all(sf, query)
+        for record in result:
             if record.get('Status') == 'InProgress':
                 continue
             is_validation = record.get('CheckOnly', False)
