@@ -1,33 +1,23 @@
 '''
-    Runs a query using the Salesforce CLI and parses the JSON response.
-    Optionally use tooling API if needed.
+    Runs a query with simple salesforce with pagination enabled.
 '''
-import json
-import subprocess
+import requests
 
+from constants import QUERY_TIMEOUT_SECONDS
 from cloudwatch_logging import logger
+from simple_salesforce.exceptions import SalesforceMalformedRequest
 
-def run_sf_cli_query(alias, query, use_tooling_api=False):
-    """Run Salesforce CLI query and return parsed records."""
+def query_records_all(sf, soql_query):
+    '''fetch all records from query using pagination - simple salesforce)'''
     try:
-        # normalize query first
-        normalized_query = ' '.join(line.strip() for line in query.strip().splitlines())
-        command = f'sf data query --query "{normalized_query}" --target-org "{alias}" --json'
-        if use_tooling_api:
-            command += ' --use-tooling-api'
-        result = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
-            check=False,
-            shell=True,
-            encoding='utf-8'
-        )
-        data = json.loads(result.stdout)
-        return data.get("result", {}).get("records", [])
-    except subprocess.CalledProcessError as e:
-        logger.error("Salesforce CLI query failed for alias %s: %s", alias, e.stderr)
+        result = sf.query_all(soql_query, timeout=QUERY_TIMEOUT_SECONDS)
+        return result['records'] if 'records' in result else []
+    except requests.exceptions.Timeout:
+        logger.error("Query timed out after : %s seconds.", QUERY_TIMEOUT_SECONDS)
         return []
-    except json.JSONDecodeError:
-        logger.error("Invalid JSON output from Salesforce CLI for alias %s", alias)
+    except SalesforceMalformedRequest as e:
+        logger.error("Salesforce malformed request: %s", e)
+        return []
+    except Exception as e:
+        logger.error("Query failed due to general exception: %s", e)
         return []

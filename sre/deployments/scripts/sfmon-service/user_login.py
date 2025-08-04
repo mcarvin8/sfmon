@@ -11,8 +11,7 @@ from cloudwatch_logging import logger
 from constants import REQUESTS_TIMEOUT_SECONDS
 from gauges import (login_failure_gauge, login_success_gauge,
                     geolocation_gauge, unique_login_attempts_guage)
-from query import run_sf_cli_query
-from log_parser import get_salesforce_base_url
+from query import query_records_all
 
 def monitor_login_events(sf):
     """
@@ -44,15 +43,15 @@ def fetch_latest_login_log(sf):
         Query log file for events.
     '''
     query = "SELECT Id, LogDate, Interval FROM EventLogFile WHERE EventType = 'Login' and Interval = 'Hourly' ORDER BY LogDate DESC"
-    event_log_file = run_sf_cli_query(query=query, alias=sf)
+    event_log_file = query_records_all(sf, query)
     if not event_log_file:
         return None
 
     log_id = event_log_file[0]['Id']
-    (base_url, access_token) = get_salesforce_base_url(sf)
-    log_data_url = base_url + f"/sobjects/EventLogFile/{log_id}/LogFile"
+
+    log_data_url = sf.base_url + f"/sobjects/EventLogFile/{log_id}/LogFile"
     response = requests.get(log_data_url,
-                            headers={"Authorization": f"Bearer {access_token}"},
+                            headers={"Authorization": f"Bearer {sf.session_id}"},
                             timeout=REQUESTS_TIMEOUT_SECONDS)
     response.raise_for_status()
     return response.text if response.text else None
@@ -93,7 +92,7 @@ def geolocation(sf, chunk_size=100):
         start_time = (datetime.now(timezone.utc) - timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
 
         query = f"SELECT UserId, LoginGeo.Latitude, LoginGeo.Longitude, Status, Browser FROM LoginHistory WHERE LoginTime >= {start_time} AND LoginTime <= {end_time}"
-        user_location = run_sf_cli_query(query=query, alias=sf)
+        user_location = query_records_all(sf, query)
         locations = user_location
 
         user_ids = [record['UserId'] for record in locations]
@@ -103,7 +102,7 @@ def geolocation(sf, chunk_size=100):
         for i in range(0, len(user_ids), chunk_size):
             chunk = user_ids[i:i + chunk_size]
             user_query = f"SELECT Id, Name FROM User WHERE Id IN ({', '.join([f"'{uid}'" for uid in chunk])})"
-            user_results = run_sf_cli_query(query=user_query, alias=sf)
+            user_results = query_records_all(sf, user_query)
             user_map.update({user['Id']: user['Name'] for user in user_results})
 
         for record in locations:

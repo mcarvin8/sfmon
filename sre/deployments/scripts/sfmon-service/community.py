@@ -3,7 +3,7 @@
 '''
 from cloudwatch_logging import logger
 from gauges import community_login_error_metric, community_registration_error_metric
-from query import run_sf_cli_query
+from query import query_records_all
 
 
 def community_login_error_logger_details(sf):
@@ -22,7 +22,7 @@ def community_login_error_logger_details(sf):
         AND CreatedDate = LAST_N_DAYS:7 
         ORDER BY CreatedDate DESC
         """
-        results = run_sf_cli_query(query=query, alias=sf)
+        results = query_records_all(sf, query)
         community_login_error_metric.clear()
 
         for record in results:
@@ -59,7 +59,7 @@ def community_registration_error_logger_details(sf):
 		AND CreatedDate = LAST_N_DAYS:7 
 		ORDER BY CreatedDate DESC
         """
-        results = run_sf_cli_query(query=query, alias=sf)
+        results = query_records_all(sf, query)
         community_registration_error_metric.clear()
 
         for record in results:

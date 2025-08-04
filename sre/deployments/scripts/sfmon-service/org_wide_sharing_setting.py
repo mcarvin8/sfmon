@@ -4,7 +4,7 @@
 from cloudwatch_logging import logger
 from compliance import get_user_name
 from gauges import org_wide_sharing__setting_changes
-from query import run_sf_cli_query
+from query import query_records_all
 
 
 def query_setup_audit_trail(sf):
@@ -12,7 +12,7 @@ def query_setup_audit_trail(sf):
     fetch audit trail records from today's date
     '''
     soql_query = "SELECT Action, CreatedById, CreatedDate, Display, Section FROM SetupAuditTrail WHERE CreatedDate=YESTERDAY ORDER BY CreatedDate DESC"
-    result = run_sf_cli_query(query=soql_query, alias=sf)
+    result = query_records_all(sf, soql_query)
 
     return result
 

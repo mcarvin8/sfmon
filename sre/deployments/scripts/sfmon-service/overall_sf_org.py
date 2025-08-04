@@ -1,9 +1,6 @@
 """
     Overall Org level functions.
 """
-import json
-import subprocess
-
 import requests
 
 from cloudwatch_logging import logger
@@ -17,39 +14,27 @@ from gauges import (api_usage_gauge, api_usage_percentage_gauge,
                     percent_usage_based_entitlements_used_gauge, percent_user_licenses_used_gauge,
                     maintenance_gauge)
 from limits import salesforce_limits_descriptions
-from query import run_sf_cli_query
+from query import query_records_all
 
 def monitor_salesforce_limits(sf):
     """
     Monitor all Salesforce limits.
     """
-    cmd = subprocess.run(
-        f"sf org list limits --target-org {sf} --json",
-        check=True,
-        shell=True,
-        stdout=subprocess.PIPE
-    )
-    sfdx_info = json.loads(cmd.stdout)
-    limits = sfdx_info.get("result", [])
-    api_usage_gauge.clear()
-    api_usage_percentage_gauge.clear()
-    for limit_data in limits:
-        limit_name = limit_data["name"]
-        max_limit = limit_data["max"]
-        remaining = limit_data["remaining"]
-        used = max_limit - remaining
+    try:
+        logger.info("Getting Salesforce API limits...")
+        limits = dict(sf.limits())
+        for limit_name, limit_data in limits.items():
+            max_limit = limit_data['Max']
+            remaining = limit_data['Remaining']
+            used = max_limit - remaining
 
-        if max_limit != 0:
-            usage_percentage = (used * 100) / max_limit
+            if max_limit != 0:
+                usage_percentage = (used * 100) / max_limit
 
-            api_usage_gauge.labels(limit_name=limit_name).set(used)
-            api_usage_percentage_gauge.labels(
-                limit_name=limit_name,
-                limit_description=salesforce_limits_descriptions.get(limit_name, "Description not available"),
-                limit_utilized=used,
-                max_limit=max_limit
-            ).set(usage_percentage)
-
+                api_usage_gauge.labels(limit_name=limit_name).set(used)
+                api_usage_percentage_gauge.labels(limit_name=limit_name, limit_description=salesforce_limits_descriptions.get(limit_name, 'Description not available'), limit_utilized=used, max_limit=max_limit).set(usage_percentage)
+    except Exception as e:
+        logger.error("Error getting limits: %s", e)
 
 def get_salesforce_licenses(sf):
     """
@@ -66,7 +51,7 @@ def get_salesforce_licenses(sf):
     used_usage_based_entitlements_licenses_gauge.clear()
     percent_usage_based_entitlements_used_gauge.clear()
 
-    result_user_license = run_sf_cli_query(query="SELECT Name, Status, UsedLicenses, TotalLicenses FROM UserLicense", alias=sf)
+    result_user_license = query_records_all(sf, "SELECT Name, Status, UsedLicenses, TotalLicenses FROM UserLicense")
     for entry in result_user_license:
         status = dict(entry)['Status']
         license_name = entry['Name']
@@ -81,8 +66,7 @@ def get_salesforce_licenses(sf):
             percent_used = (used_licenses / total_licenses) * 100
             percent_user_licenses_used_gauge.labels(license_name=license_name, status=status, used_licenses=used_licenses, total_licenses=total_licenses).set(percent_used)
 
-    result_perm_set_license = run_sf_cli_query(query="SELECT MasterLabel, Status, ExpirationDate, TotalLicenses, UsedLicenses FROM PermissionSetLicense",
-                                               alias=sf)
+    result_perm_set_license = query_records_all(sf, "SELECT MasterLabel, Status, ExpirationDate, TotalLicenses, UsedLicenses FROM PermissionSetLicense")
     for entry in result_perm_set_license:
         status = dict(entry)['Status']
         license_name = entry['MasterLabel']
@@ -97,8 +81,7 @@ def get_salesforce_licenses(sf):
             percent_used = (used_licenses / total_licenses) * 100
             percent_permissionset_used_gauge.labels(license_name=license_name, status=status, expiration_date=expiration_date, used_licenses=used_licenses, total_licenses=total_licenses).set(percent_used)
 
-    result_usage_based_entitlements = run_sf_cli_query(query="SELECT MasterLabel, AmountUsed, CurrentAmountAllowed, EndDate FROM TenantUsageEntitlement",
-                                                       alias=sf)
+    result_usage_based_entitlements = query_records_all(sf, "SELECT MasterLabel, AmountUsed, CurrentAmountAllowed, EndDate FROM TenantUsageEntitlement")
     for entry in result_usage_based_entitlements:
         license_name = dict(entry)['MasterLabel']
         total_licenses = dict(entry)['CurrentAmountAllowed']
@@ -118,8 +101,7 @@ def fetch_pod(instance):
     """
     Fetch the Salesforce pod for a given instance.
     """
-    result = run_sf_cli_query(query="Select FIELDS(ALL) From Organization LIMIT 1",
-                              alias=instance)
+    result = query_records_all(instance, "Select FIELDS(ALL) From Organization LIMIT 1")
     return result[0]['InstanceName']
 
 
@@ -127,12 +109,12 @@ def get_salesforce_instance(sf):
     """
     Get instance info.
     """
-    logger.info("Getting Salesforce instance info for %s...", sf)
+    logger.info("Getting Salesforce instance info for Production...")
     try:
         pod = fetch_pod(sf)
         incident_gauge.clear()
-        get_salesforce_incidents(sf, pod)
-        get_salesforce_maintenances({sf: pod})
+        get_salesforce_incidents("Production", pod)
+        get_salesforce_maintenances({"Production": pod})
     except requests.RequestException as e:
         logger.error("Error getting Salesforce instance status: %s", e)
     except Exception as e:
@@ -198,7 +180,7 @@ def get_salesforce_incidents(org, instancepod):
 
 def get_salesforce_maintenances(pod_map):
     """
-    Get all scheduled maintenance details.
+    Get all scheduled maintenance details for the Production org only.
     """
     try:
         response = requests.get("https://api.status.salesforce.com/v1/maintenances",

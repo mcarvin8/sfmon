@@ -5,7 +5,7 @@ from cloudwatch_logging import logger
 from log_parser import parse_logs
 from gauges import hourly_report_export_metric
 from compliance import get_user_name
-from query import run_sf_cli_query
+from query import query_records_all
 
 def hourly_report_export_records(sf):
     '''
@@ -32,13 +32,13 @@ def hourly_report_export_records(sf):
                 continue
 
             report_detail_query = f"SELECT Id, Name, ReportTypeApiName FROM Report WHERE Id = '{modified_id}'"
-            result = run_sf_cli_query(query=report_detail_query, alias=sf)
+            result = query_records_all(sf, report_detail_query)
 
             hourly_report_export_metric.labels(
                 user_name=user_name if user_name else None,
                 timestamp=timestamp,
-                report_name=result.get('Name') if result else None,
-                report_type_api_name = result.get('records', [])[0].get('ReportTypeApiName') if result.get('records') else None
+                report_name=result[0].get('Name') if result and len(result) > 0 else None,
+                report_type_api_name=result[0].get('ReportTypeApiName') if result and len(result) > 0 else None
             ).set(1)
     # pylint: disable=broad-except
     except Exception as e:

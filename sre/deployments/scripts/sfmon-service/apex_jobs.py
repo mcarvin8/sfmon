@@ -14,7 +14,7 @@ from gauges import (async_job_status_gauge, run_time_metric, cpu_time_metric,
                     apex_runtime_gt_10s_count, apex_runtime_gt_5s_percentage)
 from log_parser import parse_logs
 import pandas as pd
-from query import run_sf_cli_query
+from query import query_records_all
 
 
 APEX_EXECUTION_EVENT_QUERY = """
@@ -32,7 +32,7 @@ def async_apex_job_status(sf):
         SELECT Id, Status, JobType, ApexClassId, MethodName, NumberOfErrors FROM AsyncApexJob 
         WHERE CreatedDate = TODAY
     """
-    result = run_sf_cli_query(query=query, alias=sf)
+    result = query_records_all(sf, query)
 
     overall_status_counts = {}
     async_job_status_gauge.clear()

@@ -1,5 +1,6 @@
 """ Constants."""
 REQUESTS_TIMEOUT_SECONDS = 300
+QUERY_TIMEOUT_SECONDS = 30
 ALLOWED_SECTIONS_ACTIONS = {
     "": ["createScratchOrg", "changedsenderemail", "deleteScratchOrg", "loginasgrantedtopartnerbt"],
     "Certificate and Key Management": ["insertCertificate"],
@@ -35,4 +36,3 @@ ALLOWED_SECTIONS_ACTIONS = {
 EXCLUDE_USERS = ['Salesforce Admin User', 'GitlabIntegration Prod', 'Rajnandini Chavan',
                  'MindMatrix Integration User', 'Okta Integration User',
                  'Matthew Forsyth', 'Matt Carvin', 'Deep Suthar']
-SF_ALIAS = 'prd'

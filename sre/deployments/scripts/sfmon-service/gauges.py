@@ -192,7 +192,9 @@ five_or_less_profile_assignees = Gauge('five_or_less_profile_assignees',
 unassigned_profiles = Gauge('unassigned_profiles',
                                             'Profiles with no active users.',
                                             ['profileId', 'profileName'])
-
+apex_flex_queue = Gauge('apex_flex_queue',
+                                            'Jobs in holding status flex queue',
+                                            ['id','ApexClassId'])
 deprecated_apex_class_gauge = Gauge('deprecated_apex_classes',
                                             'Apex classes running on deprecated API versions.',
                                             ['id', 'name'])

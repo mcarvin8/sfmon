@@ -5,7 +5,7 @@ from cloudwatch_logging import logger
 from gauges import (unused_permissionsets, five_or_less_profile_assignees,
                     unassigned_profiles, limited_permissionsets,
                     deprecated_apex_class_gauge)
-from query import run_sf_cli_query
+from query import query_records_all
 
 def unassigned_permission_sets(sf):
     """
@@ -28,7 +28,7 @@ def unassigned_permission_sets(sf):
         AND IsOwnedByProfile = FALSE
 
         """
-        results = run_sf_cli_query(query=query, alias=sf)
+        results = query_records_all(sf, query)
         # Clear existing Prometheus gauge labels
         unused_permissionsets.clear()
 
@@ -58,7 +58,7 @@ def perm_sets_limited_users(sf):
         GROUP BY PermissionSet.Id, PermissionSet.Name
         HAVING COUNT(Id) <= 10
         """
-        results = run_sf_cli_query(query=query, alias=sf)
+        results = query_records_all(sf, query)
         # Clear existing Prometheus gauge labels
         limited_permissionsets.clear()
 
@@ -84,7 +84,7 @@ def profile_assignment_under5(sf):
         GROUP BY ProfileId, Profile.Name
         HAVING COUNT(Id) <= 5
         """
-        results = run_sf_cli_query(query=query, alias=sf)
+        results = query_records_all(sf, query)
         # Clear existing Prometheus gauge labels
         five_or_less_profile_assignees.clear()
 
@@ -110,7 +110,7 @@ def profile_no_active_users(sf):
         SELECT ProfileId FROM User WHERE IsActive = TRUE
         )
         """
-        results = run_sf_cli_query(query=query, alias=sf)
+        results = query_records_all(sf, query)
         # Clear existing Prometheus gauge labels
         unassigned_profiles.clear()
 
@@ -125,16 +125,16 @@ def profile_no_active_users(sf):
 
 def apex_classes_api_version(sf):
     """
-    Query all local apex classes running on deprecated API versions.
+    Query all local apex classes running on outdated API versions.
     """
     try:
-        logger.info("Querying all local apex classes running on deprecated API versions...")
+        logger.info("Querying all local apex classes running on outdated API versions...")
         query = """
         SELECT Id,Name,ApiVersion
         FROM ApexClass
-        WHERE NamespacePrefix = null AND ApiVersion <= 30
+        WHERE NamespacePrefix = null AND ApiVersion <= 50
         """
-        results = run_sf_cli_query(query=query, alias=sf)
+        results = query_records_all(sf, query)
         # Clear existing Prometheus gauge labels
         deprecated_apex_class_gauge.clear()
 
@@ -145,4 +145,4 @@ def apex_classes_api_version(sf):
             ).set(int(record['ApiVersion']))
     # pylint: disable=broad-except
     except Exception as e:
-        logger.error("Error fetching local apex classes running on deprecated API versions: %s", e)
+        logger.error("Error fetching local apex classes running on outdated API versions: %s", e)

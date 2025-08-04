@@ -5,7 +5,7 @@ from constants import EXCLUDE_USERS, ALLOWED_SECTIONS_ACTIONS
 from cloudwatch_logging import logger
 from log_parser import parse_logs
 from gauges import (hourly_large_query_metric, suspicious_records_gauge)
-from query import run_sf_cli_query
+from query import query_records_all
 
 def get_user_name(sf, user_id):
     """
@@ -13,8 +13,8 @@ def get_user_name(sf, user_id):
     """
     try:
         query = f"SELECT Name FROM User WHERE Id = '{user_id}'"
-        result = run_sf_cli_query(alias=sf, query=query)
-        return result['Name'] if result else 'Unknown User'
+        result = query_records_all(sf, query)
+        return result[0]['Name'] if result else 'Unknown User'
     except Exception as e: # pylint: disable=broad-except
         logger.error("Error fetching user name for ID %s: %s", user_id, e)
         return 'Unknown User'
@@ -175,7 +175,7 @@ def expose_suspicious_records(sf):
     try:
         suspicious_records_gauge.clear()
         audittrail_query = build_audit_trail_query(EXCLUDE_USERS)
-        result = run_sf_cli_query(query=audittrail_query, alias=sf)
+        result = query_records_all(sf, audittrail_query)
 
         process_suspicious_records(result)
     # pylint: disable=broad-except

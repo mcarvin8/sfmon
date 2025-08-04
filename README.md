@@ -99,7 +99,7 @@ Import the JSON file in `configs/grafana` to get started with a ready-to-use SFM
 
 ## ✍️ Authors
 
-Originally developed by **Deep Suthar** and **Matt Carvin** for ECS deployment at Avalara.
+Originally developed by **Deep Suthar** and **Matt Carvin** for ECS deployment and Kubernetes deployment at Avalara.
 
 ---
 
