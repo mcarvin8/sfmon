@@ -30,7 +30,7 @@ The core components that make this possible:
 
 ### Python Monitoring Scripts
 
-Located in `sre/deployments/scripts/sfmon-service`, these scripts:
+Located in `scripts`, these scripts:
 
 - Authenticate to Salesforce using the CLI
 - Schedule and run custom monitoring jobs
@@ -44,7 +44,7 @@ You can customize:
 
 ### Dockerfile
 
-Located in `sre/deployments/docker/sfmon-service`, it:
+Located in `docker`, it:
 
 - Installs Python and dependencies
 - Copies in the monitoring scripts
@@ -74,7 +74,7 @@ docker push your-repo/sfmon:latest
 
 ## 📊 Grafana Dashboard
 
-Import the JSON file in `configs/grafana` to get started with a ready-to-use SFMon dashboard. Customize based on your orgs and alerting requirements.
+Import the JSON file in `grafana` to get started with a ready-to-use SFMon dashboard. Customize based on your orgs and alerting requirements.
 
 ---
 
