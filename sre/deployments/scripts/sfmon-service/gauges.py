@@ -9,7 +9,6 @@ USED_LICENSES = 'Used Salesforce licenses'
 USED_LICENSES_PERCENTAGE = 'Percentage of Salesforce licenses used'
 
 # Prometheus metrics
-api_usage_gauge = Gauge('salesforce_api_usage', 'Salesforce API Usage', ['limit_name'])
 api_usage_percentage_gauge = Gauge('salesforce_api_usage_percentage',
                                    'Salesforce API Usage Percentage',
                                    ['limit_name', 'limit_description',

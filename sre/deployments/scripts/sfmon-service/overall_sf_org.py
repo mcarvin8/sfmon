@@ -5,7 +5,7 @@ import requests
 
 from cloudwatch_logging import logger
 from constants import REQUESTS_TIMEOUT_SECONDS
-from gauges import (api_usage_gauge, api_usage_percentage_gauge,
+from gauges import (api_usage_percentage_gauge,
                     incident_gauge, total_permissionset_licenses_gauge,
                     total_usage_based_entitlements_licenses_gauge,
                     total_user_licenses_gauge,
@@ -23,6 +23,7 @@ def monitor_salesforce_limits(sf):
     try:
         logger.info("Getting Salesforce API limits...")
         limits = dict(sf.limits())
+        api_usage_percentage_gauge.clear()
         for limit_name, limit_data in limits.items():
             max_limit = limit_data['Max']
             remaining = limit_data['Remaining']
@@ -30,8 +31,6 @@ def monitor_salesforce_limits(sf):
 
             if max_limit != 0:
                 usage_percentage = (used * 100) / max_limit
-
-                api_usage_gauge.labels(limit_name=limit_name).set(used)
                 api_usage_percentage_gauge.labels(limit_name=limit_name, limit_description=salesforce_limits_descriptions.get(limit_name, 'Description not available'), limit_utilized=used, max_limit=max_limit).set(usage_percentage)
     except Exception as e:
         logger.error("Error getting limits: %s", e)
