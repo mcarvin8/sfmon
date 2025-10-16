@@ -1,4 +1,4 @@
-FROM artifacts.platform.avalara.io/docker/ubuntu
+FROM ubuntu:latest
 
 # Pull in build arguments
 ARG SALESFORCE_AUTH_URL

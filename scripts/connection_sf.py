@@ -1,12 +1,23 @@
-""""
-    Connect to the Salesforce org.
+"""
+Salesforce Connection Module
+
+This module handles authentication and connection establishment to the Salesforce
+production organization using the Salesforce CLI (sf) and Simple Salesforce library.
+It provides secure, token-based authentication via SFDX URL method.
+
+Functions:
+    - get_salesforce_connection_url: Authenticates and returns a Salesforce connection object
+
+Requirements:
+    - Salesforce CLI (sf) v2.24.4 or newer
+    - Valid SFDX authentication URL with credentials
 """
 import json
 import subprocess
 
 from simple_salesforce import Salesforce
 
-from cloudwatch_logging import logger
+from logger import logger
 
 def get_salesforce_connection_url(url):
     """

@@ -1,5 +1,33 @@
 """
-    Descriptions for all Salesforce limits.
+Salesforce Limits Descriptions Module
+
+This module provides human-readable descriptions for all Salesforce org limits
+tracked by the monitoring service. These descriptions are used as labels in
+Prometheus metrics to provide context in Grafana dashboards and alerts.
+
+Purpose:
+    - Maps technical limit names to user-friendly descriptions
+    - Provides context for limit alerts and dashboard panels
+    - Documents the meaning of each tracked Salesforce limit
+
+Limit Categories:
+    - API Limits: Daily API requests, concurrent API usage
+    - Storage Limits: Data storage, file storage
+    - Async Processing: Async Apex executions, batch jobs, queueable jobs
+    - Bulk API: Daily/hourly bulk API batch limits
+    - Streaming API: Platform events, streaming API clients
+    - Email Limits: Single email, mass email, workflow emails
+    - Reporting: Dashboard refreshes, report runs
+    - Einstein: Discovery, Analytics, AI/ML limits
+    - Scratch Orgs: Creation and active org limits
+    - Functions: Salesforce Functions API limits
+
+Usage:
+    This dictionary is referenced by the limits monitoring module to enrich
+    Prometheus metrics with descriptive labels for better dashboard visualization.
+
+Note: Descriptions are kept concise for metric label compatibility while
+providing sufficient context for monitoring and alerting.
 """
 salesforce_limits_descriptions = {
     'ActiveScratchOrgs': 'Number of active scratch orgs in use.',

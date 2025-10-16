@@ -1,9 +1,34 @@
 """
-Bulk API functions.
+Bulk API Monitoring Module
+
+This module monitors Salesforce Bulk API usage patterns by analyzing BulkAPI EventLogFile
+records. It tracks batch operations, entity types, and success/failure rates for both
+daily and hourly intervals to identify bulk data processing patterns and potential issues.
+
+Key Metrics:
+    - Batch counts per job, user, and entity type
+    - Total records processed and failed per batch
+    - Entity type operation counts (insert, update, delete, etc.)
+    - User-level bulk API activity tracking
+
+Functions:
+    - daily_analyse_bulk_api: Analyzes daily Bulk API logs
+    - hourly_analyse_bulk_api: Analyzes hourly Bulk API logs
+    - process_bulk_api_logs: Common processing logic for log analysis
+    - is_valid_entity: Validates entity type in log records
+    - safe_int: Safely converts string values to integers
+    - report_batch_counts: Reports batch-level metrics to Prometheus
+    - report_entity_counts: Reports entity-level metrics to Prometheus
+
+Use Cases:
+    - Identifying heavy Bulk API users
+    - Tracking batch failure rates
+    - Monitoring specific entity type operations
+    - Detecting unusual bulk data processing patterns
 """
 from collections import defaultdict
 
-from cloudwatch_logging import logger
+from logger import logger
 from gauges import (
     daily_batch_count_metric, daily_entity_type_count_metric,
     hourly_batch_count_metric, hourly_entity_type_count_metric

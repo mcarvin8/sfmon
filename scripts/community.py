@@ -1,7 +1,39 @@
-'''
-    Community monitoring functions.
-'''
-from cloudwatch_logging import logger
+"""
+Community Portal Monitoring Module
+
+This module monitors Salesforce Community (PRM and GSP) login and registration failures
+by querying SFDC_Logger__c custom object records. It tracks Error and Fatal level logs
+to identify authentication issues, registration problems, and integration failures
+affecting community users.
+
+Monitored Communities:
+    - Partner Relationship Management (PRM)
+    - Global Service Portal (GSP)
+
+Key Monitoring Areas:
+    - Login failures and authentication errors
+    - Registration process failures
+    - Conversation ID issues
+    - Avalara Identity integration errors
+    - PRMP registration failures
+
+Functions:
+    - community_login_error_logger_details: Monitors login errors (last 7 days)
+    - community_registration_error_logger_details: Monitors registration errors (last 7 days)
+
+Log Sources:
+    - Source: 'Community - Login'
+    - Source: 'Community - Conversation Id'
+    - Source: 'Community - Registration'
+    - Source: 'GSP - Registration PRMP'
+    - Source: 'AvalaraIdentityCreateAvataxAccount'
+
+Metrics Exposed:
+    - Error count by log level, message, and affected records
+    - Callout response payloads for integration failures
+    - Timestamp and user context for debugging
+"""
+from logger import logger
 from gauges import community_login_error_metric, community_registration_error_metric
 from query import query_records_all
 

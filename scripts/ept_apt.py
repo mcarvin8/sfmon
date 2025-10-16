@@ -1,5 +1,39 @@
 """
-EPT/APT function.
+Effective Page Time (EPT) and Average Page Time (APT) Monitoring Module
+
+This module monitors Salesforce Lightning Experience page performance by analyzing
+LightningPageView EventLogFile records. It calculates and exposes both APT (average
+page load times) and EPT (effective page time with deviation analysis) metrics.
+
+Key Performance Indicators:
+    - Average Page Time (APT): Mean load time per Lightning page
+    - Effective Page Time (EPT): Adjusted page time accounting for deviations
+    - Page-level performance breakdown by browser and navigation context
+    - Deviation analysis with error types and reasons
+
+Functions:
+    - get_salesforce_ept_and_apt: Main orchestration function
+    - fetch_latest_lightning_pageview_log: Retrieves most recent hourly log
+    - download_log_file: Downloads EventLogFile CSV content
+    - parse_log_data: Parses CSV into APT summaries and EPT deviation records
+    - update_page_time_data: Accumulates page timing statistics
+    - report_apt_metrics: Exposes average page time metrics
+    - report_ept_metrics: Exposes effective page time with deviation details
+
+Metrics Exposed:
+    - apt_metric: Average page load time by page name
+    - ept_metric: Effective page time with detailed context labels:
+        * Deviation reason and error type
+        * Previous page and current page context
+        * Browser information
+        * Page entity types and app names
+
+Use Cases:
+    - Identifying slow Lightning pages
+    - Detecting performance degradation patterns
+    - Analyzing browser-specific performance issues
+    - Tracking navigation impact on page load times
+    - Monitoring EPT deviation trends
 """
 from collections import defaultdict
 import csv
@@ -7,7 +41,7 @@ import io
 
 import requests
 
-from cloudwatch_logging import logger
+from logger import logger
 from constants import REQUESTS_TIMEOUT_SECONDS
 from gauges import ept_metric, apt_metric
 from query import query_records_all

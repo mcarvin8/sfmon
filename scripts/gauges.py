@@ -1,5 +1,31 @@
 """
-    Define all Prometheus gauges.
+Prometheus Metrics Definitions Module
+
+This module defines all Prometheus Gauge metrics for the production monitoring service.
+These gauges expose comprehensive Salesforce org health, performance, compliance, and
+operational metrics that are scraped by Prometheus and visualized in Grafana dashboards.
+
+Metric Categories:
+    1. API and Limits: API usage percentages, org limits
+    2. Bulk API: Daily/hourly batch and entity type metrics
+    3. Licenses: User licenses, permission set licenses, usage-based entitlements
+    4. Incidents & Maintenance: Salesforce Trust API status
+    5. User Activity: Login counts, geolocation analysis
+    6. Deployments: Deployment and validation timing/status
+    7. Performance: EPT, APT, Apex execution metrics
+    8. Apex Jobs: Job status, execution time, exceptions, concurrent errors
+    9. Compliance: Large queries, suspicious audit trail changes, org-wide sharing
+    10. Community: Login/registration error tracking
+    11. Report Exports: User report export activity
+    12. Integration Users: Password expiration tracking
+
+Constants:
+    - TOTAL_LICENSES: Description for total license metrics
+    - USED_LICENSES: Description for used license metrics
+    - USED_LICENSES_PERCENTAGE: Description for license usage percentage
+
+Note: All gauges follow consistent labeling patterns for filtering and aggregation
+in Grafana dashboards.
 """
 from prometheus_client import Gauge
 
@@ -65,8 +91,7 @@ percent_usage_based_entitlements_used_gauge = Gauge('salesforce_percent_used_usa
 
 incident_gauge = Gauge('salesforce_incidents',
                        'Number of active Salesforce incidents',
-                       ['environment', 'pod', 'severity',
-                        'message', 'original_message'])
+                       ['environment', 'pod', 'severity', 'incident_id'])
 
 maintenance_gauge = Gauge('salesforce_maintenance', 'Ongoing or Planned Salesforce Maintenance',
                           ['environment', 'maintenance_id', 'status',
@@ -178,25 +203,10 @@ community_registration_error_metric = Gauge('community_registration_error_detail
                                             ['id', 'name', 'source_name', 'log_level',
                                              'log_message', 'callout_response',
                                              'record_id', 'created_date'])
-unused_permissionsets = Gauge('unused_permissionsets',
-                                            'unused permissionsets',
-                                            ['name', 'id'])
-limited_permissionsets = Gauge('limited_permissionsets',
-                                            'Permission sets assigned to 10 or less active users.',
-                                            ['name', 'id'])
-five_or_less_profile_assignees = Gauge('five_or_less_profile_assignees',
-                                            'five_or_less_profile_assignees',
-                                            ['profileId', 'profileName'])
 
-unassigned_profiles = Gauge('unassigned_profiles',
-                                            'Profiles with no active users.',
-                                            ['profileId', 'profileName'])
 apex_flex_queue = Gauge('apex_flex_queue',
                                             'Jobs in holding status flex queue',
                                             ['id','ApexClassId'])
-deprecated_apex_class_gauge = Gauge('deprecated_apex_classes',
-                                            'Apex classes running on deprecated API versions.',
-                                            ['id', 'name'])
 
 apex_entry_point_count = Gauge('apex_entry_point_count',
                                'Count of apex executions by entry point',
@@ -236,3 +246,84 @@ hourly_report_export_metric = Gauge('hourly_report_export', 'Report export detai
 suspicious_records_gauge = Gauge('suspicious_records','suspicious records from Audit Trail logs',
                                 ['action', 'section', 'user',
                                  'created_date', 'display', 'delegate_user'])
+
+integration_user_password_expiration_gauge = Gauge('integration_user_password_expiration',
+                                                   'Days until password expiration for core integration users',
+                                                   ['user_id', 'name', 'username', 
+                                                    'last_password_change_date', 
+                                                    'days_until_expiration'])
+
+unused_permissionsets = Gauge('unused_permissionsets',
+                                            'unused permissionsets',
+                                            ['name', 'id'])
+limited_permissionsets = Gauge('limited_permissionsets',
+                                            'Permission sets assigned to 10 or less active users.',
+                                            ['name', 'id'])
+five_or_less_profile_assignees = Gauge('five_or_less_profile_assignees',
+                                            'five_or_less_profile_assignees',
+                                            ['profileId', 'profileName'])
+
+unassigned_profiles = Gauge('unassigned_profiles',
+                                            'Profiles with no active users.',
+                                            ['profileId', 'profileName'])
+
+deprecated_apex_class_gauge = Gauge('deprecated_apex_classes',
+                                            'Apex classes running on deprecated API versions.',
+                                            ['id', 'name'])
+
+deprecated_apex_trigger_gauge = Gauge('deprecated_apex_triggers',
+                                            'Apex triggers running on deprecated API versions.',
+                                            ['id', 'name'])
+
+workflow_rules_gauge = Gauge('workflow_rules',
+                             'Workflow rules in the org',
+                             ['id', 'created_date', 'namespace_prefix'])
+
+security_health_check_gauge = Gauge('security_health_check_score',
+                                   'Salesforce Security Health Check Score',
+                                   ['grade'])
+
+salesforce_health_risks_gauge = Gauge('salesforce_health_risks',
+                                     'Salesforce Security Health Check Risks',
+                                     ['org_value', 'risk_type', 'setting', 'setting_group', 
+                                      'setting_risk_category', 'standard_value', 'compliance_status'])
+
+pmd_code_smells_gauge = Gauge('pmd_code_smells',
+                              'PMD Code Smells detected in codebase',
+                              ['code_smell'])
+
+# Phase 3 Monitoring - Dormant Users
+dormant_salesforce_users_gauge = Gauge('dormant_salesforce_users',
+                                      'Dormant Salesforce users (90+ days inactive)',
+                                      ['user_id', 'username', 'email', 'profile_name', 'created_date', 'last_login_date'])
+
+dormant_portal_users_gauge = Gauge('dormant_portal_users',
+                                  'Dormant Portal users (90+ days inactive)',
+                                  ['user_id', 'username', 'email', 'profile_name', 'created_date', 'last_login_date'])
+
+# Phase 3 Monitoring - Dormant Queues
+total_queues_per_object_gauge = Gauge('total_queues_per_object',
+                                     'Total queues per Salesforce object',
+                                     ['sobject_type'])
+
+queues_with_no_members_gauge = Gauge('queues_with_no_members',
+                                    'Queues with no members',
+                                    ['queue_id', 'queue_name'])
+
+queues_with_zero_open_cases_gauge = Gauge('queues_with_zero_open_cases',
+                                         'Queues that can own Cases but have zero open Cases',
+                                         ['queue_id', 'queue_name'])
+
+# Phase 3 Monitoring - Dormant Public Groups
+public_groups_with_no_members_gauge = Gauge('public_groups_with_no_members',
+                                           'Public Groups with no members',
+                                           ['group_id', 'group_name'])
+
+useless_permission_sets_gauge = Gauge('useless_permission_sets',
+                                     'Permission sets with no actual permissions',
+                                     ['permission_set_name', 'file_path'])
+
+dashboards_with_inactive_users_gauge = Gauge('dashboards_with_inactive_users',
+                                             'Dashboards owned by inactive users',
+                                             ['dashboard_id', 'dashboard_title', 'running_user_name', 
+                                              'created_date', 'last_referenced_date'])

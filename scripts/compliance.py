@@ -1,8 +1,41 @@
 """
-    Compliance functions.
+Compliance and Audit Trail Monitoring Module
+
+This module monitors compliance-related activities in the production Salesforce org
+by analyzing API EventLogFiles and SetupAuditTrail records. It identifies potentially
+risky activities such as large-scale data queries and unauthorized configuration changes.
+
+Key Compliance Checks:
+    1. Large Query Monitoring: Tracks users querying > 10,000 records per hour
+    2. Suspicious Setup Changes: Monitors audit trail for non-approved actions
+    3. Configuration Change Tracking: Audits system modifications against allowed lists
+
+Compliance Rules:
+    - Predefined ALLOWED_SECTIONS_ACTIONS for legitimate changes
+    - EXCLUDE_USERS list for admin/integration accounts
+    - Automatic flagging of deviations from approved patterns
+
+Functions:
+    - get_user_name: Resolves user ID to name for reporting
+    - hourly_observe_user_querying_large_records: Monitors API log for large queries
+    - collect_large_queries: Aggregates query volume by user and entity
+    - is_large_query: Checks if query exceeds 10k records threshold
+    - report_large_queries: Exposes large query metrics
+    - expose_suspicious_records: Monitors SetupAuditTrail for non-compliant changes
+    - build_audit_trail_query: Constructs filtered audit trail SOQL
+    - extract_record_data: Normalizes audit trail record data
+    - expose_record_metric: Exposes compliance violations to Prometheus
+    - process_suspicious_records: Processes and flags suspicious changes
+    - is_allowed_action: Validates if action is in allowed list
+
+Alert Triggers:
+    - API queries processing > 10,000 records
+    - Setup changes not in ALLOWED_SECTIONS_ACTIONS whitelist
+    - Configuration modifications by non-excluded users
+    - Critical section changes (e.g., Sharing Defaults, Security)
 """
 from constants import EXCLUDE_USERS, ALLOWED_SECTIONS_ACTIONS
-from cloudwatch_logging import logger
+from logger import logger
 from log_parser import parse_logs
 from gauges import (hourly_large_query_metric, suspicious_records_gauge)
 from query import query_records_all

@@ -1,7 +1,33 @@
 """
-    Apex related jobs.
+Apex Job Monitoring and Performance Analysis Module
+
+This module provides comprehensive monitoring of Apex job execution, performance metrics,
+and error tracking in the production Salesforce environment. It analyzes EventLogFile
+records including ApexExecution, ApexUnexpectedException, and ConcurrentLongRunningApexLimit
+events to expose detailed metrics for performance optimization and error detection.
+
+Key Monitoring Areas:
+    - Async Apex job status and error counts
+    - Apex execution time metrics (runtime, CPU time, DB time, callout time)
+    - Unexpected exceptions with categorization
+    - Concurrent long-running request analysis
+    - Top problematic entry points sorted by runtime and frequency
+    - Apex execution summary with quiddity-based analysis
+
+Functions:
+    - async_apex_job_status: Monitors daily AsyncApexJob records
+    - monitor_apex_execution_time: Tracks execution time metrics per entry point
+    - expose_apex_exception_metrics: Processes and categorizes unexpected exceptions
+    - concurrent_apex_errors: Identifies top concurrent error patterns
+    - expose_concurrent_long_running_apex_errors: Counts concurrent limit violations
+    - async_apex_execution_summary: Provides aggregated execution statistics
+
+Performance Thresholds:
+    - Long-running requests: > 5 seconds runtime
+    - Tracks requests > 10 seconds separately
+    - Monitors IS_LONG_RUNNING_REQUEST flag from logs
 """
-from cloudwatch_logging import logger
+from logger import logger
 from gauges import (async_job_status_gauge, run_time_metric, cpu_time_metric,
                     exec_time_metric, db_total_time_metric, callout_time_metric,
                     apex_exception_details_gauge, apex_exception_category_count_gauge,

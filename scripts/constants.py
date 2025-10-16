@@ -1,4 +1,23 @@
-""" Constants."""
+"""
+Constants and Configuration Module
+
+This module defines global constants and configuration used across the production
+monitoring service. It includes timeout values, compliance whitelists, and
+allowed configuration change patterns for audit trail monitoring.
+
+Constants:
+    - REQUESTS_TIMEOUT_SECONDS: Timeout for external HTTP requests (300s)
+    - QUERY_TIMEOUT_SECONDS: Timeout for Salesforce SOQL queries (30s)
+    - ALLOWED_SECTIONS_ACTIONS: Whitelist of legitimate SetupAuditTrail actions by section
+    - EXCLUDE_USERS: List of admin/integration users excluded from compliance monitoring
+
+Compliance Configuration:
+    The ALLOWED_SECTIONS_ACTIONS dictionary defines legitimate actions per Setup section
+    to distinguish between normal administrative activities and potentially risky changes.
+    
+    The EXCLUDE_USERS list contains service accounts and administrators whose actions
+    are trusted and should not trigger compliance alerts.
+"""
 REQUESTS_TIMEOUT_SECONDS = 300
 QUERY_TIMEOUT_SECONDS = 30
 ALLOWED_SECTIONS_ACTIONS = {

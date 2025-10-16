@@ -1,7 +1,40 @@
-'''
-    Org-wide sharing setting functions
-'''
-from cloudwatch_logging import logger
+"""
+Organization-Wide Sharing Settings Monitoring Module
+
+This module monitors changes to Salesforce organization-wide default (OWD) sharing
+settings by analyzing SetupAuditTrail records. OWD changes can significantly impact
+data visibility and security, so tracking these modifications is critical for
+compliance and security auditing.
+
+Monitored Changes:
+    - Sharing model changes (Private, Public Read Only, Public Read/Write)
+    - Object-level OWD modifications
+    - Manual sharing rule changes
+    - Territory-based sharing adjustments
+
+Functions:
+    - query_setup_audit_trail: Fetches yesterday's audit trail records
+    - monitor_org_wide_sharing_settings: Filters and processes sharing-related changes
+
+Alert Triggers:
+    - Section = 'Sharing Defaults'
+    - Any action modifying object sharing models
+    - Changes to grant access using hierarchies
+    - Modifications to manual sharing settings
+
+Metrics Exposed:
+    - Timestamp of change
+    - User who made the change
+    - Action performed (e.g., 'changedObjectSharing')
+    - Details of the change from Display field
+
+Use Cases:
+    - Security compliance auditing
+    - Detecting unauthorized sharing model changes
+    - Tracking data access expansion
+    - Correlating sharing changes with security incidents
+"""
+from logger import logger
 from compliance import get_user_name
 from gauges import org_wide_sharing__setting_changes
 from query import query_records_all

@@ -1,9 +1,40 @@
 """
-    Deployment functions.
+Deployment Monitoring Module
+
+This module monitors Salesforce metadata deployments and validations by querying
+DeployRequest records via the Tooling API. It tracks deployment timing, status,
+and identifies bottlenecks in the deployment process.
+
+Key Metrics:
+    - Deployment status (Succeeded, Failed, InProgress, Canceled)
+    - Pending time (time between creation and start)
+    - Deployment time (time between start and completion)
+    - Deployment vs validation separation (CheckOnly flag)
+    - Deployer identification and timing analysis
+
+Functions:
+    - get_deployment_status: Main function to fetch and process deployment records
+    - process_deployment_record: Processes individual deployment/validation records
+    - parse_datetime: Converts Salesforce datetime strings to Python datetime objects
+    - calculate_minutes_difference: Calculates duration between two timestamps
+    - report_deployment_metrics: Exposes metrics to Prometheus gauges
+
+Status Mapping:
+    - Succeeded: 1
+    - Failed: 0
+    - InProgress: 2 (excluded from metrics)
+    - Canceled: -1
+
+Use Cases:
+    - Identifying slow deployments
+    - Tracking deployment success rates
+    - Analyzing queue/pending times
+    - Monitoring validation-only deployments
+    - Correlating deployer with deployment performance
 """
 from datetime import datetime
 
-from cloudwatch_logging import logger
+from logger import logger
 from query import tooling_query_records_all
 from gauges import (
     deployment_details_gauge, pending_time_gauge, deployment_time_gauge,

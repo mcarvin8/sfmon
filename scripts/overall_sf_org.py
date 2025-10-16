@@ -1,9 +1,46 @@
 """
-    Overall Org level functions.
+Salesforce Organization-Level Monitoring Module
+
+This module monitors organization-wide status, health, and resource utilization for
+the production Salesforce org. It tracks org limits, licenses, active incidents, and
+scheduled maintenance to provide comprehensive visibility into org health.
+
+Key Monitoring Areas:
+    1. Org Limits: All Salesforce platform limits (API, storage, async jobs, etc.)
+    2. Licenses: User licenses, permission set licenses, usage-based entitlements
+    3. Incidents: Active Salesforce Trust site incidents affecting the org's pod
+    4. Maintenance: Scheduled Salesforce maintenance windows
+
+Functions:
+    - monitor_salesforce_limits: Tracks all org limits with usage percentages
+    - get_salesforce_licenses: Monitors all license types and utilization
+    - get_salesforce_instance: Coordinates pod fetching and incident/maintenance checks
+    - fetch_pod: Retrieves the Salesforce pod/instance name for the org
+    - get_salesforce_incidents: Queries active incidents from Salesforce Trust API
+    - get_salesforce_maintenances: Queries scheduled maintenance from Trust API
+
+Data Sources:
+    - Salesforce REST API /limits endpoint
+    - Organization object metadata
+    - UserLicense, PermissionSetLicense, TenantUsageEntitlement objects
+    - https://api.status.salesforce.com/v1/incidents/active
+    - https://api.status.salesforce.com/v1/maintenances
+
+Metrics Exposed:
+    - API usage percentage for each limit with descriptions
+    - Total, used, and percentage for all license types
+    - Incident count and severity by pod
+    - Maintenance windows with status and time ranges
+
+Alert Thresholds:
+    - License usage > 80%
+    - API limits > 80%
+    - Any active incidents on prod pod
+    - Scheduled maintenance within 24 hours
 """
 import requests
 
-from cloudwatch_logging import logger
+from logger import logger
 from constants import REQUESTS_TIMEOUT_SECONDS
 from gauges import (api_usage_percentage_gauge,
                     incident_gauge, total_permissionset_licenses_gauge,
@@ -134,14 +171,9 @@ def get_salesforce_incidents(org, instancepod):
 
         for element in incidents:
             try:
-                incident_events = element.get('IncidentEvents', [])
-                if incident_events:
-                    latest_message = incident_events[0].get('message', no_msg)
-                    original_message = incident_events[-1].get('message', no_msg)
-                else:
-                    latest_message = no_msg
-                    original_message = no_msg
-
+                # Extract incident ID for building trust site URL
+                incident_id = element.get('id', 'unknown')
+                
                 # Access the IncidentImpacts to get the severity
                 severity = element['IncidentImpacts'][0].get('severity', 'unknown')
                 pods = str(element['instanceKeys']).replace("'", "").replace("[", "").replace("]", "")
@@ -150,8 +182,7 @@ def get_salesforce_incidents(org, instancepod):
                     incident_gauge.labels(environment=org,
                                           pod=instancepod,
                                           severity=severity,
-                                          message=latest_message,
-                                          original_message=original_message
+                                          incident_id=incident_id
                                           ).set(1)
                     incident_cnt += 1
             except (KeyError, IndexError) as e:
@@ -162,8 +193,7 @@ def get_salesforce_incidents(org, instancepod):
             incident_gauge.labels(environment=org,
                                   pod=instancepod,
                                   severity='ok',
-                                  message=None,
-                                  original_message=None
+                                  incident_id=None
                                   ).set(0)
 
     except requests.RequestException as e:
@@ -172,8 +202,7 @@ def get_salesforce_incidents(org, instancepod):
         incident_gauge.labels(environment=org,
                               pod=instancepod,
                               severity='ok',
-                              message=None,
-                              original_message=None
+                              incident_id=None
                               ).set(0)
 
 

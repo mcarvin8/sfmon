@@ -1,12 +1,45 @@
 """
-    Helper function to parse salesforce logs.
+Salesforce EventLogFile Parser Module
+
+This module provides utility functions for fetching and parsing Salesforce EventLogFile
+records. It handles the complete workflow of querying for log files, downloading their
+CSV content, and parsing them into structured data for analysis.
+
+EventLogFile Types Supported:
+    - ApexExecution: Apex code execution logs
+    - ApexUnexpectedException: Apex exception logs
+    - API: API usage and large query logs
+    - BulkAPI: Bulk API operation logs
+    - LightningPageView: Lightning page performance logs
+    - ReportExport: Report export activity
+    - ConcurrentLongRunningApexLimit: Concurrent Apex limit violations
+
+Functions:
+    - parse_logs: Main function that orchestrates log fetching and parsing
+
+Process Flow:
+    1. Execute SOQL query to find EventLogFile record
+    2. Download CSV log file content via REST API
+    3. Parse CSV into dictionary reader for iteration
+    4. Return CSV reader for processing by calling modules
+
+Error Handling:
+    - Handles network request failures gracefully
+    - Manages CSV parsing errors
+    - Logs detailed error information for debugging
+    - Returns None on any failure to allow calling code to handle gracefully
+
+Requirements:
+    - Valid Salesforce connection with API access
+    - EventLogFile object read permissions
+    - Sufficient API calls for log downloads
 """
 import csv
 from io import StringIO
 import requests
 
 from constants import REQUESTS_TIMEOUT_SECONDS
-from cloudwatch_logging import logger
+from logger import logger
 from query import query_records_all
 
 
