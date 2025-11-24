@@ -250,7 +250,10 @@ def main():
     """
     Main function. Runs tasks using APScheduler with cron syntax for precise timing.
     """
-    start_http_server(9001)
+    # Start Prometheus metrics server
+    metrics_port = int(os.getenv('METRICS_PORT', 9001))
+    start_http_server(metrics_port)
+    # Connect to Salesforce org
     sf = get_salesforce_connection_url(url=os.getenv('SALESFORCE_AUTH_URL'))
     # Initialize APScheduler
     scheduler = BlockingScheduler()
