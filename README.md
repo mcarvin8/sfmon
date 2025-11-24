@@ -8,6 +8,63 @@ A prebuilt **Grafana dashboard** is included to help you visualize metrics right
 
 ---
 
+## 🚀 Quick Start
+
+### Using the Pre-built Docker Image
+
+The easiest way to get started is using the pre-built image from Docker Hub:
+
+```bash
+docker run -d \
+  --name sfmon \
+  -p 9001:9001 \
+  -e SALESFORCE_AUTH_URL="your-sfdx-auth-url-here" \
+  mcarvin8/sfmon:latest
+```
+
+### Environment Variables
+
+SFMon is configured via environment variables. Here are the available options:
+
+#### Required
+
+- **`SALESFORCE_AUTH_URL`**: SFDX authentication URL for your Salesforce org
+  - Generate this using: `sf org display --url-only` or `sfdx force:org:display --urlonly`
+  - Format: `force://PlatformCLI::...`
+
+#### Optional
+
+- **`METRICS_PORT`**: Port for Prometheus metrics endpoint (default: `9001`)
+  - Example: `-e METRICS_PORT=9001`
+
+- **`INTEGRATION_USER_NAMES`**: Comma-separated list of integration user names to monitor for password expiration
+  - Example: `-e INTEGRATION_USER_NAMES="Integration User 1,Integration User 2,Service Account"`
+  - If not provided, password expiration monitoring will be skipped
+
+### Complete Example
+
+```bash
+docker run -d \
+  --name sfmon \
+  -p 9001:9001 \
+  -e SALESFORCE_AUTH_URL="force://PlatformCLI::..." \
+  -e METRICS_PORT=9001 \
+  -e INTEGRATION_USER_NAMES="Integration User,Service Account" \
+  mcarvin8/sfmon:latest
+```
+
+### Verify It's Working
+
+Check that metrics are being exposed:
+
+```bash
+curl http://localhost:9001/metrics
+```
+
+You should see Prometheus-formatted metrics output.
+
+---
+
 ## ☁️ Platform-Agnostic Design
 
 The SFMon container can be deployed in any of the following environments:
@@ -20,7 +77,7 @@ The SFMon container can be deployed in any of the following environments:
 
 The core components that make this possible:
 
-- **Custom Dockerfile** exposing metrics on port `9001`
+- **Pre-built Docker image** (`mcarvin8/sfmon`) exposing metrics on configurable port
 - **Python monitoring scripts** that authenticate to your Salesforce org and run scheduled checks
 - **Prometheus-compatible metrics format**
 
@@ -30,7 +87,7 @@ The core components that make this possible:
 
 ### Python Monitoring Scripts
 
-Located in `scripts`, these scripts:
+Located in `src/sfmon`, these scripts:
 
 - Authenticate to Salesforce using the CLI
 - Schedule and run custom monitoring jobs
@@ -39,7 +96,7 @@ Located in `scripts`, these scripts:
 You can customize:
 
 - Monitoring intervals
-- Org-specific logic
+- Org-specific logic (via environment variables)
 - Additional checks
 
 ### Dockerfile
@@ -49,13 +106,13 @@ Located in `docker`, it:
 - Installs Python and dependencies
 - Copies in the monitoring scripts
 - Sets the entrypoint to run `salesforce_monitoring.py`
-- Exposes port `9001` for Prometheus scraping
+- Exposes configurable port for Prometheus scraping
 
 ---
 
-## 🔨 Building the Docker Image
+## 🔨 Building the Docker Image (Advanced)
 
-You'll need to build and push the image to your preferred container registry (e.g., ECR, GCR, Docker Hub).
+If you need to build the image yourself or customize it:
 
 **Required build argument**: Salesforce org SFDX auth URL (`SALESFORCE_AUTH_URL`)
 
@@ -63,11 +120,59 @@ Example:
 
 ```bash
 docker build \
-  --file "./sre/deployments/docker/sfmon-service/Dockerfile" \
+  --file "./docker/Dockerfile" \
   --build-arg SALESFORCE_AUTH_URL=$SALESFORCE_AUTH_URL \
   --tag your-repo/sfmon:latest .
 
 docker push your-repo/sfmon:latest
+```
+
+> **Note**: The pre-built image `mcarvin8/sfmon` is recommended for most users. Build your own only if you need to customize the code.
+
+---
+
+## ⚙️ Customization
+
+### Excluding Users from Compliance Monitoring
+
+By default, all users are monitored for compliance violations. To exclude specific admin or integration users, you'll need to modify the `EXCLUDE_USERS` constant in `src/sfmon/constants.py` before building your own image:
+
+```python
+# In src/sfmon/constants.py
+EXCLUDE_USERS = ['Admin User 1', 'Integration User 2', 'Service Account']
+```
+
+> **Note**: If you're using the pre-built `mcarvin8/sfmon` image, you'll need to build your own customized image to modify `EXCLUDE_USERS`. This is a code-level configuration, not an environment variable.
+
+---
+
+## 📊 Prometheus Configuration
+
+To scrape metrics from SFMon, add the following to your Prometheus configuration:
+
+```yaml
+scrape_configs:
+  - job_name: 'sfmon'
+    static_configs:
+      - targets: ['sfmon:9001']  # Adjust hostname/port as needed
+    scrape_interval: 30s
+    scrape_timeout: 10s
+```
+
+For Kubernetes deployments, use service discovery:
+
+```yaml
+scrape_configs:
+  - job_name: 'sfmon'
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names:
+            - default
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_name]
+        regex: 'sfmon.*'
+        action: keep
 ```
 
 ---
@@ -82,7 +187,47 @@ Import the JSON file in `grafana` to get started with a ready-to-use SFMon dashb
 
 - Never commit your **SFDX auth URLs**.
 - Use secrets management systems (e.g., AWS Secrets Manager, GCP Secret Manager, or Kubernetes Secrets).
-- Ensure your Prometheus server can access port `9001` of the SFMon container.
+- Ensure your Prometheus server can access the metrics port (default: `9001`) of the SFMon container.
+- Store sensitive environment variables securely and pass them at runtime, not in Dockerfiles.
+
+### Using Secrets with Docker
+
+```bash
+# Using Docker secrets or environment files
+docker run -d \
+  --name sfmon \
+  -p 9001:9001 \
+  --env-file .env \
+  mcarvin8/sfmon:latest
+```
+
+### Kubernetes Example
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sfmon
+spec:
+  containers:
+  - name: sfmon
+    image: mcarvin8/sfmon:latest
+    ports:
+    - containerPort: 9001
+    env:
+    - name: SALESFORCE_AUTH_URL
+      valueFrom:
+        secretKeyRef:
+          name: sfmon-secrets
+          key: salesforce-auth-url
+    - name: METRICS_PORT
+      value: "9001"
+    - name: INTEGRATION_USER_NAMES
+      valueFrom:
+        secretKeyRef:
+          name: sfmon-secrets
+          key: integration-users
+```
 
 ---
 
