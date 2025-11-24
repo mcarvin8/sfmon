@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.0](https://github.com/mcarvin8/sfmon/compare/v1.0.0...v1.1.0) (2025-11-24)
+
+
+### Features
+
+* add QUERY_TIMEOUT_SECONDS environment variable ([5f8941d](https://github.com/mcarvin8/sfmon/commit/5f8941d68e36987564ed7c30afa262dd83110556))
+* add tech debt monitoring functions ([4795e2a](https://github.com/mcarvin8/sfmon/commit/4795e2af5c4546a4326be0086ab6e5d9378f662f))
+
 ## 1.0.0 (2025-11-24)
 
 
