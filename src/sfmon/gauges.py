@@ -281,7 +281,6 @@ pmd_code_smells_gauge = Gauge('pmd_code_smells',
                               'PMD Code Smells detected in codebase',
                               ['code_smell'])
 
-# Phase 3 Monitoring - Dormant Users
 dormant_salesforce_users_gauge = Gauge('dormant_salesforce_users',
                                       'Dormant Salesforce users (90+ days inactive)',
                                       ['user_id', 'username', 'email', 'profile_name', 'created_date', 'last_login_date'])
@@ -290,7 +289,6 @@ dormant_portal_users_gauge = Gauge('dormant_portal_users',
                                   'Dormant Portal users (90+ days inactive)',
                                   ['user_id', 'username', 'email', 'profile_name', 'created_date', 'last_login_date'])
 
-# Phase 3 Monitoring - Dormant Queues
 total_queues_per_object_gauge = Gauge('total_queues_per_object',
                                      'Total queues per Salesforce object',
                                      ['sobject_type'])
@@ -303,7 +301,6 @@ queues_with_zero_open_cases_gauge = Gauge('queues_with_zero_open_cases',
                                          'Queues that can own Cases but have zero open Cases',
                                          ['queue_id', 'queue_name'])
 
-# Phase 3 Monitoring - Dormant Public Groups
 public_groups_with_no_members_gauge = Gauge('public_groups_with_no_members',
                                            'Public Groups with no members',
                                            ['group_id', 'group_name'])

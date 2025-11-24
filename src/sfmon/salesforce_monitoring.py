@@ -13,6 +13,7 @@ It implements a comprehensive monitoring strategy with resource-optimized schedu
     - EPT/APT performance metrics
     - Report exports
     - Integration user password expiration
+    - Technical debt monitoring (permission sets, profiles, Apex versions, security health, dormant users, queues, dashboards)
 
 Resource Optimization Strategy:
     - Functions are staggered to prevent CPU/memory spikes
@@ -66,6 +67,14 @@ from overall_sf_org import (monitor_salesforce_limits,
 from user_login import monitor_login_events, geolocation, monitor_integration_user_passwords
 from org_wide_sharing_setting import monitor_org_wide_sharing_settings
 from report_export import hourly_report_export_records
+from tech_debt import (unassigned_permission_sets, perm_sets_limited_users,
+                       profile_assignment_under5, profile_no_active_users,
+                       apex_classes_api_version, apex_triggers_api_version,
+                       security_health_check, salesforce_health_risks,
+                       workflow_rules_monitoring, dormant_salesforce_users,
+                       dormant_portal_users, total_queues_per_object,
+                       queues_with_no_members, queues_with_zero_open_cases,
+                       public_groups_with_no_members, dashboards_with_inactive_users)
 
 
 def parse_cron_schedule(schedule_str):
@@ -171,7 +180,8 @@ def schedule_tasks(sf, scheduler):
     - Resource-intensive functions have 15+ minute intervals between executions
     - Functions are grouped by type and scheduled in logical time blocks:
       * 06:00-07:30: Performance & Apex monitoring (15-minute intervals)
-      * 07:30-08:45: Daily business functions (15-minute intervals)  
+      * 07:30-09:00: Daily business functions (15-minute intervals)
+      * 09:15-13:00: Tech debt monitoring (15-minute intervals)
       * Hourly: :00 (bulk API), :10/:50 (licenses), :20 (user queries), :40 (reports)
     - Critical 5-minute functions (limits, instance, apex flex queue) remain unchanged
     - All daily functions run once per day during business hours for optimal resource usage
@@ -200,6 +210,23 @@ def schedule_tasks(sf, scheduler):
     get_deployment_status(sf)
     geolocation(sf, chunk_size=100)
     monitor_integration_user_passwords(sf)
+    # Tech debt monitoring functions
+    unassigned_permission_sets(sf)
+    perm_sets_limited_users(sf)
+    profile_assignment_under5(sf)
+    profile_no_active_users(sf)
+    apex_classes_api_version(sf)
+    apex_triggers_api_version(sf)
+    security_health_check(sf)
+    salesforce_health_risks(sf)
+    workflow_rules_monitoring(sf)
+    dormant_salesforce_users(sf)
+    dormant_portal_users(sf)
+    total_queues_per_object(sf)
+    queues_with_no_members(sf)
+    queues_with_zero_open_cases(sf)
+    public_groups_with_no_members(sf)
+    dashboards_with_inactive_users(sf)
     logger.info("Initial execution completed, scheduling tasks with APScheduler...")
 
     # Every 5 minutes on the dot (0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55)
@@ -277,6 +304,152 @@ def schedule_tasks(sf, scheduler):
             trigger=CronTrigger(**schedule),
             id='monitor_integration_user_passwords',
             name='Monitor Integration User Passwords'
+        )
+
+    # Tech Debt Monitoring Block - Daily functions (09:15-11:00)
+    # Staggered to prevent resource conflicts with other daily functions
+    schedule = get_schedule_config('unassigned_permission_sets', {'hour': '9', 'minute': '15'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: unassigned_permission_sets(sf),
+            trigger=CronTrigger(**schedule),
+            id='unassigned_permission_sets',
+            name='Unassigned Permission Sets'
+        )
+    
+    schedule = get_schedule_config('perm_sets_limited_users', {'hour': '9', 'minute': '30'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: perm_sets_limited_users(sf),
+            trigger=CronTrigger(**schedule),
+            id='perm_sets_limited_users',
+            name='Permission Sets Limited Users'
+        )
+    
+    schedule = get_schedule_config('profile_assignment_under5', {'hour': '9', 'minute': '45'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: profile_assignment_under5(sf),
+            trigger=CronTrigger(**schedule),
+            id='profile_assignment_under5',
+            name='Profile Assignment Under 5'
+        )
+    
+    schedule = get_schedule_config('profile_no_active_users', {'hour': '10', 'minute': '0'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: profile_no_active_users(sf),
+            trigger=CronTrigger(**schedule),
+            id='profile_no_active_users',
+            name='Profile No Active Users'
+        )
+    
+    schedule = get_schedule_config('apex_classes_api_version', {'hour': '10', 'minute': '15'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: apex_classes_api_version(sf),
+            trigger=CronTrigger(**schedule),
+            id='apex_classes_api_version',
+            name='Apex Classes API Version'
+        )
+    
+    schedule = get_schedule_config('apex_triggers_api_version', {'hour': '10', 'minute': '30'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: apex_triggers_api_version(sf),
+            trigger=CronTrigger(**schedule),
+            id='apex_triggers_api_version',
+            name='Apex Triggers API Version'
+        )
+    
+    schedule = get_schedule_config('security_health_check', {'hour': '10', 'minute': '45'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: security_health_check(sf),
+            trigger=CronTrigger(**schedule),
+            id='security_health_check',
+            name='Security Health Check'
+        )
+    
+    schedule = get_schedule_config('salesforce_health_risks', {'hour': '11', 'minute': '0'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: salesforce_health_risks(sf),
+            trigger=CronTrigger(**schedule),
+            id='salesforce_health_risks',
+            name='Salesforce Health Risks'
+        )
+    
+    schedule = get_schedule_config('workflow_rules_monitoring', {'hour': '11', 'minute': '15'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: workflow_rules_monitoring(sf),
+            trigger=CronTrigger(**schedule),
+            id='workflow_rules_monitoring',
+            name='Workflow Rules Monitoring'
+        )
+    
+    schedule = get_schedule_config('dormant_salesforce_users', {'hour': '11', 'minute': '30'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: dormant_salesforce_users(sf),
+            trigger=CronTrigger(**schedule),
+            id='dormant_salesforce_users',
+            name='Dormant Salesforce Users'
+        )
+    
+    schedule = get_schedule_config('dormant_portal_users', {'hour': '11', 'minute': '45'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: dormant_portal_users(sf),
+            trigger=CronTrigger(**schedule),
+            id='dormant_portal_users',
+            name='Dormant Portal Users'
+        )
+    
+    schedule = get_schedule_config('total_queues_per_object', {'hour': '12', 'minute': '0'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: total_queues_per_object(sf),
+            trigger=CronTrigger(**schedule),
+            id='total_queues_per_object',
+            name='Total Queues Per Object'
+        )
+    
+    schedule = get_schedule_config('queues_with_no_members', {'hour': '12', 'minute': '15'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: queues_with_no_members(sf),
+            trigger=CronTrigger(**schedule),
+            id='queues_with_no_members',
+            name='Queues With No Members'
+        )
+    
+    schedule = get_schedule_config('queues_with_zero_open_cases', {'hour': '12', 'minute': '30'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: queues_with_zero_open_cases(sf),
+            trigger=CronTrigger(**schedule),
+            id='queues_with_zero_open_cases',
+            name='Queues With Zero Open Cases'
+        )
+    
+    schedule = get_schedule_config('public_groups_with_no_members', {'hour': '12', 'minute': '45'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: public_groups_with_no_members(sf),
+            trigger=CronTrigger(**schedule),
+            id='public_groups_with_no_members',
+            name='Public Groups With No Members'
+        )
+    
+    schedule = get_schedule_config('dashboards_with_inactive_users', {'hour': '13', 'minute': '0'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: dashboards_with_inactive_users(sf),
+            trigger=CronTrigger(**schedule),
+            id='dashboards_with_inactive_users',
+            name='Dashboards With Inactive Users'
         )
 
     # Performance & Apex Monitoring - Staggered across early morning (06:00-07:30)
