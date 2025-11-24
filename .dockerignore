@@ -1,0 +1,70 @@
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE.md
+GENERALIZATION_SUMMARY.md
+*.md
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+.circleci
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Python cache and virtual environments
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Build artifacts
+*.egg-info
+dist/
+build/
+*.egg
+
+# Test files
+tests/
+test_*.py
+*_test.py
+.pytest_cache
+.coverage
+htmlcov/
+
+# Grafana dashboard (not needed in container)
+grafana/
+
+# Temporary and cleanup scripts
+*.tmp
+*.log
+
+# Version files (if not needed in container)
+version.txt
+
+# Release files
+release-please.yml
+
+# Any other development files
+.env
+.env.local
+*.bak
+*.backup
+
