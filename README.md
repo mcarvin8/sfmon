@@ -41,6 +41,13 @@ SFMon is configured via environment variables. Here are the available options:
   - Example: `-e INTEGRATION_USER_NAMES="Integration User 1,Integration User 2,Service Account"`
   - If not provided, password expiration monitoring will be skipped
 
+- **`SCHEDULE_<JOB_ID>`**: Custom cron schedule for any monitoring job (optional)
+  - Format: `minute=*/5`, `hour=7,minute=30`, `*/5 * * * *`, or JSON `{"minute": "*/5"}`
+  - Set to `disabled` or empty to skip a job
+  - Example: `-e SCHEDULE_MONITOR_SALESFORCE_LIMITS="*/10"` (run every 10 minutes instead of 5)
+  - Example: `-e SCHEDULE_DAILY_ANALYSE_BULK_API="hour=8,minute=0"` (run at 8:00 AM instead of 7:30 AM)
+  - Example: `-e SCHEDULE_GEOLOCATION="disabled"` (disable geolocation monitoring)
+
 ### Complete Example
 
 ```bash
@@ -132,6 +139,68 @@ docker push your-repo/sfmon:latest
 ---
 
 ## ⚙️ Customization
+
+### Customizing Job Schedules
+
+You can customize when monitoring jobs run using environment variables with the pattern `SCHEDULE_<JOB_ID>`. This allows you to:
+- Change execution frequency (e.g., run every 10 minutes instead of 5)
+- Change execution times (e.g., run daily jobs at different hours)
+- Disable specific jobs you don't need
+
+**Supported Schedule Formats:**
+- Simple: `"*/5"` - Every 5 minutes
+- Parameter: `"minute=*/5"` or `"hour=7,minute=30"` - Specific parameters
+- Standard cron: `"*/5 * * * *"` - Full cron expression
+- JSON: `'{"minute": "*/5", "hour": "7"}'` - JSON object
+
+**Available Job IDs:**
+- `MONITOR_SALESFORCE_LIMITS` (default: every 5 minutes)
+- `GET_SALESFORCE_INSTANCE` (default: every 5 minutes)
+- `MONITOR_APEX_FLEX_QUEUE` (default: every 5 minutes)
+- `HOURLY_ANALYSE_BULK_API` (default: every hour at :00)
+- `GET_SALESFORCE_LICENSES` (default: every hour at :10 and :50)
+- `HOURLY_OBSERVE_USER_QUERYING_LARGE_RECORDS` (default: every hour at :20)
+- `HOURLY_REPORT_EXPORT_RECORDS` (default: every hour at :40)
+- `DAILY_ANALYSE_BULK_API` (default: daily at 7:30 AM)
+- `GET_DEPLOYMENT_STATUS` (default: daily at 7:45 AM)
+- `GEOLOCATION` (default: daily at 8:00 AM)
+- `MONITOR_ORG_WIDE_SHARING_SETTINGS` (default: daily at 8:45 AM)
+- `MONITOR_INTEGRATION_USER_PASSWORDS` (default: daily at 9:00 AM)
+- `GET_SALESFORCE_EPT_AND_APT` (default: daily at 6:00 AM)
+- `MONITOR_LOGIN_EVENTS` (default: daily at 6:15 AM)
+- `ASYNC_APEX_JOB_STATUS` (default: daily at 6:30 AM)
+- `MONITOR_APEX_EXECUTION_TIME` (default: daily at 6:45 AM)
+- `ASYNC_APEX_EXECUTION_SUMMARY` (default: daily at 7:00 AM)
+- `CONCURRENT_APEX_ERRORS` (default: daily at 7:15 AM)
+- `EXPOSE_APEX_EXCEPTION_METRICS` (default: daily at 7:30 AM)
+
+**Examples:**
+
+```bash
+# Run limits check every 10 minutes instead of 5
+docker run -d \
+  --name sfmon \
+  -p 9001:9001 \
+  -e SALESFORCE_AUTH_URL="..." \
+  -e SCHEDULE_MONITOR_SALESFORCE_LIMITS="*/10" \
+  mcarvin8/sfmon:latest
+
+# Change daily bulk API analysis to run at 9:00 AM instead of 7:30 AM
+docker run -d \
+  --name sfmon \
+  -p 9001:9001 \
+  -e SALESFORCE_AUTH_URL="..." \
+  -e SCHEDULE_DAILY_ANALYSE_BULK_API="hour=9,minute=0" \
+  mcarvin8/sfmon:latest
+
+# Disable geolocation monitoring
+docker run -d \
+  --name sfmon \
+  -p 9001:9001 \
+  -e SALESFORCE_AUTH_URL="..." \
+  -e SCHEDULE_GEOLOCATION="disabled" \
+  mcarvin8/sfmon:latest
+```
 
 ### Excluding Users from Compliance Monitoring
 
