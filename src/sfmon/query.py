@@ -11,7 +11,7 @@ Functions:
 
 Features:
     - Automatic pagination for large result sets
-    - Configurable query timeout (30 seconds default)
+    - Configurable query timeout via QUERY_TIMEOUT_SECONDS environment variable (default: 30 seconds)
     - Comprehensive exception handling for network and API errors
     - Graceful failure with empty list returns
     - Detailed error logging for debugging

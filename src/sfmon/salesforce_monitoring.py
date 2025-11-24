@@ -31,6 +31,7 @@ Environment Variables Required:
 Environment Variables Optional:
     - INTEGRATION_USER_NAMES: Comma-separated list of integration user names to monitor
                               for password expiration (e.g., "User1,User2,User3")
+    - QUERY_TIMEOUT_SECONDS: Timeout in seconds for Salesforce SOQL queries (default: 30)
     - SCHEDULE_<JOB_ID>: Custom cron schedule for any job. Set to "disabled" to skip a job.
                          Format: "minute=*/5", "hour=7,minute=30", "*/5 * * * *", or JSON.
                          Example: SCHEDULE_MONITOR_SALESFORCE_LIMITS="*/10"

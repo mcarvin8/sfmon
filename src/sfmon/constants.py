@@ -7,7 +7,7 @@ allowed configuration change patterns for audit trail monitoring.
 
 Constants:
     - REQUESTS_TIMEOUT_SECONDS: Timeout for external HTTP requests (300s)
-    - QUERY_TIMEOUT_SECONDS: Timeout for Salesforce SOQL queries (30s)
+    - QUERY_TIMEOUT_SECONDS: Timeout for Salesforce SOQL queries (configurable via QUERY_TIMEOUT_SECONDS env var, default: 30s)
     - ALLOWED_SECTIONS_ACTIONS: Whitelist of legitimate SetupAuditTrail actions by section
     - EXCLUDE_USERS: List of admin/integration users excluded from compliance monitoring
 
@@ -21,8 +21,9 @@ Compliance Configuration:
     NOTE: EXCLUDE_USERS should be customized for your org. Replace the default
     empty list with your admin/integration user names.
 """
+import os
 REQUESTS_TIMEOUT_SECONDS = 300
-QUERY_TIMEOUT_SECONDS = 30
+QUERY_TIMEOUT_SECONDS = int(os.getenv('QUERY_TIMEOUT_SECONDS', 30))
 ALLOWED_SECTIONS_ACTIONS = {
     "": ["createScratchOrg", "changedsenderemail", "deleteScratchOrg", "loginasgrantedtopartnerbt"],
     "Certificate and Key Management": ["insertCertificate"],

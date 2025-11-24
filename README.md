@@ -45,6 +45,9 @@ SFMon is configured via environment variables. Here are the available options:
   - Example: `-e INTEGRATION_USER_NAMES="Integration User 1,Integration User 2,Service Account"`
   - If not provided, password expiration monitoring will be skipped
 
+- **`QUERY_TIMEOUT_SECONDS`**: Timeout in seconds for Salesforce SOQL queries (default: `30`)
+  - Example: `-e QUERY_TIMEOUT_SECONDS=60` (increase timeout to 60 seconds for large queries)
+
 - **`SCHEDULE_<JOB_ID>`**: Custom cron schedule for any monitoring job (optional)
   - Format: `minute=*/5`, `hour=7,minute=30`, `*/5 * * * *`, or JSON `{"minute": "*/5"}`
   - Set to `disabled` or empty to skip a job
