@@ -4,7 +4,7 @@
 ![Docker Pulls](https://img.shields.io/docker/pulls/mcarvin8/sfmon)
 ![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/mcarvin8/sfmon)
 
-**SFMon** is a portable, custom-built Docker container that collects Salesforce org metrics and exposes them via an HTTP endpoint for scraping by **Prometheus**. It enables teams to gain visibility into Salesforce performance, usage, configuration, and incidents—no matter what cloud platform they use.
+**SFMon** is a portable, custom-built Docker container that collects Salesforce org metrics and exposes them via an HTTP endpoint for scraping by **Prometheus**. It enables teams to gain visibility into Salesforce performance, usage, configuration, technical debt, and incidents—no matter what cloud platform they use.
 
 > **SFMon can be deployed on any platform** that supports Docker and Prometheus, including GCP, Azure, or Kubernetes-based environments. It has been tested and verified on AWS ECS and Kubernetes.
 
@@ -180,6 +180,22 @@ You can customize when monitoring jobs run using environment variables with the 
 - `ASYNC_APEX_EXECUTION_SUMMARY` (default: daily at 7:00 AM)
 - `CONCURRENT_APEX_ERRORS` (default: daily at 7:15 AM)
 - `EXPOSE_APEX_EXCEPTION_METRICS` (default: daily at 7:30 AM)
+- `UNASSIGNED_PERMISSION_SETS` (default: daily at 9:15 AM)
+- `PERM_SETS_LIMITED_USERS` (default: daily at 9:30 AM)
+- `PROFILE_ASSIGNMENT_UNDER5` (default: daily at 9:45 AM)
+- `PROFILE_NO_ACTIVE_USERS` (default: daily at 10:00 AM)
+- `APEX_CLASSES_API_VERSION` (default: daily at 10:15 AM)
+- `APEX_TRIGGERS_API_VERSION` (default: daily at 10:30 AM)
+- `SECURITY_HEALTH_CHECK` (default: daily at 10:45 AM)
+- `SALESFORCE_HEALTH_RISKS` (default: daily at 11:00 AM)
+- `WORKFLOW_RULES_MONITORING` (default: daily at 11:15 AM)
+- `DORMANT_SALESFORCE_USERS` (default: daily at 11:30 AM)
+- `DORMANT_PORTAL_USERS` (default: daily at 11:45 AM)
+- `TOTAL_QUEUES_PER_OBJECT` (default: daily at 12:00 PM)
+- `QUEUES_WITH_NO_MEMBERS` (default: daily at 12:15 PM)
+- `QUEUES_WITH_ZERO_OPEN_CASES` (default: daily at 12:30 PM)
+- `PUBLIC_GROUPS_WITH_NO_MEMBERS` (default: daily at 12:45 PM)
+- `DASHBOARDS_WITH_INACTIVE_USERS` (default: daily at 1:00 PM)
 
 **Examples:**
 
