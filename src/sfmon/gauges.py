@@ -1,7 +1,7 @@
 """
 Prometheus Metrics Definitions Module
 
-This module defines all Prometheus Gauge metrics for the production monitoring service.
+This module defines all Prometheus Gauge metrics for the monitoring service.
 These gauges expose comprehensive Salesforce org health, performance, compliance, and
 operational metrics that are scraped by Prometheus and visualized in Grafana dashboards.
 
@@ -15,7 +15,6 @@ Metric Categories:
     7. Performance: EPT, APT, Apex execution metrics
     8. Apex Jobs: Job status, execution time, exceptions, concurrent errors
     9. Compliance: Large queries, suspicious audit trail changes, org-wide sharing
-    10. Community: Login/registration error tracking
     11. Report Exports: User report export activity
     12. Integration Users: Password expiration tracking
 
@@ -193,16 +192,6 @@ hourly_large_query_metric = Gauge('hourly_user_querying_large_records',
                                   'Number of large queries by user',
                            ['user_id', 'user_name', 'method', 'entity_name', 'rows_processed'])
 
-community_login_error_metric = Gauge('community_login_error_details',
-                                     'Details of SFDC logger entries', 
-                                     ['id', 'name', 'log_level', 'log_message',
-                                      'record_id', 'created_date'])
-
-community_registration_error_metric = Gauge('community_registration_error_details',
-                                            'Details of SFDC logger entries',
-                                            ['id', 'name', 'source_name', 'log_level',
-                                             'log_message', 'callout_response',
-                                             'record_id', 'created_date'])
 
 apex_flex_queue = Gauge('apex_flex_queue',
                                             'Jobs in holding status flex queue',

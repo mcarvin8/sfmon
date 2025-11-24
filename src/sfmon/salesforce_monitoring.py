@@ -1,13 +1,12 @@
 """
 Salesforce Monitoring Service - Main Entry Point
 
-This is the primary orchestration module for monitoring the Salesforce production environment.
+This is the primary orchestration module for monitoring a Salesforce org.
 It implements a comprehensive monitoring strategy with resource-optimized scheduling to track:
     - Salesforce org limits and API usage
     - Apex execution, errors, and flex queue
     - Bulk API operations (daily and hourly)
     - User login events and geolocation analysis
-    - Community login and registration errors
     - Deployment and validation status
     - Org-wide sharing settings changes
     - Compliance violations and suspicious audit trail activities
@@ -28,6 +27,10 @@ via Prometheus on port 9001.
 
 Environment Variables Required:
     - SALESFORCE_AUTH_URL: SFDX authentication URL for org
+    
+Environment Variables Optional:
+    - INTEGRATION_USER_NAMES: Comma-separated list of integration user names to monitor
+                              for password expiration (e.g., "User1,User2,User3")
 
 Functions:
     - schedule_tasks: Configures all APScheduler jobs with optimized timing
@@ -47,8 +50,6 @@ from apex_jobs import (async_apex_job_status, monitor_apex_execution_time,
                        async_apex_execution_summary)
 from bulk_api import daily_analyse_bulk_api, hourly_analyse_bulk_api
 from logger import logger
-from community import (community_login_error_logger_details,
-                       community_registration_error_logger_details)
 from compliance import (hourly_observe_user_querying_large_records, expose_suspicious_records)
 from connection_sf import get_salesforce_connection_url
 from deployments import get_deployment_status
@@ -97,8 +98,6 @@ def schedule_tasks(sf, scheduler):
     expose_suspicious_records(sf)
     get_deployment_status(sf)
     geolocation(sf, chunk_size=100)
-    community_login_error_logger_details(sf)
-    community_registration_error_logger_details(sf)
     monitor_integration_user_passwords(sf)
     logger.info("Initial execution completed, scheduling tasks with APScheduler...")
 
@@ -145,19 +144,6 @@ def schedule_tasks(sf, scheduler):
         name='Geolocation Analysis'
     )
 
-    # Community Monitoring Block (08:15-08:45)
-    scheduler.add_job(
-        func=lambda: community_login_error_logger_details(sf),
-        trigger=CronTrigger(hour='8', minute='15'),
-        id='community_login_error_logger_details',
-        name='Community Login Error Logger'
-    )
-    scheduler.add_job(
-        func=lambda: community_registration_error_logger_details(sf),
-        trigger=CronTrigger(hour='8', minute='30'),
-        id='community_registration_error_logger_details',
-        name='Community Registration Error Logger'
-    )
     scheduler.add_job(
         func=lambda: monitor_org_wide_sharing_settings(sf),
         trigger=CronTrigger(hour='8', minute='45'),

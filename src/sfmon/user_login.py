@@ -2,7 +2,7 @@
 User Login and Authentication Monitoring Module
 
 This module monitors user login activity, authentication patterns, and integration user
-password expiration in the production Salesforce org. It analyzes Login EventLogFile
+password expiration in the Salesforce org. It analyzes Login EventLogFile
 records and LoginHistory to track authentication trends, geolocation patterns, and
 credential management.
 
@@ -10,10 +10,6 @@ Key Monitoring Areas:
     1. Login Events: Success/failure rates from hourly logs
     2. Geolocation Analysis: User login locations and browser information
     3. Integration User Passwords: Tracks password expiration for critical service accounts
-
-Monitored Integration Users (Production):
-    - BizApps Monitoring
-    - GitlabIntegration Prod
 
 Functions:
     - monitor_login_events: Processes hourly login logs for success/failure metrics
@@ -161,20 +157,43 @@ def geolocation(sf, chunk_size=100):
         logger.error("Unexpected error: %s", e)
 
 
-def monitor_integration_user_passwords(sf):
+def monitor_integration_user_passwords(sf, integration_user_names=None):
     """
     Monitor password expiration for core integration users.
     Queries specific integration users and calculates days until password expiration.
     Password policy: 90 days from LastPasswordChangeDate
+    
+    Args:
+        sf: Salesforce connection object
+        integration_user_names: List of integration user names to monitor.
+                               If None, queries all users with Profile.Name containing 'Integration'
+                               or 'Service Account'. Can be customized via environment variable
+                               INTEGRATION_USER_NAMES (comma-separated).
     """
+    import os
+    
     logger.info("Monitoring integration user password expiration...")
     
     try:
-        # Query core integration users
-        query = """
+        # Get integration user names from parameter or environment variable
+        if integration_user_names is None:
+            env_users = os.getenv('INTEGRATION_USER_NAMES')
+            if env_users:
+                integration_user_names = [name.strip() for name in env_users.split(',')]
+        
+        if not integration_user_names:
+            logger.warning(
+                "No integration users specified. Set INTEGRATION_USER_NAMES environment variable "
+                "or pass integration_user_names parameter. Skipping password expiration monitoring."
+            )
+            return
+        
+        # Query specific users by name
+        user_names = "', '".join(integration_user_names)
+        query = f"""
             SELECT Id, Name, Username, LastPasswordChangeDate
             FROM User
-            WHERE Name IN ('BizApps Monitoring', 'GitlabIntegration Prod')
+            WHERE Name IN ('{user_names}')
         """
         users = query_records_all(sf, query)
         

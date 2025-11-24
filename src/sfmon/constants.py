@@ -1,7 +1,7 @@
 """
 Constants and Configuration Module
 
-This module defines global constants and configuration used across the production
+This module defines global constants and configuration used across the
 monitoring service. It includes timeout values, compliance whitelists, and
 allowed configuration change patterns for audit trail monitoring.
 
@@ -17,6 +17,9 @@ Compliance Configuration:
     
     The EXCLUDE_USERS list contains service accounts and administrators whose actions
     are trusted and should not trigger compliance alerts.
+    
+    NOTE: EXCLUDE_USERS should be customized for your org. Replace the default
+    empty list with your admin/integration user names.
 """
 REQUESTS_TIMEOUT_SECONDS = 300
 QUERY_TIMEOUT_SECONDS = 30
@@ -52,6 +55,6 @@ ALLOWED_SECTIONS_ACTIONS = {
     ],
     "Mobile Administration": ["assigneduserstomobileconfig"]
 }
-EXCLUDE_USERS = ['Salesforce Admin User', 'GitlabIntegration Prod', 'Rajnandini Chavan',
-                 'MindMatrix Integration User', 'Okta Integration User',
-                 'Matthew Forsyth', 'Matt Carvin', 'Deep Suthar']
+# TODO: Customize this list with your org's admin/integration user names
+# These users will be excluded from compliance monitoring alerts
+EXCLUDE_USERS = []
