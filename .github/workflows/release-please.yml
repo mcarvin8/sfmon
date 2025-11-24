@@ -1,0 +1,107 @@
+name: Release Please
+
+# This workflow uses release-please to automatically create semantic version tags
+# and GitHub releases based on conventional commit messages.
+#
+# How it works:
+# 1. On push to main, release-please analyzes commit messages
+# 2. It creates a Release PR with version bump and changelog
+# 3. When the Release PR is merged, it automatically creates:
+#    - A semantic version tag (e.g., v1.2.3)
+#    - A GitHub release with changelog
+#    - Builds and publishes Docker image to Docker Hub
+#
+# Commit message format (Conventional Commits):
+# - feat: New feature (minor version bump)
+# - fix: Bug fix (patch version bump)
+# - feat!: Breaking change (major version bump)
+# - docs, perf, refactor, test, build, ci, chore: No version bump by default
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: ${{ github.repository }}
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run release-please
+        id: release
+        uses: google-github-actions/release-please-action@v4
+        with:
+          release-type: simple
+
+      - name: Fetch tags
+        run: git fetch --tags
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+
+      - name: Checkout repository for Docker build
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ steps.release.outputs.tag_name }}
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+
+      - name: Verify tag is on main branch
+        run: |
+          TAG_NAME="${{ steps.release.outputs.tag_name }}"
+          echo "Tag name: $TAG_NAME"
+          git fetch origin main
+          if ! git merge-base --is-ancestor $TAG_NAME origin/main; then
+            echo "Tag $TAG_NAME is not on main branch. Skipping build."
+            exit 1
+          fi
+          echo "Tag $TAG_NAME verified on main branch"
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.release.outputs.tag_name }}
+            type=raw,value=latest
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/atlassian-statuspage-prom-exporter/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+        if: ${{ steps.release.outputs.release_created == 'true' }}
