@@ -20,7 +20,7 @@ ENV SF_AUTOUPDATE_DISABLE=true \
 
 # Set working directory to script
 WORKDIR /app/sfmon
-COPY scripts /app/sfmon
+COPY src/sfmon/*.py /app/sfmon
 
 # Install required Salesforce and Python dependencies
 RUN apt-get update && apt-get install -y curl python3 python3-pip python3-venv && \
