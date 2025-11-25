@@ -22,6 +22,11 @@ ENV SF_AUTOUPDATE_DISABLE=true \
 WORKDIR /app/sfmon
 COPY src/sfmon/*.py /app/sfmon
 
+# Copy documentation and license
+COPY README.md /app/sfmon/README.md
+COPY LICENSE.md /app/sfmon/LICENSE.md
+COPY version.txt /app/sfmon/version.txt
+
 # Install required Salesforce and Python dependencies
 RUN apt-get update && apt-get install -y curl python3 python3-pip python3-venv && \
     python3 -m venv /opt/venv && \

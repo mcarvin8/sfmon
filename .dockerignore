@@ -3,13 +3,6 @@
 .gitignore
 .gitattributes
 
-# Documentation
-README.md
-CHANGELOG.md
-LICENSE.md
-GENERALIZATION_SUMMARY.md
-*.md
-
 # CI/CD
 .github
 .gitlab-ci.yml
@@ -55,9 +48,6 @@ grafana/
 # Temporary and cleanup scripts
 *.tmp
 *.log
-
-# Version files (if not needed in container)
-version.txt
 
 # Release files
 release-please.yml
