@@ -30,20 +30,18 @@ Environment Variables Required:
     - SALESFORCE_AUTH_URL: SFDX authentication URL for org
     
 Environment Variables Optional:
-    - INTEGRATION_USER_NAMES: Comma-separated list of integration user names to monitor
-                              for password expiration (e.g., "User1,User2,User3")
+    - CONFIG_FILE_PATH: Path to JSON configuration file (default: /app/sfmon/config.json)
     - QUERY_TIMEOUT_SECONDS: Timeout in seconds for Salesforce SOQL queries (default: 30)
-    - SCHEDULE_<JOB_ID>: Custom cron schedule for any job. Set to "disabled" to skip a job.
-                         Format: "minute=*/5", "hour=7,minute=30", "*/5 * * * *", or JSON.
-                         Example: SCHEDULE_MONITOR_SALESFORCE_LIMITS="*/10"
+    
+Configuration File:
+    A JSON configuration file is used to configure schedules, disable functions,
+    and set integration user names. See README for configuration file format and examples.
 
 Functions:
     - schedule_tasks: Configures all APScheduler jobs with optimized timing
     - main: Entry point that initializes connection and starts scheduler
 """
 import os
-import json
-import re
 
 from prometheus_client import start_http_server
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -77,76 +75,14 @@ from tech_debt import (unassigned_permission_sets, perm_sets_limited_users,
                        public_groups_with_no_members, dashboards_with_inactive_users)
 
 
-def parse_cron_schedule(schedule_str):
-    """
-    Parse a cron schedule string into CronTrigger parameters.
-    
-    Supports multiple formats:
-    1. Standard cron: "*/5 * * * *" -> minute='*/5'
-    2. Parameter format: "minute=*/5" or "hour=7,minute=30"
-    3. JSON format: '{"minute": "*/5"}' or '{"hour": "7", "minute": "30"}'
-    4. Simple minute: "*/5" -> minute='*/5'
-    
-    Args:
-        schedule_str: Cron schedule string in one of the supported formats
-        
-    Returns:
-        dict: Keyword arguments for CronTrigger
-    """
-    if not schedule_str or schedule_str.lower() in ('disabled', 'none', ''):
-        return None
-    
-    schedule_str = schedule_str.strip()
-    
-    # Try JSON format first
-    if schedule_str.startswith('{'):
-        try:
-            return json.loads(schedule_str)
-        except json.JSONDecodeError:
-            pass
-    
-    # Try standard cron format: "*/5 * * * *"
-    cron_parts = schedule_str.split()
-    if len(cron_parts) == 5:
-        result = {}
-        if cron_parts[0] != '*':
-            result['minute'] = cron_parts[0]
-        if cron_parts[1] != '*':
-            result['hour'] = cron_parts[1]
-        if cron_parts[2] != '*':
-            result['day'] = cron_parts[2]
-        if cron_parts[3] != '*':
-            result['month'] = cron_parts[3]
-        if cron_parts[4] != '*':
-            result['day_of_week'] = cron_parts[4]
-        return result if result else None
-    
-    # Try parameter format: "minute=*/5" or "hour=7,minute=30"
-    if '=' in schedule_str:
-        params = {}
-        for part in schedule_str.split(','):
-            if '=' in part:
-                key, value = part.split('=', 1)
-                params[key.strip()] = value.strip()
-        if params:
-            return params
-    
-    # Simple format: assume it's just minutes if it's a single value
-    # e.g., "*/5" or "0" or "10,50"
-    if re.match(r'^[\d\*\/,]+$', schedule_str):
-        return {'minute': schedule_str}
-    
-    # If we can't parse it, return None to use default
-    logger.warning("Could not parse schedule string: %s, using default", schedule_str)
-    return None
-
-
 def get_schedule_config(job_id, default_schedule):
     """
-    Get schedule configuration for a job from environment variable or use default.
+    Get schedule configuration for a job from config file, environment variable, or use default.
     
-    Environment variable format: SCHEDULE_<JOB_ID>
-    Example: SCHEDULE_MONITOR_SALESFORCE_LIMITS="*/5"
+    Priority:
+    1. Environment variable SCHEDULE_<JOB_ID> (highest priority)
+    2. Config file schedules.<job_id>
+    3. Default schedule (lowest priority)
     
     Args:
         job_id: The job identifier
@@ -155,20 +91,8 @@ def get_schedule_config(job_id, default_schedule):
     Returns:
         dict or None: Schedule configuration for CronTrigger, None if disabled
     """
-    env_var = f'SCHEDULE_{job_id.upper()}'
-    env_value = os.getenv(env_var)
-    
-    if env_value:
-        parsed = parse_cron_schedule(env_value)
-        if parsed is None:
-            # Disabled or invalid - return None to skip scheduling
-            logger.info("Job %s is disabled or has invalid schedule, skipping", job_id)
-            return None
-        logger.info("Using custom schedule for %s: %s", job_id, env_value)
-        return parsed
-    
-    # Use default (may be None)
-    return default_schedule
+    from config import get_schedule_from_config
+    return get_schedule_from_config(job_id, default_schedule)
 
 
 def schedule_tasks(sf, scheduler):

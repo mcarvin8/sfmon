@@ -166,24 +166,23 @@ def monitor_integration_user_passwords(sf, integration_user_names=None):
     Args:
         sf: Salesforce connection object
         integration_user_names: List of integration user names to monitor.
-                               If None, queries all users with Profile.Name containing 'Integration'
-                               or 'Service Account'. Can be customized via environment variable
-                               INTEGRATION_USER_NAMES (comma-separated).
+                               If None, loads from config file.
+                               Priority: parameter > config file
     """
-    import os
-    
     logger.info("Monitoring integration user password expiration...")
     
     try:
-        # Get integration user names from parameter or environment variable
+        # Get integration user names from parameter or config file
         if integration_user_names is None:
-            env_users = os.getenv('INTEGRATION_USER_NAMES')
-            if env_users:
-                integration_user_names = [name.strip() for name in env_users.split(',')]
+            try:
+                from config import get_integration_user_names
+                integration_user_names = get_integration_user_names()
+            except Exception:
+                pass
         
         if not integration_user_names:
             logger.warning(
-                "No integration users specified. Set INTEGRATION_USER_NAMES environment variable "
+                "No integration users specified. Add 'integration_user_names' to config file "
                 "or pass integration_user_names parameter. Skipping password expiration monitoring."
             )
             return

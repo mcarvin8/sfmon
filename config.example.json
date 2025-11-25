@@ -1,0 +1,50 @@
+{
+  "schedules": {
+    "monitor_salesforce_limits": "*/5",
+    "get_salesforce_instance": "*/5",
+    "monitor_apex_flex_queue": "*/5",
+    "hourly_analyse_bulk_api": "minute=0",
+    "get_salesforce_licenses": "minute=10,50",
+    "hourly_observe_user_querying_large_records": "minute=20",
+    "hourly_report_export_records": "minute=40",
+    "daily_analyse_bulk_api": "hour=7,minute=30",
+    "get_deployment_status": "hour=7,minute=45",
+    "geolocation": "hour=8,minute=0",
+    "monitor_org_wide_sharing_settings": "hour=8,minute=45",
+    "monitor_integration_user_passwords": "hour=9,minute=0",
+    "get_salesforce_ept_and_apt": "hour=6,minute=0",
+    "monitor_login_events": "hour=6,minute=15",
+    "async_apex_job_status": "hour=6,minute=30",
+    "monitor_apex_execution_time": "hour=6,minute=45",
+    "async_apex_execution_summary": "hour=7,minute=0",
+    "concurrent_apex_errors": "hour=7,minute=15",
+    "expose_apex_exception_metrics": "hour=7,minute=30",
+    "unassigned_permission_sets": "hour=9,minute=15",
+    "perm_sets_limited_users": "hour=9,minute=30",
+    "profile_assignment_under5": "hour=9,minute=45",
+    "profile_no_active_users": "hour=10,minute=0",
+    "apex_classes_api_version": "hour=10,minute=15",
+    "apex_triggers_api_version": "hour=10,minute=30",
+    "security_health_check": "hour=10,minute=45",
+    "salesforce_health_risks": "hour=11,minute=0",
+    "workflow_rules_monitoring": "hour=11,minute=15",
+    "dormant_salesforce_users": "hour=11,minute=30",
+    "dormant_portal_users": "hour=11,minute=45",
+    "total_queues_per_object": "hour=12,minute=0",
+    "queues_with_no_members": "hour=12,minute=15",
+    "queues_with_zero_open_cases": "hour=12,minute=30",
+    "public_groups_with_no_members": "hour=12,minute=45",
+    "dashboards_with_inactive_users": "hour=13,minute=0"
+  },
+  "integration_user_names": [
+    "Integration User 1",
+    "Integration User 2",
+    "Service Account"
+  ],
+  "exclude_users": [
+    "Admin User",
+    "Integration User",
+    "Service Account"
+  ]
+}
+

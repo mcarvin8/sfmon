@@ -41,19 +41,12 @@ SFMon is configured via environment variables. Here are the available options:
 - **`METRICS_PORT`**: Port for Prometheus metrics endpoint (default: `9001`)
   - Example: `-e METRICS_PORT=9001`
 
-- **`INTEGRATION_USER_NAMES`**: Comma-separated list of integration user names to monitor for password expiration
-  - Example: `-e INTEGRATION_USER_NAMES="Integration User 1,Integration User 2,Service Account"`
-  - If not provided, password expiration monitoring will be skipped
+- **`CONFIG_FILE_PATH`**: Path to JSON configuration file (default: `/app/sfmon/config.json`)
+  - Example: `-e CONFIG_FILE_PATH=/app/config/my-config.json`
+  - See [Configuration File](#configuration-file) section below for details
 
 - **`QUERY_TIMEOUT_SECONDS`**: Timeout in seconds for Salesforce SOQL queries (default: `30`)
   - Example: `-e QUERY_TIMEOUT_SECONDS=60` (increase timeout to 60 seconds for large queries)
-
-- **`SCHEDULE_<JOB_ID>`**: Custom cron schedule for any monitoring job (optional)
-  - Format: `minute=*/5`, `hour=7,minute=30`, `*/5 * * * *`, or JSON `{"minute": "*/5"}`
-  - Set to `disabled` or empty to skip a job
-  - Example: `-e SCHEDULE_MONITOR_SALESFORCE_LIMITS="*/10"` (run every 10 minutes instead of 5)
-  - Example: `-e SCHEDULE_DAILY_ANALYSE_BULK_API="hour=8,minute=0"` (run at 8:00 AM instead of 7:30 AM)
-  - Example: `-e SCHEDULE_GEOLOCATION="disabled"` (disable geolocation monitoring)
 
 ### Complete Example
 
@@ -147,9 +140,83 @@ docker push your-repo/sfmon:latest
 
 ## ⚙️ Customization
 
+### Configuration File
+
+SFMon uses a JSON configuration file to manage all monitoring settings, schedules, and user configurations. This is the primary method for customizing SFMon behavior.
+
+**Configuration File Location:**
+- Default: `/app/sfmon/config.json` (inside container)
+- Override with: `CONFIG_FILE_PATH` environment variable
+- Mount as volume: `-v /path/to/config.json:/app/sfmon/config.json`
+
+**Configuration File Format:**
+
+```json
+{
+  "schedules": {
+    "monitor_salesforce_limits": "*/10",
+    "daily_analyse_bulk_api": "hour=8,minute=0",
+    "geolocation": "disabled",
+    "unassigned_permission_sets": "hour=9,minute=15"
+  },
+  "integration_user_names": [
+    "Integration User 1",
+    "Integration User 2",
+    "Service Account"
+  ],
+  "exclude_users": [
+    "Admin User",
+    "Integration User",
+    "Service Account"
+  ]
+}
+```
+
+**Configuration Options:**
+
+- **`schedules`** (object, optional): Custom schedules for monitoring jobs
+  - Key: Job ID in lowercase with underscores (e.g., `monitor_salesforce_limits`)
+  - Value: Cron schedule string or `"disabled"` to skip the job
+  - See [Customizing Job Schedules](#customizing-job-schedules) for schedule formats
+
+- **`integration_user_names`** (array, optional): List of integration user names to monitor for password expiration
+  - If not provided, password expiration monitoring will be skipped
+
+- **`exclude_users`** (array, optional): List of user names to exclude from compliance monitoring
+  - These users will not trigger compliance alerts for audit trail changes
+  - Default: empty array (all users monitored)
+
+**Example Docker Run with Config File:**
+
+```bash
+# Create config file (or use config.example.json as a template)
+cat > config.json << EOF
+{
+  "schedules": {
+    "monitor_salesforce_limits": "*/10",
+    "geolocation": "disabled"
+  },
+  "integration_user_names": ["Integration User", "Service Account"],
+  "exclude_users": ["Admin User", "Integration User"]
+}
+EOF
+
+# Run with mounted config file
+docker run -d \
+  --name sfmon \
+  -p 9001:9001 \
+  -e SALESFORCE_AUTH_URL="..." \
+  -v $(pwd)/config.json:/app/sfmon/config.json \
+  mcarvin8/sfmon:latest
+```
+
+> **Note**: An example configuration file (`config.example.json`) is included in the repository with all available job IDs and their default schedules. Use it as a starting point for your own configuration.
+
+**Note:** All scheduling and user configuration is managed through the configuration file. Environment variables are only used for core runtime settings (SALESFORCE_AUTH_URL, METRICS_PORT, QUERY_TIMEOUT_SECONDS, CONFIG_FILE_PATH).
+
 ### Customizing Job Schedules
 
-You can customize when monitoring jobs run using environment variables with the pattern `SCHEDULE_<JOB_ID>`. This allows you to:
+You can customize when monitoring jobs run by configuring schedules in the `config.json` file. This allows you to:
 - Change execution frequency (e.g., run every 10 minutes instead of 5)
 - Change execution times (e.g., run daily jobs at different hours)
 - Disable specific jobs you don't need
@@ -199,29 +266,26 @@ You can customize when monitoring jobs run using environment variables with the 
 
 **Examples:**
 
+Configure schedules in your `config.json`:
+
+```json
+{
+  "schedules": {
+    "monitor_salesforce_limits": "*/10",
+    "daily_analyse_bulk_api": "hour=9,minute=0",
+    "geolocation": "disabled"
+  }
+}
+```
+
+Then mount the config file when running the container:
+
 ```bash
-# Run limits check every 10 minutes instead of 5
 docker run -d \
   --name sfmon \
   -p 9001:9001 \
   -e SALESFORCE_AUTH_URL="..." \
-  -e SCHEDULE_MONITOR_SALESFORCE_LIMITS="*/10" \
-  mcarvin8/sfmon:latest
-
-# Change daily bulk API analysis to run at 9:00 AM instead of 7:30 AM
-docker run -d \
-  --name sfmon \
-  -p 9001:9001 \
-  -e SALESFORCE_AUTH_URL="..." \
-  -e SCHEDULE_DAILY_ANALYSE_BULK_API="hour=9,minute=0" \
-  mcarvin8/sfmon:latest
-
-# Disable geolocation monitoring
-docker run -d \
-  --name sfmon \
-  -p 9001:9001 \
-  -e SALESFORCE_AUTH_URL="..." \
-  -e SCHEDULE_GEOLOCATION="disabled" \
+  -v $(pwd)/config.json:/app/sfmon/config.json \
   mcarvin8/sfmon:latest
 ```
 
