@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/mcarvin8/sfmon/compare/v1.1.0...v2.0.0) (2025-11-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* Remove support for SCHEDULE_<JOB_ID> and INTEGRATION_USER_NAMES environment variables. All scheduling and user configuration must now be managed through config.json file.
+
+### Features
+
+* remove environment variable support for scheduling and user config ([55b8495](https://github.com/mcarvin8/sfmon/commit/55b8495d0b62622650cf3c256d628269c976e408))
+
 ## [1.1.0](https://github.com/mcarvin8/sfmon/compare/v1.0.0...v1.1.0) (2025-11-24)
 
 
