@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/mcarvin8/sfmon/compare/v2.0.0...v2.0.1) (2025-12-10)
+
+
+### Bug Fixes
+
+* address security injection concerns on sf connection commands ([124f633](https://github.com/mcarvin8/sfmon/commit/124f633ede8ef3572c7b4642ebd9090e39db7864))
+
 ## [2.0.0](https://github.com/mcarvin8/sfmon/compare/v1.1.0...v2.0.0) (2025-11-25)
 
 
