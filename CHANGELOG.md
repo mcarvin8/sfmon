@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.2](https://github.com/mcarvin8/sfmon/compare/v2.0.1...v2.0.2) (2025-12-29)
+
+
+### Bug Fixes
+
+* use temp file for connection to sf ([5445e07](https://github.com/mcarvin8/sfmon/commit/5445e076dc7deb963584d3fb63a6ee449c83f0f9))
+
 ## [2.0.1](https://github.com/mcarvin8/sfmon/compare/v2.0.0...v2.0.1) (2025-12-10)
 
 
