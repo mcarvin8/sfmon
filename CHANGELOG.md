@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.0.0](https://github.com/mcarvin8/sfmon/compare/v2.0.2...v3.0.0) (2026-01-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* Jobs must now be explicitly defined in config.json to run. Previously, all jobs ran by default unless disabled. Now, only jobs listed in the schedules section will execute.
+
+### Features
+
+* add scheduled apex job monitoring, refactor tech debt monitoring functions ([cf3542a](https://github.com/mcarvin8/sfmon/commit/cf3542afc93437eace36e381f5f9c024421f0b14))
+* change job scheduling to opt-in configuration model ([9902b51](https://github.com/mcarvin8/sfmon/commit/9902b5198fd9a13359c2ffa54a5803c430a4b55d))
+
 ## [2.0.2](https://github.com/mcarvin8/sfmon/compare/v2.0.1...v2.0.2) (2025-12-29)
 
 
