@@ -13,15 +13,26 @@ It implements a comprehensive monitoring strategy with resource-optimized schedu
     - EPT/APT performance metrics
     - Report exports
     - Integration user password expiration
-    - Technical debt monitoring (permission sets, profiles, Apex versions, security health, dormant users, queues, dashboards)
+    - Technical debt monitoring:
+        * Permission sets (unassigned, limited users)
+        * Profiles (under 5 users, no active users)
+        * Apex API versions (classes, triggers)
+        * Security health check and risks
+        * Workflow rules
+        * Dormant users (Salesforce and Portal)
+        * Queues (per object, no members, zero open cases)
+        * Public groups (no members)
+        * Dashboards (inactive running users)
+        * Scheduled Apex jobs
 
 Resource Optimization Strategy:
     - Functions are staggered to prevent CPU/memory spikes
     - Critical 5-minute functions: limits, instance health, apex flex queue
-    - Hourly functions distributed across :00, :10, :20, :40, :50 minutes
-    - Daily functions scheduled 06:00-09:00 with 15-minute intervals
-    - Performance monitoring: 06:00-07:30
-    - Business functions: 07:30-08:45
+    - Hourly functions distributed across :00, :10/:50, :20, :40 minutes
+    - Daily functions scheduled with 15-minute intervals:
+        * 06:00-07:30: Performance & Apex monitoring
+        * 07:30-09:00: Daily business functions
+        * 09:15-13:15: Tech debt monitoring (17 functions)
 
 The service uses APScheduler with cron-style scheduling and exposes metrics
 via Prometheus on port 9001.
@@ -32,6 +43,7 @@ Environment Variables Required:
 Environment Variables Optional:
     - CONFIG_FILE_PATH: Path to JSON configuration file (default: /app/sfmon/config.json)
     - QUERY_TIMEOUT_SECONDS: Timeout in seconds for Salesforce SOQL queries (default: 30)
+    - METRICS_PORT: Prometheus metrics server port (default: 9001)
     
 Configuration File:
     A JSON configuration file is used to configure schedules, disable functions,
@@ -103,17 +115,59 @@ def schedule_tasks(sf, scheduler):
     
     OPTIMIZATION STRATEGY (Resource Load Distribution):
     - ALL non-critical functions are staggered to prevent CPU/memory spikes
-    - Resource-intensive functions have 15+ minute intervals between executions
-    - Functions are grouped by type and scheduled in logical time blocks:
-      * 06:00-07:30: Performance & Apex monitoring (15-minute intervals)
-      * 07:30-09:00: Daily business functions (15-minute intervals)
-      * 09:15-13:00: Tech debt monitoring (15-minute intervals)
-      * Hourly: :00 (bulk API), :10/:50 (licenses), :20 (user queries), :40 (reports)
-    - Critical 5-minute functions (limits, instance, apex flex queue) remain unchanged
+    - Resource-intensive functions have 15-minute intervals between executions
     - All daily functions run once per day during business hours for optimal resource usage
+    
+    SCHEDULE OVERVIEW:
+    
+    Critical Functions (Every 5 minutes):
+        - monitor_salesforce_limits
+        - get_salesforce_instance
+        - monitor_apex_flex_queue
+    
+    Hourly Functions (staggered throughout the hour):
+        - :00 - hourly_analyse_bulk_api
+        - :10, :50 - get_salesforce_licenses
+        - :20 - hourly_observe_user_querying_large_records
+        - :40 - hourly_report_export_records
+    
+    Daily Performance & Apex Monitoring (06:00-07:30):
+        - 06:00 - get_salesforce_ept_and_apt
+        - 06:15 - monitor_login_events
+        - 06:30 - async_apex_job_status
+        - 06:45 - monitor_apex_execution_time
+        - 07:00 - async_apex_execution_summary
+        - 07:15 - concurrent_apex_errors
+        - 07:30 - expose_apex_exception_metrics
+    
+    Daily Business Functions (07:30-09:00):
+        - 07:30 - daily_analyse_bulk_api
+        - 07:45 - get_deployment_status
+        - 08:00 - geolocation
+        - 08:45 - monitor_org_wide_sharing_settings
+        - 09:00 - monitor_integration_user_passwords
+    
+    Daily Tech Debt Monitoring (09:15-13:15):
+        - 09:15 - unassigned_permission_sets
+        - 09:30 - perm_sets_limited_users
+        - 09:45 - profile_assignment_under5
+        - 10:00 - profile_no_active_users
+        - 10:15 - apex_classes_api_version
+        - 10:30 - apex_triggers_api_version
+        - 10:45 - security_health_check
+        - 11:00 - salesforce_health_risks
+        - 11:15 - workflow_rules_monitoring
+        - 11:30 - dormant_salesforce_users
+        - 11:45 - dormant_portal_users
+        - 12:00 - total_queues_per_object
+        - 12:15 - queues_with_no_members
+        - 12:30 - queues_with_zero_open_cases
+        - 12:45 - public_groups_with_no_members
+        - 13:00 - dashboards_with_inactive_users
+        - 13:15 - scheduled_apex_jobs_monitoring
     """
-    # Execute each task once at script startup
-    # High-prority functions should be prioritized over minor functions (i.e. functions that run every 5 minutes take priority over daily functions)
+    # Execute each task once at script startup to populate initial metrics
+    # Critical functions (5-minute interval) are executed first, followed by hourly and daily functions
     logger.info("Executing tasks at startup...")
     monitor_salesforce_limits(sf)
     monitor_apex_flex_queue(sf)
@@ -156,7 +210,7 @@ def schedule_tasks(sf, scheduler):
     scheduled_apex_jobs_monitoring(sf)
     logger.info("Initial execution completed, scheduling tasks with APScheduler...")
 
-    # Every 5 minutes on the dot (0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55)
+    # Critical Functions - Every 5 minutes (*/5)
     schedule = get_schedule_config('monitor_salesforce_limits', {'minute': '*/5'})
     if schedule:
         scheduler.add_job(
@@ -184,10 +238,8 @@ def schedule_tasks(sf, scheduler):
             name='Monitor Apex Flex Queue'
         )
 
-    # Daily Business Functions - Staggered across morning hours (07:30-08:45)
-    # to prevent resource spikes from simultaneous execution
-
-    # Morning Business Hours Block (07:30-08:15)
+    # Daily Business Functions (07:30-09:00)
+    # Staggered to prevent resource spikes from simultaneous execution
     schedule = get_schedule_config('daily_analyse_bulk_api', {'hour': '7', 'minute': '30'})
     if schedule:
         scheduler.add_job(
@@ -233,8 +285,8 @@ def schedule_tasks(sf, scheduler):
             name='Monitor Integration User Passwords'
         )
 
-    # Tech Debt Monitoring Block - Daily functions (09:15-11:00)
-    # Staggered to prevent resource conflicts with other daily functions
+    # Tech Debt Monitoring Block (09:15-13:15)
+    # 17 functions staggered at 15-minute intervals to prevent resource conflicts
     schedule = get_schedule_config('unassigned_permission_sets', {'hour': '9', 'minute': '15'})
     if schedule:
         scheduler.add_job(
@@ -388,10 +440,8 @@ def schedule_tasks(sf, scheduler):
             name='Scheduled Apex Jobs Monitoring'
         )
 
-    # Performance & Apex Monitoring - Staggered across early morning (06:00-07:30)
-    # Spread to avoid resource conflicts and provide comprehensive daily monitoring
-
-    # Performance Metrics Block (06:00-06:30)
+    # Performance & Apex Monitoring (06:00-07:30)
+    # 7 functions staggered at 15-minute intervals for comprehensive daily monitoring
     schedule = get_schedule_config('get_salesforce_ept_and_apt', {'hour': '6', 'minute': '0'})
     if schedule:
         scheduler.add_job(
@@ -418,8 +468,7 @@ def schedule_tasks(sf, scheduler):
             id='async_apex_job_status',
             name='Async Apex Job Status'
         )
-
-    # Apex Performance Analysis Block (06:45-07:15)
+    
     schedule = get_schedule_config('monitor_apex_execution_time', {'hour': '6', 'minute': '45'})
     if schedule:
         scheduler.add_job(
@@ -437,8 +486,7 @@ def schedule_tasks(sf, scheduler):
             id='async_apex_execution_summary',
             name='Async Apex Execution Summary'
         )
-
-    # Apex Error Monitoring Block (07:15-07:30)
+    
     schedule = get_schedule_config('concurrent_apex_errors', {'hour': '7', 'minute': '15'})
     if schedule:
         scheduler.add_job(
@@ -457,10 +505,8 @@ def schedule_tasks(sf, scheduler):
             name='Expose Apex Exception Metrics'
         )
 
-    # Hourly Monitoring Functions - Staggered to prevent simultaneous execution
-    # Functions run at different minute intervals to distribute load
-
-    # Bulk API Analysis - Every hour at :00
+    # Hourly Monitoring Functions
+    # Staggered at :00, :10/:50, :20, :40 to distribute load across the hour
     schedule = get_schedule_config('hourly_analyse_bulk_api', {'minute': '0'})
     if schedule:
         scheduler.add_job(
@@ -469,8 +515,7 @@ def schedule_tasks(sf, scheduler):
             id='hourly_analyse_bulk_api',
             name='Hourly Analyse Bulk API'
         )
-
-    # Salesforce Licenses - Twice per hour at :10 and :50
+    
     schedule = get_schedule_config('get_salesforce_licenses', {'minute': '10,50'})
     if schedule:
         scheduler.add_job(
@@ -479,8 +524,7 @@ def schedule_tasks(sf, scheduler):
             id='get_salesforce_licenses',
             name='Get Salesforce Licenses'
         )
-
-    # User Query Monitoring - Every hour at :20 (20 minutes after bulk API)
+    
     schedule = get_schedule_config('hourly_observe_user_querying_large_records', {'minute': '20'})
     if schedule:
         scheduler.add_job(
@@ -489,8 +533,7 @@ def schedule_tasks(sf, scheduler):
             id='hourly_observe_user_querying_large_records',
             name='Hourly Observe User Querying Large Records'
         )
-
-    # Report Export Monitoring - Every hour at :40 (40 minutes after bulk API)
+    
     schedule = get_schedule_config('hourly_report_export_records', {'minute': '40'})
     if schedule:
         scheduler.add_job(
@@ -500,8 +543,8 @@ def schedule_tasks(sf, scheduler):
             name='Hourly Report Export Records'
         )
     
-    # Note: expose_suspicious_records is called at startup but not scheduled
-    # Add it if you want it scheduled:
+    # Optional: expose_suspicious_records runs at startup only by default
+    # Configure via config file to enable scheduled execution
     schedule = get_schedule_config('expose_suspicious_records', None)
     if schedule:
         scheduler.add_job(
