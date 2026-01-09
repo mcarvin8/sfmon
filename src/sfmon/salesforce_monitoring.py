@@ -543,8 +543,7 @@ def schedule_tasks(sf, scheduler):
             name='Hourly Report Export Records'
         )
     
-    # Optional: expose_suspicious_records runs at startup only by default
-    # Configure via config file to enable scheduled execution
+    # Optional: expose_suspicious_records - add to config file to enable
     schedule = get_schedule_config('expose_suspicious_records', None)
     if schedule:
         scheduler.add_job(

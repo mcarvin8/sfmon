@@ -1,17 +1,18 @@
 {
+  "_comment": "SFMon Configuration - OPT-IN: Only jobs listed in 'schedules' will run. Remove jobs you don't need.",
   "schedules": {
+    "_comment_critical": "Critical functions - every 5 minutes",
     "monitor_salesforce_limits": "*/5",
     "get_salesforce_instance": "*/5",
     "monitor_apex_flex_queue": "*/5",
+
+    "_comment_hourly": "Hourly functions - staggered throughout the hour",
     "hourly_analyse_bulk_api": "minute=0",
     "get_salesforce_licenses": "minute=10,50",
     "hourly_observe_user_querying_large_records": "minute=20",
     "hourly_report_export_records": "minute=40",
-    "daily_analyse_bulk_api": "hour=7,minute=30",
-    "get_deployment_status": "hour=7,minute=45",
-    "geolocation": "hour=8,minute=0",
-    "monitor_org_wide_sharing_settings": "hour=8,minute=45",
-    "monitor_integration_user_passwords": "hour=9,minute=0",
+
+    "_comment_performance": "Daily Performance & Apex Monitoring (06:00-07:30)",
     "get_salesforce_ept_and_apt": "hour=6,minute=0",
     "monitor_login_events": "hour=6,minute=15",
     "async_apex_job_status": "hour=6,minute=30",
@@ -19,6 +20,15 @@
     "async_apex_execution_summary": "hour=7,minute=0",
     "concurrent_apex_errors": "hour=7,minute=15",
     "expose_apex_exception_metrics": "hour=7,minute=30",
+
+    "_comment_business": "Daily Business Functions (07:30-09:00)",
+    "daily_analyse_bulk_api": "hour=7,minute=30",
+    "get_deployment_status": "hour=7,minute=45",
+    "geolocation": "hour=8,minute=0",
+    "monitor_org_wide_sharing_settings": "hour=8,minute=45",
+    "monitor_integration_user_passwords": "hour=9,minute=0",
+
+    "_comment_techdebt": "Daily Tech Debt Monitoring (09:15-13:15)",
     "unassigned_permission_sets": "hour=9,minute=15",
     "perm_sets_limited_users": "hour=9,minute=30",
     "profile_assignment_under5": "hour=9,minute=45",
@@ -34,7 +44,11 @@
     "queues_with_no_members": "hour=12,minute=15",
     "queues_with_zero_open_cases": "hour=12,minute=30",
     "public_groups_with_no_members": "hour=12,minute=45",
-    "dashboards_with_inactive_users": "hour=13,minute=0"
+    "dashboards_with_inactive_users": "hour=13,minute=0",
+    "scheduled_apex_jobs_monitoring": "hour=13,minute=15",
+
+    "_comment_optional": "Optional - uncomment to enable",
+    "expose_suspicious_records": "hour=7,minute=30"
   },
   "integration_user_names": [
     "Integration User 1",

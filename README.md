@@ -144,6 +144,10 @@ docker push your-repo/sfmon:latest
 
 SFMon uses a JSON configuration file to manage all monitoring settings, schedules, and user configurations. This is the primary method for customizing SFMon behavior.
 
+> **⚠️ IMPORTANT: OPT-IN Configuration**
+> 
+> SFMon uses an **opt-in approach** for job scheduling. Only jobs explicitly defined in the `schedules` section of your config file will run. Jobs not listed will be **skipped**. This gives you full control over which monitoring functions are active.
+
 **Configuration File Location:**
 - Default: `/app/sfmon/config.json` (inside container)
 - Override with: `CONFIG_FILE_PATH` environment variable
@@ -154,10 +158,12 @@ SFMon uses a JSON configuration file to manage all monitoring settings, schedule
 ```json
 {
   "schedules": {
-    "monitor_salesforce_limits": "*/10",
-    "daily_analyse_bulk_api": "hour=8,minute=0",
-    "geolocation": "disabled",
-    "unassigned_permission_sets": "hour=9,minute=15"
+    "monitor_salesforce_limits": "*/5",
+    "get_salesforce_instance": "*/5",
+    "monitor_apex_flex_queue": "*/5",
+    "daily_analyse_bulk_api": "hour=7,minute=30",
+    "hourly_analyse_bulk_api": "minute=0",
+    "get_salesforce_licenses": "minute=10,50"
   },
   "integration_user_names": [
     "Integration User 1",
@@ -174,10 +180,11 @@ SFMon uses a JSON configuration file to manage all monitoring settings, schedule
 
 **Configuration Options:**
 
-- **`schedules`** (object, optional): Custom schedules for monitoring jobs
+- **`schedules`** (object, **required for jobs to run**): Defines which monitoring jobs run and their schedules
   - Key: Job ID in lowercase with underscores (e.g., `monitor_salesforce_limits`)
-  - Value: Cron schedule string or `"disabled"` to skip the job
-  - See [Customizing Job Schedules](#customizing-job-schedules) for schedule formats
+  - Value: Cron schedule string or `"disabled"` to explicitly disable
+  - **Only jobs listed here will run** - unlisted jobs are skipped
+  - See [Customizing Job Schedules](#customizing-job-schedules) for schedule formats and available job IDs
 
 - **`integration_user_names`** (array, optional): List of integration user names to monitor for password expiration
   - If not provided, password expiration monitoring will be skipped
@@ -190,11 +197,16 @@ SFMon uses a JSON configuration file to manage all monitoring settings, schedule
 
 ```bash
 # Create config file (or use config.example.json as a template)
+# IMPORTANT: Only jobs listed in "schedules" will run!
 cat > config.json << EOF
 {
   "schedules": {
-    "monitor_salesforce_limits": "*/10",
-    "geolocation": "disabled"
+    "monitor_salesforce_limits": "*/5",
+    "get_salesforce_instance": "*/5",
+    "monitor_apex_flex_queue": "*/5",
+    "hourly_analyse_bulk_api": "minute=0",
+    "get_salesforce_licenses": "minute=10,50",
+    "daily_analyse_bulk_api": "hour=7,minute=30"
   },
   "integration_user_names": ["Integration User", "Service Account"],
   "exclude_users": ["Admin User", "Integration User"]
@@ -210,16 +222,18 @@ docker run -d \
   mcarvin8/sfmon:latest
 ```
 
-> **Note**: An example configuration file (`config.example.json`) is included in the repository with all available job IDs and their default schedules. Use it as a starting point for your own configuration.
+> **Note**: An example configuration file (`config.example.json`) is included in the repository with all available job IDs and their recommended schedules. **Copy this file and customize it** - only jobs you include will run.
 
 **Note:** All scheduling and user configuration is managed through the configuration file. Environment variables are only used for core runtime settings (SALESFORCE_AUTH_URL, METRICS_PORT, QUERY_TIMEOUT_SECONDS, CONFIG_FILE_PATH).
 
 ### Customizing Job Schedules
 
-You can customize when monitoring jobs run by configuring schedules in the `config.json` file. This allows you to:
-- Change execution frequency (e.g., run every 10 minutes instead of 5)
-- Change execution times (e.g., run daily jobs at different hours)
-- Disable specific jobs you don't need
+SFMon uses an **opt-in approach** - only jobs explicitly listed in your `config.json` will run. This gives you complete control over resource usage and which monitoring functions are active.
+
+**Key Points:**
+- **Only jobs in `schedules` will run** - unlisted jobs are skipped entirely
+- Jobs run once at startup, then follow their configured schedule
+- Use `"disabled"` value to explicitly document a disabled job
 
 **Supported Schedule Formats:**
 - Simple: `"*/5"` - Every 5 minutes
@@ -227,59 +241,73 @@ You can customize when monitoring jobs run by configuring schedules in the `conf
 - Standard cron: `"*/5 * * * *"` - Full cron expression
 - JSON: `'{"minute": "*/5", "hour": "7"}'` - JSON object
 
-**Available Job IDs (use lowercase with underscores in config.json):**
-- `monitor_salesforce_limits` (default: every 5 minutes)
-- `get_salesforce_instance` (default: every 5 minutes)
-- `monitor_apex_flex_queue` (default: every 5 minutes)
-- `daily_analyse_bulk_api` (default: daily at 7:30 AM)
-- `get_deployment_status` (default: daily at 7:45 AM)
-- `geolocation` (default: daily at 8:00 AM)
-- `monitor_org_wide_sharing_settings` (default: daily at 8:45 AM)
-- `monitor_integration_user_passwords` (default: daily at 9:00 AM)
-- `unassigned_permission_sets` (default: daily at 9:15 AM)
-- `perm_sets_limited_users` (default: daily at 9:30 AM)
-- `profile_assignment_under5` (default: daily at 9:45 AM)
-- `profile_no_active_users` (default: daily at 10:00 AM)
-- `apex_classes_api_version` (default: daily at 10:15 AM)
-- `apex_triggers_api_version` (default: daily at 10:30 AM)
-- `security_health_check` (default: daily at 10:45 AM)
-- `salesforce_health_risks` (default: daily at 11:00 AM)
-- `workflow_rules_monitoring` (default: daily at 11:15 AM)
-- `dormant_salesforce_users` (default: daily at 11:30 AM)
-- `dormant_portal_users` (default: daily at 11:45 AM)
-- `total_queues_per_object` (default: daily at 12:00 PM)
-- `queues_with_no_members` (default: daily at 12:15 PM)
-- `queues_with_zero_open_cases` (default: daily at 12:30 PM)
-- `public_groups_with_no_members` (default: daily at 12:45 PM)
-- `dashboards_with_inactive_users` (default: daily at 1:00 PM)
-- `get_salesforce_ept_and_apt` (default: daily at 6:00 AM)
-- `monitor_login_events` (default: daily at 6:15 AM)
-- `async_apex_job_status` (default: daily at 6:30 AM)
-- `monitor_apex_execution_time` (default: daily at 6:45 AM)
-- `async_apex_execution_summary` (default: daily at 7:00 AM)
-- `concurrent_apex_errors` (default: daily at 7:15 AM)
-- `expose_apex_exception_metrics` (default: daily at 7:30 AM)
-- `hourly_analyse_bulk_api` (default: every hour at :00)
-- `get_salesforce_licenses` (default: every hour at :10 and :50)
-- `hourly_observe_user_querying_large_records` (default: every hour at :20)
-- `hourly_report_export_records` (default: every hour at :40)
-- `expose_suspicious_records` (default: daily at 7:30 AM)
+**Available Job IDs and Recommended Schedules:**
 
-**Examples:**
+Copy the jobs you need into your `config.json`. Use lowercase with underscores.
 
-Configure schedules in your `config.json`:
+| Job ID | Recommended Schedule | Description |
+|--------|---------------------|-------------|
+| **Critical (Every 5 minutes)** |||
+| `monitor_salesforce_limits` | `*/5` | Org limits and API usage |
+| `get_salesforce_instance` | `*/5` | Instance health status |
+| `monitor_apex_flex_queue` | `*/5` | Apex flex queue depth |
+| **Hourly** |||
+| `hourly_analyse_bulk_api` | `minute=0` | Bulk API job analysis |
+| `get_salesforce_licenses` | `minute=10,50` | License usage |
+| `hourly_observe_user_querying_large_records` | `minute=20` | Large query compliance |
+| `hourly_report_export_records` | `minute=40` | Report export tracking |
+| **Daily - Performance (06:00-07:30)** |||
+| `get_salesforce_ept_and_apt` | `hour=6,minute=0` | EPT/APT metrics |
+| `monitor_login_events` | `hour=6,minute=15` | Login event analysis |
+| `async_apex_job_status` | `hour=6,minute=30` | Async job status |
+| `monitor_apex_execution_time` | `hour=6,minute=45` | Apex execution times |
+| `async_apex_execution_summary` | `hour=7,minute=0` | Async execution summary |
+| `concurrent_apex_errors` | `hour=7,minute=15` | Concurrent Apex errors |
+| `expose_apex_exception_metrics` | `hour=7,minute=30` | Apex exceptions |
+| **Daily - Business (07:30-09:00)** |||
+| `daily_analyse_bulk_api` | `hour=7,minute=30` | Daily bulk API summary |
+| `get_deployment_status` | `hour=7,minute=45` | Deployment status |
+| `geolocation` | `hour=8,minute=0` | Login geolocation |
+| `monitor_org_wide_sharing_settings` | `hour=8,minute=45` | OWD changes |
+| `monitor_integration_user_passwords` | `hour=9,minute=0` | Integration user passwords |
+| **Daily - Tech Debt (09:15-13:15)** |||
+| `unassigned_permission_sets` | `hour=9,minute=15` | Unused permission sets |
+| `perm_sets_limited_users` | `hour=9,minute=30` | Low-usage permission sets |
+| `profile_assignment_under5` | `hour=9,minute=45` | Profiles with <5 users |
+| `profile_no_active_users` | `hour=10,minute=0` | Profiles with no users |
+| `apex_classes_api_version` | `hour=10,minute=15` | Outdated Apex classes |
+| `apex_triggers_api_version` | `hour=10,minute=30` | Outdated Apex triggers |
+| `security_health_check` | `hour=10,minute=45` | Security health score |
+| `salesforce_health_risks` | `hour=11,minute=0` | Security risks |
+| `workflow_rules_monitoring` | `hour=11,minute=15` | Legacy workflow rules |
+| `dormant_salesforce_users` | `hour=11,minute=30` | Dormant SF users |
+| `dormant_portal_users` | `hour=11,minute=45` | Dormant portal users |
+| `total_queues_per_object` | `hour=12,minute=0` | Queue distribution |
+| `queues_with_no_members` | `hour=12,minute=15` | Empty queues |
+| `queues_with_zero_open_cases` | `hour=12,minute=30` | Inactive case queues |
+| `public_groups_with_no_members` | `hour=12,minute=45` | Empty public groups |
+| `dashboards_with_inactive_users` | `hour=13,minute=0` | Dashboards with inactive users |
+| `scheduled_apex_jobs_monitoring` | `hour=13,minute=15` | Scheduled Apex jobs |
+| **Optional** |||
+| `expose_suspicious_records` | `hour=7,minute=30` | Suspicious audit records |
+
+**Minimal Example (Critical jobs only):**
 
 ```json
 {
   "schedules": {
-    "monitor_salesforce_limits": "*/10",
-    "daily_analyse_bulk_api": "hour=9,minute=0",
-    "geolocation": "disabled"
+    "monitor_salesforce_limits": "*/5",
+    "get_salesforce_instance": "*/5",
+    "monitor_apex_flex_queue": "*/5"
   }
 }
 ```
 
-Then mount the config file when running the container:
+**Full Example (All recommended jobs):**
+
+See `config.example.json` in the repository for a complete configuration with all jobs enabled.
+
+**Running with Config:**
 
 ```bash
 docker run -d \

@@ -2,20 +2,25 @@
 Configuration Module
 
 This module handles loading configuration from a JSON file. The configuration file
-allows users to customize schedules, disable functions, and set user-specific settings
+allows users to customize schedules, enable functions, and set user-specific settings
 without modifying code or using multiple environment variables.
+
+IMPORTANT: This module uses an OPT-IN approach for job scheduling.
+    - Only jobs explicitly defined in the config file will run
+    - Jobs not listed in the config file will be SKIPPED
+    - Set a job to "disabled" to explicitly disable it (useful for documentation)
 
 Configuration File Location:
     - Default: /app/sfmon/config.json (inside container)
     - Can be overridden via CONFIG_FILE_PATH environment variable
-    - If file doesn't exist, defaults are used
+    - If file doesn't exist or schedules section is empty, NO jobs will run
 
 Configuration Structure:
     {
         "schedules": {
             "monitor_salesforce_limits": "*/5",
             "daily_analyse_bulk_api": "hour=7,minute=30",
-            "geolocation": "disabled"
+            "get_salesforce_instance": "*/5"
         },
         "integration_user_names": ["User 1", "User 2"],
         "exclude_users": ["Admin User", "Integration User"]
@@ -136,33 +141,37 @@ def parse_cron_schedule(schedule_str):
 
 def get_schedule_from_config(job_id, default_schedule):
     """
-    Get schedule for a job from config file or use default.
+    Get schedule for a job from config file (OPT-IN approach).
     
-    Priority:
-    1. Config file schedules.<job_id>
-    2. Default schedule (lowest priority)
+    IMPORTANT: Only jobs explicitly defined in the config file will run.
+    Jobs not listed in the config file will be SKIPPED.
     
     Args:
         job_id: The job identifier
-        default_schedule: Default schedule dict for CronTrigger, or None to skip by default
+        default_schedule: Default schedule dict for CronTrigger (used as fallback format hint only)
         
     Returns:
-        dict or None: Schedule configuration for CronTrigger, None if disabled
+        dict or None: Schedule configuration for CronTrigger, None if not in config or disabled
     """
-    # Check config file
     config = load_config()
-    config_schedule = config.get('schedules', {}).get(job_id.lower())
+    schedules = config.get('schedules', {})
     
-    if config_schedule:
-        parsed = parse_cron_schedule(config_schedule)
-        if parsed is None:
-            logger.info("Job %s is disabled in config file, skipping", job_id)
-            return None
-        logger.info("Using config file schedule for %s: %s", job_id, config_schedule)
-        return parsed
+    # Check if job is explicitly defined in config (case-insensitive)
+    config_schedule = schedules.get(job_id.lower())
     
-    # Use default
-    return default_schedule
+    if config_schedule is None:
+        # Job not in config file - skip it (opt-in approach)
+        logger.debug("Job %s not defined in config file, skipping (opt-in mode)", job_id)
+        return None
+    
+    # Job is in config - parse the schedule
+    parsed = parse_cron_schedule(config_schedule)
+    if parsed is None:
+        logger.info("Job %s is disabled in config file", job_id)
+        return None
+    
+    logger.info("Job %s enabled with schedule: %s", job_id, config_schedule)
+    return parsed
 
 
 def get_integration_user_names():
