@@ -1,0 +1,2715 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "cip-o11y-aws-prd-us-west-2-theta"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 5172,
+  "links": [],
+  "panels": [
+    {
+      "description": "",
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 58,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<h2 style=\"color: orange; text-align: center;\">\r\n    Salesforce Tech Debt Monitoring\r\n</h2>\r\n",
+        "mode": "html"
+      },
+      "pluginVersion": "12.0.5",
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 2
+      },
+      "id": 154,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "cip-o11y-aws-prd-us-west-2-theta"
+          },
+          "description": "- 90% and above = Excellent\n- 80%–89% = Very Good\n- 70%–79% = Good\n- 55%–69% = Poor\n- 54% and below = Very Poor",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "min": 0,
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "dark-red"
+                  },
+                  {
+                    "color": "dark-orange",
+                    "value": 55
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 70
+                  },
+                  {
+                    "color": "#27ae60",
+                    "value": 80
+                  },
+                  {
+                    "color": "dark-green",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 5,
+            "x": 0,
+            "y": 3
+          },
+          "id": 144,
+          "interval": "24h",
+          "options": {
+            "colorMode": "background_solid",
+            "graphMode": "area",
+            "justifyMode": "center",
+            "orientation": "vertical",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "value_and_name",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.0.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "security_health_check_score",
+              "instant": true,
+              "legendFormat": "{{grade}}",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "Salesforce Health Check Score %",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "cip-o11y-aws-prd-us-west-2-theta"
+          },
+          "description": "- 90% and above = Excellent\n- 80%–89% = Very Good\n- 70%–79% = Good\n- 55%–69% = Poor\n- 54% and below = Very Poor",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 100,
+                "gradientMode": "opacity",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "dark-red"
+                  },
+                  {
+                    "color": "dark-orange",
+                    "value": 55
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 70
+                  },
+                  {
+                    "color": "#27ae60",
+                    "value": 80
+                  },
+                  {
+                    "color": "dark-green",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 19,
+            "x": 5,
+            "y": 3
+          },
+          "id": 147,
+          "interval": "12h",
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "editorMode": "code",
+              "expr": "security_health_check_score",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "score",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Salesforce Health Check Trend",
+          "transformations": [
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "Health Check Score",
+                "mode": "reduceRow",
+                "reduce": {
+                  "include": [
+                    "score"
+                  ],
+                  "reducer": "lastNotNull"
+                },
+                "replaceFields": true
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "cip-o11y-aws-prd-us-west-2-theta"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": true
+              },
+              "fieldMinMax": false,
+              "mappings": [
+                {
+                  "options": {
+                    "HIGH_RISK": {
+                      "color": "dark-red",
+                      "index": 1
+                    },
+                    "LOW_RISK": {
+                      "color": "green",
+                      "index": 3
+                    },
+                    "MEDIUM_RISK": {
+                      "color": "yellow",
+                      "index": 2
+                    },
+                    "MEETS_STANDARD": {
+                      "color": "blue",
+                      "index": 4
+                    },
+                    "True": {
+                      "color": "red",
+                      "index": 0
+                    },
+                    "match": {
+                      "color": "dark-green",
+                      "index": 6,
+                      "text": "True"
+                    },
+                    "mismatch": {
+                      "color": "dark-red",
+                      "index": 5,
+                      "text": "False"
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Setting"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 568
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Setting Group"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 249
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Risk Type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 179
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Setting Risk Category"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 205
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Org Value (Actual)"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 342
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 19,
+            "w": 24,
+            "x": 0,
+            "y": 152
+          },
+          "id": 143,
+          "interval": "5m",
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Compliance Status"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "salesforce_health_risks",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Salesforce Security Health Check Risks",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "__name__": true,
+                  "container": true,
+                  "endpoint": true,
+                  "instance": true,
+                  "job": true,
+                  "namespace": true,
+                  "pod": true,
+                  "service": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 15,
+                  "__name__": 1,
+                  "container": 2,
+                  "endpoint": 3,
+                  "instance": 4,
+                  "job": 5,
+                  "namespace": 6,
+                  "org_value": 13,
+                  "pod": 7,
+                  "risk_type": 11,
+                  "service": 8,
+                  "setting": 9,
+                  "setting_group": 10,
+                  "setting_risk_category": 12,
+                  "standard_value": 14
+                },
+                "renameByName": {
+                  "Value": "",
+                  "compliance_status": "Compliance Status",
+                  "org_value": "Org Value (Actual)",
+                  "risk_type": "Risk Type",
+                  "service": "",
+                  "setting": "Setting",
+                  "setting_group": "Setting Group",
+                  "setting_risk_category": "Setting Risk Category",
+                  "standard_value": "Standard Value (Expected)"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        }
+      ],
+      "title": "Health Check",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 3
+      },
+      "id": 159,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "cip-o11y-aws-prd-us-west-2-theta"
+          },
+          "description": "Apex classes & triggers developed by FTE in production running on API version 50.0 and older.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "ID"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "${__data.fields[\"ID\"]}",
+                        "url": "https://avalara.my.salesforce.com/${__data.fields[\"ID\"]}"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "API Version"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "options": {
+                          "from": 0,
+                          "result": {
+                            "color": "red",
+                            "index": 0
+                          },
+                          "to": 30
+                        },
+                        "type": "range"
+                      },
+                      {
+                        "options": {
+                          "from": 31,
+                          "result": {
+                            "color": "orange",
+                            "index": 1
+                          },
+                          "to": 50
+                        },
+                        "type": "range"
+                      },
+                      {
+                        "options": {
+                          "from": 51,
+                          "result": {
+                            "color": "yellow",
+                            "index": 2
+                          },
+                          "to": 60
+                        },
+                        "type": "range"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 14,
+            "w": 24,
+            "x": 0,
+            "y": 4
+          },
+          "id": 139,
+          "interval": "5m",
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "API Name"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "deprecated_apex_classes\r\n",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "deprecated_apex_triggers",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "B"
+            }
+          ],
+          "title": "Apex Classes/Triggers API Version <=50.0",
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "API Version",
+                "mode": "reduceRow",
+                "reduce": {
+                  "include": [
+                    "Value #A",
+                    "Value #B"
+                  ],
+                  "reducer": "max"
+                }
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": false,
+                  "Value #A": true,
+                  "Value #B": true,
+                  "__name__": true,
+                  "cluster_arn": true,
+                  "contact_id": false,
+                  "container": true,
+                  "container_arn": true,
+                  "container_name": true,
+                  "created_date": false,
+                  "delegate_user": false,
+                  "docker_image": true,
+                  "endpoint": true,
+                  "instance": true,
+                  "job": true,
+                  "namespace": true,
+                  "org": true,
+                  "payment_gateway_token": true,
+                  "pod": true,
+                  "service": true,
+                  "task_arn": true,
+                  "task_group": true,
+                  "task_name": true,
+                  "task_revision": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 3,
+                  "__name__": 4,
+                  "cluster_arn": 5,
+                  "container_arn": 6,
+                  "container_name": 7,
+                  "docker_image": 8,
+                  "id": 1,
+                  "instance": 9,
+                  "job": 10,
+                  "name": 2,
+                  "task_arn": 11,
+                  "task_group": 12,
+                  "task_name": 13,
+                  "task_revision": 14
+                },
+                "renameByName": {
+                  "Time": "",
+                  "Total": "User Count",
+                  "Value": "API Version",
+                  "Value #A": "API Version (Apex Class)",
+                  "Value #B": "API Version (Apex Trigger)",
+                  "__name__": "",
+                  "action": "Action",
+                  "billing_active_status": "Billing Active Status",
+                  "billing_autopay_status": "Billing Autopay Status",
+                  "billing_payment_gateway_name": "Payment Gateway Name",
+                  "contact_id": "Contact ID",
+                  "created_date": "Created Date",
+                  "delegate_user": "Delegate User",
+                  "display": "Message",
+                  "email": "Email",
+                  "environment": "Environment",
+                  "id": "ID",
+                  "instance": "",
+                  "job": "",
+                  "last_modified_date": "Last modified Date",
+                  "message": "Incident Message",
+                  "name": "API Name",
+                  "payment_gateway_token": "Gateway Token",
+                  "payment_method_id": "Method Id",
+                  "payment_method_name": "Method Name",
+                  "pod": "POD Instance",
+                  "profileId": "Profile ID",
+                  "profileName": "Profile Name",
+                  "section": "Section",
+                  "severity": "Severity",
+                  "user": "User",
+                  "user_name": "User"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "cip-o11y-aws-prd-us-west-2-theta"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "fieldMinMax": false,
+              "mappings": [
+                {
+                  "options": {
+                    "COMPLETE": {
+                      "color": "green",
+                      "index": 2
+                    },
+                    "ERROR": {
+                      "color": "red",
+                      "index": 3
+                    },
+                    "EXECUTING": {
+                      "color": "yellow",
+                      "index": 1
+                    },
+                    "WAITING": {
+                      "color": "blue",
+                      "index": 0
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Owner ID"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "${__data.fields[\"Owner ID\"]}",
+                        "url": "https://avalara.my.salesforce.com/${__data.fields[\"Owner ID\"]}"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "State"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-background"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 130
+          },
+          "id": 165,
+          "interval": "5m",
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "API Name"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "scheduled_apex_jobs",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Scheduled Apex Jobs",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "__name__": true,
+                  "container": true,
+                  "created_date": false,
+                  "endpoint": true,
+                  "instance": true,
+                  "job": true,
+                  "namespace": true,
+                  "pod": true,
+                  "service": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 9,
+                  "__name__": 1,
+                  "apex_class": 10,
+                  "container": 2,
+                  "created_by": 15,
+                  "created_date": 16,
+                  "cron_expression": 11,
+                  "endpoint": 3,
+                  "instance": 4,
+                  "job": 5,
+                  "job_id": 13,
+                  "job_name": 12,
+                  "namespace": 6,
+                  "next_fire_time": 18,
+                  "owner_id": 14,
+                  "pod": 7,
+                  "previous_fire_time": 17,
+                  "service": 8,
+                  "state": 19,
+                  "times_triggered": 20
+                },
+                "renameByName": {
+                  "apex_class": "Apex Class",
+                  "created_by": "Created By",
+                  "created_date": "Created Date",
+                  "cron_expression": "Cron Expression",
+                  "email": "Email",
+                  "job_id": "Job ID",
+                  "job_name": "Job Name",
+                  "last_login_date": "Last Login Date",
+                  "next_fire_time": "Next Fire Time",
+                  "owner_id": "Owner ID",
+                  "previous_fire_time": "Previous Fire Time",
+                  "profile_name": "Profile Name",
+                  "state": "State",
+                  "times_triggered": "Times Triggered",
+                  "user_id": "User ID",
+                  "username": "User Name"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        }
+      ],
+      "title": "Apex",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 160,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "cip-o11y-aws-prd-us-west-2-theta"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "fieldMinMax": false,
+              "mappings": [
+                {
+                  "options": {
+                    "True": {
+                      "color": "red",
+                      "index": 0
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "User ID"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "${__data.fields[\"ID\"]}",
+                        "url": "https://avalara.my.salesforce.com/${__data.fields[\"User ID\"]}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 16,
+            "w": 12,
+            "x": 0,
+            "y": 5
+          },
+          "id": 148,
+          "interval": "5m",
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "API Name"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "dormant_salesforce_users",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Dormant Salesforce Users",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "__name__": true,
+                  "container": true,
+                  "created_date": true,
+                  "endpoint": true,
+                  "instance": true,
+                  "job": true,
+                  "namespace": true,
+                  "pod": true,
+                  "service": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 15,
+                  "__name__": 1,
+                  "container": 2,
+                  "created_date": 3,
+                  "email": 6,
+                  "endpoint": 7,
+                  "instance": 8,
+                  "job": 9,
+                  "last_login_date": 11,
+                  "namespace": 12,
+                  "pod": 13,
+                  "profile_name": 10,
+                  "service": 14,
+                  "user_id": 4,
+                  "username": 5
+                },
+                "renameByName": {
+                  "email": "Email",
+                  "last_login_date": "Last Login Date",
+                  "profile_name": "Profile Name",
+                  "user_id": "User ID",
+                  "username": "User Name"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "cip-o11y-aws-prd-us-west-2-theta"
+          },
+          "description": "Set \"Portal Users Last Login Date\" variable to change this panel",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "fieldMinMax": false,
+              "mappings": [
+                {
+                  "options": {
+                    "True": {
+                      "color": "red",
+                      "index": 0
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "User ID"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "${__data.fields[\"ID\"]}",
+                        "url": "https://avalara.my.salesforce.com/${__data.fields[\"User ID\"]}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 16,
+            "w": 12,
+            "x": 12,
+            "y": 5
+          },
+          "id": 149,
+          "interval": "5m",
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "API Name"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "dormant_portal_users{last_login_date=~\"$last_login_date\"}",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Dormant Portal Users - Last Login Date: $last_login_date",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "__name__": true,
+                  "container": true,
+                  "created_date": true,
+                  "endpoint": true,
+                  "instance": true,
+                  "job": true,
+                  "namespace": true,
+                  "pod": true,
+                  "service": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 15,
+                  "__name__": 1,
+                  "container": 2,
+                  "created_date": 3,
+                  "email": 6,
+                  "endpoint": 7,
+                  "instance": 8,
+                  "job": 9,
+                  "last_login_date": 11,
+                  "namespace": 12,
+                  "pod": 13,
+                  "profile_name": 10,
+                  "service": 14,
+                  "user_id": 4,
+                  "username": 5
+                },
+                "renameByName": {
+                  "email": "Email",
+                  "last_login_date": "Last Login Date",
+                  "profile_name": "Profile Name",
+                  "user_id": "User ID",
+                  "username": "User Name"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        }
+      ],
+      "title": "Users",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 156,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "cip-o11y-aws-prd-us-west-2-theta"
+          },
+          "description": "Permission sets developed by FTE in production with 10 or less active users.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "ID"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "${__data.fields[\"ID\"]}",
+                        "url": "https://avalara.my.salesforce.com/${__data.fields[\"ID\"]}"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "User Count"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "options": {
+                          "0": {
+                            "color": "red",
+                            "index": 0
+                          }
+                        },
+                        "type": "value"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 16,
+            "w": 12,
+            "x": 0,
+            "y": 6
+          },
+          "id": 136,
+          "interval": "5m",
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "API Name"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "unused_permissionsets\r\n",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "limited_permissionsets",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "B"
+            }
+          ],
+          "title": "Permission Sets with ≤10 Active Users",
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "mode": "reduceRow",
+                "reduce": {
+                  "include": [
+                    "Value #A",
+                    "Value #B"
+                  ],
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "Value #A": true,
+                  "Value #B": true,
+                  "__name__": true,
+                  "cluster_arn": true,
+                  "contact_id": false,
+                  "container": true,
+                  "container_arn": true,
+                  "container_name": true,
+                  "created_date": false,
+                  "delegate_user": false,
+                  "docker_image": true,
+                  "endpoint": true,
+                  "instance": true,
+                  "job": true,
+                  "namespace": true,
+                  "org": true,
+                  "payment_gateway_token": true,
+                  "pod": true,
+                  "service": true,
+                  "task_arn": true,
+                  "task_group": true,
+                  "task_name": true,
+                  "task_revision": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 1,
+                  "action": 3,
+                  "created_date": 2,
+                  "delegate_user": 6,
+                  "display": 7,
+                  "section": 4,
+                  "user": 5
+                },
+                "renameByName": {
+                  "Time": "",
+                  "Total": "User Count",
+                  "Value": "",
+                  "Value #B": "",
+                  "action": "Action",
+                  "billing_active_status": "Billing Active Status",
+                  "billing_autopay_status": "Billing Autopay Status",
+                  "billing_payment_gateway_name": "Payment Gateway Name",
+                  "contact_id": "Contact ID",
+                  "created_date": "Created Date",
+                  "delegate_user": "Delegate User",
+                  "display": "Message",
+                  "email": "Email",
+                  "environment": "Environment",
+                  "id": "ID",
+                  "last_modified_date": "Last modified Date",
+                  "message": "Incident Message",
+                  "name": "API Name",
+                  "payment_gateway_token": "Gateway Token",
+                  "payment_method_id": "Method Id",
+                  "payment_method_name": "Method Name",
+                  "pod": "POD Instance",
+                  "section": "Section",
+                  "severity": "Severity",
+                  "user": "User",
+                  "user_name": "User"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "cip-o11y-aws-prd-us-west-2-theta"
+          },
+          "description": "Profiles developed by FTE in production which are assigned to 5 or less active users.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "fieldMinMax": false,
+              "mappings": [
+                {
+                  "options": {
+                    "True": {
+                      "color": "red",
+                      "index": 0
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Profile ID"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "${__data.fields[\"ID\"]}",
+                        "url": "https://avalara.my.salesforce.com/${__data.fields[\"Profile ID\"]}"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "User Count"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "options": {
+                          "0": {
+                            "color": "red",
+                            "index": 0
+                          }
+                        },
+                        "type": "value"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 16,
+            "w": 12,
+            "x": 12,
+            "y": 6
+          },
+          "id": 138,
+          "interval": "5m",
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "Profile Name"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "five_or_less_profile_assignees\r\n",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "unassigned_profiles",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "B"
+            }
+          ],
+          "title": "Profiles with ≤5 Active Users",
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "mode": "reduceRow",
+                "reduce": {
+                  "include": [
+                    "Value #A",
+                    "Value #B"
+                  ],
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": false,
+                  "Value #A": true,
+                  "Value #B": true,
+                  "__name__": true,
+                  "cluster_arn": true,
+                  "contact_id": false,
+                  "container": true,
+                  "container_arn": true,
+                  "container_name": true,
+                  "created_date": false,
+                  "delegate_user": false,
+                  "docker_image": true,
+                  "endpoint": true,
+                  "instance": true,
+                  "job": true,
+                  "namespace": true,
+                  "org": true,
+                  "payment_gateway_token": true,
+                  "pod": true,
+                  "service": true,
+                  "task_arn": true,
+                  "task_group": true,
+                  "task_name": true,
+                  "task_revision": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 2,
+                  "Value": 3,
+                  "__name__": 4,
+                  "cluster_arn": 5,
+                  "container_arn": 6,
+                  "container_name": 7,
+                  "docker_image": 8,
+                  "instance": 9,
+                  "job": 10,
+                  "profileId": 0,
+                  "profileName": 1,
+                  "task_arn": 11,
+                  "task_group": 12,
+                  "task_name": 13,
+                  "task_revision": 14
+                },
+                "renameByName": {
+                  "Time": "",
+                  "Total": "User Count",
+                  "Value": "User Count",
+                  "action": "Action",
+                  "billing_active_status": "Billing Active Status",
+                  "billing_autopay_status": "Billing Autopay Status",
+                  "billing_payment_gateway_name": "Payment Gateway Name",
+                  "contact_id": "Contact ID",
+                  "created_date": "Created Date",
+                  "delegate_user": "Delegate User",
+                  "display": "Message",
+                  "email": "Email",
+                  "environment": "Environment",
+                  "id": "ID",
+                  "instance": "",
+                  "job": "",
+                  "last_modified_date": "Last modified Date",
+                  "message": "Incident Message",
+                  "name": "API Name",
+                  "payment_gateway_token": "Gateway Token",
+                  "payment_method_id": "Method Id",
+                  "payment_method_name": "Method Name",
+                  "pod": "POD Instance",
+                  "profileId": "Profile ID",
+                  "profileName": "Profile Name",
+                  "section": "Section",
+                  "severity": "Severity",
+                  "user": "User",
+                  "user_name": "User"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        }
+      ],
+      "title": "Profiles & Permission Sets",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "id": 155,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "cip-o11y-aws-prd-us-west-2-theta"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "fieldMinMax": false,
+              "mappings": [
+                {
+                  "options": {
+                    "True": {
+                      "color": "red",
+                      "index": 0
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text"
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 16,
+            "w": 12,
+            "x": 0,
+            "y": 7
+          },
+          "id": 150,
+          "interval": "5m",
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "API Name"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "total_queues_per_object",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Total Queues Per Object",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "container": true,
+                  "endpoint": true,
+                  "instance": true,
+                  "job": true,
+                  "namespace": true,
+                  "pod": true,
+                  "service": true
+                },
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {}
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "cip-o11y-aws-prd-us-west-2-theta"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Queue ID"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "${__data.fields[\"Queue ID\"]}",
+                        "url": "https://avalara.my.salesforce.com/p/own/Queue/d?id=${__data.fields[\"Queue ID\"]}&setupid=Queues"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 16,
+            "w": 12,
+            "x": 12,
+            "y": 7
+          },
+          "id": 151,
+          "interval": "5m",
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "API Name"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "queues_with_no_members",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Queues with No Members",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "__name__": true,
+                  "container": true,
+                  "endpoint": true,
+                  "instance": true,
+                  "job": true,
+                  "namespace": true,
+                  "pod": true,
+                  "service": true
+                },
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "queue_id": "Queue ID",
+                  "queue_name": "Queue Name"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "cip-o11y-aws-prd-us-west-2-theta"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Queue ID"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "${__data.fields[\"ID\"]}",
+                        "url": "https://avalara.my.salesforce.com/p/own/Queue/d?id=${__data.fields[\"Queue ID\"]}&setupid=Queues"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 16,
+            "w": 12,
+            "x": 0,
+            "y": 55
+          },
+          "id": 152,
+          "interval": "5m",
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "API Name"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "queues_with_zero_open_cases",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Queues With Zero Open Cases",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "__name__": true,
+                  "container": true,
+                  "endpoint": true,
+                  "instance": true,
+                  "job": true,
+                  "namespace": true,
+                  "pod": true,
+                  "service": true
+                },
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "queue_id": "Queue ID",
+                  "queue_name": "Queue Name"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "cip-o11y-aws-prd-us-west-2-theta"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Group ID"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "${__data.fields[\"ID\"]}",
+                        "url": "https://avalara.my.salesforce.com/setup/own/groupdetail.jsp?id=${__data.fields[\"Group ID\"]}&setupid=PublicGroups"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 16,
+            "w": 12,
+            "x": 12,
+            "y": 55
+          },
+          "id": 153,
+          "interval": "5m",
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "API Name"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "public_groups_with_no_members",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Public Groups With No Members",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "__name__": true,
+                  "container": true,
+                  "endpoint": true,
+                  "instance": true,
+                  "job": true,
+                  "namespace": true,
+                  "pod": true,
+                  "service": true
+                },
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "group_id": "Group ID",
+                  "group_name": "Group Name",
+                  "queue_id": "Queue ID",
+                  "queue_name": "Queue Name"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        }
+      ],
+      "title": "Queues & Public Groups",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "id": 162,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "cip-o11y-aws-prd-us-west-2-theta"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Dashboard ID"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "${__data.fields[\"Dashboard ID\"]}",
+                        "url": "https://avalara.my.salesforce.com/${__data.fields[\"Dashboard ID\"]}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 16,
+            "w": 24,
+            "x": 0,
+            "y": 8
+          },
+          "id": 163,
+          "interval": "5m",
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "API Name"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "dashboards_with_inactive_users",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Dashboards Running Under Inactive Users",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "__name__": true,
+                  "container": true,
+                  "endpoint": true,
+                  "instance": true,
+                  "job": true,
+                  "namespace": true,
+                  "pod": true,
+                  "service": true
+                },
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "created_date": "Created Date",
+                  "dashboard_id": "Dashboard ID",
+                  "dashboard_title": "Dashboard Title",
+                  "last_referenced_date": "Last Referenced Date",
+                  "namespace": "",
+                  "running_user_name": "Running User Name"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        }
+      ],
+      "title": "Dashboards",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 158,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "cip-o11y-aws-prd-us-west-2-theta"
+          },
+          "description": "Workflow rules developed by FTE in production.\n\nSalesforce has revealed that Workflow Rules and Process Builder will no longer be supported after December 31, 2025.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text"
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "ID"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "${__data.fields[\"ID\"]}",
+                        "url": "https://avalara.my.salesforce.com/${__data.fields[\"ID\"]}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 16,
+            "w": 12,
+            "x": 0,
+            "y": 9
+          },
+          "id": 145,
+          "interval": "5m",
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": true,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "count"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "API Name"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "workflow_rules\r\n",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Workflow Rules",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "Value #A": true,
+                  "Value #B": true,
+                  "__name__": true,
+                  "container": true,
+                  "endpoint": true,
+                  "instance": true,
+                  "job": true,
+                  "name": true,
+                  "namespace": true,
+                  "namespace_prefix": true,
+                  "pod": true,
+                  "service": true
+                },
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "created_date": "Created Date",
+                  "id": "ID",
+                  "namespace_prefix": "NameSpace Prefix"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        }
+      ],
+      "title": "Workflow Rules",
+      "type": "row"
+    }
+  ],
+  "preload": false,
+  "refresh": "",
+  "schemaVersion": 41,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "^Never",
+          "value": "^Never"
+        },
+        "includeAll": false,
+        "label": "Portal Users Last Login Date",
+        "name": "last_login_date",
+        "options": [
+          {
+            "selected": false,
+            "text": "2025",
+            "value": "^2025.*"
+          },
+          {
+            "selected": false,
+            "text": "2024",
+            "value": "^2024.*"
+          },
+          {
+            "selected": false,
+            "text": "2023",
+            "value": "^2023.*"
+          },
+          {
+            "selected": false,
+            "text": "2022",
+            "value": "^2022.*"
+          },
+          {
+            "selected": false,
+            "text": "2021",
+            "value": "^2021.*"
+          },
+          {
+            "selected": false,
+            "text": "2020",
+            "value": "^2020.*"
+          },
+          {
+            "selected": true,
+            "text": "Never",
+            "value": "^Never"
+          },
+          {
+            "selected": false,
+            "text": "Before 2020",
+            "value": "^201.*"
+          }
+        ],
+        "query": "2025 : ^2025.*,2024 : ^2024.*,2023 : ^2023.*,2022 : ^2022.*,2021 : ^2021.*,2020 : ^2020.*,Never : ^Never,Before 2020 : ^201.*",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "timezone": "browser",
+  "title": "Salesforce Tech Debt Monitoring",
+  "uid": "feya5pwtlxxc0d",
+  "version": 0
+}
