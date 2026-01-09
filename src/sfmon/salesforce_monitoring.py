@@ -65,14 +65,16 @@ from overall_sf_org import (monitor_salesforce_limits,
 from user_login import monitor_login_events, geolocation, monitor_integration_user_passwords
 from org_wide_sharing_setting import monitor_org_wide_sharing_settings
 from report_export import hourly_report_export_records
-from tech_debt import (unassigned_permission_sets, perm_sets_limited_users,
-                       profile_assignment_under5, profile_no_active_users,
-                       apex_classes_api_version, apex_triggers_api_version,
-                       security_health_check, salesforce_health_risks,
-                       workflow_rules_monitoring, dormant_salesforce_users,
-                       dormant_portal_users, total_queues_per_object,
-                       queues_with_no_members, queues_with_zero_open_cases,
-                       public_groups_with_no_members, dashboards_with_inactive_users)
+from code_quality import (apex_classes_api_version, apex_triggers_api_version,
+                          workflow_rules_monitoring)
+from dashboards import dashboards_with_inactive_users
+from permissions import (unassigned_permission_sets, perm_sets_limited_users,
+                         profile_assignment_under5, profile_no_active_users)
+from queues_groups import (total_queues_per_object, queues_with_no_members,
+                           queues_with_zero_open_cases, public_groups_with_no_members)
+from scheduled_jobs import scheduled_apex_jobs_monitoring
+from security import security_health_check, salesforce_health_risks
+from users import dormant_salesforce_users, dormant_portal_users
 
 
 def get_schedule_config(job_id, default_schedule):
@@ -151,6 +153,7 @@ def schedule_tasks(sf, scheduler):
     queues_with_zero_open_cases(sf)
     public_groups_with_no_members(sf)
     dashboards_with_inactive_users(sf)
+    scheduled_apex_jobs_monitoring(sf)
     logger.info("Initial execution completed, scheduling tasks with APScheduler...")
 
     # Every 5 minutes on the dot (0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55)
@@ -374,6 +377,15 @@ def schedule_tasks(sf, scheduler):
             trigger=CronTrigger(**schedule),
             id='dashboards_with_inactive_users',
             name='Dashboards With Inactive Users'
+        )
+    
+    schedule = get_schedule_config('scheduled_apex_jobs_monitoring', {'hour': '13', 'minute': '15'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: scheduled_apex_jobs_monitoring(sf),
+            trigger=CronTrigger(**schedule),
+            id='scheduled_apex_jobs_monitoring',
+            name='Scheduled Apex Jobs Monitoring'
         )
 
     # Performance & Apex Monitoring - Staggered across early morning (06:00-07:30)

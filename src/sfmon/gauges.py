@@ -277,10 +277,6 @@ salesforce_health_risks_gauge = Gauge('salesforce_health_risks',
                                      ['org_value', 'risk_type', 'setting', 'setting_group', 
                                       'setting_risk_category', 'standard_value', 'compliance_status'])
 
-pmd_code_smells_gauge = Gauge('pmd_code_smells',
-                              'PMD Code Smells detected in codebase',
-                              ['code_smell'])
-
 dormant_salesforce_users_gauge = Gauge('dormant_salesforce_users',
                                       'Dormant Salesforce users (90+ days inactive)',
                                       ['user_id', 'username', 'email', 'profile_name', 'created_date', 'last_login_date'])
@@ -313,3 +309,8 @@ dashboards_with_inactive_users_gauge = Gauge('dashboards_with_inactive_users',
                                              'Dashboards owned by inactive users',
                                              ['dashboard_id', 'dashboard_title', 'running_user_name', 
                                               'created_date', 'last_referenced_date'])
+
+scheduled_apex_jobs_gauge = Gauge('scheduled_apex_jobs',
+                                  'Scheduled Apex jobs in the org',
+                                  ['job_id', 'job_name', 'cron_expression', 'state', 
+                                   'next_fire_time', 'previous_fire_time', 'created_by', 'created_date'])
