@@ -34,14 +34,25 @@ from logger import logger
 # Default config file path
 DEFAULT_CONFIG_PATH = '/app/sfmon/config.json'
 
+# Cached config to avoid repeated file reads and log messages
+_cached_config = None
 
-def load_config():
+
+def load_config(force_reload=False):
     """
     Load configuration from JSON file.
+    
+    Args:
+        force_reload: If True, reload config from file even if cached
     
     Returns:
         dict: Configuration dictionary with schedules, integration_user_names, and exclude_users
     """
+    global _cached_config
+    
+    if _cached_config is not None and not force_reload:
+        return _cached_config
+    
     config_file_path = os.getenv('CONFIG_FILE_PATH', DEFAULT_CONFIG_PATH)
     
     default_config = {
@@ -52,7 +63,8 @@ def load_config():
     
     if not os.path.exists(config_file_path):
         logger.info("Config file not found at %s, using defaults", config_file_path)
-        return default_config
+        _cached_config = default_config
+        return _cached_config
     
     try:
         with open(config_file_path, 'r', encoding='utf-8') as f:
@@ -65,14 +77,17 @@ def load_config():
         result['exclude_users'] = config.get('exclude_users', [])
         
         logger.info("Loaded configuration from %s", config_file_path)
-        return result
+        _cached_config = result
+        return _cached_config
     
     except json.JSONDecodeError as e:
         logger.error("Error parsing config file %s: %s. Using defaults.", config_file_path, e)
-        return default_config
+        _cached_config = default_config
+        return _cached_config
     except Exception as e:
         logger.error("Error loading config file %s: %s. Using defaults.", config_file_path, e)
-        return default_config
+        _cached_config = default_config
+        return _cached_config
 
 
 def parse_cron_schedule(schedule_str):

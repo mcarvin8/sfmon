@@ -52,3 +52,4 @@ def dashboards_with_inactive_users(sf):
     # pylint: disable=broad-except
     except Exception as e:
         logger.error("Error querying dashboards with inactive users: %s", e)
+

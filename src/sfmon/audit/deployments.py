@@ -120,7 +120,7 @@ def calculate_minutes_difference(start, end):
 
 def report_deployment_metrics(record, deployment_time, pending_time, status_mapping, is_validation):
     """
-    Send deployment-related metrics to CloudWatch gauges.
+    Send deployment-related metrics to Prometheus gauges.
 
     Args:
         record (dict): Deployment record.

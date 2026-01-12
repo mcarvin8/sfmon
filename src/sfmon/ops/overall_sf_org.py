@@ -50,7 +50,7 @@ from gauges import (api_usage_percentage_gauge,
                     used_user_licenses_gauge, percent_permissionset_used_gauge,
                     percent_usage_based_entitlements_used_gauge, percent_user_licenses_used_gauge,
                     maintenance_gauge)
-from limits import salesforce_limits_descriptions
+from .limits import salesforce_limits_descriptions
 from query import query_records_all
 
 def monitor_salesforce_limits(sf):

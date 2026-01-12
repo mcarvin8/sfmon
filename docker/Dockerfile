@@ -1,8 +1,5 @@
 FROM ubuntu:latest
 
-# Pull in build arguments
-ARG SALESFORCE_AUTH_URL
-
 # Set Salesforce CLI Environment Variables
 # https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_dev_cli_env_variables.htm
 ENV SF_AUTOUPDATE_DISABLE=true \
@@ -15,12 +12,11 @@ ENV SF_AUTOUPDATE_DISABLE=true \
     SF_HIDE_RELEASE_NOTES=true \
     SF_HIDE_RELEASE_NOTES_FOOTER=true \
     SF_SKIP_NEW_VERSION_CHECK=true \
-    SF_CONTAINER_MODE=true \
-    SALESFORCE_AUTH_URL=${SALESFORCE_AUTH_URL}
+    SF_CONTAINER_MODE=true
 
 # Set working directory to script
 WORKDIR /app/sfmon
-COPY src/sfmon/*.py /app/sfmon
+COPY src/sfmon/ /app/sfmon/
 
 # Copy documentation and license
 COPY README.md /app/sfmon/README.md

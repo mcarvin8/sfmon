@@ -48,6 +48,14 @@ SFMon is configured via environment variables. Here are the available options:
 - **`QUERY_TIMEOUT_SECONDS`**: Timeout in seconds for Salesforce SOQL queries (default: `30`)
   - Example: `-e QUERY_TIMEOUT_SECONDS=60` (increase timeout to 60 seconds for large queries)
 
+- **`INTEGRATION_USER_NAMES`**: Comma-separated list of integration user names for compliance filtering
+  - Example: `-e INTEGRATION_USER_NAMES="Integration User,Service Account,API User"`
+  - Users in this list will be categorized as "Integration User" in audit metrics
+
+- **`FORBIDDEN_PROD_PROFILES`**: Comma-separated list of profile names that should not be assigned in production
+  - Example: `-e FORBIDDEN_PROD_PROFILES="Admin-SoD-PreProd-Delivery,System Administrator - Sandbox"`
+  - Active users with these profiles will trigger compliance alerts
+
 ### Complete Example
 
 ```bash
@@ -256,6 +264,7 @@ Copy the jobs you need into your `config.json`. Use lowercase with underscores.
 | `get_salesforce_licenses` | `minute=10,50` | License usage |
 | `hourly_observe_user_querying_large_records` | `minute=20` | Large query compliance |
 | `hourly_report_export_records` | `minute=40` | Report export tracking |
+| `monitor_forbidden_profile_assignments` | `minute=30` | Users with forbidden profiles |
 | **Daily - Performance (06:00-07:30)** |||
 | `get_salesforce_ept_and_apt` | `hour=6,minute=0` | EPT/APT metrics |
 | `monitor_login_events` | `hour=6,minute=15` | Login event analysis |
@@ -268,8 +277,8 @@ Copy the jobs you need into your `config.json`. Use lowercase with underscores.
 | `daily_analyse_bulk_api` | `hour=7,minute=30` | Daily bulk API summary |
 | `get_deployment_status` | `hour=7,minute=45` | Deployment status |
 | `geolocation` | `hour=8,minute=0` | Login geolocation |
+| `expose_suspicious_records` | `hour=8,minute=30` | Suspicious audit trail records |
 | `monitor_org_wide_sharing_settings` | `hour=8,minute=45` | OWD changes |
-| `monitor_integration_user_passwords` | `hour=9,minute=0` | Integration user passwords |
 | **Daily - Tech Debt (09:15-13:15)** |||
 | `unassigned_permission_sets` | `hour=9,minute=15` | Unused permission sets |
 | `perm_sets_limited_users` | `hour=9,minute=30` | Low-usage permission sets |
@@ -288,8 +297,6 @@ Copy the jobs you need into your `config.json`. Use lowercase with underscores.
 | `public_groups_with_no_members` | `hour=12,minute=45` | Empty public groups |
 | `dashboards_with_inactive_users` | `hour=13,minute=0` | Dashboards with inactive users |
 | `scheduled_apex_jobs_monitoring` | `hour=13,minute=15` | Scheduled Apex jobs |
-| **Optional** |||
-| `expose_suspicious_records` | `hour=7,minute=30` | Suspicious audit records |
 
 **Minimal Example (Critical jobs only):**
 
@@ -318,16 +325,25 @@ docker run -d \
   mcarvin8/sfmon:latest
 ```
 
-### Excluding Users from Compliance Monitoring
+### Configuring Integration Users and Forbidden Profiles
 
-By default, all users are monitored for compliance violations. To exclude specific admin or integration users, you'll need to modify the `EXCLUDE_USERS` constant in `src/sfmon/constants.py` before building your own image:
+SFMon uses environment variables to configure compliance monitoring:
 
-```python
-# In src/sfmon/constants.py
-EXCLUDE_USERS = ['Admin User 1', 'Integration User 2', 'Service Account']
+**Integration User Names:**
+Users listed in `INTEGRATION_USER_NAMES` are categorized as "Integration User" in audit metrics, allowing you to filter them in Grafana dashboards.
+
+```bash
+-e INTEGRATION_USER_NAMES="Integration User,Service Account,API User"
 ```
 
-> **Note**: If you're using the pre-built `mcarvin8/sfmon` image, you'll need to build your own customized image to modify `EXCLUDE_USERS`. This is a code-level configuration, not an environment variable.
+**Forbidden Production Profiles:**
+Profiles listed in `FORBIDDEN_PROD_PROFILES` will trigger compliance alerts if assigned to active users.
+
+```bash
+-e FORBIDDEN_PROD_PROFILES="Admin-SoD-PreProd-Delivery,System Administrator - Sandbox"
+```
+
+> **Note**: If these environment variables are not set, the corresponding monitoring functions will skip their checks gracefully.
 
 ---
 
