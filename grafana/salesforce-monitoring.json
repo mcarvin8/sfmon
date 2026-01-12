@@ -316,7 +316,7 @@
             "h": 11,
             "w": 7,
             "x": 0,
-            "y": 4
+            "y": 11
           },
           "id": 21,
           "options": {
@@ -429,7 +429,7 @@
             "h": 11,
             "w": 17,
             "x": 7,
-            "y": 4
+            "y": 11
           },
           "id": 133,
           "interval": "300",
@@ -602,7 +602,7 @@
             "h": 12,
             "w": 8,
             "x": 0,
-            "y": 5
+            "y": 23
           },
           "id": 1,
           "interval": "5m",
@@ -762,14 +762,15 @@
             "h": 12,
             "w": 16,
             "x": 8,
-            "y": 5
+            "y": 23
           },
           "id": 10,
           "interval": "5m",
           "options": {
             "legend": {
               "calcs": [
-                "lastNotNull"
+                "lastNotNull",
+                "diff"
               ],
               "displayMode": "table",
               "placement": "right",
@@ -788,10 +789,10 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "cip-aws-prd-us-west-2-theta-mimir"
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "(cm:salesforce_monitoring:salesforce_api_usage_max_over_5_mins{prometheus_replica=\"prometheus-observability-0\"}\r\nOR\r\n(\r\n  cm:salesforce_monitoring:salesforce_api_usage_max_over_5_mins{prometheus_replica=\"prometheus-observability-1\"}\r\n    AND absent(cm:salesforce_monitoring:salesforce_api_usage_max_over_5_mins{prometheus_replica=\"prometheus-observability-0\"})\r\n))",
+              "expr": "max by (limit_name) (salesforce_api_usage_percentage)",
               "hide": false,
               "instant": false,
               "legendFormat": "{{limit_name}}",
@@ -804,7 +805,7 @@
           "type": "timeseries"
         }
       ],
-      "title": "API Limits",
+      "title": "API Usage",
       "type": "row"
     },
     {
@@ -853,7 +854,7 @@
             "h": 11,
             "w": 7,
             "x": 0,
-            "y": 6
+            "y": 36
           },
           "id": 4,
           "interval": "1800",
@@ -1007,7 +1008,7 @@
             "h": 11,
             "w": 17,
             "x": 7,
-            "y": 6
+            "y": 36
           },
           "id": 27,
           "interval": "1800",
@@ -1168,7 +1169,7 @@
             "h": 14,
             "w": 7,
             "x": 0,
-            "y": 239
+            "y": 47
           },
           "id": 50,
           "interval": "1800",
@@ -1324,7 +1325,7 @@
             "h": 14,
             "w": 17,
             "x": 7,
-            "y": 239
+            "y": 47
           },
           "id": 51,
           "interval": "1800",
@@ -1494,12 +1495,18 @@
             "h": 14,
             "w": 7,
             "x": 0,
-            "y": 253
+            "y": 61
           },
           "id": 8,
           "interval": "5m",
           "options": {
             "displayMode": "lcd",
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
             "maxVizHeight": 300,
             "minVizHeight": 16,
             "minVizWidth": 8,
@@ -1517,7 +1524,7 @@
             "sizing": "auto",
             "valueMode": "color"
           },
-          "pluginVersion": "10.4.18",
+          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -1646,7 +1653,7 @@
             "h": 14,
             "w": 17,
             "x": 7,
-            "y": 253
+            "y": 61
           },
           "id": 52,
           "interval": "1800",
@@ -1668,7 +1675,7 @@
               }
             ]
           },
-          "pluginVersion": "10.4.18",
+          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -1817,7 +1824,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 7
+            "y": 76
           },
           "id": 64,
           "interval": "15s",
@@ -1971,7 +1978,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 211
+            "y": 82
           },
           "id": 61,
           "interval": "1800",
@@ -2155,7 +2162,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 220
+            "y": 91
           },
           "id": 62,
           "interval": "1800",
@@ -2261,7 +2268,7 @@
           "type": "table"
         }
       ],
-      "title": "Bulk API Analysis Details",
+      "title": "Bulk API Usage",
       "type": "row"
     },
     {
@@ -2338,7 +2345,7 @@
             "h": 10,
             "w": 12,
             "x": 0,
-            "y": 8
+            "y": 101
           },
           "id": 29,
           "interval": "1800",
@@ -2405,7 +2412,7 @@
             "h": 10,
             "w": 12,
             "x": 12,
-            "y": 8
+            "y": 101
           },
           "id": 30,
           "interval": "1800",
@@ -2515,7 +2522,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 69
+            "y": 111
           },
           "id": 33,
           "interval": "1800",
@@ -2615,7 +2622,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 69
+            "y": 111
           },
           "id": 32,
           "interval": "1800",
@@ -2674,7 +2681,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -2718,7 +2724,7 @@
             "h": 12,
             "w": 24,
             "x": 0,
-            "y": 81
+            "y": 123
           },
           "id": 35,
           "interval": "1800",
@@ -2733,12 +2739,10 @@
               "showLegend": true
             },
             "tooltip": {
-              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -2780,7 +2784,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -2824,7 +2827,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 93
+            "y": 135
           },
           "id": 36,
           "interval": "1800",
@@ -2839,12 +2842,10 @@
               "showLegend": true
             },
             "tooltip": {
-              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -3022,7 +3023,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -3066,7 +3066,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 93
+            "y": 135
           },
           "id": 37,
           "interval": "1800",
@@ -3081,12 +3081,10 @@
               "showLegend": true
             },
             "tooltip": {
-              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -3264,7 +3262,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -3308,7 +3305,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 105
+            "y": 147
           },
           "id": 38,
           "interval": "1800",
@@ -3323,12 +3320,10 @@
               "showLegend": true
             },
             "tooltip": {
-              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -3506,7 +3501,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -3550,7 +3544,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 105
+            "y": 147
           },
           "id": 39,
           "interval": "1800",
@@ -3565,12 +3559,10 @@
               "showLegend": true
             },
             "tooltip": {
-              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -3748,7 +3740,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -3792,7 +3783,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 117
+            "y": 159
           },
           "id": 40,
           "interval": "1800",
@@ -3807,12 +3798,10 @@
               "showLegend": true
             },
             "tooltip": {
-              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -3990,7 +3979,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -4034,7 +4022,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 117
+            "y": 159
           },
           "id": 41,
           "interval": "1800",
@@ -4049,12 +4037,10 @@
               "showLegend": true
             },
             "tooltip": {
-              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -4232,7 +4218,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -4276,7 +4261,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 129
+            "y": 171
           },
           "id": 42,
           "options": {
@@ -4290,12 +4275,10 @@
               "showLegend": true
             },
             "tooltip": {
-              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -4473,7 +4456,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -4517,7 +4499,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 129
+            "y": 171
           },
           "id": 43,
           "interval": "1800",
@@ -4532,12 +4514,10 @@
               "showLegend": true
             },
             "tooltip": {
-              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -4715,7 +4695,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -4759,7 +4738,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 141
+            "y": 183
           },
           "id": 44,
           "options": {
@@ -4773,12 +4752,10 @@
               "showLegend": true
             },
             "tooltip": {
-              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -4956,7 +4933,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -5000,7 +4976,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 141
+            "y": 183
           },
           "id": 45,
           "options": {
@@ -5014,12 +4990,10 @@
               "showLegend": true
             },
             "tooltip": {
-              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -5281,7 +5255,7 @@
             "h": 13,
             "w": 12,
             "x": 0,
-            "y": 153
+            "y": 195
           },
           "id": 46,
           "interval": "1800",
@@ -5303,7 +5277,6 @@
               "valueSize": 10
             },
             "tooltip": {
-              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             },
@@ -5311,7 +5284,6 @@
             "xTickLabelRotation": 30,
             "xTickLabelSpacing": 0
           },
-          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -5511,7 +5483,7 @@
             "h": 13,
             "w": 12,
             "x": 12,
-            "y": 153
+            "y": 195
           },
           "id": 47,
           "interval": "1800",
@@ -5533,7 +5505,6 @@
               "valueSize": 10
             },
             "tooltip": {
-              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             },
@@ -5541,7 +5512,6 @@
             "xTickLabelRotation": 30,
             "xTickLabelSpacing": 0
           },
-          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -5680,7 +5650,7 @@
             "h": 12,
             "w": 5,
             "x": 0,
-            "y": 166
+            "y": 208
           },
           "id": 76,
           "interval": "30m",
@@ -5689,7 +5659,6 @@
             "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "horizontal",
-            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -5701,7 +5670,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "10.4.18",
           "targets": [
             {
               "datasource": {
@@ -5745,7 +5714,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -5801,7 +5769,7 @@
             "h": 12,
             "w": 9,
             "x": 5,
-            "y": 166
+            "y": 208
           },
           "id": 74,
           "interval": "30m",
@@ -5813,12 +5781,11 @@
               "showLegend": true
             },
             "tooltip": {
-              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -5863,7 +5830,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -5916,7 +5882,7 @@
             "h": 12,
             "w": 10,
             "x": 14,
-            "y": 166
+            "y": 208
           },
           "id": 77,
           "interval": "30m",
@@ -5928,12 +5894,11 @@
               "showLegend": true
             },
             "tooltip": {
-              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -5987,7 +5952,7 @@
             "h": 13,
             "w": 5,
             "x": 0,
-            "y": 178
+            "y": 220
           },
           "id": 59,
           "interval": "300",
@@ -5996,7 +5961,6 @@
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
-            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -6008,7 +5972,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "10.4.18",
           "targets": [
             {
               "datasource": {
@@ -6052,7 +6016,6 @@
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 10,
                 "gradientMode": "none",
@@ -6105,7 +6068,7 @@
             "h": 13,
             "w": 19,
             "x": 5,
-            "y": 178
+            "y": 220
           },
           "id": 75,
           "interval": "30m",
@@ -6117,12 +6080,11 @@
               "showLegend": true
             },
             "tooltip": {
-              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -6361,7 +6323,7 @@
             "h": 15,
             "w": 24,
             "x": 0,
-            "y": 191
+            "y": 233
           },
           "id": 83,
           "interval": "1h",
@@ -6379,7 +6341,7 @@
             "showHeader": true,
             "sortBy": []
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "10.4.18",
           "targets": [
             {
               "datasource": {
@@ -6603,7 +6565,7 @@
             "h": 13,
             "w": 24,
             "x": 0,
-            "y": 9
+            "y": 249
           },
           "id": 53,
           "options": {
@@ -6710,7 +6672,7 @@
             "h": 14,
             "w": 24,
             "x": 0,
-            "y": 22
+            "y": 262
           },
           "id": 55,
           "options": {
@@ -6836,7 +6798,7 @@
             "h": 12,
             "w": 24,
             "x": 0,
-            "y": 36
+            "y": 276
           },
           "id": 56,
           "interval": "3600",
@@ -6859,7 +6821,7 @@
               }
             ]
           },
-          "pluginVersion": "10.4.18",
+          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -6987,7 +6949,7 @@
             "h": 12,
             "w": 24,
             "x": 0,
-            "y": 48
+            "y": 288
           },
           "id": 57,
           "interval": "3600",
@@ -7010,7 +6972,7 @@
               }
             ]
           },
-          "pluginVersion": "10.4.18",
+          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -7064,21 +7026,7 @@
           ],
           "transparent": true,
           "type": "table"
-        }
-      ],
-      "title": "Errors",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 9
-      },
-      "id": 79,
-      "panels": [
+        },
         {
           "datasource": {
             "type": "prometheus",
@@ -7110,7 +7058,7 @@
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 832
+            "y": 300
           },
           "id": 13,
           "interval": "1h",
@@ -7119,6 +7067,7 @@
             "graphMode": "none",
             "justifyMode": "center",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "sum"
@@ -7130,7 +7079,7 @@
             "textMode": "value_and_name",
             "wideLayout": false
           },
-          "pluginVersion": "10.4.18",
+          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -7317,7 +7266,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 835
+            "y": 303
           },
           "id": 78,
           "interval": "1800",
@@ -7340,7 +7289,7 @@
               }
             ]
           },
-          "pluginVersion": "10.4.18",
+          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -7594,7 +7543,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 844
+            "y": 312
           },
           "id": 80,
           "interval": "1800",
@@ -7617,7 +7566,7 @@
               }
             ]
           },
-          "pluginVersion": "10.4.18",
+          "pluginVersion": "12.0.5",
           "targets": [
             {
               "datasource": {
@@ -7709,2476 +7658,7 @@
           "type": "table"
         }
       ],
-      "title": "Concurrent Apex Errors",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 10
-      },
-      "id": 25,
-      "panels": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "These integration users in production facilitate our deployments and monitoring services. We must monitor the password expiration date to avoid deployments and monitoring from failing.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "align": "auto",
-                "cellOptions": {
-                  "type": "auto"
-                },
-                "inspect": false
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "User ID"
-                },
-                "properties": [
-                  {
-                    "id": "links",
-                    "value": [
-                      {
-                        "targetBlank": true,
-                        "title": "${__data.fields[\"User ID\"]}",
-                        "url": "https://avalara.my.salesforce.com/${__data.fields[\"User ID\"]}"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 24,
-            "x": 0,
-            "y": 302
-          },
-          "id": 143,
-          "options": {
-            "cellHeight": "sm",
-            "footer": {
-              "countRows": false,
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
-            "showHeader": true
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "integration_user_password_expiration",
-              "format": "table",
-              "instant": true,
-              "legendFormat": "__auto",
-              "range": false,
-              "refId": "A"
-            }
-          ],
-          "title": "Core Integration Users Password Expriration",
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "Value": true,
-                  "__name__": true,
-                  "container": true,
-                  "endpoint": true,
-                  "instance": true,
-                  "job": true,
-                  "namespace": true,
-                  "pod": true,
-                  "service": true
-                },
-                "includeByName": {},
-                "indexByName": {},
-                "renameByName": {
-                  "days_until_expiration": "Days Until Expiration",
-                  "last_password_change_date": "Last Password Change Date",
-                  "user_id": "User ID",
-                  "username": "User Name"
-                }
-              }
-            }
-          ],
-          "transparent": true,
-          "type": "table"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "fixedColor": "dark-green",
-                "mode": "fixed"
-              },
-              "fieldMinMax": false,
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 0,
-            "y": 307
-          },
-          "id": 19,
-          "interval": "1h",
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "sum"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "value_and_name",
-            "wideLayout": false
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "disableTextWrap": false,
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "sum(salesforce_login_success_total)",
-              "format": "time_series",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "Login Success",
-              "range": true,
-              "refId": "A",
-              "useBackend": false
-            }
-          ],
-          "title": "",
-          "transparent": true,
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "User location based on their login coordinates",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "fixedColor": "orange",
-                "mode": "fixed",
-                "seriesBy": "last"
-              },
-              "custom": {
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                }
-              },
-              "fieldMinMax": false,
-              "mappings": [],
-              "min": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 18,
-            "w": 20,
-            "x": 4,
-            "y": 307
-          },
-          "id": 15,
-          "interval": "12h",
-          "options": {
-            "basemap": {
-              "config": {},
-              "name": "Layer 0",
-              "opacity": 1,
-              "tooltip": true,
-              "type": "osm-standard"
-            },
-            "controls": {
-              "mouseWheelZoom": true,
-              "showAttribution": true,
-              "showDebug": false,
-              "showMeasure": false,
-              "showScale": false,
-              "showZoom": true
-            },
-            "layers": [
-              {
-                "config": {
-                  "showLegend": false,
-                  "style": {
-                    "color": {
-                      "fixed": "semi-dark-orange"
-                    },
-                    "opacity": 1,
-                    "rotation": {
-                      "fixed": 0,
-                      "max": 360,
-                      "min": -360,
-                      "mode": "mod"
-                    },
-                    "size": {
-                      "fixed": 10,
-                      "max": 15,
-                      "min": 2
-                    },
-                    "symbol": {
-                      "fixed": "img/icons/unicons/user-location.svg",
-                      "mode": "fixed"
-                    },
-                    "symbolAlign": {
-                      "horizontal": "center",
-                      "vertical": "center"
-                    },
-                    "textConfig": {
-                      "fontSize": 12,
-                      "offsetX": 0,
-                      "offsetY": 0,
-                      "textAlign": "center",
-                      "textBaseline": "middle"
-                    }
-                  }
-                },
-                "location": {
-                  "mode": "auto"
-                },
-                "name": "Layer 1",
-                "tooltip": false,
-                "type": "markers"
-              }
-            ],
-            "tooltip": {
-              "mode": "details"
-            },
-            "view": {
-              "allLayers": true,
-              "id": "fit",
-              "lastOnly": false,
-              "lat": 0,
-              "layer": "Layer 1",
-              "lon": 0,
-              "shared": false,
-              "zoom": 15
-            }
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "disableTextWrap": false,
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "user_location",
-              "format": "table",
-              "fullMetaSearch": false,
-              "includeNullMetadata": false,
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A",
-              "useBackend": false
-            }
-          ],
-          "title": "Users Geolocation",
-          "transparent": true,
-          "type": "geomap"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "fixedColor": "red",
-                "mode": "fixed"
-              },
-              "fieldMinMax": false,
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 0,
-            "y": 313
-          },
-          "id": 81,
-          "interval": "1h",
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "sum"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "value_and_name",
-            "wideLayout": false
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "disableTextWrap": false,
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "sum(salesforce_login_failure_total)",
-              "format": "time_series",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "Login Failure",
-              "range": true,
-              "refId": "A",
-              "useBackend": false
-            }
-          ],
-          "title": "",
-          "transparent": true,
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "fixedColor": "orange",
-                "mode": "fixed"
-              },
-              "fieldMinMax": false,
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "orange"
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 0,
-            "y": 319
-          },
-          "id": 82,
-          "interval": "1h",
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "sum"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "value_and_name",
-            "wideLayout": false
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "disableTextWrap": false,
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "sum(unique_login_count_total)",
-              "format": "time_series",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "Unique Logins",
-              "range": true,
-              "refId": "A",
-              "useBackend": false
-            }
-          ],
-          "title": "",
-          "transparent": true,
-          "type": "stat"
-        }
-      ],
-      "title": "User Login",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 11
-      },
-      "id": 23,
-      "panels": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Average deployment times and average pending times for production deployments/validations over the past month.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineStyle": {
-                  "fill": "solid"
-                },
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  }
-                ]
-              },
-              "unit": "m"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 10,
-            "w": 9,
-            "x": 0,
-            "y": 326
-          },
-          "id": 12,
-          "interval": "30",
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "disableTextWrap": false,
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(deployment_pending_time[30m]))",
-              "format": "time_series",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "Avg Deployment Pending Time",
-              "range": true,
-              "refId": "A",
-              "useBackend": false
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "disableTextWrap": false,
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(deployment_time[30m]))",
-              "format": "time_series",
-              "fullMetaSearch": false,
-              "hide": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "Avg Deployment Time",
-              "range": true,
-              "refId": "B",
-              "useBackend": false
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(deployment_time{status=\"Succeeded\"}[30m]))",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Avg Successful Deployment Time",
-              "range": true,
-              "refId": "C"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(deployment_pending_time{status=\"Succeeded\"}[30m]))",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Avg Successful Deployment Pending Time",
-              "range": true,
-              "refId": "D"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_pending_time[30m]))",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Avg Validation Pending Time",
-              "range": true,
-              "refId": "E"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_time[30m]))",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Avg Validation Time",
-              "range": true,
-              "refId": "F"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_time{status=\"Succeeded\"}[30m]))",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Avg Successful Validation Time",
-              "range": true,
-              "refId": "G"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_pending_time{status=\"Succeeded\"}[30m]))",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Avg Successful Validation Pending Time",
-              "range": true,
-              "refId": "H"
-            }
-          ],
-          "title": "Production Average Deployment Time vs Average Pending Time",
-          "transparent": true,
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Success rates for deployments and validations in production over the month.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "area"
-                }
-              },
-              "mappings": [],
-              "max": 100,
-              "min": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "red"
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 50
-                  },
-                  {
-                    "color": "green",
-                    "value": 90
-                  }
-                ]
-              },
-              "unit": "percent"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 10,
-            "w": 10,
-            "x": 9,
-            "y": 326
-          },
-          "id": 89,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "count(deployment_details{status=\"Succeeded\"}) / count(deployment_details{}) * 100",
-              "instant": false,
-              "legendFormat": "Deployment Success Rate %",
-              "range": true,
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "count(validation_details{status=\"Succeeded\"}) / count(validation_details{}) * 100",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Validation Success Rate %",
-              "range": true,
-              "refId": "B"
-            }
-          ],
-          "title": "Production Deployment Success Rate",
-          "transparent": true,
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Average production deployment pending time over the past month.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "orange"
-                  }
-                ]
-              },
-              "unit": "m"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 19,
-            "y": 326
-          },
-          "id": 118,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(deployment_pending_time[30m]))",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Production Average Deployment Pending Time",
-          "transparent": true,
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Average production validation pending time over the past month.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "orange"
-                  }
-                ]
-              },
-              "unit": "m"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 19,
-            "y": 332
-          },
-          "id": 124,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_pending_time[30m]))",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Production Average Validation Pending Time",
-          "transparent": true,
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Success rate of production deployments over the past month.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "red"
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 50
-                  },
-                  {
-                    "color": "green",
-                    "value": 90
-                  }
-                ]
-              },
-              "unit": "percent"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 0,
-            "y": 336
-          },
-          "id": 88,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "count(deployment_details{status=\"Succeeded\"}) / count(deployment_details{}) * 100",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Production Deployment Success Rate",
-          "transparent": true,
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Total production deployments over the past month.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "orange"
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 3,
-            "x": 4,
-            "y": 336
-          },
-          "id": 116,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "count(deployment_details)",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Total Production Deployments",
-          "transparent": true,
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Total successful production deployments over the past month.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "orange"
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 7,
-            "y": 336
-          },
-          "id": 125,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "count(deployment_details{status=\"Succeeded\"})",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Total Successful Production Deployments",
-          "transparent": true,
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Average production deployment time over the past month.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "orange"
-                  }
-                ]
-              },
-              "unit": "m"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 11,
-            "y": 336
-          },
-          "id": 117,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(deployment_time[30m]))",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Production Average Deployment Time",
-          "transparent": true,
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Average successful production deployment time over the past month.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "orange"
-                  }
-                ]
-              },
-              "unit": "m"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 15,
-            "y": 336
-          },
-          "id": 127,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(deployment_time{status=\"Succeeded\"}[30m]))",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Production Average Successful Deployment Time",
-          "transparent": true,
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Success rate of production validations over the past month.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "red"
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 50
-                  },
-                  {
-                    "color": "green",
-                    "value": 90
-                  }
-                ]
-              },
-              "unit": "percent"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 0,
-            "y": 342
-          },
-          "id": 121,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "count(validation_details{status=\"Succeeded\"}) / count(validation_details{}) * 100",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Production Validation Success Rate",
-          "transparent": true,
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Total production validations over the past month.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "orange"
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 3,
-            "x": 4,
-            "y": 342
-          },
-          "id": 122,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "count(validation_details)",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Total Production Validations",
-          "transparent": true,
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Total successful production validations over the past month.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "orange"
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 7,
-            "y": 342
-          },
-          "id": 126,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "count(validation_details{status=\"Succeeded\"})",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Total Successful Production Validations",
-          "transparent": true,
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Average production validation time over the past month.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "orange"
-                  }
-                ]
-              },
-              "unit": "m"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 11,
-            "y": 342
-          },
-          "id": 123,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_time[30m]))",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Production Average Validation Time",
-          "transparent": true,
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Average successful production validation time over the past month.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "orange"
-                  }
-                ]
-              },
-              "unit": "m"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 15,
-            "y": 342
-          },
-          "id": 128,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_time{status=\"Succeeded\"}[30m]))",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Production Average Successful Validation Time",
-          "transparent": true,
-          "type": "stat"
-        }
-      ],
-      "title": "Deployments",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 12
-      },
-      "id": 67,
-      "panels": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Monitors and lists users who query more than 10,000 records in Salesforce",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "continuous-RdYlGr"
-              },
-              "custom": {
-                "align": "auto",
-                "cellOptions": {
-                  "type": "color-text"
-                },
-                "filterable": true,
-                "inspect": false
-              },
-              "mappings": [],
-              "noValue": "No operation on >10k records",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  }
-                ]
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Time"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 207
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Exception Cateogry"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 186
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Exception Type"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 213
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "h": 12,
-            "w": 24,
-            "x": 0,
-            "y": 385
-          },
-          "id": 66,
-          "interval": "1800",
-          "options": {
-            "cellHeight": "md",
-            "footer": {
-              "countRows": true,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "count"
-              ],
-              "show": false
-            },
-            "showHeader": true,
-            "sortBy": [
-              {
-                "desc": true,
-                "displayName": "Time"
-              }
-            ]
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "count by (entity_name, method, query_type, rows_processed, user_id, user_name) (${interval}_user_querying_large_records)",
-              "format": "table",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "List of users querying large (>10k) records (${interval})",
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": false,
-                  "Value": true,
-                  "exception_category": false,
-                  "exception_type": false
-                },
-                "includeByName": {},
-                "indexByName": {
-                  "Time": 0,
-                  "Value": 6,
-                  "entity_name": 3,
-                  "method": 4,
-                  "rows_processed": 5,
-                  "user_id": 2,
-                  "user_name": 1
-                },
-                "renameByName": {
-                  "cpu_time": "CPU Time",
-                  "entity_name": "Entity Name",
-                  "entry_point": "Entry Point",
-                  "exception_category": "Exception Cateogry",
-                  "exception_message": "Exception Message",
-                  "exception_type": "Exception Type",
-                  "method": "Operation",
-                  "rows_processed": "Rows processed",
-                  "run_time": "Run Time",
-                  "stack_trace": "Stack Trace",
-                  "user_id": "User ID",
-                  "user_name": "User Name"
-                }
-              }
-            }
-          ],
-          "transparent": true,
-          "type": "table"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Monitors and lists users exporting Reports",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "align": "auto",
-                "cellOptions": {
-                  "type": "color-text"
-                },
-                "filterable": true,
-                "inspect": false
-              },
-              "mappings": [],
-              "noValue": "No Report was exported in Last hour",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  }
-                ]
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Time"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 207
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Exception Cateogry"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 186
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Exception Type"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 213
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Timestamp"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 228
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "User Name"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 255
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Report Name"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 518
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "h": 12,
-            "w": 24,
-            "x": 0,
-            "y": 397
-          },
-          "id": 86,
-          "interval": "1h",
-          "options": {
-            "cellHeight": "md",
-            "footer": {
-              "countRows": true,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "count"
-              ],
-              "show": true
-            },
-            "showHeader": true,
-            "sortBy": []
-          },
-          "pluginVersion": "12.0.5",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "count by (user_name, timestamp, report_name, report_type_api_name) (hourly_report_export)",
-              "format": "table",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "List of users exporting Reports",
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "Value": true,
-                  "exception_category": false,
-                  "exception_type": false
-                },
-                "includeByName": {},
-                "indexByName": {
-                  "Time": 0,
-                  "Value": 3,
-                  "report_name": 4,
-                  "report_type_api_name": 5,
-                  "timestamp": 1,
-                  "user_name": 2
-                },
-                "renameByName": {
-                  "cpu_time": "CPU Time",
-                  "entity_name": "Entity Name",
-                  "entry_point": "Entry Point",
-                  "exception_category": "Exception Cateogry",
-                  "exception_message": "Exception Message",
-                  "exception_type": "Exception Type",
-                  "method": "Operation",
-                  "report_name": "Report Name",
-                  "report_type_api_name": "Report Type API Name",
-                  "rows_processed": "Rows processed",
-                  "run_time": "Run Time",
-                  "stack_trace": "Stack Trace",
-                  "timestamp": "Timestamp",
-                  "user_id": "User ID",
-                  "user_name": "User Name"
-                }
-              }
-            },
-            {
-              "id": "groupBy",
-              "options": {
-                "fields": {
-                  "Report Name": {
-                    "aggregations": [],
-                    "operation": "groupby"
-                  },
-                  "Report Type API Name": {
-                    "aggregations": [],
-                    "operation": "groupby"
-                  },
-                  "Timestamp": {
-                    "aggregations": [],
-                    "operation": "groupby"
-                  },
-                  "User Name": {
-                    "aggregations": [],
-                    "operation": "groupby"
-                  }
-                }
-              }
-            }
-          ],
-          "transparent": true,
-          "type": "table"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Count of possible suspicious activities from Audit Trail logs",
-          "fieldConfig": {
-            "defaults": {
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "red"
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 4,
-            "x": 0,
-            "y": 409
-          },
-          "id": 90,
-          "interval": "1h",
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "10.4.18",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "sum(suspicious_records)",
-              "format": "table",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Number of suspicious activities",
-          "transformations": [
-            {
-              "disabled": true,
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "Value": true,
-                  "exception_category": false,
-                  "exception_type": false
-                },
-                "includeByName": {},
-                "indexByName": {
-                  "Time": 4,
-                  "Value": 5,
-                  "action": 2,
-                  "created_date": 0,
-                  "delegate_user": 6,
-                  "display": 7,
-                  "section": 3,
-                  "user": 1
-                },
-                "renameByName": {
-                  "Time": "",
-                  "action": "Action",
-                  "cpu_time": "CPU Time",
-                  "created_date": "Created Date",
-                  "delegate_user": "Delegate User",
-                  "display": "Display message",
-                  "entity_name": "Entity Name",
-                  "entry_point": "Entry Point",
-                  "exception_category": "Exception Cateogry",
-                  "exception_message": "Exception Message",
-                  "exception_type": "Exception Type",
-                  "method": "Operation",
-                  "report_name": "Report Name",
-                  "report_type_api_name": "Report Type API Name",
-                  "rows_processed": "Rows processed",
-                  "run_time": "Run Time",
-                  "section": "Section",
-                  "stack_trace": "Stack Trace",
-                  "timestamp": "Timestamp",
-                  "user": "User Name",
-                  "user_id": "User ID",
-                  "user_name": "User Name"
-                }
-              }
-            }
-          ],
-          "transparent": true,
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "Count of possible suspicious activities from Audit Trail logs",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "noValue": "No Audit Trail log captured for selected Interval",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "red"
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 20,
-            "x": 4,
-            "y": 409
-          },
-          "id": 92,
-          "interval": "1h",
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "10.4.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "count(suspicious_records)",
-              "format": "table",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Count of possible suspicious activities from Audit Trail logs",
-          "transparent": true,
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "cip-o11y-aws-prd-us-west-2-theta"
-          },
-          "description": "List of possible suspicious activities from Audit Trail logs",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "align": "auto",
-                "cellOptions": {
-                  "type": "color-text"
-                },
-                "filterable": true,
-                "inspect": false
-              },
-              "mappings": [],
-              "noValue": "No Audit Trail log captured for selected Interval",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  }
-                ]
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Created Date"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 231
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "User Name"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 213
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Action"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 261
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Delegate User"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 211
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Section"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 241
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "h": 12,
-            "w": 24,
-            "x": 0,
-            "y": 417
-          },
-          "id": 91,
-          "interval": "1h",
-          "options": {
-            "cellHeight": "md",
-            "footer": {
-              "countRows": false,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "count"
-              ],
-              "show": false
-            },
-            "showHeader": true,
-            "sortBy": [
-              {
-                "desc": true,
-                "displayName": "Created Date"
-              }
-            ]
-          },
-          "pluginVersion": "10.4.18",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "cip-o11y-aws-prd-us-west-2-theta"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "label_replace(count by (action, section, user, created_date, display, delegate_user) (suspicious_records), \"created_date\", \"$1\", \"created_date\", \"(.+)\\\\.[0-9]+\\\\+[0-9]+\")",
-              "format": "table",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "List of possible suspicious activities from Audit Trail logs",
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "Value": true,
-                  "exception_category": false,
-                  "exception_type": false
-                },
-                "includeByName": {},
-                "indexByName": {
-                  "Time": 4,
-                  "Value": 5,
-                  "action": 2,
-                  "created_date": 0,
-                  "delegate_user": 6,
-                  "display": 7,
-                  "section": 3,
-                  "user": 1
-                },
-                "renameByName": {
-                  "Time": "",
-                  "action": "Action",
-                  "cpu_time": "CPU Time",
-                  "created_date": "Created Date",
-                  "delegate_user": "Delegate User",
-                  "display": "Display message",
-                  "entity_name": "Entity Name",
-                  "entry_point": "Entry Point",
-                  "exception_category": "Exception Cateogry",
-                  "exception_message": "Exception Message",
-                  "exception_type": "Exception Type",
-                  "method": "Operation",
-                  "report_name": "Report Name",
-                  "report_type_api_name": "Report Type API Name",
-                  "rows_processed": "Rows processed",
-                  "run_time": "Run Time",
-                  "section": "Section",
-                  "stack_trace": "Stack Trace",
-                  "timestamp": "Timestamp",
-                  "user": "User Name",
-                  "user_id": "User ID",
-                  "user_name": "User Name"
-                }
-              }
-            },
-            {
-              "id": "groupBy",
-              "options": {
-                "fields": {
-                  "Action": {
-                    "aggregations": [],
-                    "operation": "groupby"
-                  },
-                  "Created Date": {
-                    "aggregations": [],
-                    "operation": "groupby"
-                  },
-                  "Delegate User": {
-                    "aggregations": [],
-                    "operation": "groupby"
-                  },
-                  "Display message": {
-                    "aggregations": [],
-                    "operation": "groupby"
-                  },
-                  "Section": {
-                    "aggregations": [],
-                    "operation": "groupby"
-                  },
-                  "User Name": {
-                    "aggregations": [],
-                    "operation": "groupby"
-                  }
-                }
-              }
-            }
-          ],
-          "transparent": true,
-          "type": "table"
-        }
-      ],
-      "title": "Compliance",
+      "title": "Errors",
       "type": "row"
     }
   ],
@@ -10504,5 +7984,5 @@
   "timezone": "browser",
   "title": "Salesforce Production Monitoring",
   "uid": "edqq6je4aevb4b",
-  "version": 264
+  "version": 0
 }
