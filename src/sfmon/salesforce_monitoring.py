@@ -12,7 +12,6 @@ It implements a comprehensive monitoring strategy with resource-optimized schedu
     - Compliance violations and suspicious audit trail activities
     - EPT/APT performance metrics
     - Report exports
-    - Integration user password expiration
     - Technical debt monitoring:
         * Permission sets (unassigned, limited users)
         * Profiles (under 5 users, no active users)
@@ -59,34 +58,45 @@ from prometheus_client import start_http_server
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from apex_flex_queue import  monitor_apex_flex_queue
-from apex_jobs import (async_apex_job_status, monitor_apex_execution_time,
-                       expose_apex_exception_metrics,
-                       concurrent_apex_errors,
-                       expose_concurrent_long_running_apex_errors,
-                       async_apex_execution_summary)
-from bulk_api import daily_analyse_bulk_api, hourly_analyse_bulk_api
+# Shared modules from root
 from logger import logger
-from compliance import (hourly_observe_user_querying_large_records, expose_suspicious_records)
 from connection_sf import get_salesforce_connection_url
-from deployments import get_deployment_status
-from ept_apt import get_salesforce_ept_and_apt
-from overall_sf_org import (monitor_salesforce_limits,
-                            get_salesforce_licenses,
-                            get_salesforce_instance)
-from user_login import monitor_login_events, geolocation, monitor_integration_user_passwords
-from org_wide_sharing_setting import monitor_org_wide_sharing_settings
-from report_export import hourly_report_export_records
-from code_quality import (apex_classes_api_version, apex_triggers_api_version,
-                          workflow_rules_monitoring)
-from dashboards import dashboards_with_inactive_users
-from permissions import (unassigned_permission_sets, perm_sets_limited_users,
-                         profile_assignment_under5, profile_no_active_users)
-from queues_groups import (total_queues_per_object, queues_with_no_members,
-                           queues_with_zero_open_cases, public_groups_with_no_members)
-from scheduled_jobs import scheduled_apex_jobs_monitoring
-from security import security_health_check, salesforce_health_risks
-from users import dormant_salesforce_users, dormant_portal_users
+
+# Operations monitoring functions (ops package)
+from ops import (
+    monitor_apex_flex_queue,
+    async_apex_job_status, monitor_apex_execution_time,
+    expose_apex_exception_metrics, concurrent_apex_errors,
+    expose_concurrent_long_running_apex_errors, async_apex_execution_summary,
+    daily_analyse_bulk_api, hourly_analyse_bulk_api,
+    monitor_salesforce_limits, get_salesforce_licenses, get_salesforce_instance,
+    get_salesforce_ept_and_apt
+)
+
+# Audit and compliance functions (audit package)
+from audit import (
+    hourly_observe_user_querying_large_records,
+    expose_suspicious_records,
+    monitor_org_wide_sharing_settings,
+    monitor_forbidden_profile_assignments,
+    community_login_error_logger_details,
+    community_registration_error_logger_details,
+    get_deployment_status,
+    monitor_login_events, geolocation,
+    hourly_report_export_records
+)
+
+# Tech debt monitoring functions (tech_debt package)
+from tech_debt import (
+    apex_classes_api_version, apex_triggers_api_version, workflow_rules_monitoring,
+    unassigned_permission_sets, perm_sets_limited_users,
+    profile_assignment_under5, profile_no_active_users,
+    security_health_check, salesforce_health_risks,
+    dormant_salesforce_users, dormant_portal_users,
+    total_queues_per_object, queues_with_no_members,
+    queues_with_zero_open_cases, public_groups_with_no_members,
+    dashboards_with_inactive_users, scheduled_apex_jobs_monitoring
+)
 
 
 def get_schedule_config(job_id, default_schedule):
@@ -145,7 +155,6 @@ def schedule_tasks(sf, scheduler):
         - 07:45 - get_deployment_status
         - 08:00 - geolocation
         - 08:45 - monitor_org_wide_sharing_settings
-        - 09:00 - monitor_integration_user_passwords
     
     Daily Tech Debt Monitoring (09:15-13:15):
         - 09:15 - unassigned_permission_sets
@@ -185,11 +194,13 @@ def schedule_tasks(sf, scheduler):
     expose_concurrent_long_running_apex_errors(sf)
     expose_apex_exception_metrics(sf)
     hourly_observe_user_querying_large_records(sf)
+    monitor_forbidden_profile_assignments(sf)
     monitor_org_wide_sharing_settings(sf)
     expose_suspicious_records(sf)
+    community_login_error_logger_details(sf)
+    community_registration_error_logger_details(sf)
     get_deployment_status(sf)
     geolocation(sf, chunk_size=100)
-    monitor_integration_user_passwords(sf)
     # Tech debt monitoring functions
     unassigned_permission_sets(sf)
     perm_sets_limited_users(sf)
@@ -276,15 +287,6 @@ def schedule_tasks(sf, scheduler):
             name='Monitor Org Wide Sharing Settings'
         )
     
-    schedule = get_schedule_config('monitor_integration_user_passwords', {'hour': '9', 'minute': '0'})
-    if schedule:
-        scheduler.add_job(
-            func=lambda: monitor_integration_user_passwords(sf),
-            trigger=CronTrigger(**schedule),
-            id='monitor_integration_user_passwords',
-            name='Monitor Integration User Passwords'
-        )
-
     # Tech Debt Monitoring Block (09:15-13:15)
     # 17 functions staggered at 15-minute intervals to prevent resource conflicts
     schedule = get_schedule_config('unassigned_permission_sets', {'hour': '9', 'minute': '15'})
@@ -543,14 +545,42 @@ def schedule_tasks(sf, scheduler):
             name='Hourly Report Export Records'
         )
     
-    # Optional: expose_suspicious_records - add to config file to enable
-    schedule = get_schedule_config('expose_suspicious_records', None)
+    # Audit Functions - Hourly
+    schedule = get_schedule_config('monitor_forbidden_profile_assignments', {'minute': '30'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: monitor_forbidden_profile_assignments(sf),
+            trigger=CronTrigger(**schedule),
+            id='monitor_forbidden_profile_assignments',
+            name='Monitor Forbidden Profile Assignments'
+        )
+
+    # Audit Functions - Daily
+    schedule = get_schedule_config('expose_suspicious_records', {'hour': '8', 'minute': '30'})
     if schedule:
         scheduler.add_job(
             func=lambda: expose_suspicious_records(sf),
             trigger=CronTrigger(**schedule),
             id='expose_suspicious_records',
             name='Expose Suspicious Records'
+        )
+
+    schedule = get_schedule_config('community_login_error_logger_details', {'hour': '9', 'minute': '0'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: community_login_error_logger_details(sf),
+            trigger=CronTrigger(**schedule),
+            id='community_login_error_logger_details',
+            name='Community Login Error Logger Details'
+        )
+
+    schedule = get_schedule_config('community_registration_error_logger_details', {'hour': '9', 'minute': '5'})
+    if schedule:
+        scheduler.add_job(
+            func=lambda: community_registration_error_logger_details(sf),
+            trigger=CronTrigger(**schedule),
+            id='community_registration_error_logger_details',
+            name='Community Registration Error Logger Details'
         )
 
     logger.info("All jobs scheduled successfully with APScheduler")

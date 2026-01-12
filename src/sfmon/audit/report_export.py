@@ -44,7 +44,7 @@ Alert Triggers:
 from logger import logger
 from log_parser import parse_logs
 from gauges import hourly_report_export_metric
-from compliance import get_user_name
+from .utils import get_user_name
 from query import query_records_all
 
 def hourly_report_export_records(sf):

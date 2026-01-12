@@ -139,7 +139,7 @@ login_success_gauge = Gauge('salesforce_login_success_total',
 login_failure_gauge = Gauge('salesforce_login_failure_total',
                             'Total number of failed Salesforce logins')
 
-unique_login_attempts_guage = Gauge('unique_login_count_total',
+unique_login_attempts_gauge = Gauge('unique_login_count_total',
                             'Total number of Unique Salesforce logins')
 
 geolocation_gauge = Gauge('user_location',
@@ -190,7 +190,7 @@ apex_exception_category_count_gauge = Gauge('apex_exception_category_count',
 
 hourly_large_query_metric = Gauge('hourly_user_querying_large_records',
                                   'Number of large queries by user',
-                           ['user_id', 'user_name', 'method', 'entity_name', 'rows_processed'])
+                           ['user_id', 'user_name', 'method', 'entity_name'])
 
 
 apex_flex_queue = Gauge('apex_flex_queue',
@@ -227,14 +227,29 @@ apex_runtime_gt_5s_percentage = Gauge('apex_runtime_gt_5s_percentage',
 
 org_wide_sharing__setting_changes = Gauge('org_wide_sharing_changes',
                                           'Track changes in Org-Wide Sharing Settings',
-                                          ['date', 'user', 'action', 'display'])
+                                          ['date', 'user', 'user_group', 'action', 'display'])
 
 hourly_report_export_metric = Gauge('hourly_report_export', 'Report export details',
                            ['user_name', 'timestamp', 'report_name', 'report_type_api_name'])
 
 suspicious_records_gauge = Gauge('suspicious_records','suspicious records from Audit Trail logs',
-                                ['action', 'section', 'user',
+                                ['action', 'section', 'user', 'user_group',
                                  'created_date', 'display', 'delegate_user'])
+
+forbidden_profile_users_gauge = Gauge('forbidden_profile_users',
+                                      'Active users with forbidden profile assignments',
+                                      ['user_id', 'user_name', 'username', 'profile_name'])
+
+community_login_error_metric = Gauge('community_login_errors',
+                                     'Community login errors from SFDC Logger',
+                                     ['id', 'name', 'log_level', 'log_message', 
+                                      'record_id', 'created_date'])
+
+community_registration_error_metric = Gauge('community_registration_errors',
+                                            'Community registration errors from SFDC Logger',
+                                            ['id', 'name', 'source_name', 'log_level', 
+                                             'log_message', 'callout_response', 
+                                             'record_id', 'created_date'])
 
 integration_user_password_expiration_gauge = Gauge('integration_user_password_expiration',
                                                    'Days until password expiration for core integration users',
