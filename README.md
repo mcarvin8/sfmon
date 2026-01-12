@@ -8,7 +8,7 @@
 
 > **SFMon can be deployed on any platform** that supports Docker and Prometheus, including GCP, Azure, or Kubernetes-based environments. It has been tested and verified on AWS ECS and Kubernetes.
 
-A prebuilt **Grafana dashboard** is included to help you visualize metrics right away.
+Prebuilt **Grafana dashboards** are included to help you visualize metrics right away.
 
 ---
 
