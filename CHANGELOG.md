@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.0](https://github.com/mcarvin8/sfmon/compare/v3.0.0...v3.1.0) (2026-01-12)
+
+
+### Features
+
+* restructure codebase into packages and add audit compliance functions ([#7](https://github.com/mcarvin8/sfmon/issues/7)) ([b4b54db](https://github.com/mcarvin8/sfmon/commit/b4b54dbd2da629ac0ab9302cdef869258ac976d6))
+
 ## [3.0.0](https://github.com/mcarvin8/sfmon/compare/v2.0.2...v3.0.0) (2026-01-09)
 
 
