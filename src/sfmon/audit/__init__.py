@@ -7,7 +7,6 @@ in the Salesforce org, including:
 - Forbidden profile detection (monitor_forbidden_profile_assignments)
 - Audit trail analysis (expose_suspicious_records)
 - Org-wide sharing settings (monitor_org_wide_sharing_settings)
-- Community login/registration monitoring
 - Deployment status tracking (get_deployment_status)
 - User login and geolocation monitoring
 - Report export tracking (hourly_report_export_records)
@@ -30,8 +29,6 @@ from .large_queries import hourly_observe_user_querying_large_records
 from .audit_trail import expose_suspicious_records
 from .sharing_settings import monitor_org_wide_sharing_settings
 from .forbidden_profiles import monitor_forbidden_profile_assignments
-from .community import (community_login_error_logger_details,
-                        community_registration_error_logger_details)
 from .deployments import get_deployment_status
 from .user_login import monitor_login_events, geolocation
 from .utils import get_user_name, categorize_user_group
@@ -46,8 +43,6 @@ __all__ = [
     'expose_suspicious_records',
     'monitor_org_wide_sharing_settings',
     'monitor_forbidden_profile_assignments',
-    'community_login_error_logger_details',
-    'community_registration_error_logger_details',
     'get_deployment_status',
     'monitor_login_events',
     'geolocation',

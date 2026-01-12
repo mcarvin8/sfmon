@@ -279,8 +279,6 @@ Copy the jobs you need into your `config.json`. Use lowercase with underscores.
 | `geolocation` | `hour=8,minute=0` | Login geolocation |
 | `expose_suspicious_records` | `hour=8,minute=30` | Suspicious audit trail records |
 | `monitor_org_wide_sharing_settings` | `hour=8,minute=45` | OWD changes |
-| `community_login_error_logger_details` | `hour=9,minute=0` | Community login errors |
-| `community_registration_error_logger_details` | `hour=9,minute=5` | Community registration errors |
 | **Daily - Tech Debt (09:15-13:15)** |||
 | `unassigned_permission_sets` | `hour=9,minute=15` | Unused permission sets |
 | `perm_sets_limited_users` | `hour=9,minute=30` | Low-usage permission sets |

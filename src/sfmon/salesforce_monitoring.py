@@ -79,8 +79,6 @@ from audit import (
     expose_suspicious_records,
     monitor_org_wide_sharing_settings,
     monitor_forbidden_profile_assignments,
-    community_login_error_logger_details,
-    community_registration_error_logger_details,
     get_deployment_status,
     monitor_login_events, geolocation,
     hourly_report_export_records
@@ -197,8 +195,6 @@ def schedule_tasks(sf, scheduler):
     monitor_forbidden_profile_assignments(sf)
     monitor_org_wide_sharing_settings(sf)
     expose_suspicious_records(sf)
-    community_login_error_logger_details(sf)
-    community_registration_error_logger_details(sf)
     get_deployment_status(sf)
     geolocation(sf, chunk_size=100)
     # Tech debt monitoring functions
@@ -563,24 +559,6 @@ def schedule_tasks(sf, scheduler):
             trigger=CronTrigger(**schedule),
             id='expose_suspicious_records',
             name='Expose Suspicious Records'
-        )
-
-    schedule = get_schedule_config('community_login_error_logger_details', {'hour': '9', 'minute': '0'})
-    if schedule:
-        scheduler.add_job(
-            func=lambda: community_login_error_logger_details(sf),
-            trigger=CronTrigger(**schedule),
-            id='community_login_error_logger_details',
-            name='Community Login Error Logger Details'
-        )
-
-    schedule = get_schedule_config('community_registration_error_logger_details', {'hour': '9', 'minute': '5'})
-    if schedule:
-        scheduler.add_job(
-            func=lambda: community_registration_error_logger_details(sf),
-            trigger=CronTrigger(**schedule),
-            id='community_registration_error_logger_details',
-            name='Community Registration Error Logger Details'
         )
 
     logger.info("All jobs scheduled successfully with APScheduler")

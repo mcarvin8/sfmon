@@ -240,22 +240,6 @@ forbidden_profile_users_gauge = Gauge('forbidden_profile_users',
                                       'Active users with forbidden profile assignments',
                                       ['user_id', 'user_name', 'username', 'profile_name'])
 
-community_login_error_metric = Gauge('community_login_errors',
-                                     'Community login errors from SFDC Logger',
-                                     ['id', 'name', 'log_level', 'log_message', 
-                                      'record_id', 'created_date'])
-
-community_registration_error_metric = Gauge('community_registration_errors',
-                                            'Community registration errors from SFDC Logger',
-                                            ['id', 'name', 'source_name', 'log_level', 
-                                             'log_message', 'callout_response', 
-                                             'record_id', 'created_date'])
-
-integration_user_password_expiration_gauge = Gauge('integration_user_password_expiration',
-                                                   'Days until password expiration for core integration users',
-                                                   ['user_id', 'name', 'username', 
-                                                    'last_password_change_date', 
-                                                    'days_until_expiration'])
 
 unused_permissionsets = Gauge('unused_permissionsets',
                                             'unused permissionsets',

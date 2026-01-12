@@ -11,7 +11,6 @@ Hourly Checks (run_hourly_audit):
 Daily Checks (run_daily_audit):
     - Suspicious audit trail activities
     - Org-wide sharing settings changes
-    - Community login/registration errors
     - Deployment and validation status
     - User login events and geolocation
 
@@ -23,8 +22,6 @@ from .large_queries import hourly_observe_user_querying_large_records
 from .audit_trail import expose_suspicious_records
 from .sharing_settings import monitor_org_wide_sharing_settings
 from .forbidden_profiles import monitor_forbidden_profile_assignments
-from .community import (community_login_error_logger_details,
-                        community_registration_error_logger_details)
 from .deployments import get_deployment_status
 from .user_login import monitor_login_events, geolocation
 from logger import logger
@@ -58,8 +55,6 @@ def run_daily_audit(sf):
     
     expose_suspicious_records(sf)
     monitor_org_wide_sharing_settings(sf)
-    community_login_error_logger_details(sf)
-    community_registration_error_logger_details(sf)
     get_deployment_status(sf)
     monitor_login_events(sf)
     geolocation(sf, chunk_size=100)
