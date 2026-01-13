@@ -265,8 +265,9 @@ cat > config.json << EOF
     "monitor_salesforce_limits": "*/5",
     "get_salesforce_instance": "*/5",
     "monitor_apex_flex_queue": "*/5",
-    "hourly_analyse_bulk_api": "minute=0",
-    "get_salesforce_licenses": "minute=10,50",
+    "hourly_analyse_bulk_api": "minute=5",
+    "get_salesforce_licenses": "minute=15",
+    "get_deployment_status": "minute=55",
     "daily_analyse_bulk_api": "hour=7,minute=30"
   },
   "integration_user_names": ["Integration User", "Service Account"],
@@ -312,44 +313,45 @@ Copy the jobs you need into your `config.json`. Use lowercase with underscores.
 | `monitor_salesforce_limits` | `*/5` | Org limits and API usage |
 | `get_salesforce_instance` | `*/5` | Instance health status |
 | `monitor_apex_flex_queue` | `*/5` | Apex flex queue depth |
-| **Hourly** |||
-| `hourly_analyse_bulk_api` | `minute=0` | Bulk API job analysis |
-| `get_salesforce_licenses` | `minute=10,50` | License usage |
-| `hourly_observe_user_querying_large_records` | `minute=20` | Large query compliance |
-| `hourly_report_export_records` | `minute=40` | Report export tracking |
-| `monitor_forbidden_profile_assignments` | `minute=30` | Users with forbidden profiles |
-| **Daily - Performance (06:00-07:30)** |||
+| **Hourly (staggered 5 mins off the hour)** |||
+| `hourly_analyse_bulk_api` | `minute=5` | Bulk API job analysis |
+| `get_salesforce_licenses` | `minute=15` | License usage |
+| `hourly_observe_user_querying_large_records` | `minute=25` | Large query compliance |
+| `monitor_forbidden_profile_assignments` | `minute=35` | Users with forbidden profiles |
+| `hourly_report_export_records` | `minute=45` | Report export tracking |
+| `get_deployment_status` | `minute=55` | Deployment status |
+| **Daily - Performance & Apex (06:00-07:35)** |||
 | `get_salesforce_ept_and_apt` | `hour=6,minute=0` | EPT/APT metrics |
 | `monitor_login_events` | `hour=6,minute=15` | Login event analysis |
 | `async_apex_job_status` | `hour=6,minute=30` | Async job status |
 | `monitor_apex_execution_time` | `hour=6,minute=45` | Apex execution times |
 | `async_apex_execution_summary` | `hour=7,minute=0` | Async execution summary |
 | `concurrent_apex_errors` | `hour=7,minute=15` | Concurrent Apex errors |
-| `expose_apex_exception_metrics` | `hour=7,minute=30` | Apex exceptions |
-| **Daily - Business (07:30-09:00)** |||
+| `expose_apex_exception_metrics` | `hour=7,minute=25` | Apex exceptions |
+| `expose_concurrent_long_running_apex_errors` | `hour=7,minute=35` | Concurrent long-running Apex |
+| **Daily - Business & Compliance (07:30-08:30)** |||
 | `daily_analyse_bulk_api` | `hour=7,minute=30` | Daily bulk API summary |
-| `get_deployment_status` | `hour=7,minute=45` | Deployment status |
 | `geolocation` | `hour=8,minute=0` | Login geolocation |
-| `expose_suspicious_records` | `hour=8,minute=30` | Suspicious audit trail records |
-| `monitor_org_wide_sharing_settings` | `hour=8,minute=45` | OWD changes |
-| **Daily - Tech Debt (09:15-13:15)** |||
-| `unassigned_permission_sets` | `hour=9,minute=15` | Unused permission sets |
-| `perm_sets_limited_users` | `hour=9,minute=30` | Low-usage permission sets |
-| `profile_assignment_under5` | `hour=9,minute=45` | Profiles with <5 users |
-| `profile_no_active_users` | `hour=10,minute=0` | Profiles with no users |
-| `apex_classes_api_version` | `hour=10,minute=15` | Outdated Apex classes |
-| `apex_triggers_api_version` | `hour=10,minute=30` | Outdated Apex triggers |
-| `security_health_check` | `hour=10,minute=45` | Security health score |
-| `salesforce_health_risks` | `hour=11,minute=0` | Security risks |
-| `workflow_rules_monitoring` | `hour=11,minute=15` | Legacy workflow rules |
-| `dormant_salesforce_users` | `hour=11,minute=30` | Dormant SF users |
-| `dormant_portal_users` | `hour=11,minute=45` | Dormant portal users |
-| `total_queues_per_object` | `hour=12,minute=0` | Queue distribution |
-| `queues_with_no_members` | `hour=12,minute=15` | Empty queues |
-| `queues_with_zero_open_cases` | `hour=12,minute=30` | Inactive case queues |
-| `public_groups_with_no_members` | `hour=12,minute=45` | Empty public groups |
-| `dashboards_with_inactive_users` | `hour=13,minute=0` | Dashboards with inactive users |
-| `scheduled_apex_jobs_monitoring` | `hour=13,minute=15` | Scheduled Apex jobs |
+| `expose_suspicious_records` | `hour=8,minute=15` | Suspicious audit trail records |
+| `monitor_org_wide_sharing_settings` | `hour=8,minute=30` | OWD changes |
+| **Daily - Tech Debt (02:00-06:00) OFF-PEAK** |||
+| `unassigned_permission_sets` | `hour=2,minute=0` | Unused permission sets |
+| `perm_sets_limited_users` | `hour=2,minute=15` | Low-usage permission sets |
+| `profile_assignment_under5` | `hour=2,minute=30` | Profiles with <5 users |
+| `profile_no_active_users` | `hour=2,minute=45` | Profiles with no users |
+| `apex_classes_api_version` | `hour=3,minute=0` | Outdated Apex classes |
+| `apex_triggers_api_version` | `hour=3,minute=15` | Outdated Apex triggers |
+| `security_health_check` | `hour=3,minute=30` | Security health score |
+| `salesforce_health_risks` | `hour=3,minute=45` | Security risks |
+| `workflow_rules_monitoring` | `hour=4,minute=0` | Legacy workflow rules |
+| `dormant_salesforce_users` | `hour=4,minute=15` | Dormant SF users |
+| `dormant_portal_users` | `hour=4,minute=30` | Dormant portal users |
+| `total_queues_per_object` | `hour=4,minute=45` | Queue distribution |
+| `queues_with_no_members` | `hour=5,minute=0` | Empty queues |
+| `queues_with_zero_open_cases` | `hour=5,minute=15` | Inactive case queues |
+| `public_groups_with_no_members` | `hour=5,minute=30` | Empty public groups |
+| `dashboards_with_inactive_users` | `hour=5,minute=45` | Dashboards with inactive users |
+| `scheduled_apex_jobs_monitoring` | `hour=5,minute=55` | Scheduled Apex jobs |
 
 **Minimal Example (Critical jobs only):**
 
