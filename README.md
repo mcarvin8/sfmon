@@ -203,11 +203,15 @@ docker push your-repo/sfmon:latest
 
 ### Configuration File
 
-SFMon uses a JSON configuration file to manage all monitoring settings, schedules, and user configurations. This is the primary method for customizing SFMon behavior.
+SFMon uses a JSON configuration file to manage monitoring schedules and user configurations. **The config file is optional** - SFMon works out of the box with sensible defaults.
 
-> **⚠️ IMPORTANT: OPT-IN Configuration**
+> **📋 Scheduling Behavior**
 > 
-> SFMon uses an **opt-in approach** for job scheduling. Only jobs explicitly defined in the `schedules` section of your config file will run. Jobs not listed will be **skipped**. This gives you full control over which monitoring functions are active.
+> - **No config file?** → All jobs run with their **default schedules** (works out of the box!)
+> - **Config file with schedules?** → **OPT-IN mode** - only jobs listed in `schedules` will run
+> - **Config file without schedules?** → All jobs run with default schedules
+> 
+> This means you can start using SFMon immediately without any configuration. Create a config file only when you want to customize which jobs run or change their schedules.
 
 **Configuration File Location:**
 - Default: `/app/sfmon/config.json` (inside container)
@@ -223,8 +227,8 @@ SFMon uses a JSON configuration file to manage all monitoring settings, schedule
     "get_salesforce_instance": "*/5",
     "monitor_apex_flex_queue": "*/5",
     "daily_analyse_bulk_api": "hour=7,minute=30",
-    "hourly_analyse_bulk_api": "minute=0",
-    "get_salesforce_licenses": "minute=10,50"
+    "hourly_analyse_bulk_api": "minute=5",
+    "get_salesforce_licenses": "minute=15"
   },
   "integration_user_names": [
     "Integration User 1",
@@ -241,14 +245,15 @@ SFMon uses a JSON configuration file to manage all monitoring settings, schedule
 
 **Configuration Options:**
 
-- **`schedules`** (object, **required for jobs to run**): Defines which monitoring jobs run and their schedules
+- **`schedules`** (object, optional): Defines which monitoring jobs run and their schedules
   - Key: Job ID in lowercase with underscores (e.g., `monitor_salesforce_limits`)
   - Value: Cron schedule string or `"disabled"` to explicitly disable
-  - **Only jobs listed here will run** - unlisted jobs are skipped
+  - **If `schedules` is provided**: Only jobs listed will run (opt-in mode)
+  - **If `schedules` is empty or not provided**: All jobs run with default schedules
   - See [Customizing Job Schedules](#customizing-job-schedules) for schedule formats and available job IDs
 
-- **`integration_user_names`** (array, optional): List of integration user names to monitor for password expiration
-  - If not provided, password expiration monitoring will be skipped
+- **`integration_user_names`** (array, optional): List of integration user names for compliance filtering
+  - Users in this list will be categorized as "Integration User" in audit metrics
 
 - **`exclude_users`** (array, optional): List of user names to exclude from compliance monitoring
   - These users will not trigger compliance alerts for audit trail changes
@@ -284,18 +289,24 @@ docker run -d \
   mcarvin8/sfmon:latest
 ```
 
-> **Note**: An example configuration file (`config.example.json`) is included in the repository with all available job IDs and their recommended schedules. **Copy this file and customize it** - only jobs you include will run.
+> **Note**: An example configuration file (`config.example.json`) is included in the repository with all available job IDs and their recommended schedules.
 
-**Note:** All scheduling and user configuration is managed through the configuration file. Environment variables are only used for core runtime settings (SALESFORCE_AUTH_URL, METRICS_PORT, QUERY_TIMEOUT_SECONDS, CONFIG_FILE_PATH).
+**Note:** Environment variables are used for core runtime settings and thresholds. The configuration file is optional and only needed when you want to customize which jobs run or their schedules.
 
 ### Customizing Job Schedules
 
-SFMon uses an **opt-in approach** - only jobs explicitly listed in your `config.json` will run. This gives you complete control over resource usage and which monitoring functions are active.
+**Default Behavior (No Config File):**
+If you don't provide a config file, **all monitoring jobs will run with their default schedules**. This is the recommended approach for most users who want comprehensive monitoring out of the box.
+
+**Custom Scheduling (With Config File):**
+When you provide a config file with a `schedules` section, SFMon switches to **opt-in mode** - only jobs explicitly listed will run. This gives you complete control over resource usage and which monitoring functions are active.
 
 **Key Points:**
-- **Only jobs in `schedules` will run** - unlisted jobs are skipped entirely
+- **No config file** → All jobs run with default schedules
+- **Config file with `schedules`** → Only listed jobs run (opt-in mode)
+- **Config file without `schedules`** → All jobs run with default schedules
 - Jobs run once at startup, then follow their configured schedule
-- Use `"disabled"` value to explicitly document a disabled job
+- Use `"disabled"` value to explicitly disable a specific job
 
 **Supported Schedule Formats:**
 - Simple: `"*/5"` - Every 5 minutes
@@ -353,7 +364,21 @@ Copy the jobs you need into your `config.json`. Use lowercase with underscores.
 | `dashboards_with_inactive_users` | `hour=5,minute=45` | Dashboards with inactive users |
 | `scheduled_apex_jobs_monitoring` | `hour=5,minute=55` | Scheduled Apex jobs |
 
-**Minimal Example (Critical jobs only):**
+**No Config Needed (Recommended for most users):**
+
+Simply run SFMon without a config file to get all monitoring jobs with default schedules:
+
+```bash
+docker run -d \
+  --name sfmon \
+  -p 9001:9001 \
+  -e SALESFORCE_AUTH_URL="..." \
+  mcarvin8/sfmon:latest
+```
+
+**Minimal Example (Run only critical jobs):**
+
+To run only specific jobs, create a config file with those jobs:
 
 ```json
 {
@@ -365,11 +390,11 @@ Copy the jobs you need into your `config.json`. Use lowercase with underscores.
 }
 ```
 
-**Full Example (All recommended jobs):**
+**Full Example (All jobs with custom schedules):**
 
-See `config.example.json` in the repository for a complete configuration with all jobs enabled.
+See `config.example.json` in the repository for a complete configuration with all jobs and their recommended schedules.
 
-**Running with Config:**
+**Running with Custom Config:**
 
 ```bash
 docker run -d \

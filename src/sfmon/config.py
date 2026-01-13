@@ -5,15 +5,14 @@ This module handles loading configuration from a JSON file. The configuration fi
 allows users to customize schedules, enable functions, and set user-specific settings
 without modifying code or using multiple environment variables.
 
-IMPORTANT: This module uses an OPT-IN approach for job scheduling.
-    - Only jobs explicitly defined in the config file will run
-    - Jobs not listed in the config file will be SKIPPED
-    - Set a job to "disabled" to explicitly disable it (useful for documentation)
+Scheduling Behavior:
+    - If NO config file exists: ALL jobs run with their DEFAULT schedules (works out of the box)
+    - If config file exists with schedules: OPT-IN approach - only listed jobs run
+    - Set a job to "disabled" to explicitly disable it
 
 Configuration File Location:
     - Default: /app/sfmon/config.json (inside container)
     - Can be overridden via CONFIG_FILE_PATH environment variable
-    - If file doesn't exist or schedules section is empty, NO jobs will run
 
 Configuration Structure:
     {
@@ -37,6 +36,9 @@ DEFAULT_CONFIG_PATH = '/app/sfmon/config.json'
 # Cached config to avoid repeated file reads and log messages
 _cached_config = None
 
+# Track whether a config file was found and has schedules defined
+_config_file_has_schedules = None
+
 
 def load_config(force_reload=False):
     """
@@ -48,7 +50,7 @@ def load_config(force_reload=False):
     Returns:
         dict: Configuration dictionary with schedules, integration_user_names, and exclude_users
     """
-    global _cached_config
+    global _cached_config, _config_file_has_schedules
     
     if _cached_config is not None and not force_reload:
         return _cached_config
@@ -62,8 +64,9 @@ def load_config(force_reload=False):
     }
     
     if not os.path.exists(config_file_path):
-        logger.info("Config file not found at %s, using defaults", config_file_path)
+        logger.info("Config file not found at %s, all jobs will run with default schedules", config_file_path)
         _cached_config = default_config
+        _config_file_has_schedules = False
         return _cached_config
     
     try:
@@ -76,18 +79,43 @@ def load_config(force_reload=False):
         result['integration_user_names'] = config.get('integration_user_names')
         result['exclude_users'] = config.get('exclude_users', [])
         
-        logger.info("Loaded configuration from %s", config_file_path)
+        # Track whether the config file has any schedules defined
+        _config_file_has_schedules = bool(result['schedules'])
+        
+        if _config_file_has_schedules:
+            logger.info("Loaded configuration from %s with %d scheduled jobs (opt-in mode)", 
+                       config_file_path, len(result['schedules']))
+        else:
+            logger.info("Loaded configuration from %s, no schedules defined - all jobs will run with defaults", 
+                       config_file_path)
+        
         _cached_config = result
         return _cached_config
     
     except json.JSONDecodeError as e:
-        logger.error("Error parsing config file %s: %s. Using defaults.", config_file_path, e)
+        logger.error("Error parsing config file %s: %s. All jobs will run with default schedules.", config_file_path, e)
         _cached_config = default_config
+        _config_file_has_schedules = False
         return _cached_config
     except Exception as e:
-        logger.error("Error loading config file %s: %s. Using defaults.", config_file_path, e)
+        logger.error("Error loading config file %s: %s. All jobs will run with default schedules.", config_file_path, e)
         _cached_config = default_config
+        _config_file_has_schedules = False
         return _cached_config
+
+
+def has_custom_schedules():
+    """
+    Check if a config file with schedules was loaded.
+    
+    Returns:
+        bool: True if config file exists and has schedules defined (opt-in mode),
+              False if no config file or empty schedules (use defaults)
+    """
+    global _config_file_has_schedules
+    if _config_file_has_schedules is None:
+        load_config()
+    return _config_file_has_schedules
 
 
 def parse_cron_schedule(schedule_str):
@@ -156,21 +184,29 @@ def parse_cron_schedule(schedule_str):
 
 def get_schedule_from_config(job_id, default_schedule):
     """
-    Get schedule for a job from config file (OPT-IN approach).
+    Get schedule for a job from config file or use default.
     
-    IMPORTANT: Only jobs explicitly defined in the config file will run.
-    Jobs not listed in the config file will be SKIPPED.
+    Behavior:
+        - If NO config file exists (or schedules is empty): Use default_schedule
+        - If config file has schedules defined: OPT-IN - only listed jobs run
+        - If job is set to "disabled" in config: Skip the job
     
     Args:
         job_id: The job identifier
-        default_schedule: Default schedule dict for CronTrigger (used as fallback format hint only)
+        default_schedule: Default schedule dict for CronTrigger
         
     Returns:
-        dict or None: Schedule configuration for CronTrigger, None if not in config or disabled
+        dict or None: Schedule configuration for CronTrigger, None if disabled
     """
     config = load_config()
     schedules = config.get('schedules', {})
     
+    # If no config file or empty schedules, use defaults for all jobs
+    if not has_custom_schedules():
+        logger.debug("Job %s using default schedule (no custom config)", job_id)
+        return default_schedule
+    
+    # Config file has schedules - use opt-in approach
     # Check if job is explicitly defined in config (case-insensitive)
     config_schedule = schedules.get(job_id.lower())
     
@@ -185,7 +221,7 @@ def get_schedule_from_config(job_id, default_schedule):
         logger.info("Job %s is disabled in config file", job_id)
         return None
     
-    logger.info("Job %s enabled with schedule: %s", job_id, config_schedule)
+    logger.info("Job %s enabled with custom schedule: %s", job_id, config_schedule)
     return parsed
 
 
