@@ -6,11 +6,17 @@ This module monitors permission set and profile technical debt including:
 - Permission sets with limited user assignments
 - Profiles with few or no active users
 
+Environment Variables:
+    - PERMSET_LIMITED_USERS_THRESHOLD: Permission sets with <= this many users are flagged (default: 10)
+    - PROFILE_UNDER_USERS_THRESHOLD: Profiles with <= this many users are flagged (default: 5)
+
 Data Sources:
     - PermissionSet, PermissionSetAssignment, PermissionSetGroupComponent objects
     - Profile object
     - User object
 """
+import os
+
 from logger import logger
 from gauges import (
     unused_permissionsets,
@@ -19,6 +25,10 @@ from gauges import (
     unassigned_profiles
 )
 from query import query_records_all
+
+# Thresholds for flagging permission sets and profiles
+PERMSET_LIMITED_USERS_THRESHOLD = int(os.getenv('PERMSET_LIMITED_USERS_THRESHOLD', 10))
+PROFILE_UNDER_USERS_THRESHOLD = int(os.getenv('PROFILE_UNDER_USERS_THRESHOLD', 5))
 
 
 def unassigned_permission_sets(sf):
@@ -58,11 +68,12 @@ def unassigned_permission_sets(sf):
 
 def perm_sets_limited_users(sf):
     """
-    Query permission sets developed by FTE assigned to 10 or less active users
+    Query permission sets developed by FTE assigned to limited active users.
+    The threshold is configurable via PERMSET_LIMITED_USERS_THRESHOLD environment variable.
     """
     try:
-        logger.info("Querying permission sets assigned to 10 or less active users...")
-        query = """
+        logger.info("Querying permission sets assigned to %d or less active users...", PERMSET_LIMITED_USERS_THRESHOLD)
+        query = f"""
         SELECT PermissionSet.Id, PermissionSet.Name, Count(ID)
         FROM PermissionSetAssignment
         where PermissionSetId NOT IN (
@@ -71,7 +82,7 @@ def perm_sets_limited_users(sf):
         )
         AND PermissionSet.NamespacePrefix = NULL  
         GROUP BY PermissionSet.Id, PermissionSet.Name
-        HAVING COUNT(Id) <= 10
+        HAVING COUNT(Id) <= {PERMSET_LIMITED_USERS_THRESHOLD}
         """
         results = query_records_all(sf, query)
         # Clear existing Prometheus gauge labels
@@ -89,16 +100,17 @@ def perm_sets_limited_users(sf):
 
 def profile_assignment_under5(sf):
     """
-    Query all profiles where 5 or less assignees.
+    Query all profiles where limited assignees.
+    The threshold is configurable via PROFILE_UNDER_USERS_THRESHOLD environment variable.
     """
     try:
-        logger.info("Querying all profiles with 5 or less assignees...")
-        query = """
+        logger.info("Querying all profiles with %d or less assignees...", PROFILE_UNDER_USERS_THRESHOLD)
+        query = f"""
         SELECT ProfileId, Profile.Name, COUNT(Id) userCount
         FROM User
         WHERE IsActive = TRUE
         GROUP BY ProfileId, Profile.Name
-        HAVING COUNT(Id) <= 5
+        HAVING COUNT(Id) <= {PROFILE_UNDER_USERS_THRESHOLD}
         """
         results = query_records_all(sf, query)
         # Clear existing Prometheus gauge labels

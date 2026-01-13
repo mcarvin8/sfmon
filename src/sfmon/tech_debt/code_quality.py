@@ -7,6 +7,9 @@ This module monitors code quality technical debt including:
 - Legacy workflow rules
 - PMD static analysis violations
 
+Environment Variables:
+    - DEPRECATED_API_VERSION: API versions at or below this are considered deprecated (default: 50)
+
 Data Sources:
     - ApexClass object (via standard API)
     - ApexTrigger object (via standard API)
@@ -14,8 +17,6 @@ Data Sources:
     - Local file reports (pmd-report.xml, apexruleset.xml)
 """
 import os
-import xml.etree.ElementTree as ET
-from collections import defaultdict
 
 from logger import logger
 from gauges import (
@@ -25,17 +26,21 @@ from gauges import (
 )
 from query import query_records_all, tooling_query_records_all
 
+# API versions at or below this threshold are considered deprecated
+DEPRECATED_API_VERSION = int(os.getenv('DEPRECATED_API_VERSION', 50))
+
 
 def apex_classes_api_version(sf):
     """
     Query all local apex classes running on outdated API versions.
+    The threshold is configurable via DEPRECATED_API_VERSION environment variable.
     """
     try:
-        logger.info("Querying all local apex classes running on outdated API versions...")
-        query = """
+        logger.info("Querying all local apex classes running on outdated API versions (<= %d)...", DEPRECATED_API_VERSION)
+        query = f"""
         SELECT Id,Name,ApiVersion
         FROM ApexClass
-        WHERE NamespacePrefix = null AND ApiVersion <= 50
+        WHERE NamespacePrefix = null AND ApiVersion <= {DEPRECATED_API_VERSION}
         """
         results = query_records_all(sf, query)
         # Clear existing Prometheus gauge labels
@@ -54,13 +59,14 @@ def apex_classes_api_version(sf):
 def apex_triggers_api_version(sf):
     """
     Query all local apex triggers running on outdated API versions.
+    The threshold is configurable via DEPRECATED_API_VERSION environment variable.
     """
     try:
-        logger.info("Querying all local apex triggers running on outdated API versions...")
-        query = """
+        logger.info("Querying all local apex triggers running on outdated API versions (<= %d)...", DEPRECATED_API_VERSION)
+        query = f"""
         SELECT Id,Name,ApiVersion
         FROM ApexTrigger 
-        WHERE NamespacePrefix = null AND ApiVersion <= 50
+        WHERE NamespacePrefix = null AND ApiVersion <= {DEPRECATED_API_VERSION}
         """
         results = query_records_all(sf, query)
         # Clear existing Prometheus gauge labels

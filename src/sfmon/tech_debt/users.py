@@ -2,12 +2,17 @@
 User Management Monitoring Module
 
 This module monitors user-related technical debt including:
-- Dormant Salesforce licensed users (inactive 90+ days)
-- Dormant Portal/Community users (inactive 90+ days)
+- Dormant Salesforce licensed users (inactive N+ days)
+- Dormant Portal/Community users (inactive N+ days)
+
+Environment Variables:
+    - DORMANT_USER_DAYS: Number of days of inactivity to consider a user dormant (default: 90)
 
 Data Sources:
     - User object with Profile.UserLicense
 """
+import os
+
 from logger import logger
 from gauges import (
     dormant_salesforce_users_gauge,
@@ -15,21 +20,25 @@ from gauges import (
 )
 from query import query_records_all
 
+# Number of days of inactivity to consider a user dormant
+DORMANT_USER_DAYS = int(os.getenv('DORMANT_USER_DAYS', 90))
+
 
 def dormant_salesforce_users(sf):
     """
-    Query dormant Salesforce users - active users whose accounts are at least 90 days old 
-    and who either haven't logged in during the last 90 days or have never logged in.
+    Query dormant Salesforce users - active users whose accounts are at least N days old 
+    and who either haven't logged in during the last N days or have never logged in.
+    The threshold is configurable via DORMANT_USER_DAYS environment variable.
     """
     try:
-        logger.info("Querying dormant Salesforce users...")
-        query = """
+        logger.info("Querying dormant Salesforce users (inactive %d+ days)...", DORMANT_USER_DAYS)
+        query = f"""
         SELECT Id, Name, CreatedDate, Username, Email, IsActive, LastLoginDate, Profile.Name
         FROM User
         WHERE IsActive = true
         AND Profile.UserLicense.Name = 'Salesforce'
-        AND (LastLoginDate < LAST_N_DAYS:90 OR LastLoginDate = Null)
-        AND CreatedDate < LAST_N_DAYS:90
+        AND (LastLoginDate < LAST_N_DAYS:{DORMANT_USER_DAYS} OR LastLoginDate = Null)
+        AND CreatedDate < LAST_N_DAYS:{DORMANT_USER_DAYS}
         ORDER BY LastLoginDate ASC
         """
         results = query_records_all(sf, query)
@@ -60,18 +69,19 @@ def dormant_salesforce_users(sf):
 
 def dormant_portal_users(sf):
     """
-    Query dormant Portal users - active users whose accounts are at least 90 days old 
-    and who either haven't logged in during the last 90 days or have never logged in.
+    Query dormant Portal users - active users whose accounts are at least N days old 
+    and who either haven't logged in during the last N days or have never logged in.
+    The threshold is configurable via DORMANT_USER_DAYS environment variable.
     """
     try:
-        logger.info("Querying dormant Portal users...")
-        query = """
+        logger.info("Querying dormant Portal users (inactive %d+ days)...", DORMANT_USER_DAYS)
+        query = f"""
         SELECT Id, Name, CreatedDate, Username, Email, IsActive, LastLoginDate, Profile.Name
         FROM User
         WHERE IsActive = true
         AND Profile.UserLicense.Name != 'Salesforce'
-        AND (LastLoginDate < LAST_N_DAYS:90 OR LastLoginDate = Null)
-        AND CreatedDate < LAST_N_DAYS:90
+        AND (LastLoginDate < LAST_N_DAYS:{DORMANT_USER_DAYS} OR LastLoginDate = Null)
+        AND CreatedDate < LAST_N_DAYS:{DORMANT_USER_DAYS}
         ORDER BY LastLoginDate ASC
         """
         results = query_records_all(sf, query)

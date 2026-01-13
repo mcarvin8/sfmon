@@ -9,6 +9,10 @@ Key Monitoring Areas:
     1. Login Events: Success/failure rates from hourly logs
     2. Geolocation Analysis: User login locations and browser information
 
+Environment Variables:
+    - GEOLOCATION_CHUNK_SIZE: Batch size for user lookups in geolocation queries (default: 100)
+    - GEOLOCATION_LOOKBACK_HOURS: Number of hours to look back for geolocation data (default: 1)
+
 Functions:
     - monitor_login_events: Processes hourly login logs for success/failure metrics
     - reset_login_gauges: Clears gauges before new data collection
@@ -31,6 +35,7 @@ Use Cases:
 import csv
 from datetime import datetime, timedelta, timezone
 from io import StringIO
+import os
 import requests
 import pandas as pd
 
@@ -39,6 +44,10 @@ from constants import REQUESTS_TIMEOUT_SECONDS
 from gauges import (login_failure_gauge, login_success_gauge,
                     geolocation_gauge, unique_login_attempts_gauge)
 from query import query_records_all
+
+# Geolocation configuration
+GEOLOCATION_CHUNK_SIZE = int(os.getenv('GEOLOCATION_CHUNK_SIZE', 100))
+GEOLOCATION_LOOKBACK_HOURS = int(os.getenv('GEOLOCATION_LOOKBACK_HOURS', 1))
 
 
 def monitor_login_events(sf):
@@ -110,14 +119,24 @@ def process_login_log(log_text):
         logger.warning("USER_ID field is not present in the log data")
 
 
-def geolocation(sf, chunk_size=100):
+def geolocation(sf, chunk_size=None):
     """
     Get geolocation data from login events.
+    The chunk size and lookback period are configurable via environment variables.
+    
+    Args:
+        sf: Salesforce connection object.
+        chunk_size: Optional batch size for user lookups (defaults to GEOLOCATION_CHUNK_SIZE env var).
     """
-    logger.info("Getting geolocation data...")
+    # Use provided chunk_size or fall back to environment variable
+    if chunk_size is None:
+        chunk_size = GEOLOCATION_CHUNK_SIZE
+    
+    logger.info("Getting geolocation data (lookback: %d hours, chunk size: %d)...", 
+                GEOLOCATION_LOOKBACK_HOURS, chunk_size)
     try:
         end_time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-        start_time = (datetime.now(timezone.utc) - timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+        start_time = (datetime.now(timezone.utc) - timedelta(hours=GEOLOCATION_LOOKBACK_HOURS)).strftime('%Y-%m-%dT%H:%M:%SZ')
 
         query = f"SELECT UserId, LoginGeo.Latitude, LoginGeo.Longitude, Status, Browser FROM LoginHistory WHERE LoginTime >= {start_time} AND LoginTime <= {end_time}"
         user_location = query_records_all(sf, query)

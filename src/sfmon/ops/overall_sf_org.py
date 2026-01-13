@@ -11,6 +11,10 @@ Key Monitoring Areas:
     3. Incidents: Active Salesforce Trust site incidents affecting the org's pod
     4. Maintenance: Scheduled Salesforce maintenance windows
 
+Environment Variables:
+    - SALESFORCE_STATUS_API_URL: Base URL for Salesforce Trust status API 
+                                  (default: https://api.status.salesforce.com)
+
 Functions:
     - monitor_salesforce_limits: Tracks all org limits with usage percentages
     - get_salesforce_licenses: Monitors all license types and utilization
@@ -23,8 +27,7 @@ Data Sources:
     - Salesforce REST API /limits endpoint
     - Organization object metadata
     - UserLicense, PermissionSetLicense, TenantUsageEntitlement objects
-    - https://api.status.salesforce.com/v1/incidents/active
-    - https://api.status.salesforce.com/v1/maintenances
+    - Salesforce Trust Status API (configurable via SALESFORCE_STATUS_API_URL)
 
 Metrics Exposed:
     - API usage percentage for each limit with descriptions
@@ -38,6 +41,7 @@ Alert Thresholds:
     - Any active incidents on prod pod
     - Scheduled maintenance within 24 hours
 """
+import os
 import requests
 
 from logger import logger
@@ -52,6 +56,10 @@ from gauges import (api_usage_percentage_gauge,
                     maintenance_gauge)
 from .limits import salesforce_limits_descriptions
 from query import query_records_all
+
+# Salesforce Trust Status API base URL
+SALESFORCE_STATUS_API_URL = os.getenv('SALESFORCE_STATUS_API_URL', 'https://api.status.salesforce.com')
+
 
 def monitor_salesforce_limits(sf):
     """
@@ -162,7 +170,7 @@ def get_salesforce_incidents(org, instancepod):
     Get all open incidents against the org.
     """
     try:
-        response = requests.get("https://api.status.salesforce.com/v1/incidents/active",
+        response = requests.get(f"{SALESFORCE_STATUS_API_URL}/v1/incidents/active",
                                 timeout=REQUESTS_TIMEOUT_SECONDS)
         response.raise_for_status()
         incidents = response.json()
@@ -211,7 +219,7 @@ def get_salesforce_maintenances(pod_map):
     Get all scheduled maintenance details for the Production org only.
     """
     try:
-        response = requests.get("https://api.status.salesforce.com/v1/maintenances",
+        response = requests.get(f"{SALESFORCE_STATUS_API_URL}/v1/maintenances",
                                 timeout=REQUESTS_TIMEOUT_SECONDS)
         response.raise_for_status()
         maintenance_data = response.json()

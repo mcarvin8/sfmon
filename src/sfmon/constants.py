@@ -5,9 +5,11 @@ This module defines global constants and configuration used across the
 monitoring service. It includes timeout values, compliance whitelists, and
 allowed configuration change patterns for audit trail monitoring.
 
+Environment Variables:
+    - REQUESTS_TIMEOUT_SECONDS: Timeout for external HTTP requests (default: 300s)
+    - QUERY_TIMEOUT_SECONDS: Timeout for Salesforce SOQL queries (default: 30s)
+
 Constants:
-    - REQUESTS_TIMEOUT_SECONDS: Timeout for external HTTP requests (300s)
-    - QUERY_TIMEOUT_SECONDS: Timeout for Salesforce SOQL queries (configurable via QUERY_TIMEOUT_SECONDS env var, default: 30s)
     - ALLOWED_SECTIONS_ACTIONS: Whitelist of legitimate SetupAuditTrail actions by section
     - EXCLUDE_USERS: List of admin/integration users excluded from compliance monitoring
                      (loaded from config.json or defaults to empty list)
@@ -22,7 +24,8 @@ Compliance Configuration:
     NOTE: EXCLUDE_USERS can be configured via config.json file. See README for details.
 """
 import os
-REQUESTS_TIMEOUT_SECONDS = 300
+
+REQUESTS_TIMEOUT_SECONDS = int(os.getenv('REQUESTS_TIMEOUT_SECONDS', 300))
 QUERY_TIMEOUT_SECONDS = int(os.getenv('QUERY_TIMEOUT_SECONDS', 30))
 ALLOWED_SECTIONS_ACTIONS = {
     "": ["createScratchOrg", "changedsenderemail", "deleteScratchOrg", "loginasgrantedtopartnerbt"],

@@ -14,6 +14,10 @@ Key Monitoring Areas:
     - Top problematic entry points sorted by runtime and frequency
     - Apex execution summary with quiddity-based analysis
 
+Environment Variables:
+    - LONG_RUNNING_APEX_MS: Milliseconds threshold for long-running Apex requests (default: 5000)
+    - VERY_LONG_RUNNING_APEX_MS: Milliseconds threshold for very long-running Apex requests (default: 10000)
+
 Functions:
     - async_apex_job_status: Monitors daily AsyncApexJob records
     - monitor_apex_execution_time: Tracks execution time metrics per entry point
@@ -23,10 +27,12 @@ Functions:
     - async_apex_execution_summary: Provides aggregated execution statistics
 
 Performance Thresholds:
-    - Long-running requests: > 5 seconds runtime
-    - Tracks requests > 10 seconds separately
+    - Long-running requests: Configurable via LONG_RUNNING_APEX_MS (default: 5000ms)
+    - Very long-running requests: Configurable via VERY_LONG_RUNNING_APEX_MS (default: 10000ms)
     - Monitors IS_LONG_RUNNING_REQUEST flag from logs
 """
+import os
+
 from logger import logger
 from gauges import (async_job_status_gauge, run_time_metric, cpu_time_metric,
                     exec_time_metric, db_total_time_metric, callout_time_metric,
@@ -41,6 +47,10 @@ from gauges import (async_job_status_gauge, run_time_metric, cpu_time_metric,
 from log_parser import parse_logs
 import pandas as pd
 from query import query_records_all
+
+# Thresholds for long-running Apex requests (in milliseconds)
+LONG_RUNNING_APEX_MS = int(os.getenv('LONG_RUNNING_APEX_MS', 5000))
+VERY_LONG_RUNNING_APEX_MS = int(os.getenv('VERY_LONG_RUNNING_APEX_MS', 10000))
 
 
 APEX_EXECUTION_EVENT_QUERY = """
@@ -257,7 +267,7 @@ def concurrent_apex_errors(sf):
         df['EXEC_TIME'] = pd.to_numeric(df['EXEC_TIME'], errors='coerce')
         df['DB_TOTAL_TIME'] = pd.to_numeric(df['DB_TOTAL_TIME'], errors='coerce')
 
-        df_filtered = df[(df['IS_LONG_RUNNING_REQUEST'] == 1) & (df['RUN_TIME'] > 5000)]
+        df_filtered = df[(df['IS_LONG_RUNNING_REQUEST'] == 1) & (df['RUN_TIME'] > LONG_RUNNING_APEX_MS)]
 
         if df_filtered.empty:
             logger.info("No long-running requests found in the logs.")
@@ -331,8 +341,8 @@ def async_apex_execution_summary(sf):
             total_cputime=('CPU_TIME', 'sum'),
             avg_cputime=('CPU_TIME', 'mean'),
             max_cputime=('CPU_TIME', 'max'),
-            runtime_gt_5s=('RUN_TIME', lambda x: (x > 5000).sum()),
-            runtime_gt_10s=('RUN_TIME', lambda x: (x > 10000).sum())
+            runtime_gt_5s=('RUN_TIME', lambda x: (x > LONG_RUNNING_APEX_MS).sum()),
+            runtime_gt_10s=('RUN_TIME', lambda x: (x > VERY_LONG_RUNNING_APEX_MS).sum())
         ).reset_index()
 
         grouped['runtime_gt_5s_percentage'] = (grouped['runtime_gt_5s'] / grouped['count']) * 100

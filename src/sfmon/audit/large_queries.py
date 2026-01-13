@@ -1,30 +1,39 @@
 """
 Large Query Monitoring Module
 
-This module monitors users who query more than 10,000 records per hour
+This module monitors users who query more than a configurable threshold of records per hour
 by analyzing API EventLogFile records. It identifies potentially risky
 data extraction activities for compliance monitoring.
+
+Environment Variables:
+    - LARGE_QUERY_THRESHOLD: Number of rows that constitutes a "large query" (default: 10000)
 
 Functions:
     - hourly_observe_user_querying_large_records: Main monitoring function
     - collect_large_queries: Collects queries exceeding threshold
-    - is_large_query: Checks if query exceeds 10k records
+    - is_large_query: Checks if query exceeds threshold
     - report_large_queries: Exposes metrics to Prometheus
 """
+import os
+
 from .utils import get_user_name
 from logger import logger
 from log_parser import parse_logs
 from gauges import hourly_large_query_metric
 
+# Number of rows that constitutes a "large query"
+LARGE_QUERY_THRESHOLD = int(os.getenv('LARGE_QUERY_THRESHOLD', 10000))
+
 
 def hourly_observe_user_querying_large_records(sf):
     """
-    Observe and record users who query more than 10,000 records hourly.
+    Observe and record users who query more than the configured threshold of records hourly.
+    The threshold is configurable via LARGE_QUERY_THRESHOLD environment variable.
 
     Args:
         sf: Salesforce connection object.
     """
-    logger.info("Getting Compliance data - User details querying large records...")
+    logger.info("Getting Compliance data - User details querying large records (>%d rows)...", LARGE_QUERY_THRESHOLD)
 
     try:
         large_queries = collect_large_queries(sf)
@@ -36,7 +45,8 @@ def hourly_observe_user_querying_large_records(sf):
 
 def collect_large_queries(sf):
     """
-    Collect queries processing more than 10k records.
+    Collect queries processing more than the configured threshold of records.
+    The threshold is configurable via LARGE_QUERY_THRESHOLD environment variable.
 
     Args:
         sf: Salesforce connection object.
@@ -75,16 +85,17 @@ def collect_large_queries(sf):
 
 def is_large_query(row):
     """
-    Check if a log record processes more than 10k rows.
+    Check if a log record processes more than the configured threshold of rows.
+    The threshold is configurable via LARGE_QUERY_THRESHOLD environment variable.
 
     Args:
         row (dict): Parsed log row.
 
     Returns:
-        bool: True if rows_processed > 10,000.
+        bool: True if rows_processed exceeds LARGE_QUERY_THRESHOLD.
     """
     rows_processed = row.get('ROWS_PROCESSED', '')
-    return rows_processed.isdigit() and int(rows_processed) > 10000
+    return rows_processed.isdigit() and int(rows_processed) > LARGE_QUERY_THRESHOLD
 
 
 def report_large_queries(large_queries):

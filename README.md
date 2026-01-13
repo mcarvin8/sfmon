@@ -36,7 +36,7 @@ SFMon is configured via environment variables. Here are the available options:
   - Generate this using: `sf org display --url-only` or `sfdx force:org:display --urlonly`
   - Format: `force://PlatformCLI::...`
 
-#### Optional
+#### Optional - Core Settings
 
 - **`METRICS_PORT`**: Port for Prometheus metrics endpoint (default: `9001`)
   - Example: `-e METRICS_PORT=9001`
@@ -48,6 +48,15 @@ SFMon is configured via environment variables. Here are the available options:
 - **`QUERY_TIMEOUT_SECONDS`**: Timeout in seconds for Salesforce SOQL queries (default: `30`)
   - Example: `-e QUERY_TIMEOUT_SECONDS=60` (increase timeout to 60 seconds for large queries)
 
+- **`REQUESTS_TIMEOUT_SECONDS`**: Timeout in seconds for external HTTP requests like EventLogFile downloads and Trust API calls (default: `300`)
+  - Example: `-e REQUESTS_TIMEOUT_SECONDS=600` (increase for slow network conditions)
+
+- **`LOG_LEVEL`**: Logging verbosity level (default: `INFO`)
+  - Options: `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`
+  - Example: `-e LOG_LEVEL=DEBUG` (for troubleshooting)
+
+#### Optional - Compliance Monitoring
+
 - **`INTEGRATION_USER_NAMES`**: Comma-separated list of integration user names for compliance filtering
   - Example: `-e INTEGRATION_USER_NAMES="Integration User,Service Account,API User"`
   - Users in this list will be categorized as "Integration User" in audit metrics
@@ -55,6 +64,44 @@ SFMon is configured via environment variables. Here are the available options:
 - **`FORBIDDEN_PROD_PROFILES`**: Comma-separated list of profile names that should not be assigned in production
   - Example: `-e FORBIDDEN_PROD_PROFILES="Admin-SoD-PreProd-Delivery,System Administrator - Sandbox"`
   - Active users with these profiles will trigger compliance alerts
+
+- **`LARGE_QUERY_THRESHOLD`**: Number of rows that constitutes a "large query" for compliance alerts (default: `10000`)
+  - Example: `-e LARGE_QUERY_THRESHOLD=50000` (alert only for queries > 50k rows)
+
+#### Optional - Tech Debt Thresholds
+
+- **`DORMANT_USER_DAYS`**: Number of days of inactivity to consider a user dormant (default: `90`)
+  - Example: `-e DORMANT_USER_DAYS=60` (flag users inactive for 60+ days)
+
+- **`DEPRECATED_API_VERSION`**: API versions at or below this are considered deprecated (default: `50`)
+  - Example: `-e DEPRECATED_API_VERSION=55` (flag Apex code on API v55 or below)
+
+- **`PERMSET_LIMITED_USERS_THRESHOLD`**: Permission sets with this many or fewer users are flagged (default: `10`)
+  - Example: `-e PERMSET_LIMITED_USERS_THRESHOLD=5` (flag permission sets with ≤5 users)
+
+- **`PROFILE_UNDER_USERS_THRESHOLD`**: Profiles with this many or fewer users are flagged (default: `5`)
+  - Example: `-e PROFILE_UNDER_USERS_THRESHOLD=3` (flag profiles with ≤3 users)
+
+#### Optional - Performance Thresholds
+
+- **`LONG_RUNNING_APEX_MS`**: Milliseconds threshold for long-running Apex requests (default: `5000`)
+  - Example: `-e LONG_RUNNING_APEX_MS=10000` (10 seconds threshold)
+
+- **`VERY_LONG_RUNNING_APEX_MS`**: Milliseconds threshold for very long-running Apex requests (default: `10000`)
+  - Example: `-e VERY_LONG_RUNNING_APEX_MS=30000` (30 seconds threshold)
+
+#### Optional - Geolocation Settings
+
+- **`GEOLOCATION_CHUNK_SIZE`**: Batch size for user lookups in geolocation queries (default: `100`)
+  - Example: `-e GEOLOCATION_CHUNK_SIZE=200` (larger batches for faster processing)
+
+- **`GEOLOCATION_LOOKBACK_HOURS`**: Number of hours to look back for geolocation data (default: `1`)
+  - Example: `-e GEOLOCATION_LOOKBACK_HOURS=24` (look back 24 hours)
+
+#### Optional - External API Settings
+
+- **`SALESFORCE_STATUS_API_URL`**: Base URL for Salesforce Trust status API (default: `https://api.status.salesforce.com`)
+  - Example: `-e SALESFORCE_STATUS_API_URL=https://proxy.example.com/salesforce-status` (use proxy)
 
 ### Complete Example
 
@@ -64,7 +111,13 @@ docker run -d \
   -p 9001:9001 \
   -e SALESFORCE_AUTH_URL="force://PlatformCLI::..." \
   -e METRICS_PORT=9001 \
+  -e LOG_LEVEL=INFO \
+  -e QUERY_TIMEOUT_SECONDS=60 \
   -e INTEGRATION_USER_NAMES="Integration User,Service Account" \
+  -e FORBIDDEN_PROD_PROFILES="Admin-SoD-PreProd-Delivery" \
+  -e DORMANT_USER_DAYS=90 \
+  -e LARGE_QUERY_THRESHOLD=10000 \
+  -e DEPRECATED_API_VERSION=50 \
   mcarvin8/sfmon:latest
 ```
 

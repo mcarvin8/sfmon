@@ -196,7 +196,7 @@ def schedule_tasks(sf, scheduler):
     monitor_org_wide_sharing_settings(sf)
     expose_suspicious_records(sf)
     get_deployment_status(sf)
-    geolocation(sf, chunk_size=100)
+    geolocation(sf)
     # Tech debt monitoring functions
     unassigned_permission_sets(sf)
     perm_sets_limited_users(sf)
@@ -268,7 +268,7 @@ def schedule_tasks(sf, scheduler):
     schedule = get_schedule_config('geolocation', {'hour': '8', 'minute': '0'})
     if schedule:
         scheduler.add_job(
-            func=lambda: geolocation(sf, chunk_size=100),
+            func=lambda: geolocation(sf),
             trigger=CronTrigger(**schedule),
             id='geolocation',
             name='Geolocation Analysis'
