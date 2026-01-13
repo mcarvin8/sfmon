@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.2.0](https://github.com/mcarvin8/sfmon/compare/v3.1.0...v3.2.0) (2026-01-13)
+
+
+### Features
+
+* add environment variables for customizable monitoring thresholds ([1403ddd](https://github.com/mcarvin8/sfmon/commit/1403ddd43c74356a2590c73da6083da503de6dc5))
+* make config file optional - use default schedules when not provided ([b6c47f7](https://github.com/mcarvin8/sfmon/commit/b6c47f78e5fc0b3223cb9d7fdb14ec9fa30d060e))
+
+
+### Bug Fixes
+
+* optimize job schedules and add missing function ([71c8ac3](https://github.com/mcarvin8/sfmon/commit/71c8ac3740761f1e984f2fc11f2acb49b6c04c06))
+
 ## [3.1.0](https://github.com/mcarvin8/sfmon/compare/v3.0.0...v3.1.0) (2026-01-12)
 
 
