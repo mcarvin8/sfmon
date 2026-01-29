@@ -25,6 +25,10 @@ from simple_salesforce import Salesforce
 from logger import logger
 
 
+# Allowed basenames for Salesforce CLI executable (validated to avoid B603 untrusted input)
+_SF_ALLOWED_BASENAMES = ("sf", "sf.cmd")
+
+
 def _get_sf_command():
     """Get the Salesforce CLI command, handling Windows .cmd extension."""
     if sys.platform == "win32":
@@ -38,6 +42,13 @@ def _get_sf_command():
             "Salesforce CLI (sf) not found. Please ensure it is installed and in your PATH."
         )
 
+    # Resolve to absolute path and validate basename to avoid executing arbitrary binaries
+    sf_path = os.path.abspath(sf_path)
+    if os.path.basename(sf_path) not in _SF_ALLOWED_BASENAMES:
+        raise ValueError(
+            "Salesforce CLI path must be 'sf' or 'sf.cmd'; got %s"
+            % os.path.basename(sf_path)
+        )
     return sf_path
 
 
@@ -75,7 +86,8 @@ def get_salesforce_connection_url(url):
             temp_file = f.name
 
         # Use --sfdx-url-file which is more reliable across platforms
-        login_process = subprocess.run(
+        # sf_cmd validated by _get_sf_command(); args are hardcoded or temp path
+        login_process = subprocess.run(  # nosec B603
             [
                 sf_cmd,
                 "org",
@@ -90,8 +102,8 @@ def get_salesforce_connection_url(url):
             stderr=subprocess.PIPE,
         )
 
-        # Get org display info
-        display_cmd = subprocess.run(
+        # Get org display info; sf_cmd validated by _get_sf_command(); args hardcoded
+        display_cmd = subprocess.run(  # nosec B603
             [sf_cmd, "org", "display", "--json"],
             check=True,
             stdout=subprocess.PIPE,
