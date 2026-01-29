@@ -20,6 +20,7 @@ from query import query_records_all
 
 _UNKNOWN_USER = "Unknown User"
 
+
 def _get_integration_users():
     """
     Load integration user names from environment variable.
@@ -50,7 +51,11 @@ def get_user_name(sf, user_id):
     """
     try:
         # Validate Salesforce Id format (15 or 18 alphanumeric) before SOQL (B608)
-        if not user_id or not str(user_id).replace("-", "").isalnum() or len(str(user_id)) not in (15, 18):
+        if (
+            not user_id
+            or not str(user_id).replace("-", "").isalnum()
+            or len(str(user_id)) not in (15, 18)
+        ):
             logger.warning("Invalid user ID format: %s", user_id)
             return _UNKNOWN_USER
         query = f"SELECT Name FROM User WHERE Id = '{user_id}'"  # nosec B608

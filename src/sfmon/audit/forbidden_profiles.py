@@ -65,7 +65,9 @@ def monitor_forbidden_profile_assignments(sf):
 
         # Build query to find active users with forbidden profiles.
         # Escape single quotes for SOQL; values from admin-configured env (B608).
-        profile_list = "', '".join(p.replace("'", "''") for p in FORBIDDEN_PROD_PROFILES)
+        profile_list = "', '".join(
+            p.replace("'", "''") for p in FORBIDDEN_PROD_PROFILES
+        )
         query = f"""
             SELECT Id, Name, Username, Profile.Name 
             FROM User 
