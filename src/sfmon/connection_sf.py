@@ -87,7 +87,7 @@ def get_salesforce_connection_url(url):
 
         # Use --sfdx-url-file which is more reliable across platforms
         # sf_cmd validated by _get_sf_command(); args are hardcoded or temp path
-        login_process = subprocess.run(  # nosec B603
+        subprocess.run(  # nosec B603
             [
                 sf_cmd,
                 "org",

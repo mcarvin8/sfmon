@@ -229,7 +229,6 @@ def get_salesforce_incidents(org, instancepod):
         response.raise_for_status()
         incidents = response.json()
         incident_cnt = 0
-        no_msg = "No message"
 
         for element in incidents:
             try:
