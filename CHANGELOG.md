@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.2.1](https://github.com/mcarvin8/sfmon/compare/v3.2.0...v3.2.1) (2026-01-29)
+
+
+### Bug Fixes
+
+* **connection:** validate exe path ([abac132](https://github.com/mcarvin8/sfmon/commit/abac132b08072cfe55d35e0985a5cc98be1df1a5))
+* **docker:** add healthcheck on prometheus metrics port ([84bb604](https://github.com/mcarvin8/sfmon/commit/84bb604808b3890e963d3a810cd0f47c65cc2d43))
+* **docker:** add no install recommends flag to apt commands ([9571573](https://github.com/mcarvin8/sfmon/commit/957157353a67c39075b234533ed6bebe5c2a5d01))
+* **docker:** add non-root user to container ([28e7c21](https://github.com/mcarvin8/sfmon/commit/28e7c2187f824e0e3edd0e8c44e59c6bc1fbf8fe))
+* **docker:** use specific container tag ([e870590](https://github.com/mcarvin8/sfmon/commit/e8705906bb4b1a5614a0428af84c0aeed909988b))
+* **scheduler:** only run jobs initially when they are enabled ([eda6502](https://github.com/mcarvin8/sfmon/commit/eda6502ce018f89433c1f95e1248d52114bca396))
+
 ## [3.2.0](https://github.com/mcarvin8/sfmon/compare/v3.1.0...v3.2.0) (2026-01-13)
 
 
