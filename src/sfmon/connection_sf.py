@@ -16,7 +16,7 @@ Requirements:
 import json
 import os
 import shutil
-import subprocess
+import subprocess  # nosec B404 - required to invoke Salesforce CLI; usage validated (B603)
 import sys
 import tempfile
 
