@@ -135,6 +135,16 @@ def get_schedule_config(job_id, default_schedule):
     return get_schedule_from_config(job_id, default_schedule)
 
 
+def _add_job_with_schedule(scheduler, sf, job_id, schedule, func, job_name):
+    """Add a job to the scheduler with the given schedule."""
+    scheduler.add_job(
+        func=lambda f=func: f(sf),
+        trigger=CronTrigger(**schedule),
+        id=job_id,
+        name=job_name,
+    )
+
+
 def schedule_tasks(sf, scheduler):
     """
     Schedule all tasks using APScheduler with cron syntax for precise timing.
@@ -195,463 +205,53 @@ def schedule_tasks(sf, scheduler):
         - 05:45 - dashboards_with_inactive_users
         - 05:55 - scheduled_apex_jobs_monitoring
     """
-    # Execute each task once at script startup to populate initial metrics
-    # Critical functions (5-minute interval) are executed first, followed by hourly and daily functions
-    logger.info("Executing tasks at startup...")
-    monitor_salesforce_limits(sf)
-    monitor_apex_flex_queue(sf)
-    get_salesforce_instance(sf)
-    get_salesforce_licenses(sf)
-    daily_analyse_bulk_api(sf)
-
-    hourly_analyse_bulk_api(sf)
-    get_salesforce_ept_and_apt(sf)
-    monitor_login_events(sf)
-    async_apex_job_status(sf)
-    monitor_apex_execution_time(sf)
-    async_apex_execution_summary(sf)
-    concurrent_apex_errors(sf)
-    expose_concurrent_long_running_apex_errors(sf)
-    expose_apex_exception_metrics(sf)
-    hourly_observe_user_querying_large_records(sf)
-    monitor_forbidden_profile_assignments(sf)
-    monitor_org_wide_sharing_settings(sf)
-    expose_suspicious_records(sf)
-    get_deployment_status(sf)
-    geolocation(sf)
-    # Tech debt monitoring functions
-    unassigned_permission_sets(sf)
-    perm_sets_limited_users(sf)
-    profile_assignment_under5(sf)
-    profile_no_active_users(sf)
-    apex_classes_api_version(sf)
-    apex_triggers_api_version(sf)
-    security_health_check(sf)
-    salesforce_health_risks(sf)
-    workflow_rules_monitoring(sf)
-    dormant_salesforce_users(sf)
-    dormant_portal_users(sf)
-    total_queues_per_object(sf)
-    queues_with_no_members(sf)
-    queues_with_zero_open_cases(sf)
-    public_groups_with_no_members(sf)
-    dashboards_with_inactive_users(sf)
-    scheduled_apex_jobs_monitoring(sf)
-    logger.info("Initial execution completed, scheduling tasks with APScheduler...")
-
-    # Critical Functions - Every 5 minutes (*/5)
-    schedule = get_schedule_config("monitor_salesforce_limits", {"minute": "*/5"})
-    if schedule:
-        scheduler.add_job(
-            func=lambda: monitor_salesforce_limits(sf),
-            trigger=CronTrigger(**schedule),
-            id="monitor_salesforce_limits",
-            name="Monitor Salesforce Limits",
-        )
-
-    schedule = get_schedule_config("get_salesforce_instance", {"minute": "*/5"})
-    if schedule:
-        scheduler.add_job(
-            func=lambda: get_salesforce_instance(sf),
-            trigger=CronTrigger(**schedule),
-            id="get_salesforce_instance",
-            name="Get Salesforce Instance",
-        )
-
-    schedule = get_schedule_config("monitor_apex_flex_queue", {"minute": "*/5"})
-    if schedule:
-        scheduler.add_job(
-            func=lambda: monitor_apex_flex_queue(sf),
-            trigger=CronTrigger(**schedule),
-            id="monitor_apex_flex_queue",
-            name="Monitor Apex Flex Queue",
-        )
-
-    # Daily Business Functions (07:30-08:30)
-    # Staggered to prevent resource spikes from simultaneous execution
-    schedule = get_schedule_config(
-        "daily_analyse_bulk_api", {"hour": "7", "minute": "30"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: daily_analyse_bulk_api(sf),
-            trigger=CronTrigger(**schedule),
-            id="daily_analyse_bulk_api",
-            name="Daily Analyse Bulk API",
-        )
-
-    schedule = get_schedule_config("geolocation", {"hour": "8", "minute": "0"})
-    if schedule:
-        scheduler.add_job(
-            func=lambda: geolocation(sf),
-            trigger=CronTrigger(**schedule),
-            id="geolocation",
-            name="Geolocation Analysis",
-        )
-
-    schedule = get_schedule_config(
-        "expose_suspicious_records", {"hour": "8", "minute": "15"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: expose_suspicious_records(sf),
-            trigger=CronTrigger(**schedule),
-            id="expose_suspicious_records",
-            name="Expose Suspicious Records",
-        )
-
-    schedule = get_schedule_config(
-        "monitor_org_wide_sharing_settings", {"hour": "8", "minute": "30"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: monitor_org_wide_sharing_settings(sf),
-            trigger=CronTrigger(**schedule),
-            id="monitor_org_wide_sharing_settings",
-            name="Monitor Org Wide Sharing Settings",
-        )
-
-    # Tech Debt Monitoring Block (02:00-06:00) - OFF-PEAK HOURS
-    # 17 functions staggered at 15-minute intervals to prevent resource conflicts
-    # Scheduled during early morning hours to minimize business impact
-    schedule = get_schedule_config(
-        "unassigned_permission_sets", {"hour": "2", "minute": "0"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: unassigned_permission_sets(sf),
-            trigger=CronTrigger(**schedule),
-            id="unassigned_permission_sets",
-            name="Unassigned Permission Sets",
-        )
-
-    schedule = get_schedule_config(
-        "perm_sets_limited_users", {"hour": "2", "minute": "15"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: perm_sets_limited_users(sf),
-            trigger=CronTrigger(**schedule),
-            id="perm_sets_limited_users",
-            name="Permission Sets Limited Users",
-        )
-
-    schedule = get_schedule_config(
-        "profile_assignment_under5", {"hour": "2", "minute": "30"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: profile_assignment_under5(sf),
-            trigger=CronTrigger(**schedule),
-            id="profile_assignment_under5",
-            name="Profile Assignment Under 5",
-        )
-
-    schedule = get_schedule_config(
-        "profile_no_active_users", {"hour": "2", "minute": "45"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: profile_no_active_users(sf),
-            trigger=CronTrigger(**schedule),
-            id="profile_no_active_users",
-            name="Profile No Active Users",
-        )
-
-    schedule = get_schedule_config(
-        "apex_classes_api_version", {"hour": "3", "minute": "0"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: apex_classes_api_version(sf),
-            trigger=CronTrigger(**schedule),
-            id="apex_classes_api_version",
-            name="Apex Classes API Version",
-        )
-
-    schedule = get_schedule_config(
-        "apex_triggers_api_version", {"hour": "3", "minute": "15"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: apex_triggers_api_version(sf),
-            trigger=CronTrigger(**schedule),
-            id="apex_triggers_api_version",
-            name="Apex Triggers API Version",
-        )
-
-    schedule = get_schedule_config(
-        "security_health_check", {"hour": "3", "minute": "30"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: security_health_check(sf),
-            trigger=CronTrigger(**schedule),
-            id="security_health_check",
-            name="Security Health Check",
-        )
-
-    schedule = get_schedule_config(
-        "salesforce_health_risks", {"hour": "3", "minute": "45"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: salesforce_health_risks(sf),
-            trigger=CronTrigger(**schedule),
-            id="salesforce_health_risks",
-            name="Salesforce Health Risks",
-        )
-
-    schedule = get_schedule_config(
-        "workflow_rules_monitoring", {"hour": "4", "minute": "0"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: workflow_rules_monitoring(sf),
-            trigger=CronTrigger(**schedule),
-            id="workflow_rules_monitoring",
-            name="Workflow Rules Monitoring",
-        )
-
-    schedule = get_schedule_config(
-        "dormant_salesforce_users", {"hour": "4", "minute": "15"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: dormant_salesforce_users(sf),
-            trigger=CronTrigger(**schedule),
-            id="dormant_salesforce_users",
-            name="Dormant Salesforce Users",
-        )
-
-    schedule = get_schedule_config(
-        "dormant_portal_users", {"hour": "4", "minute": "30"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: dormant_portal_users(sf),
-            trigger=CronTrigger(**schedule),
-            id="dormant_portal_users",
-            name="Dormant Portal Users",
-        )
-
-    schedule = get_schedule_config(
-        "total_queues_per_object", {"hour": "4", "minute": "45"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: total_queues_per_object(sf),
-            trigger=CronTrigger(**schedule),
-            id="total_queues_per_object",
-            name="Total Queues Per Object",
-        )
-
-    schedule = get_schedule_config(
-        "queues_with_no_members", {"hour": "5", "minute": "0"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: queues_with_no_members(sf),
-            trigger=CronTrigger(**schedule),
-            id="queues_with_no_members",
-            name="Queues With No Members",
-        )
-
-    schedule = get_schedule_config(
-        "queues_with_zero_open_cases", {"hour": "5", "minute": "15"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: queues_with_zero_open_cases(sf),
-            trigger=CronTrigger(**schedule),
-            id="queues_with_zero_open_cases",
-            name="Queues With Zero Open Cases",
-        )
-
-    schedule = get_schedule_config(
-        "public_groups_with_no_members", {"hour": "5", "minute": "30"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: public_groups_with_no_members(sf),
-            trigger=CronTrigger(**schedule),
-            id="public_groups_with_no_members",
-            name="Public Groups With No Members",
-        )
-
-    schedule = get_schedule_config(
-        "dashboards_with_inactive_users", {"hour": "5", "minute": "45"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: dashboards_with_inactive_users(sf),
-            trigger=CronTrigger(**schedule),
-            id="dashboards_with_inactive_users",
-            name="Dashboards With Inactive Users",
-        )
-
-    schedule = get_schedule_config(
-        "scheduled_apex_jobs_monitoring", {"hour": "5", "minute": "55"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: scheduled_apex_jobs_monitoring(sf),
-            trigger=CronTrigger(**schedule),
-            id="scheduled_apex_jobs_monitoring",
-            name="Scheduled Apex Jobs Monitoring",
-        )
-
-    # Performance & Apex Monitoring (06:00-07:35)
-    # 8 functions staggered at ~15-minute intervals for comprehensive daily monitoring
-    schedule = get_schedule_config(
-        "get_salesforce_ept_and_apt", {"hour": "6", "minute": "0"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: get_salesforce_ept_and_apt(sf),
-            trigger=CronTrigger(**schedule),
-            id="get_salesforce_ept_and_apt",
-            name="Get Salesforce EPT and APT",
-        )
-
-    schedule = get_schedule_config(
-        "monitor_login_events", {"hour": "6", "minute": "15"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: monitor_login_events(sf),
-            trigger=CronTrigger(**schedule),
-            id="monitor_login_events",
-            name="Monitor Login Events",
-        )
-
-    schedule = get_schedule_config(
-        "async_apex_job_status", {"hour": "6", "minute": "30"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: async_apex_job_status(sf),
-            trigger=CronTrigger(**schedule),
-            id="async_apex_job_status",
-            name="Async Apex Job Status",
-        )
-
-    schedule = get_schedule_config(
-        "monitor_apex_execution_time", {"hour": "6", "minute": "45"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: monitor_apex_execution_time(sf),
-            trigger=CronTrigger(**schedule),
-            id="monitor_apex_execution_time",
-            name="Monitor Apex Execution Time",
-        )
-
-    schedule = get_schedule_config(
-        "async_apex_execution_summary", {"hour": "7", "minute": "0"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: async_apex_execution_summary(sf),
-            trigger=CronTrigger(**schedule),
-            id="async_apex_execution_summary",
-            name="Async Apex Execution Summary",
-        )
-
-    schedule = get_schedule_config(
-        "concurrent_apex_errors", {"hour": "7", "minute": "15"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: concurrent_apex_errors(sf),
-            trigger=CronTrigger(**schedule),
-            id="concurrent_apex_errors",
-            name="Concurrent Apex Errors",
-        )
-
-    schedule = get_schedule_config(
-        "expose_apex_exception_metrics", {"hour": "7", "minute": "25"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: expose_apex_exception_metrics(sf),
-            trigger=CronTrigger(**schedule),
-            id="expose_apex_exception_metrics",
-            name="Expose Apex Exception Metrics",
-        )
-
-    schedule = get_schedule_config(
-        "expose_concurrent_long_running_apex_errors", {"hour": "7", "minute": "35"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: expose_concurrent_long_running_apex_errors(sf),
-            trigger=CronTrigger(**schedule),
-            id="expose_concurrent_long_running_apex_errors",
-            name="Expose Concurrent Long Running Apex Errors",
-        )
-
-    # Hourly Monitoring Functions
-    # Staggered 5 minutes off the hour to avoid system congestion at :00
-    schedule = get_schedule_config("hourly_analyse_bulk_api", {"minute": "5"})
-    if schedule:
-        scheduler.add_job(
-            func=lambda: hourly_analyse_bulk_api(sf),
-            trigger=CronTrigger(**schedule),
-            id="hourly_analyse_bulk_api",
-            name="Hourly Analyse Bulk API",
-        )
-
-    schedule = get_schedule_config("get_salesforce_licenses", {"minute": "15"})
-    if schedule:
-        scheduler.add_job(
-            func=lambda: get_salesforce_licenses(sf),
-            trigger=CronTrigger(**schedule),
-            id="get_salesforce_licenses",
-            name="Get Salesforce Licenses",
-        )
-
-    schedule = get_schedule_config(
-        "hourly_observe_user_querying_large_records", {"minute": "25"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: hourly_observe_user_querying_large_records(sf),
-            trigger=CronTrigger(**schedule),
-            id="hourly_observe_user_querying_large_records",
-            name="Hourly Observe User Querying Large Records",
-        )
-
-    schedule = get_schedule_config(
-        "monitor_forbidden_profile_assignments", {"minute": "35"}
-    )
-    if schedule:
-        scheduler.add_job(
-            func=lambda: monitor_forbidden_profile_assignments(sf),
-            trigger=CronTrigger(**schedule),
-            id="monitor_forbidden_profile_assignments",
-            name="Monitor Forbidden Profile Assignments",
-        )
-
-    schedule = get_schedule_config("hourly_report_export_records", {"minute": "45"})
-    if schedule:
-        scheduler.add_job(
-            func=lambda: hourly_report_export_records(sf),
-            trigger=CronTrigger(**schedule),
-            id="hourly_report_export_records",
-            name="Hourly Report Export Records",
-        )
-
-    schedule = get_schedule_config("get_deployment_status", {"minute": "55"})
-    if schedule:
-        scheduler.add_job(
-            func=lambda: get_deployment_status(sf),
-            trigger=CronTrigger(**schedule),
-            id="get_deployment_status",
-            name="Get Deployment Status",
-        )
-
-    logger.info("All jobs scheduled successfully with APScheduler")
+    scheduled_jobs = [
+        ("monitor_salesforce_limits", {"minute": "*/5"}, monitor_salesforce_limits, "Monitor Salesforce Limits"),
+        ("get_salesforce_instance", {"minute": "*/5"}, get_salesforce_instance, "Get Salesforce Instance"),
+        ("monitor_apex_flex_queue", {"minute": "*/5"}, monitor_apex_flex_queue, "Monitor Apex Flex Queue"),
+        ("daily_analyse_bulk_api", {"hour": "7", "minute": "30"}, daily_analyse_bulk_api, "Daily Analyse Bulk API"),
+        ("geolocation", {"hour": "8", "minute": "0"}, geolocation, "Geolocation Analysis"),
+        ("expose_suspicious_records", {"hour": "8", "minute": "15"}, expose_suspicious_records, "Expose Suspicious Records"),
+        ("monitor_org_wide_sharing_settings", {"hour": "8", "minute": "30"}, monitor_org_wide_sharing_settings, "Monitor Org Wide Sharing Settings"),
+        ("unassigned_permission_sets", {"hour": "2", "minute": "0"}, unassigned_permission_sets, "Unassigned Permission Sets"),
+        ("perm_sets_limited_users", {"hour": "2", "minute": "15"}, perm_sets_limited_users, "Permission Sets Limited Users"),
+        ("profile_assignment_under5", {"hour": "2", "minute": "30"}, profile_assignment_under5, "Profile Assignment Under 5"),
+        ("profile_no_active_users", {"hour": "2", "minute": "45"}, profile_no_active_users, "Profile No Active Users"),
+        ("apex_classes_api_version", {"hour": "3", "minute": "0"}, apex_classes_api_version, "Apex Classes API Version"),
+        ("apex_triggers_api_version", {"hour": "3", "minute": "15"}, apex_triggers_api_version, "Apex Triggers API Version"),
+        ("security_health_check", {"hour": "3", "minute": "30"}, security_health_check, "Security Health Check"),
+        ("salesforce_health_risks", {"hour": "3", "minute": "45"}, salesforce_health_risks, "Salesforce Health Risks"),
+        ("workflow_rules_monitoring", {"hour": "4", "minute": "0"}, workflow_rules_monitoring, "Workflow Rules Monitoring"),
+        ("dormant_salesforce_users", {"hour": "4", "minute": "15"}, dormant_salesforce_users, "Dormant Salesforce Users"),
+        ("dormant_portal_users", {"hour": "4", "minute": "30"}, dormant_portal_users, "Dormant Portal Users"),
+        ("total_queues_per_object", {"hour": "4", "minute": "45"}, total_queues_per_object, "Total Queues Per Object"),
+        ("queues_with_no_members", {"hour": "5", "minute": "0"}, queues_with_no_members, "Queues With No Members"),
+        ("queues_with_zero_open_cases", {"hour": "5", "minute": "15"}, queues_with_zero_open_cases, "Queues With Zero Open Cases"),
+        ("public_groups_with_no_members", {"hour": "5", "minute": "30"}, public_groups_with_no_members, "Public Groups With No Members"),
+        ("dashboards_with_inactive_users", {"hour": "5", "minute": "45"}, dashboards_with_inactive_users, "Dashboards With Inactive Users"),
+        ("scheduled_apex_jobs_monitoring", {"hour": "5", "minute": "55"}, scheduled_apex_jobs_monitoring, "Scheduled Apex Jobs Monitoring"),
+        ("get_salesforce_ept_and_apt", {"hour": "6", "minute": "0"}, get_salesforce_ept_and_apt, "Get Salesforce EPT and APT"),
+        ("monitor_login_events", {"hour": "6", "minute": "15"}, monitor_login_events, "Monitor Login Events"),
+        ("async_apex_job_status", {"hour": "6", "minute": "30"}, async_apex_job_status, "Async Apex Job Status"),
+        ("monitor_apex_execution_time", {"hour": "6", "minute": "45"}, monitor_apex_execution_time, "Monitor Apex Execution Time"),
+        ("async_apex_execution_summary", {"hour": "7", "minute": "0"}, async_apex_execution_summary, "Async Apex Execution Summary"),
+        ("concurrent_apex_errors", {"hour": "7", "minute": "15"}, concurrent_apex_errors, "Concurrent Apex Errors"),
+        ("expose_apex_exception_metrics", {"hour": "7", "minute": "25"}, expose_apex_exception_metrics, "Expose Apex Exception Metrics"),
+        ("expose_concurrent_long_running_apex_errors", {"hour": "7", "minute": "35"}, expose_concurrent_long_running_apex_errors, "Expose Concurrent Long Running Apex Errors"),
+        ("hourly_analyse_bulk_api", {"minute": "5"}, hourly_analyse_bulk_api, "Hourly Analyse Bulk API"),
+        ("get_salesforce_licenses", {"minute": "15"}, get_salesforce_licenses, "Get Salesforce Licenses"),
+        ("hourly_observe_user_querying_large_records", {"minute": "25"}, hourly_observe_user_querying_large_records, "Hourly Observe User Querying Large Records"),
+        ("monitor_forbidden_profile_assignments", {"minute": "35"}, monitor_forbidden_profile_assignments, "Monitor Forbidden Profile Assignments"),
+        ("hourly_report_export_records", {"minute": "45"}, hourly_report_export_records, "Hourly Report Export Records"),
+        ("get_deployment_status", {"minute": "55"}, get_deployment_status, "Get Deployment Status"),
+    ]
+    logger.info("Executing enabled tasks at startup (respecting config)...")
+    for job_id, default_schedule, func, job_name in scheduled_jobs:
+        schedule = get_schedule_config(job_id, default_schedule)
+        if schedule:
+            func(sf)  # initial run only for jobs enabled by config
+            _add_job_with_schedule(scheduler, sf, job_id, schedule, func, job_name)
+    logger.info("Initial execution completed, all jobs scheduled with APScheduler")
 
 
 def main():

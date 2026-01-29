@@ -135,6 +135,48 @@ def has_custom_schedules():
     return _config_file_has_schedules
 
 
+def _parse_json_cron(schedule_str):
+    """Parse JSON cron format: '{"minute": "*/5"}'."""
+    if not schedule_str.strip().startswith("{"):
+        return None
+    try:
+        return json.loads(schedule_str)
+    except json.JSONDecodeError:
+        return None
+
+
+def _parse_five_part_cron(schedule_str):
+    """Parse standard 5-part cron: '*/5 * * * *'."""
+    parts = schedule_str.split()
+    if len(parts) != 5:
+        return None
+    result = {}
+    keys = ("minute", "hour", "day", "month", "day_of_week")
+    for key, value in zip(keys, parts):
+        if value != "*":
+            result[key] = value
+    return result if result else None
+
+
+def _parse_key_value_cron(schedule_str):
+    """Parse key=value format: 'minute=*/5' or 'hour=7,minute=30'."""
+    if "=" not in schedule_str:
+        return None
+    params = {}
+    for part in schedule_str.split(","):
+        if "=" in part:
+            key, value = part.split("=", 1)
+            params[key.strip()] = value.strip()
+    return params if params else None
+
+
+def _parse_simple_minute_cron(schedule_str):
+    """Parse simple minute format: '*/5' or '10,50'."""
+    if re.match(r"^[\d\*\/,]+$", schedule_str):
+        return {"minute": schedule_str}
+    return None
+
+
 def parse_cron_schedule(schedule_str):
     """
     Parse a cron schedule string into CronTrigger parameters.
@@ -151,50 +193,18 @@ def parse_cron_schedule(schedule_str):
     Returns:
         dict or None: Keyword arguments for CronTrigger, None if disabled
     """
-    if not schedule_str or schedule_str.lower() in ("disabled", "none", ""):
+    if not schedule_str or schedule_str.lower().strip() in ("disabled", "none", ""):
         return None
+    s = schedule_str.strip()
 
-    schedule_str = schedule_str.strip()
-
-    # Try JSON format first
-    if schedule_str.startswith("{"):
-        try:
-            return json.loads(schedule_str)
-        except json.JSONDecodeError:
-            pass
-
-    # Try standard cron format: "*/5 * * * *"
-    cron_parts = schedule_str.split()
-    if len(cron_parts) == 5:
-        result = {}
-        if cron_parts[0] != "*":
-            result["minute"] = cron_parts[0]
-        if cron_parts[1] != "*":
-            result["hour"] = cron_parts[1]
-        if cron_parts[2] != "*":
-            result["day"] = cron_parts[2]
-        if cron_parts[3] != "*":
-            result["month"] = cron_parts[3]
-        if cron_parts[4] != "*":
-            result["day_of_week"] = cron_parts[4]
-        return result if result else None
-
-    # Try parameter format: "minute=*/5" or "hour=7,minute=30"
-    if "=" in schedule_str:
-        params = {}
-        for part in schedule_str.split(","):
-            if "=" in part:
-                key, value = part.split("=", 1)
-                params[key.strip()] = value.strip()
-        if params:
-            return params
-
-    # Simple format: assume it's just minutes if it's a single value
-    # e.g., "*/5" or "0" or "10,50"
-    if re.match(r"^[\d\*\/,]+$", schedule_str):
-        return {"minute": schedule_str}
-
-    # If we can't parse it, return None to use default
+    parsed = (
+        _parse_json_cron(s)
+        or _parse_five_part_cron(s)
+        or _parse_key_value_cron(s)
+        or _parse_simple_minute_cron(s)
+    )
+    if parsed is not None:
+        return parsed
     logger.warning("Could not parse schedule string: %s, using default", schedule_str)
     return None
 
