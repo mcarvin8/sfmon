@@ -15,6 +15,7 @@ Data Sources:
     - Profile object
     - User object
 """
+
 import os
 
 from logger import logger
@@ -22,13 +23,13 @@ from gauges import (
     unused_permissionsets,
     limited_permissionsets,
     five_or_less_profile_assignees,
-    unassigned_profiles
+    unassigned_profiles,
 )
 from query import query_records_all
 
 # Thresholds for flagging permission sets and profiles
-PERMSET_LIMITED_USERS_THRESHOLD = int(os.getenv('PERMSET_LIMITED_USERS_THRESHOLD', 10))
-PROFILE_UNDER_USERS_THRESHOLD = int(os.getenv('PROFILE_UNDER_USERS_THRESHOLD', 5))
+PERMSET_LIMITED_USERS_THRESHOLD = int(os.getenv("PERMSET_LIMITED_USERS_THRESHOLD", 10))
+PROFILE_UNDER_USERS_THRESHOLD = int(os.getenv("PROFILE_UNDER_USERS_THRESHOLD", 5))
 
 
 def unassigned_permission_sets(sf):
@@ -57,10 +58,7 @@ def unassigned_permission_sets(sf):
         unused_permissionsets.clear()
 
         for record in results:
-            unused_permissionsets.labels(
-                name=record['Name'],
-                id=record['Id']
-            ).set(0)
+            unused_permissionsets.labels(name=record["Name"], id=record["Id"]).set(0)
     # pylint: disable=broad-except
     except Exception as e:
         logger.error("Error fetching unassigned permission sets: %s", e)
@@ -72,7 +70,10 @@ def perm_sets_limited_users(sf):
     The threshold is configurable via PERMSET_LIMITED_USERS_THRESHOLD environment variable.
     """
     try:
-        logger.info("Querying permission sets assigned to %d or less active users...", PERMSET_LIMITED_USERS_THRESHOLD)
+        logger.info(
+            "Querying permission sets assigned to %d or less active users...",
+            PERMSET_LIMITED_USERS_THRESHOLD,
+        )
         query = f"""
         SELECT PermissionSet.Id, PermissionSet.Name, Count(ID)
         FROM PermissionSetAssignment
@@ -89,13 +90,14 @@ def perm_sets_limited_users(sf):
         limited_permissionsets.clear()
 
         for record in results:
-            limited_permissionsets.labels(
-                name=record['Name'],
-                id=record['Id']
-            ).set(int(record['expr0']))
+            limited_permissionsets.labels(name=record["Name"], id=record["Id"]).set(
+                int(record["expr0"])
+            )
     # pylint: disable=broad-except
     except Exception as e:
-        logger.error("Error fetching permission sets assigned to 10 or less active users: %s", e)
+        logger.error(
+            "Error fetching permission sets assigned to 10 or less active users: %s", e
+        )
 
 
 def profile_assignment_under5(sf):
@@ -104,7 +106,10 @@ def profile_assignment_under5(sf):
     The threshold is configurable via PROFILE_UNDER_USERS_THRESHOLD environment variable.
     """
     try:
-        logger.info("Querying all profiles with %d or less assignees...", PROFILE_UNDER_USERS_THRESHOLD)
+        logger.info(
+            "Querying all profiles with %d or less assignees...",
+            PROFILE_UNDER_USERS_THRESHOLD,
+        )
         query = f"""
         SELECT ProfileId, Profile.Name, COUNT(Id) userCount
         FROM User
@@ -118,9 +123,8 @@ def profile_assignment_under5(sf):
 
         for record in results:
             five_or_less_profile_assignees.labels(
-                profileId=record['ProfileId'],
-                profileName=record['Name']
-            ).set(int(record['userCount']))
+                profileId=record["ProfileId"], profileName=record["Name"]
+            ).set(int(record["userCount"]))
     # pylint: disable=broad-except
     except Exception as e:
         logger.error("Error fetching profiles with under 5 assignees: %s", e)
@@ -145,8 +149,7 @@ def profile_no_active_users(sf):
 
         for record in results:
             unassigned_profiles.labels(
-                profileId=record['Id'],
-                profileName=record['Name']
+                profileId=record["Id"], profileName=record["Name"]
             ).set(0)
     # pylint: disable=broad-except
     except Exception as e:

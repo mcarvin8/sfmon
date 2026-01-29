@@ -26,12 +26,15 @@ Use Cases:
     - Monitoring specific entity type operations
     - Detecting unusual bulk data processing patterns
 """
+
 from collections import defaultdict
 
 from logger import logger
 from gauges import (
-    daily_batch_count_metric, daily_entity_type_count_metric,
-    hourly_batch_count_metric, hourly_entity_type_count_metric
+    daily_batch_count_metric,
+    daily_entity_type_count_metric,
+    hourly_batch_count_metric,
+    hourly_entity_type_count_metric,
 )
 from log_parser import parse_logs
 
@@ -52,7 +55,7 @@ def daily_analyse_bulk_api(sf):
         process_bulk_api_logs(
             bulk_api_logs,
             batch_metric=daily_batch_count_metric,
-            entity_metric=daily_entity_type_count_metric
+            entity_metric=daily_entity_type_count_metric,
         )
     # pylint: disable=broad-except
     except Exception as e:
@@ -75,7 +78,7 @@ def hourly_analyse_bulk_api(sf):
         process_bulk_api_logs(
             bulk_api_logs,
             batch_metric=hourly_batch_count_metric,
-            entity_metric=hourly_entity_type_count_metric
+            entity_metric=hourly_entity_type_count_metric,
         )
     # pylint: disable=broad-except
     except Exception as e:
@@ -103,19 +106,21 @@ def process_bulk_api_logs(bulk_api_logs, batch_metric, entity_metric):
         if not is_valid_entity(row):
             continue
 
-        job_id = row.get('JOB_ID')
-        user_id = row.get('USER_ID')
-        entity_type = row.get('ENTITY_TYPE')
-        operation_type = row.get('OPERATION_TYPE')
-        rows_processed = safe_int(row.get('ROWS_PROCESSED'))
-        number_failures = safe_int(row.get('NUMBER_FAILURES'))
+        job_id = row.get("JOB_ID")
+        user_id = row.get("USER_ID")
+        entity_type = row.get("ENTITY_TYPE")
+        operation_type = row.get("OPERATION_TYPE")
+        rows_processed = safe_int(row.get("ROWS_PROCESSED"))
+        number_failures = safe_int(row.get("NUMBER_FAILURES"))
 
         batch_counts[(job_id, user_id, entity_type)] += 1
         total_records_failed[(job_id, user_id, entity_type)] += number_failures
         total_records_processed[(job_id, user_id, entity_type)] += rows_processed
         entity_type_counts[(user_id, operation_type, entity_type)] += 1
 
-    report_batch_counts(batch_counts, total_records_failed, total_records_processed, batch_metric)
+    report_batch_counts(
+        batch_counts, total_records_failed, total_records_processed, batch_metric
+    )
     report_entity_counts(entity_type_counts, entity_metric)
 
 
@@ -129,8 +134,8 @@ def is_valid_entity(row):
     Returns:
         bool: True if entity type is valid, else False.
     """
-    entity_type = row.get('ENTITY_TYPE')
-    return entity_type and entity_type.lower() != 'none'
+    entity_type = row.get("ENTITY_TYPE")
+    return entity_type and entity_type.lower() != "none"
 
 
 def safe_int(value):
@@ -163,7 +168,7 @@ def report_batch_counts(batch_counts, failed_counts, processed_counts, metric):
             user_id=user_id,
             entity_type=entity_type,
             total_records_failed=failed_counts[key],
-            total_records_processed=processed_counts[key]
+            total_records_processed=processed_counts[key],
         ).set(count)
 
 
@@ -177,7 +182,5 @@ def report_entity_counts(entity_type_counts, metric):
     """
     for (user_id, operation_type, entity_type), count in entity_type_counts.items():
         metric.labels(
-            user_id=user_id,
-            operation_type=operation_type,
-            entity_type=entity_type
+            user_id=user_id, operation_type=operation_type, entity_type=entity_type
         ).set(count)

@@ -14,6 +14,7 @@ Functions:
     - is_large_query: Checks if query exceeds threshold
     - report_large_queries: Exposes metrics to Prometheus
 """
+
 import os
 
 from .utils import get_user_name
@@ -22,7 +23,7 @@ from log_parser import parse_logs
 from gauges import hourly_large_query_metric
 
 # Number of rows that constitutes a "large query"
-LARGE_QUERY_THRESHOLD = int(os.getenv('LARGE_QUERY_THRESHOLD', 10000))
+LARGE_QUERY_THRESHOLD = int(os.getenv("LARGE_QUERY_THRESHOLD", 10000))
 
 
 def hourly_observe_user_querying_large_records(sf):
@@ -33,14 +34,19 @@ def hourly_observe_user_querying_large_records(sf):
     Args:
         sf: Salesforce connection object.
     """
-    logger.info("Getting Compliance data - User details querying large records (>%d rows)...", LARGE_QUERY_THRESHOLD)
+    logger.info(
+        "Getting Compliance data - User details querying large records (>%d rows)...",
+        LARGE_QUERY_THRESHOLD,
+    )
 
     try:
         large_queries = collect_large_queries(sf)
         report_large_queries(large_queries)
     # pylint: disable=broad-except
     except Exception as e:
-        logger.error("An error occurred in hourly_observe_user_querying_large_records: %s", e)
+        logger.error(
+            "An error occurred in hourly_observe_user_querying_large_records: %s", e
+        )
 
 
 def collect_large_queries(sf):
@@ -67,18 +73,20 @@ def collect_large_queries(sf):
             if not is_large_query(row):
                 continue
 
-            user_id = row.get('USER_ID')
+            user_id = row.get("USER_ID")
             if not user_id:
                 continue
 
             user_name = get_user_name(sf, user_id)
-            large_queries.add((
-                user_id,
-                user_name,
-                row.get('METHOD_NAME'),
-                row.get('ENTITY_NAME'),
-                int(row.get('ROWS_PROCESSED', 0))
-            ))
+            large_queries.add(
+                (
+                    user_id,
+                    user_name,
+                    row.get("METHOD_NAME"),
+                    row.get("ENTITY_NAME"),
+                    int(row.get("ROWS_PROCESSED", 0)),
+                )
+            )
 
     return large_queries
 
@@ -94,7 +102,7 @@ def is_large_query(row):
     Returns:
         bool: True if rows_processed exceeds LARGE_QUERY_THRESHOLD.
     """
-    rows_processed = row.get('ROWS_PROCESSED', '')
+    rows_processed = row.get("ROWS_PROCESSED", "")
     return rows_processed.isdigit() and int(rows_processed) > LARGE_QUERY_THRESHOLD
 
 
@@ -112,13 +120,13 @@ def report_large_queries(large_queries):
                 user_id=user_id,
                 user_name=user_name,
                 method=method,
-                entity_name=entity_name
+                entity_name=entity_name,
             ).set(rows_processed)
     else:
         # Ensure metric is visible even when there are no large queries
         hourly_large_query_metric.labels(
-            user_id='none',
-            user_name='No Large Queries',
-            method='none',
-            entity_name='none'
+            user_id="none",
+            user_name="No Large Queries",
+            method="none",
+            entity_name="none",
         ).set(0)

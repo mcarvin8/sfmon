@@ -13,6 +13,7 @@ Data Sources:
     - GroupMember object
     - Case object
 """
+
 from logger import logger
 from gauges import (
     total_queues_per_object_gauge,
@@ -36,15 +37,15 @@ def total_queues_per_object(sf):
         ORDER BY COUNT_DISTINCT(QueueId) DESC
         """
         results = query_records_all(sf, query)
-        
+
         # Clear existing Prometheus gauge labels
         total_queues_per_object_gauge.clear()
 
         for record in results:
             total_queues_per_object_gauge.labels(
-                sobject_type=record['SobjectType']
-            ).set(int(record['expr0']))
-            
+                sobject_type=record["SobjectType"]
+            ).set(int(record["expr0"]))
+
         logger.info("Found queues for %d different object types", len(results))
     # pylint: disable=broad-except
     except Exception as e:
@@ -64,16 +65,15 @@ def queues_with_no_members(sf):
         AND Id NOT IN (SELECT GroupID FROM GroupMember)
         """
         results = query_records_all(sf, query)
-        
+
         # Clear existing Prometheus gauge labels
         queues_with_no_members_gauge.clear()
 
         for record in results:
             queues_with_no_members_gauge.labels(
-                queue_id=record['Id'],
-                queue_name=record['Name']
+                queue_id=record["Id"], queue_name=record["Name"]
             ).set(1)
-            
+
         logger.info("Found %d queues with no members", len(results))
     # pylint: disable=broad-except
     except Exception as e:
@@ -98,16 +98,15 @@ def queues_with_zero_open_cases(sf):
         )
         """
         results = query_records_all(sf, query)
-        
+
         # Clear existing Prometheus gauge labels
         queues_with_zero_open_cases_gauge.clear()
 
         for record in results:
             queues_with_zero_open_cases_gauge.labels(
-                queue_id=record['Id'],
-                queue_name=record['Name']
+                queue_id=record["Id"], queue_name=record["Name"]
             ).set(1)
-            
+
         logger.info("Found %d queues with zero open cases", len(results))
     # pylint: disable=broad-except
     except Exception as e:
@@ -128,18 +127,16 @@ def public_groups_with_no_members(sf):
         ORDER BY Name
         """
         results = query_records_all(sf, query)
-        
+
         # Clear existing Prometheus gauge labels
         public_groups_with_no_members_gauge.clear()
 
         for record in results:
             public_groups_with_no_members_gauge.labels(
-                group_id=record['Id'],
-                group_name=record['Name']
+                group_id=record["Id"], group_name=record["Name"]
             ).set(1)
-            
+
         logger.info("Found %d public groups with no members", len(results))
     # pylint: disable=broad-except
     except Exception as e:
         logger.error("Error fetching public groups with no members: %s", e)
-

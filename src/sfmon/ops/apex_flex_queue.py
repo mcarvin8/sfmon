@@ -8,9 +8,11 @@ Prometheus metrics for alerting and monitoring purposes.
 Functions:
     - monitor_apex_flex_queue: Queries and reports jobs in holding status
 """
+
 from logger import logger
 from gauges import apex_flex_queue
 from query import query_records_all
+
 
 def monitor_apex_flex_queue(sf):
     """
@@ -28,15 +30,11 @@ def monitor_apex_flex_queue(sf):
         if results:
             for record in results:
                 apex_flex_queue.labels(
-                    id=record['Id'],
-                    ApexClassId=record['ApexClassId']
+                    id=record["Id"], ApexClassId=record["ApexClassId"]
                 ).set(1)
         else:
             # Emit a 0-valued series when no records are found
-            apex_flex_queue.labels(
-                id="none",
-                ApexClassId="none"
-            ).set(0)    
+            apex_flex_queue.labels(id="none", ApexClassId="none").set(0)
     # pylint: disable=broad-except
     except Exception as e:
         logger.error("Error fetching Apex Flex Queue: %s", e)

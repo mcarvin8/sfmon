@@ -9,6 +9,7 @@ Data Sources:
     - SecurityHealthCheck (via Tooling API)
     - SecurityHealthCheckRisks (via Tooling API)
 """
+
 from logger import logger
 from gauges import (
     security_health_check_gauge,
@@ -30,7 +31,7 @@ def security_health_check(sf):
         security_health_check_gauge.clear()
 
         for record in results:
-            score = int(record['Score'])
+            score = int(record["Score"])
 
             # Determine grade based on score
             if score >= 90:
@@ -60,27 +61,28 @@ def salesforce_health_risks(sf):
                    SettingRiskCategory, StandardValue, StandardValueRaw 
                    from SecurityHealthCheckRisks"""
         results = tooling_query_records_all(sf, query)
-        
+
         # Clear existing Prometheus gauge labels
         salesforce_health_risks_gauge.clear()
 
         for record in results:
-            org_value = record.get('OrgValue', '')
-            standard_value = record.get('StandardValue', '')
-            
+            org_value = record.get("OrgValue", "")
+            standard_value = record.get("StandardValue", "")
+
             # Compare OrgValue and StandardValue to determine compliance status
-            compliance_status = "match" if str(org_value) == str(standard_value) else "mismatch"
-            
+            compliance_status = (
+                "match" if str(org_value) == str(standard_value) else "mismatch"
+            )
+
             salesforce_health_risks_gauge.labels(
                 org_value=org_value,
-                risk_type=record.get('RiskType', ''),
-                setting=record.get('Setting', ''),
-                setting_group=record.get('SettingGroup', ''),
-                setting_risk_category=record.get('SettingRiskCategory', ''),
+                risk_type=record.get("RiskType", ""),
+                setting=record.get("Setting", ""),
+                setting_group=record.get("SettingGroup", ""),
+                setting_risk_category=record.get("SettingRiskCategory", ""),
                 standard_value=standard_value,
-                compliance_status=compliance_status
+                compliance_status=compliance_status,
             ).set(1)
     # pylint: disable=broad-except
     except Exception as e:
         logger.error("Error fetching Salesforce Security Health Check Risks: %s", e)
-

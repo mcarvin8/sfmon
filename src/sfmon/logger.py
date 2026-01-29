@@ -13,21 +13,21 @@ Environment Variables:
 Exports:
     - logger: Configured logging instance for use across monitoring modules
 """
+
 import logging
 import os
 
 # Get log level from environment variable, default to INFO
-LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO').upper()
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 
 # Validate log level
-VALID_LOG_LEVELS = {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}
+VALID_LOG_LEVELS = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
 if LOG_LEVEL not in VALID_LOG_LEVELS:
-    LOG_LEVEL = 'INFO'
+    LOG_LEVEL = "INFO"
 
 logging.basicConfig(
     level=getattr(logging, LOG_LEVEL),
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
 logger = logging.getLogger(__name__)
-

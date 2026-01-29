@@ -34,6 +34,7 @@ Requirements:
     - EventLogFile object read permissions
     - Sufficient API calls for log downloads
 """
+
 import csv
 from io import StringIO
 import requests
@@ -52,11 +53,13 @@ def parse_logs(sf, log_query):
         if not event_log_records:
             return None
 
-        log_id = event_log_records[0]['Id']
+        log_id = event_log_records[0]["Id"]
         log_file_url = f"{sf.base_url}/sobjects/EventLogFile/{log_id}/LogFile"
-        log_file_response = requests.get(log_file_url,
-                                         headers={"Authorization": f"Bearer {sf.session_id}"},
-                                         timeout=REQUESTS_TIMEOUT_SECONDS)
+        log_file_response = requests.get(
+            log_file_url,
+            headers={"Authorization": f"Bearer {sf.session_id}"},
+            timeout=REQUESTS_TIMEOUT_SECONDS,
+        )
         log_file_response.raise_for_status()
 
         log_content = log_file_response.text

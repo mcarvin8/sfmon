@@ -18,6 +18,7 @@ Functions:
     - run_hourly_audit: Executes all hourly compliance checks
     - run_daily_audit: Executes all daily compliance checks
 """
+
 from .large_queries import hourly_observe_user_querying_large_records
 from .audit_trail import expose_suspicious_records
 from .sharing_settings import monitor_org_wide_sharing_settings
@@ -31,15 +32,15 @@ def run_hourly_audit(sf):
     """
     Hourly audit function for time-sensitive compliance checks.
     This function should be scheduled to run every hour.
-    
+
     Args:
         sf: Salesforce connection object.
     """
     logger.info("Starting hourly audit compliance checks...")
-    
+
     hourly_observe_user_querying_large_records(sf)
     monitor_forbidden_profile_assignments(sf)
-    
+
     logger.info("Hourly audit compliance checks completed.")
 
 
@@ -47,16 +48,16 @@ def run_daily_audit(sf):
     """
     Daily audit function for compliance checks.
     This function is called daily at 8:00 AM PST (16:00 UTC) to run before BAR standup.
-    
+
     Args:
         sf: Salesforce connection object.
     """
     logger.info("Starting daily audit compliance checks...")
-    
+
     expose_suspicious_records(sf)
     monitor_org_wide_sharing_settings(sf)
     get_deployment_status(sf)
     monitor_login_events(sf)
     geolocation(sf, chunk_size=100)
-    
+
     logger.info("Daily audit compliance checks completed.")

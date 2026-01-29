@@ -41,33 +41,36 @@ Alert Triggers:
     - Exports outside business hours
     - Unusual export patterns
 """
+
 from logger import logger
 from log_parser import parse_logs
 from gauges import hourly_report_export_metric
 from .utils import get_user_name
 from query import query_records_all
 
+
 def hourly_report_export_records(sf):
-    '''
-    Query and expose report export details 
-    '''
+    """
+    Query and expose report export details
+    """
     logger.info("Getting report export records...")
 
     try:
         hourly_report_export_metric.clear()
-        log_query = (
-            "SELECT Id FROM EventLogFile WHERE EventType = 'ReportExport' and Interval = 'Hourly' ORDER BY LogDate DESC LIMIT 1")
+        log_query = "SELECT Id FROM EventLogFile WHERE EventType = 'ReportExport' and Interval = 'Hourly' ORDER BY LogDate DESC LIMIT 1"
 
         api_log_records = parse_logs(sf, log_query)
 
         for row in api_log_records:
-            user_name = get_user_name(sf, row['USER_ID'])
-            timestamp = row['TIMESTAMP_DERIVED']
+            user_name = get_user_name(sf, row["USER_ID"])
+            timestamp = row["TIMESTAMP_DERIVED"]
 
-            modified_id = row['URI'][1:] if row['URI'].startswith("/") else row['URI']
+            modified_id = row["URI"][1:] if row["URI"].startswith("/") else row["URI"]
 
             # Add validation for the report ID format
-            if not modified_id or len(modified_id) < 15:  # Salesforce IDs are typically 15 or 18 characters
+            if (
+                not modified_id or len(modified_id) < 15
+            ):  # Salesforce IDs are typically 15 or 18 characters
                 logger.warning("Invalid report ID format: %s", modified_id)
                 continue
 
@@ -77,8 +80,14 @@ def hourly_report_export_records(sf):
             hourly_report_export_metric.labels(
                 user_name=user_name if user_name else None,
                 timestamp=timestamp,
-                report_name=result[0].get('Name') if result and len(result) > 0 else None,
-                report_type_api_name=result[0].get('ReportTypeApiName') if result and len(result) > 0 else None
+                report_name=(
+                    result[0].get("Name") if result and len(result) > 0 else None
+                ),
+                report_type_api_name=(
+                    result[0].get("ReportTypeApiName")
+                    if result and len(result) > 0
+                    else None
+                ),
             ).set(1)
     # pylint: disable=broad-except
     except Exception as e:

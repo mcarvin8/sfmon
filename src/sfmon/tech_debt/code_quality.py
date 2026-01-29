@@ -16,18 +16,19 @@ Data Sources:
     - WorkflowRule (via Tooling API)
     - Local file reports (pmd-report.xml, apexruleset.xml)
 """
+
 import os
 
 from logger import logger
 from gauges import (
     deprecated_apex_class_gauge,
     deprecated_apex_trigger_gauge,
-    workflow_rules_gauge
+    workflow_rules_gauge,
 )
 from query import query_records_all, tooling_query_records_all
 
 # API versions at or below this threshold are considered deprecated
-DEPRECATED_API_VERSION = int(os.getenv('DEPRECATED_API_VERSION', 50))
+DEPRECATED_API_VERSION = int(os.getenv("DEPRECATED_API_VERSION", 50))
 
 
 def apex_classes_api_version(sf):
@@ -36,7 +37,10 @@ def apex_classes_api_version(sf):
     The threshold is configurable via DEPRECATED_API_VERSION environment variable.
     """
     try:
-        logger.info("Querying all local apex classes running on outdated API versions (<= %d)...", DEPRECATED_API_VERSION)
+        logger.info(
+            "Querying all local apex classes running on outdated API versions (<= %d)...",
+            DEPRECATED_API_VERSION,
+        )
         query = f"""
         SELECT Id,Name,ApiVersion
         FROM ApexClass
@@ -48,12 +52,13 @@ def apex_classes_api_version(sf):
 
         for record in results:
             deprecated_apex_class_gauge.labels(
-                id=record['Id'],
-                name=record['Name']
-            ).set(int(record['ApiVersion']))
+                id=record["Id"], name=record["Name"]
+            ).set(int(record["ApiVersion"]))
     # pylint: disable=broad-except
     except Exception as e:
-        logger.error("Error fetching local apex classes running on outdated API versions: %s", e)
+        logger.error(
+            "Error fetching local apex classes running on outdated API versions: %s", e
+        )
 
 
 def apex_triggers_api_version(sf):
@@ -62,7 +67,10 @@ def apex_triggers_api_version(sf):
     The threshold is configurable via DEPRECATED_API_VERSION environment variable.
     """
     try:
-        logger.info("Querying all local apex triggers running on outdated API versions (<= %d)...", DEPRECATED_API_VERSION)
+        logger.info(
+            "Querying all local apex triggers running on outdated API versions (<= %d)...",
+            DEPRECATED_API_VERSION,
+        )
         query = f"""
         SELECT Id,Name,ApiVersion
         FROM ApexTrigger 
@@ -74,12 +82,13 @@ def apex_triggers_api_version(sf):
 
         for record in results:
             deprecated_apex_trigger_gauge.labels(
-                id=record['Id'],
-                name=record['Name']
-            ).set(int(record['ApiVersion']))
+                id=record["Id"], name=record["Name"]
+            ).set(int(record["ApiVersion"]))
     # pylint: disable=broad-except
     except Exception as e:
-        logger.error("Error fetching local apex triggers running on outdated API versions: %s", e)
+        logger.error(
+            "Error fetching local apex triggers running on outdated API versions: %s", e
+        )
 
 
 def workflow_rules_monitoring(sf):
@@ -98,18 +107,18 @@ def workflow_rules_monitoring(sf):
         workflow_rules_gauge.clear()
 
         for record in results:
-            workflow_id = record['Id']
-            created_date = record.get('CreatedDate', 'Unknown')
-            namespace_prefix = record.get('NamespacePrefix', 'None') or 'None'
-            
+            workflow_id = record["Id"]
+            created_date = record.get("CreatedDate", "Unknown")
+            namespace_prefix = record.get("NamespacePrefix", "None") or "None"
+
             # Add all workflow rules to the gauge with a numeric value
             workflow_rules_gauge.labels(
                 id=workflow_id,
                 created_date=created_date,
-                namespace_prefix=namespace_prefix
+                namespace_prefix=namespace_prefix,
             ).set(1)
             logger.debug("Added workflow rule to gauge: %s", workflow_id)
-                
+
     # pylint: disable=broad-except
     except Exception as e:
         logger.error("Error fetching workflow rules: %s", e)

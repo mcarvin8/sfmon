@@ -35,6 +35,7 @@ Use Cases:
     - Tracking navigation impact on page load times
     - Monitoring EPT deviation trends
 """
+
 from collections import defaultdict
 import csv
 import io
@@ -61,7 +62,7 @@ def get_salesforce_ept_and_apt(sf):
             logger.warning("No LightningPageView event log found.")
             return
 
-        log_data = download_log_file(sf, record['Id'])
+        log_data = download_log_file(sf, record["Id"])
         if not log_data:
             logger.warning("No log data found.")
             return
@@ -109,9 +110,11 @@ def download_log_file(sf, log_id):
         str: The raw CSV log data as a string, or None if the request failed.
     """
     url = sf.base_url + f"/sobjects/EventLogFile/{log_id}/LogFile"
-    response = requests.get(url,
-                            headers={"Authorization": f"Bearer {sf.session_id}"},
-                            timeout=REQUESTS_TIMEOUT_SECONDS)
+    response = requests.get(
+        url,
+        headers={"Authorization": f"Bearer {sf.session_id}"},
+        timeout=REQUESTS_TIMEOUT_SECONDS,
+    )
     if response.status_code == 200:
         return response.text
     return None
@@ -129,13 +132,13 @@ def parse_log_data(log_data):
             page_time_data (defaultdict): Mapping of page names to total time and count.
             ept_rows (list): List of rows with EPT deviation information.
     """
-    page_time_data = defaultdict(lambda: {'total_time': 0, 'count': 0})
+    page_time_data = defaultdict(lambda: {"total_time": 0, "count": 0})
     ept_rows = []
     csv_data = csv.DictReader(io.StringIO(log_data))
 
     for row in csv_data:
         update_page_time_data(page_time_data, row)
-        if row.get('EFFECTIVE_PAGE_TIME_DEVIATION'):
+        if row.get("EFFECTIVE_PAGE_TIME_DEVIATION"):
             ept_rows.append(row)
 
     return page_time_data, ept_rows
@@ -149,10 +152,10 @@ def update_page_time_data(page_time_data, row):
         page_time_data (defaultdict): Mapping of page names to accumulated time and count.
         row (dict): A single row from the parsed CSV log data.
     """
-    page_name = row['PAGE_APP_NAME'] or 'Unknown_Page'
-    duration = float(row['DURATION']) / 1000 if row.get('DURATION') else 0
-    page_time_data[page_name]['total_time'] += duration
-    page_time_data[page_name]['count'] += 1
+    page_name = row["PAGE_APP_NAME"] or "Unknown_Page"
+    duration = float(row["DURATION"]) / 1000 if row.get("DURATION") else 0
+    page_time_data[page_name]["total_time"] += duration
+    page_time_data[page_name]["count"] += 1
 
 
 def report_apt_metrics(page_time_data):
@@ -163,8 +166,8 @@ def report_apt_metrics(page_time_data):
         page_time_data (defaultdict): Mapping of page names to total time and count.
     """
     for page, data in page_time_data.items():
-        if data['count'] > 0:
-            avg_time = data['total_time'] / data['count']
+        if data["count"] > 0:
+            avg_time = data["total_time"] / data["count"]
             apt_metric.labels(Page_name=page).set(avg_time)
 
 
@@ -176,13 +179,21 @@ def report_ept_metrics(ept_rows):
         ept_rows (list): List of rows containing EPT deviation data.
     """
     for row in ept_rows:
-        ept_value = float(row['EFFECTIVE_PAGE_TIME']) / 1000 if row.get('EFFECTIVE_PAGE_TIME') else 0
+        ept_value = (
+            float(row["EFFECTIVE_PAGE_TIME"]) / 1000
+            if row.get("EFFECTIVE_PAGE_TIME")
+            else 0
+        )
         ept_metric.labels(
-            EFFECTIVE_PAGE_TIME_DEVIATION_REASON=row.get('EFFECTIVE_PAGE_TIME_DEVIATION_REASON', ''),
-            EFFECTIVE_PAGE_TIME_DEVIATION_ERROR_TYPE=row.get('EFFECTIVE_PAGE_TIME_DEVIATION_ERROR_TYPE', ''),
-            PREVPAGE_ENTITY_TYPE=row.get('PREVPAGE_ENTITY_TYPE', ''),
-            PREVPAGE_APP_NAME=row.get('PREVPAGE_APP_NAME', ''),
-            PAGE_ENTITY_TYPE=row.get('PAGE_ENTITY_TYPE', ''),
-            PAGE_APP_NAME=row.get('PAGE_APP_NAME', ''),
-            BROWSER_NAME=row.get('BROWSER_NAME', '')
+            EFFECTIVE_PAGE_TIME_DEVIATION_REASON=row.get(
+                "EFFECTIVE_PAGE_TIME_DEVIATION_REASON", ""
+            ),
+            EFFECTIVE_PAGE_TIME_DEVIATION_ERROR_TYPE=row.get(
+                "EFFECTIVE_PAGE_TIME_DEVIATION_ERROR_TYPE", ""
+            ),
+            PREVPAGE_ENTITY_TYPE=row.get("PREVPAGE_ENTITY_TYPE", ""),
+            PREVPAGE_APP_NAME=row.get("PREVPAGE_APP_NAME", ""),
+            PAGE_ENTITY_TYPE=row.get("PAGE_ENTITY_TYPE", ""),
+            PAGE_APP_NAME=row.get("PAGE_APP_NAME", ""),
+            BROWSER_NAME=row.get("BROWSER_NAME", ""),
         ).set(ept_value)
