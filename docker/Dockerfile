@@ -37,6 +37,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl python3 py
 # Set the environment variables to use the venv #
 ENV PATH="/opt/venv/bin:$PATH"
 
+# Create non-root user for running the application
+RUN groupadd --gid 1000 sfmon && \
+    useradd --uid 1000 --gid sfmon --shell /bin/bash --create-home sfmon && \
+    chown -R sfmon:sfmon /app/sfmon /opt/venv
+
+USER sfmon
+
 # Run the application
 ENTRYPOINT ["python3", "salesforce_monitoring.py"]
 EXPOSE 9001
