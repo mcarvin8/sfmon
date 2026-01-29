@@ -44,6 +44,10 @@ RUN groupadd --gid 1000 sfmon && \
 
 USER sfmon
 
+# Health check: metrics endpoint on METRICS_PORT (default 9001)
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD curl -f "http://localhost:${METRICS_PORT:-9001}/metrics" || exit 1
+
 # Run the application
 ENTRYPOINT ["python3", "salesforce_monitoring.py"]
 EXPOSE 9001
