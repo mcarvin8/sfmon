@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.2](https://github.com/mcarvin8/sfmon/compare/v3.2.1...v3.2.2) (2026-01-29)
+
+
+### Bug Fixes
+
+* **formatting:** fix f-string in user login script ([e82e1ea](https://github.com/mcarvin8/sfmon/commit/e82e1eadbfb3ba711e5b19c099a33f16bd2a8d66))
+
 ## [3.2.1](https://github.com/mcarvin8/sfmon/compare/v3.2.0...v3.2.1) (2026-01-29)
 
 
