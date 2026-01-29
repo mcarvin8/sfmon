@@ -63,14 +63,15 @@ def monitor_forbidden_profile_assignments(sf):
             ).set(0)
             return
 
-        # Build query to find active users with forbidden profiles
-        profile_list = "', '".join(FORBIDDEN_PROD_PROFILES)
+        # Build query to find active users with forbidden profiles.
+        # Escape single quotes for SOQL; values from admin-configured env (B608).
+        profile_list = "', '".join(p.replace("'", "''") for p in FORBIDDEN_PROD_PROFILES)
         query = f"""
             SELECT Id, Name, Username, Profile.Name 
             FROM User 
             WHERE IsActive = true 
             AND Profile.Name IN ('{profile_list}')
-        """
+        """  # nosec B608
 
         result = query_records_all(sf, query)
 

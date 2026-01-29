@@ -74,6 +74,7 @@ def perm_sets_limited_users(sf):
             "Querying permission sets assigned to %d or less active users...",
             PERMSET_LIMITED_USERS_THRESHOLD,
         )
+        # SOQL; PERMSET_LIMITED_USERS_THRESHOLD is int from env (B608)
         query = f"""
         SELECT PermissionSet.Id, PermissionSet.Name, Count(ID)
         FROM PermissionSetAssignment
@@ -84,7 +85,7 @@ def perm_sets_limited_users(sf):
         AND PermissionSet.NamespacePrefix = NULL  
         GROUP BY PermissionSet.Id, PermissionSet.Name
         HAVING COUNT(Id) <= {PERMSET_LIMITED_USERS_THRESHOLD}
-        """
+        """  # nosec B608
         results = query_records_all(sf, query)
         # Clear existing Prometheus gauge labels
         limited_permissionsets.clear()
@@ -110,13 +111,14 @@ def profile_assignment_under5(sf):
             "Querying all profiles with %d or less assignees...",
             PROFILE_UNDER_USERS_THRESHOLD,
         )
+        # SOQL; PROFILE_UNDER_USERS_THRESHOLD is int from env (B608)
         query = f"""
         SELECT ProfileId, Profile.Name, COUNT(Id) userCount
         FROM User
         WHERE IsActive = TRUE
         GROUP BY ProfileId, Profile.Name
         HAVING COUNT(Id) <= {PROFILE_UNDER_USERS_THRESHOLD}
-        """
+        """  # nosec B608
         results = query_records_all(sf, query)
         # Clear existing Prometheus gauge labels
         five_or_less_profile_assignees.clear()

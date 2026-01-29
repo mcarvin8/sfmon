@@ -47,7 +47,11 @@ def get_user_name(sf, user_id):
         str: User's display name or 'Unknown User' if not found.
     """
     try:
-        query = f"SELECT Name FROM User WHERE Id = '{user_id}'"
+        # Validate Salesforce Id format (15 or 18 alphanumeric) before SOQL (B608)
+        if not user_id or not str(user_id).replace("-", "").isalnum() or len(str(user_id)) not in (15, 18):
+            logger.warning("Invalid user ID format: %s", user_id)
+            return "Unknown User"
+        query = f"SELECT Name FROM User WHERE Id = '{user_id}'"  # nosec B608
         result = query_records_all(sf, query)
         return result[0]["Name"] if result else "Unknown User"
     except Exception as e:  # pylint: disable=broad-except

@@ -41,11 +41,12 @@ def apex_classes_api_version(sf):
             "Querying all local apex classes running on outdated API versions (<= %d)...",
             DEPRECATED_API_VERSION,
         )
+        # SOQL; DEPRECATED_API_VERSION is int from env (B608)
         query = f"""
         SELECT Id,Name,ApiVersion
         FROM ApexClass
         WHERE NamespacePrefix = null AND ApiVersion <= {DEPRECATED_API_VERSION}
-        """
+        """  # nosec B608
         results = query_records_all(sf, query)
         # Clear existing Prometheus gauge labels
         deprecated_apex_class_gauge.clear()
@@ -71,11 +72,12 @@ def apex_triggers_api_version(sf):
             "Querying all local apex triggers running on outdated API versions (<= %d)...",
             DEPRECATED_API_VERSION,
         )
+        # SOQL; DEPRECATED_API_VERSION is int from env (B608)
         query = f"""
         SELECT Id,Name,ApiVersion
         FROM ApexTrigger 
         WHERE NamespacePrefix = null AND ApiVersion <= {DEPRECATED_API_VERSION}
-        """
+        """  # nosec B608
         results = query_records_all(sf, query)
         # Clear existing Prometheus gauge labels
         deprecated_apex_trigger_gauge.clear()

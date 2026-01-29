@@ -67,14 +67,18 @@ def hourly_report_export_records(sf):
 
             modified_id = row["URI"][1:] if row["URI"].startswith("/") else row["URI"]
 
-            # Add validation for the report ID format
+            # Add validation for the report ID format (15 or 18 alphanumeric)
             if (
-                not modified_id or len(modified_id) < 15
-            ):  # Salesforce IDs are typically 15 or 18 characters
+                not modified_id
+                or len(modified_id) < 15
+                or not modified_id.isalnum()
+                or len(modified_id) not in (15, 18)
+            ):
                 logger.warning("Invalid report ID format: %s", modified_id)
                 continue
 
-            report_detail_query = f"SELECT Id, Name, ReportTypeApiName FROM Report WHERE Id = '{modified_id}'"
+            # SOQL; modified_id validated as Salesforce Id format (B608)
+            report_detail_query = f"SELECT Id, Name, ReportTypeApiName FROM Report WHERE Id = '{modified_id}'"  # nosec B608
             result = query_records_all(sf, report_detail_query)
 
             hourly_report_export_metric.labels(

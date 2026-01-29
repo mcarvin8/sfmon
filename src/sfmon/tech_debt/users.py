@@ -36,6 +36,7 @@ def dormant_salesforce_users(sf):
             "Querying dormant Salesforce users (inactive %d+ days)...",
             DORMANT_USER_DAYS,
         )
+        # SOQL; DORMANT_USER_DAYS is int from env (B608)
         query = f"""
         SELECT Id, Name, CreatedDate, Username, Email, IsActive, LastLoginDate, Profile.Name
         FROM User
@@ -44,7 +45,7 @@ def dormant_salesforce_users(sf):
         AND (LastLoginDate < LAST_N_DAYS:{DORMANT_USER_DAYS} OR LastLoginDate = Null)
         AND CreatedDate < LAST_N_DAYS:{DORMANT_USER_DAYS}
         ORDER BY LastLoginDate ASC
-        """
+        """  # nosec B608
         results = query_records_all(sf, query)
 
         # Clear existing Prometheus gauge labels
@@ -81,6 +82,7 @@ def dormant_portal_users(sf):
         logger.info(
             "Querying dormant Portal users (inactive %d+ days)...", DORMANT_USER_DAYS
         )
+        # SOQL; DORMANT_USER_DAYS is int from env (B608)
         query = f"""
         SELECT Id, Name, CreatedDate, Username, Email, IsActive, LastLoginDate, Profile.Name
         FROM User
@@ -89,7 +91,7 @@ def dormant_portal_users(sf):
         AND (LastLoginDate < LAST_N_DAYS:{DORMANT_USER_DAYS} OR LastLoginDate = Null)
         AND CreatedDate < LAST_N_DAYS:{DORMANT_USER_DAYS}
         ORDER BY LastLoginDate ASC
-        """
+        """  # nosec B608
         results = query_records_all(sf, query)
 
         # Clear existing Prometheus gauge labels
