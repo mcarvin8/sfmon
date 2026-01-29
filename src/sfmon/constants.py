@@ -21,7 +21,7 @@ Compliance Configuration:
     The EXCLUDE_USERS list contains service accounts and administrators whose actions
     are trusted and should not trigger compliance alerts.
     
-    NOTE: EXCLUDE_USERS can be configured via config.json file. See README for details.
+    EXCLUDE_USERS can be configured via config.json file. See README for details.
 """
 import os
 
