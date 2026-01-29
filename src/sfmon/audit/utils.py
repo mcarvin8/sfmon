@@ -18,6 +18,8 @@ from logger import logger
 from query import query_records_all
 
 
+_UNKNOWN_USER = "Unknown User"
+
 def _get_integration_users():
     """
     Load integration user names from environment variable.
@@ -50,13 +52,13 @@ def get_user_name(sf, user_id):
         # Validate Salesforce Id format (15 or 18 alphanumeric) before SOQL (B608)
         if not user_id or not str(user_id).replace("-", "").isalnum() or len(str(user_id)) not in (15, 18):
             logger.warning("Invalid user ID format: %s", user_id)
-            return "Unknown User"
+            return _UNKNOWN_USER
         query = f"SELECT Name FROM User WHERE Id = '{user_id}'"  # nosec B608
         result = query_records_all(sf, query)
-        return result[0]["Name"] if result else "Unknown User"
+        return result[0]["Name"] if result else _UNKNOWN_USER
     except Exception as e:  # pylint: disable=broad-except
         logger.error("Error fetching user name for ID %s: %s", user_id, e)
-        return "Unknown User"
+        return _UNKNOWN_USER
 
 
 def categorize_user_group(user_name):
