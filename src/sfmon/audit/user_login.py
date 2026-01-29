@@ -160,7 +160,8 @@ def geolocation(sf, chunk_size=None):
         user_map = {}
         for i in range(0, len(user_ids), chunk_size):
             chunk = user_ids[i : i + chunk_size]
-            user_query = f"SELECT Id, Name FROM User WHERE Id IN ({', '.join([f"'{uid}'" for uid in chunk])})"
+            in_list = ", ".join(f"'{uid}'" for uid in chunk)
+            user_query = f"SELECT Id, Name FROM User WHERE Id IN ({in_list})"
             user_results = query_records_all(sf, user_query)
             user_map.update({user["Id"]: user["Name"] for user in user_results})
 
