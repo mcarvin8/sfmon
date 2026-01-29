@@ -24,10 +24,10 @@ COPY LICENSE.md /app/sfmon/LICENSE.md
 COPY version.txt /app/sfmon/version.txt
 
 # Install required Salesforce and Python dependencies
-RUN apt-get update && apt-get install -y curl python3 python3-pip python3-venv && \
+RUN apt-get update && apt-get install -y --no-install-recommends curl python3 python3-pip python3-venv && \
     python3 -m venv /opt/venv && \
     curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
-    apt-get install -y nodejs && \
+    apt-get install -y --no-install-recommends nodejs && \
     rm -rf /var/lib/apt/lists/* && \
     npm install --global @salesforce/cli@latest && \
     /opt/venv/bin/pip install --no-cache-dir simple_salesforce prometheus_client requests apscheduler pandas && \
