@@ -135,6 +135,8 @@ def report_deployment_metrics(
     deployment_id = record["Id"]
     deployed_by = record["CreatedBy"]["Name"]
     status = record["Status"]
+    start_date = record.get("StartDate") or ""
+    completed_date = record.get("CompletedDate") or ""
 
     if is_validation:
         validation_details_gauge.labels(
@@ -143,14 +145,24 @@ def report_deployment_metrics(
             deployment_id=deployment_id,
             deployed_by=deployed_by,
             status=status,
+            start_date=start_date,
+            completed_date=completed_date,
         ).set(status_mapping.get(status, -1))
 
         validation_pending_time_gauge.labels(
-            deployment_id=deployment_id, deployed_by=deployed_by, status=status
+            deployment_id=deployment_id,
+            deployed_by=deployed_by,
+            status=status,
+            start_date=start_date,
+            completed_date=completed_date,
         ).set(pending_time)
 
         validation_time_gauge.labels(
-            deployment_id=deployment_id, deployed_by=deployed_by, status=status
+            deployment_id=deployment_id,
+            deployed_by=deployed_by,
+            status=status,
+            start_date=start_date,
+            completed_date=completed_date,
         ).set(deployment_time)
     else:
         deployment_details_gauge.labels(
@@ -159,12 +171,22 @@ def report_deployment_metrics(
             deployment_id=deployment_id,
             deployed_by=deployed_by,
             status=status,
+            start_date=start_date,
+            completed_date=completed_date,
         ).set(status_mapping.get(status, -1))
 
         pending_time_gauge.labels(
-            deployment_id=deployment_id, deployed_by=deployed_by, status=status
+            deployment_id=deployment_id,
+            deployed_by=deployed_by,
+            status=status,
+            start_date=start_date,
+            completed_date=completed_date,
         ).set(pending_time)
 
         deployment_time_gauge.labels(
-            deployment_id=deployment_id, deployed_by=deployed_by, status=status
+            deployment_id=deployment_id,
+            deployed_by=deployed_by,
+            status=status,
+            start_date=start_date,
+            completed_date=completed_date,
         ).set(deployment_time)
