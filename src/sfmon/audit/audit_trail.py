@@ -33,6 +33,7 @@ def build_audit_trail_query():
                CreatedDate, Display, DelegateUser 
         FROM SetupAuditTrail 
         WHERE CreatedDate=YESTERDAY
+        AND CreatedBy.Username != NULL
         ORDER BY CreatedDate DESC
     """
 
