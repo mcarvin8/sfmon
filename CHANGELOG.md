@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.1](https://github.com/mcarvin8/sfmon/compare/v3.3.0...v3.3.1) (2026-03-10)
+
+
+### Bug Fixes
+
+* salesforce env variable name in reauthenticate function ([83e6082](https://github.com/mcarvin8/sfmon/commit/83e608241ce29d4d3790de2adce1e44d1d1a6ef8))
+
 ## [3.3.0](https://github.com/mcarvin8/sfmon/compare/v3.2.2...v3.3.0) (2026-03-10)
 
 
