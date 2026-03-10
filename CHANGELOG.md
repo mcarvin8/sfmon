@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.3.0](https://github.com/mcarvin8/sfmon/compare/v3.2.2...v3.3.0) (2026-03-10)
+
+
+### Features
+
+* add reauthenticate function and allow query to reauthenticate when expired session ([d775819](https://github.com/mcarvin8/sfmon/commit/d775819b99d11b205f16031187e8df91a865d411))
+* add start date and completed date to deploy metrics ([ec2bd35](https://github.com/mcarvin8/sfmon/commit/ec2bd359d7a776952fb5869987665265cb884fc0))
+* monitor custom apex character limit and apex length without comments ([2dc9c2b](https://github.com/mcarvin8/sfmon/commit/2dc9c2b3725431847b3da897cff8ffd925725103))
+
+
+### Bug Fixes
+
+* exclude audit trail actions where user name is null ([9d5404f](https://github.com/mcarvin8/sfmon/commit/9d5404f29953e6acdd44e6de905026b849935dde))
+
 ## [3.2.2](https://github.com/mcarvin8/sfmon/compare/v3.2.1...v3.2.2) (2026-01-29)
 
 
