@@ -115,6 +115,27 @@ from tech_debt import (
 )
 
 
+# Global connection store - allows re-authentication to update connection
+sf_connection = None
+
+
+def reauthenticate_connections():
+    """
+    Re-authenticate to Salesforce org.
+    Refreshes the authentication token by re-logging in using the SFDX auth URL.
+    """
+    global sf_connection
+    logger.info("Starting re-authentication to Salesforce org...")
+    try:
+        sf_connection = get_salesforce_connection_url(
+            url=os.getenv("PRODUCTION_AUTH_URL")
+        )
+        logger.info("Successfully re-authenticated to Salesforce org.")
+    except Exception as e:
+        logger.error("Failed to re-authenticate to Salesforce org: %s", e)
+    logger.info("Re-authentication complete")
+
+
 def get_schedule_config(job_id, default_schedule):
     """
     Get schedule configuration for a job from config file, environment variable, or use default.
@@ -146,7 +167,7 @@ def _add_job_with_schedule(scheduler, sf, job_id, schedule, func, job_name):
     )
 
 
-def schedule_tasks(sf, scheduler):
+def schedule_tasks(scheduler):
     """
     Schedule all tasks using APScheduler with cron syntax for precise timing.
 
@@ -447,8 +468,10 @@ def schedule_tasks(sf, scheduler):
     for job_id, default_schedule, func, job_name in scheduled_jobs:
         schedule = get_schedule_config(job_id, default_schedule)
         if schedule:
-            func(sf)  # initial run only for jobs enabled by config
-            _add_job_with_schedule(scheduler, sf, job_id, schedule, func, job_name)
+            func(sf_connection)  # initial run only for jobs enabled by config
+            _add_job_with_schedule(
+                scheduler, sf_connection, job_id, schedule, func, job_name
+            )
     logger.info("Initial execution completed, all jobs scheduled with APScheduler")
 
 
@@ -456,15 +479,16 @@ def main():
     """
     Main function. Runs tasks using APScheduler with cron syntax for precise timing.
     """
+    global sf_connection
     # Start Prometheus metrics server
     metrics_port = int(os.getenv("METRICS_PORT", 9001))
     start_http_server(metrics_port)
     # Connect to Salesforce org
-    sf = get_salesforce_connection_url(url=os.getenv("SALESFORCE_AUTH_URL"))
+    sf_connection = get_salesforce_connection_url(url=os.getenv("SALESFORCE_AUTH_URL"))
     # Initialize APScheduler
     scheduler = BlockingScheduler()
     # Schedule all tasks
-    schedule_tasks(sf, scheduler)
+    schedule_tasks(scheduler)
     try:
         logger.info("Starting APScheduler...")
         scheduler.start()
