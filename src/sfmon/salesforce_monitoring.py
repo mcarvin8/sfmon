@@ -128,7 +128,7 @@ def reauthenticate_connections():
     logger.info("Starting re-authentication to Salesforce org...")
     try:
         sf_connection = get_salesforce_connection_url(
-            url=os.getenv("PRODUCTION_AUTH_URL")
+            url=os.getenv("SALESFORCE_AUTH_URL")
         )
         logger.info("Successfully re-authenticated to Salesforce org.")
     except Exception as e:
