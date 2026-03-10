@@ -1,0 +1,23 @@
+src/sfmon/connection_sf.py
+  a8cb21feb2793e96 28-31,45-51,89-90,105-106
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.37",
+  "base_commit_sha": "abac132b08072cfe55d35e0985a5cc98be1df1a5",
+  "prompts": {
+    "a8cb21feb2793e96": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a2a672df-9c13-4531-867f-a931ebf17ba8",
+        "model": "default"
+      },
+      "human_author": "Matt Carvin <90224411+mcarvin8@users.noreply.github.com>",
+      "messages": [],
+      "total_additions": 15,
+      "total_deletions": 3,
+      "accepted_lines": 15,
+      "overriden_lines": 0
+    }
+  }
+}

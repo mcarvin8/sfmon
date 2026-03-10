@@ -1,0 +1,33 @@
+src/sfmon/audit/utils.py
+  a8cb21feb2793e96 50-54
+src/sfmon/tech_debt/permissions.py
+  a8cb21feb2793e96 77,88,114,121
+src/sfmon/audit/report_export.py
+  a8cb21feb2793e96 70,74-76,80-81
+src/sfmon/audit/forbidden_profiles.py
+  a8cb21feb2793e96 66-68,74
+src/sfmon/tech_debt/users.py
+  a8cb21feb2793e96 39,48,85,94
+src/sfmon/tech_debt/code_quality.py
+  a8cb21feb2793e96 44,49,75,80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.37",
+  "base_commit_sha": "24caba392639582738e25f1c841c6529ab515803",
+  "prompts": {
+    "a8cb21feb2793e96": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a2a672df-9c13-4531-867f-a931ebf17ba8",
+        "model": "default"
+      },
+      "human_author": "Matt Carvin <90224411+mcarvin8@users.noreply.github.com>",
+      "messages": [],
+      "total_additions": 51,
+      "total_deletions": 34,
+      "accepted_lines": 34,
+      "overriden_lines": 0
+    }
+  }
+}

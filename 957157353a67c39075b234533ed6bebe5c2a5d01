@@ -1,0 +1,23 @@
+docker/Dockerfile
+  a8cb21feb2793e96 27,30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.37",
+  "base_commit_sha": "957157353a67c39075b234533ed6bebe5c2a5d01",
+  "prompts": {
+    "a8cb21feb2793e96": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a2a672df-9c13-4531-867f-a931ebf17ba8",
+        "model": "default"
+      },
+      "human_author": "Matt Carvin <90224411+mcarvin8@users.noreply.github.com>",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 2,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}
