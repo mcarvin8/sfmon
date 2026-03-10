@@ -43,7 +43,7 @@
         "content": "<h2 style=\"color: orange; text-align: center;\">\r\n    Salesforce Tech Debt Monitoring\r\n</h2>\r\n",
         "mode": "html"
       },
-      "pluginVersion": "12.0.5",
+      "pluginVersion": "12.3.3",
       "title": "",
       "transparent": true,
       "type": "text"
@@ -77,7 +77,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "dark-red"
+                    "color": "dark-red",
+                    "value": 0
                   },
                   {
                     "color": "dark-orange",
@@ -126,7 +127,7 @@
             "textMode": "value_and_name",
             "wideLayout": true
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "12.3.3",
           "targets": [
             {
               "datasource": {
@@ -181,6 +182,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": true,
                 "stacking": {
                   "group": "A",
@@ -198,7 +200,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "dark-red"
+                    "color": "dark-red",
+                    "value": 0
                   },
                   {
                     "color": "dark-orange",
@@ -229,7 +232,7 @@
             "y": 3
           },
           "id": 147,
-          "interval": "12h",
+          "interval": "1d",
           "options": {
             "legend": {
               "calcs": [],
@@ -243,7 +246,7 @@
               "sort": "none"
             }
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "12.3.3",
           "targets": [
             {
               "datasource": {
@@ -254,28 +257,12 @@
               "expr": "security_health_check_score",
               "hide": false,
               "instant": false,
-              "legendFormat": "score",
+              "legendFormat": "Health Check Score",
               "range": true,
               "refId": "A"
             }
           ],
           "title": "Salesforce Health Check Trend",
-          "transformations": [
-            {
-              "id": "calculateField",
-              "options": {
-                "alias": "Health Check Score",
-                "mode": "reduceRow",
-                "reduce": {
-                  "include": [
-                    "score"
-                  ],
-                  "reducer": "lastNotNull"
-                },
-                "replaceFields": true
-              }
-            }
-          ],
           "transparent": true,
           "type": "timeseries"
         },
@@ -296,6 +283,11 @@
                   "type": "color-text"
                 },
                 "filterable": true,
+                "footer": {
+                  "reducers": [
+                    "countAll"
+                  ]
+                },
                 "inspect": true
               },
               "fieldMinMax": false,
@@ -340,7 +332,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text"
+                    "color": "text",
+                    "value": 0
                   }
                 ]
               }
@@ -412,21 +405,13 @@
             "h": 19,
             "w": 24,
             "x": 0,
-            "y": 152
+            "y": 149
           },
           "id": 143,
           "interval": "5m",
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": true,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "count"
-              ],
-              "show": true
-            },
+            "enablePagination": false,
             "showHeader": true,
             "sortBy": [
               {
@@ -435,7 +420,7 @@
               }
             ]
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "12.3.3",
           "targets": [
             {
               "datasource": {
@@ -540,6 +525,11 @@
                   "type": "color-text"
                 },
                 "filterable": true,
+                "footer": {
+                  "reducers": [
+                    "countAll"
+                  ]
+                },
                 "inspect": false
               },
               "fieldMinMax": false,
@@ -548,7 +538,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text"
+                    "color": "text",
+                    "value": 0
                   }
                 ]
               }
@@ -621,7 +612,7 @@
             ]
           },
           "gridPos": {
-            "h": 14,
+            "h": 15,
             "w": 24,
             "x": 0,
             "y": 4
@@ -630,15 +621,7 @@
           "interval": "5m",
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": true,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "count"
-              ],
-              "show": true
-            },
+            "enablePagination": false,
             "showHeader": true,
             "sortBy": [
               {
@@ -647,7 +630,7 @@
               }
             ]
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "12.3.3",
           "targets": [
             {
               "datasource": {
@@ -796,6 +779,289 @@
             "type": "prometheus",
             "uid": "cip-o11y-aws-prd-us-west-2-theta"
           },
+          "description": "Tracks the percentage of Apex code limit utilized, excluding comments and @isTest annotated classes, to monitor Salesforce's technical debt and ensure system scalability and compliance.\n\nLimit: 6 million characters",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 2,
+              "fieldMinMax": false,
+              "mappings": [],
+              "min": 0,
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "blue",
+                    "value": 55
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 70
+                  },
+                  {
+                    "color": "orange",
+                    "value": 80
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 4,
+            "x": 0,
+            "y": 19
+          },
+          "id": 167,
+          "interval": "24h",
+          "options": {
+            "colorMode": "background_solid",
+            "graphMode": "area",
+            "justifyMode": "center",
+            "orientation": "vertical",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "value",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.3.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "apex_character_limit_percentage",
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "Percent of Apex Used",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "cip-o11y-aws-prd-us-west-2-theta"
+          },
+          "description": "Displays Apex Classes and Apex Triggers by code length (excluding comments).\n\nSalesforce enforces a 6,000,000 character limit for Apex (excluding comments and @isTest classes).",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
+                "filterable": true,
+                "footer": {
+                  "reducers": [
+                    "countAll"
+                  ]
+                },
+                "inspect": false
+              },
+              "fieldMinMax": false,
+              "mappings": [
+                {
+                  "options": {
+                    "false": {
+                      "color": "green",
+                      "index": 1,
+                      "text": "FALSE"
+                    },
+                    "true": {
+                      "color": "orange",
+                      "index": 0,
+                      "text": "TRUE"
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Id"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "${__data.fields[\"Id]}",
+                        "url": "https://avalara.my.salesforce.com/${__data.fields[\"Id\"]}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 14,
+            "w": 20,
+            "x": 4,
+            "y": 19
+          },
+          "id": 166,
+          "interval": "5m",
+          "options": {
+            "cellHeight": "sm",
+            "enablePagination": false,
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Length Without Comments"
+              }
+            ]
+          },
+          "pluginVersion": "12.3.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "apex_class_length_without_comments",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A",
+              "useBackend": false
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "cip-o11y-aws-prd-us-west-2-theta"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "apex_trigger_length_without_comments",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "B"
+            }
+          ],
+          "title": "Custom Apex Length Without Comments",
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "Length Without Comments",
+                "mode": "reduceRow",
+                "reduce": {
+                  "include": [
+                    "Value #A",
+                    "Value #B"
+                  ],
+                  "reducer": "max"
+                }
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value #A": true,
+                  "Value #B": true,
+                  "__name__": true,
+                  "container": true,
+                  "endpoint": true,
+                  "instance": true,
+                  "job": true,
+                  "namespace": true,
+                  "pod": true,
+                  "service": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Length Without Comments": 14,
+                  "Time": 0,
+                  "Value #A": 12,
+                  "Value #B": 13,
+                  "__name__": 1,
+                  "container": 2,
+                  "endpoint": 3,
+                  "id": 4,
+                  "instance": 5,
+                  "is_test": 11,
+                  "job": 6,
+                  "name": 7,
+                  "namespace": 8,
+                  "pod": 9,
+                  "service": 10
+                },
+                "renameByName": {
+                  "id": "Id",
+                  "instance": "",
+                  "is_test": "Is Test"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "cip-o11y-aws-prd-us-west-2-theta"
+          },
           "description": "",
           "fieldConfig": {
             "defaults": {
@@ -808,6 +1074,11 @@
                   "type": "auto"
                 },
                 "filterable": true,
+                "footer": {
+                  "reducers": [
+                    "countAll"
+                  ]
+                },
                 "inspect": false
               },
               "fieldMinMax": false,
@@ -838,7 +1109,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text"
+                    "color": "text",
+                    "value": 0
                   }
                 ]
               }
@@ -882,21 +1154,13 @@
             "h": 12,
             "w": 24,
             "x": 0,
-            "y": 130
+            "y": 33
           },
           "id": 165,
           "interval": "5m",
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": true,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "count"
-              ],
-              "show": true
-            },
+            "enablePagination": false,
             "showHeader": true,
             "sortBy": [
               {
@@ -905,7 +1169,7 @@
               }
             ]
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "12.3.3",
           "targets": [
             {
               "datasource": {
@@ -1023,6 +1287,11 @@
                   "type": "color-text"
                 },
                 "filterable": true,
+                "footer": {
+                  "reducers": [
+                    "countAll"
+                  ]
+                },
                 "inspect": false
               },
               "fieldMinMax": false,
@@ -1041,7 +1310,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text"
+                    "color": "text",
+                    "value": 0
                   }
                 ]
               }
@@ -1071,21 +1341,13 @@
             "h": 16,
             "w": 12,
             "x": 0,
-            "y": 5
+            "y": 46
           },
           "id": 148,
           "interval": "5m",
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": true,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "count"
-              ],
-              "show": true
-            },
+            "enablePagination": false,
             "showHeader": true,
             "sortBy": [
               {
@@ -1094,7 +1356,7 @@
               }
             ]
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "12.3.3",
           "targets": [
             {
               "datasource": {
@@ -1182,6 +1444,11 @@
                   "type": "color-text"
                 },
                 "filterable": true,
+                "footer": {
+                  "reducers": [
+                    "countAll"
+                  ]
+                },
                 "inspect": false
               },
               "fieldMinMax": false,
@@ -1200,7 +1467,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text"
+                    "color": "text",
+                    "value": 0
                   }
                 ]
               }
@@ -1230,21 +1498,13 @@
             "h": 16,
             "w": 12,
             "x": 12,
-            "y": 5
+            "y": 46
           },
           "id": 149,
           "interval": "5m",
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": true,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "count"
-              ],
-              "show": true
-            },
+            "enablePagination": false,
             "showHeader": true,
             "sortBy": [
               {
@@ -1253,7 +1513,7 @@
               }
             ]
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "12.3.3",
           "targets": [
             {
               "datasource": {
@@ -1355,6 +1615,11 @@
                   "type": "color-text"
                 },
                 "filterable": true,
+                "footer": {
+                  "reducers": [
+                    "countAll"
+                  ]
+                },
                 "inspect": false
               },
               "fieldMinMax": false,
@@ -1363,7 +1628,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text"
+                    "color": "text",
+                    "value": 0
                   }
                 ]
               }
@@ -1415,21 +1681,13 @@
             "h": 16,
             "w": 12,
             "x": 0,
-            "y": 6
+            "y": 47
           },
           "id": 136,
           "interval": "5m",
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": true,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "count"
-              ],
-              "show": true
-            },
+            "enablePagination": false,
             "showHeader": true,
             "sortBy": [
               {
@@ -1438,7 +1696,7 @@
               }
             ]
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "12.3.3",
           "targets": [
             {
               "datasource": {
@@ -1585,6 +1843,11 @@
                   "type": "color-text"
                 },
                 "filterable": true,
+                "footer": {
+                  "reducers": [
+                    "countAll"
+                  ]
+                },
                 "inspect": false
               },
               "fieldMinMax": false,
@@ -1603,7 +1866,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text"
+                    "color": "text",
+                    "value": 0
                   }
                 ]
               }
@@ -1655,21 +1919,13 @@
             "h": 16,
             "w": 12,
             "x": 12,
-            "y": 6
+            "y": 47
           },
           "id": 138,
           "interval": "5m",
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": true,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "count"
-              ],
-              "show": true
-            },
+            "enablePagination": false,
             "showHeader": true,
             "sortBy": [
               {
@@ -1678,7 +1934,7 @@
               }
             ]
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "12.3.3",
           "targets": [
             {
               "datasource": {
@@ -1849,6 +2105,11 @@
                   "type": "color-text"
                 },
                 "filterable": true,
+                "footer": {
+                  "reducers": [
+                    "countAll"
+                  ]
+                },
                 "inspect": false
               },
               "fieldMinMax": false,
@@ -1867,7 +2128,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text"
+                    "color": "text",
+                    "value": 0
                   }
                 ]
               }
@@ -1878,21 +2140,13 @@
             "h": 16,
             "w": 12,
             "x": 0,
-            "y": 7
+            "y": 48
           },
           "id": 150,
           "interval": "5m",
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": true,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "count"
-              ],
-              "show": true
-            },
+            "enablePagination": false,
             "showHeader": true,
             "sortBy": [
               {
@@ -1901,7 +2155,7 @@
               }
             ]
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "12.3.3",
           "targets": [
             {
               "datasource": {
@@ -1964,6 +2218,11 @@
                   "type": "color-text"
                 },
                 "filterable": true,
+                "footer": {
+                  "reducers": [
+                    "countAll"
+                  ]
+                },
                 "inspect": false
               },
               "fieldMinMax": false,
@@ -1972,7 +2231,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text"
+                    "color": "text",
+                    "value": 0
                   }
                 ]
               }
@@ -2002,21 +2262,13 @@
             "h": 16,
             "w": 12,
             "x": 12,
-            "y": 7
+            "y": 48
           },
           "id": 151,
           "interval": "5m",
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": true,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "count"
-              ],
-              "show": true
-            },
+            "enablePagination": false,
             "showHeader": true,
             "sortBy": [
               {
@@ -2025,7 +2277,7 @@
               }
             ]
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "12.3.3",
           "targets": [
             {
               "datasource": {
@@ -2092,6 +2344,11 @@
                   "type": "color-text"
                 },
                 "filterable": true,
+                "footer": {
+                  "reducers": [
+                    "countAll"
+                  ]
+                },
                 "inspect": false
               },
               "fieldMinMax": false,
@@ -2100,7 +2357,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text"
+                    "color": "text",
+                    "value": 0
                   }
                 ]
               }
@@ -2130,21 +2388,13 @@
             "h": 16,
             "w": 12,
             "x": 0,
-            "y": 55
+            "y": 64
           },
           "id": 152,
           "interval": "5m",
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": true,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "count"
-              ],
-              "show": true
-            },
+            "enablePagination": false,
             "showHeader": true,
             "sortBy": [
               {
@@ -2153,7 +2403,7 @@
               }
             ]
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "12.3.3",
           "targets": [
             {
               "datasource": {
@@ -2220,6 +2470,11 @@
                   "type": "color-text"
                 },
                 "filterable": true,
+                "footer": {
+                  "reducers": [
+                    "countAll"
+                  ]
+                },
                 "inspect": false
               },
               "fieldMinMax": false,
@@ -2228,7 +2483,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text"
+                    "color": "text",
+                    "value": 0
                   }
                 ]
               }
@@ -2258,21 +2514,13 @@
             "h": 16,
             "w": 12,
             "x": 12,
-            "y": 55
+            "y": 64
           },
           "id": 153,
           "interval": "5m",
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": true,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "count"
-              ],
-              "show": true
-            },
+            "enablePagination": false,
             "showHeader": true,
             "sortBy": [
               {
@@ -2281,7 +2529,7 @@
               }
             ]
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "12.3.3",
           "targets": [
             {
               "datasource": {
@@ -2364,6 +2612,11 @@
                   "type": "color-text"
                 },
                 "filterable": true,
+                "footer": {
+                  "reducers": [
+                    "countAll"
+                  ]
+                },
                 "inspect": false
               },
               "fieldMinMax": false,
@@ -2372,7 +2625,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text"
+                    "color": "text",
+                    "value": 0
                   }
                 ]
               }
@@ -2402,21 +2656,13 @@
             "h": 16,
             "w": 24,
             "x": 0,
-            "y": 8
+            "y": 81
           },
           "id": 163,
           "interval": "5m",
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": true,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "count"
-              ],
-              "show": true
-            },
+            "enablePagination": false,
             "showHeader": true,
             "sortBy": [
               {
@@ -2425,7 +2671,7 @@
               }
             ]
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "12.3.3",
           "targets": [
             {
               "datasource": {
@@ -2548,7 +2794,7 @@
             "h": 16,
             "w": 12,
             "x": 0,
-            "y": 9
+            "y": 1300
           },
           "id": 145,
           "interval": "5m",
@@ -2571,7 +2817,7 @@
               }
             ]
           },
-          "pluginVersion": "12.0.5",
+          "pluginVersion": "12.0.6+security-01",
           "targets": [
             {
               "datasource": {
@@ -2633,7 +2879,7 @@
   ],
   "preload": false,
   "refresh": "",
-  "schemaVersion": 41,
+  "schemaVersion": 42,
   "tags": [],
   "templating": {
     "list": [
