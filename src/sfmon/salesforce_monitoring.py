@@ -97,6 +97,7 @@ from tech_debt import (
     apex_classes_api_version,
     apex_triggers_api_version,
     workflow_rules_monitoring,
+    apex_used_limits_monitoring,
     unassigned_permission_sets,
     perm_sets_limited_users,
     profile_assignment_under5,
@@ -192,6 +193,7 @@ def schedule_tasks(sf, scheduler):
         - 02:30 - profile_assignment_under5
         - 02:45 - profile_no_active_users
         - 03:00 - apex_classes_api_version
+        - 03:05 - apex_used_limits_monitoring
         - 03:15 - apex_triggers_api_version
         - 03:30 - security_health_check
         - 03:45 - salesforce_health_risks
@@ -277,6 +279,12 @@ def schedule_tasks(sf, scheduler):
             {"hour": "3", "minute": "0"},
             apex_classes_api_version,
             "Apex Classes API Version",
+        ),
+        (
+            "apex_used_limits_monitoring",
+            {"hour": "3", "minute": "5"},
+            apex_used_limits_monitoring,
+            "Apex Used Limits Monitoring",
         ),
         (
             "apex_triggers_api_version",

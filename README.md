@@ -82,6 +82,10 @@ SFMon is configured via environment variables. Here are the available options:
 - **`PROFILE_UNDER_USERS_THRESHOLD`**: Profiles with this many or fewer users are flagged (default: `5`)
   - Example: `-e PROFILE_UNDER_USERS_THRESHOLD=3` (flag profiles with ≤3 users)
 
+- **`APEX_CHARACTER_LIMIT`**: Salesforce Apex character limit (default: `6,000,000`)
+  - Example: `-e APEX_CHARACTER_LIMIT=9000000` (sets character limit to 9M characters)
+
+
 #### Optional - Performance Thresholds
 
 - **`LONG_RUNNING_APEX_MS`**: Milliseconds threshold for long-running Apex requests (default: `5000`)
@@ -118,6 +122,7 @@ docker run -d \
   -e DORMANT_USER_DAYS=90 \
   -e LARGE_QUERY_THRESHOLD=10000 \
   -e DEPRECATED_API_VERSION=50 \
+  -e APEX_CHARACTER_LIMIT=9000000 \
   mcarvin8/sfmon:latest
 ```
 
@@ -351,6 +356,7 @@ Copy the jobs you need into your `config.json`. Use lowercase with underscores.
 | `profile_assignment_under5` | `hour=2,minute=30` | Profiles with <5 users |
 | `profile_no_active_users` | `hour=2,minute=45` | Profiles with no users |
 | `apex_classes_api_version` | `hour=3,minute=0` | Outdated Apex classes |
+| `apex_used_limits_monitoring` | `hour=3,minute=5` | Apex limits monitoring |
 | `apex_triggers_api_version` | `hour=3,minute=15` | Outdated Apex triggers |
 | `security_health_check` | `hour=3,minute=30` | Security health score |
 | `salesforce_health_risks` | `hour=3,minute=45` | Security risks |

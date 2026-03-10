@@ -445,7 +445,7 @@ unassigned_profiles = Gauge(
 )
 
 # =============================================================================
-# 13. Tech Debt - Code Quality (API Versions)
+# 13. Tech Debt - Code Quality (API Versions and Apex)
 # =============================================================================
 deprecated_apex_class_gauge = Gauge(
     "deprecated_apex_classes",
@@ -456,6 +456,21 @@ deprecated_apex_trigger_gauge = Gauge(
     "deprecated_apex_triggers",
     "Apex triggers running on deprecated API versions (threshold configurable via DEPRECATED_API_VERSION)",
     ["id", "name"],
+)
+apex_class_length_without_comments_gauge = Gauge(
+    "apex_class_length_without_comments",
+    "Apex class character count excluding comments (Apex Used Limits). Custom classes only.",
+    ["id", "name", "is_test"],
+)
+apex_trigger_length_without_comments_gauge = Gauge(
+    "apex_trigger_length_without_comments",
+    "Apex trigger character count excluding comments (Apex Used Limits). Custom triggers only.",
+    ["id", "name", "is_test"],
+)
+apex_character_limit_percentage_gauge = Gauge(
+    "apex_character_limit_percentage",
+    "Percentage of Apex character limit (6M) used. Custom classes/triggers only, excludes @isTest classes.",
+    [],
 )
 
 # =============================================================================

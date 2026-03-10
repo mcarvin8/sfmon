@@ -27,6 +27,7 @@ from .code_quality import (
     apex_classes_api_version,
     apex_triggers_api_version,
     workflow_rules_monitoring,
+    apex_used_limits_monitoring,
 )
 from .permissions import (
     unassigned_permission_sets,
@@ -50,6 +51,7 @@ __all__ = [
     "apex_classes_api_version",
     "apex_triggers_api_version",
     "workflow_rules_monitoring",
+    "apex_used_limits_monitoring",
     # Permissions
     "unassigned_permission_sets",
     "perm_sets_limited_users",
