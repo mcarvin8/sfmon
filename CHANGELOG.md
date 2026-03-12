@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.3.2](https://github.com/mcarvin8/sfmon/compare/v3.3.1...v3.3.2) (2026-03-12)
+
+
+### Bug Fixes
+
+* **docker:** modify user creation for Kubernetes compatibility ([2296c7f](https://github.com/mcarvin8/sfmon/commit/2296c7f1bcc7562365ae01122d8d22d980e2a9e2))
+* **docker:** path to app after user uid update ([fcc5cb7](https://github.com/mcarvin8/sfmon/commit/fcc5cb772fbb5bb75a7f57aa2287aad89ac643d6))
+
 ## [3.3.1](https://github.com/mcarvin8/sfmon/compare/v3.3.0...v3.3.1) (2026-03-10)
 
 
