@@ -40,7 +40,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Create non-root user for running the application (numeric UID for Kubernetes runAsNonRoot)
 ARG EXPORTER_UID=1001
 RUN useradd --uid ${EXPORTER_UID} --create-home --shell /bin/bash exporter && \
-    chown -R exporter:exporter /app/statuspage-exporter /opt/venv
+    chown -R exporter:exporter /app/sfmon /opt/venv
 
 # Use numeric UID so Kubernetes can verify non-root when runAsNonRoot is set
 USER ${EXPORTER_UID}
