@@ -37,12 +37,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl python3 py
 # Set the environment variables to use the venv #
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Create non-root user for running the application
-RUN groupadd --gid 1000 sfmon && \
-    useradd --uid 1000 --gid sfmon --shell /bin/bash --create-home sfmon && \
-    chown -R sfmon:sfmon /app/sfmon /opt/venv
+# Create non-root user for running the application (numeric UID for Kubernetes runAsNonRoot)
+ARG EXPORTER_UID=1001
+RUN useradd --uid ${EXPORTER_UID} --create-home --shell /bin/bash exporter && \
+    chown -R exporter:exporter /app/statuspage-exporter /opt/venv
 
-USER sfmon
+# Use numeric UID so Kubernetes can verify non-root when runAsNonRoot is set
+USER ${EXPORTER_UID}
 
 # Health check: metrics endpoint on METRICS_PORT (default 9001)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
