@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.0](https://github.com/mcarvin8/sfmon/compare/v3.3.2...v3.4.0) (2026-03-13)
+
+
+### Features
+
+* **connection:** pass URL via stdin on ubuntu to allow to avoid writing to file-system in a secure container ([0a257a5](https://github.com/mcarvin8/sfmon/commit/0a257a5f6e98e3ab9eaa21751ed23a897a63f1d6))
+
 ## [3.3.2](https://github.com/mcarvin8/sfmon/compare/v3.3.1...v3.3.2) (2026-03-12)
 
 
