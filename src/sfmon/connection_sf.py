@@ -25,10 +25,6 @@ from simple_salesforce import Salesforce
 from logger import logger
 
 
-# Allowed basenames for Salesforce CLI executable (validated to avoid B603 untrusted input)
-_SF_ALLOWED_BASENAMES = ("sf", "sf.cmd")
-
-
 def _get_sf_command():
     """Get the Salesforce CLI command, handling Windows .cmd extension."""
     if sys.platform == "win32":
@@ -42,13 +38,6 @@ def _get_sf_command():
             "Salesforce CLI (sf) not found. Please ensure it is installed and in your PATH."
         )
 
-    # Resolve to absolute path and validate basename to avoid executing arbitrary binaries
-    sf_path = os.path.abspath(sf_path)
-    if os.path.basename(sf_path) not in _SF_ALLOWED_BASENAMES:
-        raise ValueError(
-            "Salesforce CLI path must be 'sf' or 'sf.cmd'; got %s"
-            % os.path.basename(sf_path)
-        )
     return sf_path
 
 
@@ -75,34 +64,58 @@ def get_salesforce_connection_url(url):
             "Ensure environment variable is set."
         )
 
-    temp_file = None
     try:
         sf_cmd = _get_sf_command()
 
-        # Use a temporary file for the auth URL (more reliable on Windows than stdin)
-        # The file is deleted immediately after use
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
-            f.write(url)
-            temp_file = f.name
+        if sys.platform == "win32":
+            # Windows: temp file is more reliable than stdin for sf CLI. Use argument list
+            # (no shell=True) to avoid command injection.
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".txt", delete=False
+            ) as f:
+                f.write(url)
+                temp_file = f.name
+            try:
+                subprocess.run(  # nosec B603
+                    [
+                        sf_cmd,
+                        "org",
+                        "login",
+                        "sfdx-url",
+                        "--set-default",
+                        "--sfdx-url-file",
+                        temp_file,
+                    ],
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
+            finally:
+                try:
+                    if os.path.exists(temp_file):
+                        os.unlink(temp_file)
+                except OSError:
+                    pass
+        else:
+            # Unix (Linux/containers): pass URL via stdin. No temp file, so safe for
+            # read-only root FS; argument list only (no shell) to prevent injection.
+            # --sfdx-url-stdin must be last per CLI requirement.
+            subprocess.run(  # nosec B603
+                [
+                    sf_cmd,
+                    "org",
+                    "login",
+                    "sfdx-url",
+                    "--set-default",
+                    "--sfdx-url-stdin",
+                ],
+                input=url.encode("utf-8"),
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
 
-        # Use --sfdx-url-file which is more reliable across platforms
-        # sf_cmd validated by _get_sf_command(); args are hardcoded or temp path
-        subprocess.run(  # nosec B603
-            [
-                sf_cmd,
-                "org",
-                "login",
-                "sfdx-url",
-                "--set-default",
-                "--sfdx-url-file",
-                temp_file,
-            ],
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-
-        # Get org display info; sf_cmd validated by _get_sf_command(); args hardcoded
+        # Get org display info (argument list only, no shell)
         display_cmd = subprocess.run(  # nosec B603
             [sf_cmd, "org", "display", "--json"],
             check=True,
@@ -133,7 +146,3 @@ def get_salesforce_connection_url(url):
     except KeyError as e:
         logger.error("Missing expected key in Salesforce CLI output: %s", e)
         raise
-    finally:
-        # Always clean up the temporary file
-        if temp_file and os.path.exists(temp_file):
-            os.unlink(temp_file)
