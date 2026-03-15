@@ -4,9 +4,9 @@
 ![Docker Pulls](https://img.shields.io/docker/pulls/mcarvin8/sfmon)
 ![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/mcarvin8/sfmon)
 
-**SFMon** is a portable, custom-built Docker container that collects Salesforce org metrics and exposes them via an HTTP endpoint for scraping by **Prometheus**. It enables teams to gain visibility into Salesforce performance, usage, configuration, technical debt, and incidents—no matter what cloud platform they use.
+**SFMon** is a portable, custom-built Docker container that collects Salesforce org metrics and exposes them via an HTTP endpoint for scraping by **Prometheus**. It enables teams to gain visibility into Salesforce performance, usage, configuration, technical debt, and incidents.
 
-> **SFMon can be deployed on any platform** that supports Docker and Prometheus, including GCP, Azure, or Kubernetes-based environments. It has been tested and verified on AWS ECS and Kubernetes.
+> **SFMon can be deployed on any platform** that supports Docker and Prometheus, including GCP, Azure, or Kubernetes-based environments. It has been tested on AWS ECS and Kubernetes.
 
 Prebuilt **Grafana dashboards** are included to help you visualize metrics right away.
 
