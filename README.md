@@ -12,7 +12,7 @@
 
 ## 🚀 Quick Start
 
-### Using the Pre-built Docker Image
+### Using the Docker Image from Docker Hub
 
 The easiest way to get started is using the pre-built image from [Docker Hub](https://hub.docker.com/repository/docker/mcarvin8/sfmon/general):
 
