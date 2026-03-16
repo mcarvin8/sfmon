@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.0](https://github.com/mcarvin8/sfmon/compare/v3.4.0...v3.5.0) (2026-03-16)
+
+
+### Features
+
+* **docker:** allow docker to run as non-root user in a non-writable root filesystem ([fea31b1](https://github.com/mcarvin8/sfmon/commit/fea31b18fd045feac6fa08656417d0b703abefa7))
+
 ## [3.4.0](https://github.com/mcarvin8/sfmon/compare/v3.3.2...v3.4.0) (2026-03-13)
 
 
