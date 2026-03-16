@@ -37,10 +37,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl python3 py
 # Set the environment variables to use the venv #
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Create non-root user for running the application (numeric UID for Kubernetes runAsNonRoot)
+# sf CLI writes config to $HOME/.sf and .sfdx. With read-only root FS, we mount emptyDir at
+# /app/sfmon/.sf and .sfdx; set HOME so the CLI uses that path (same pattern as SBX).
+ENV HOME=/app/sfmon
+
+# Create non-root user and sf CLI config dirs (mount points for writable volumes)
 ARG EXPORTER_UID=1001
 RUN useradd --uid ${EXPORTER_UID} --create-home --shell /bin/bash exporter && \
-    chown -R exporter:exporter /app/sfmon /opt/venv
+    chown -R exporter:exporter /app/sfmon /opt/venv && \
+    mkdir -p /app/sfmon/.sf /app/sfmon/.sfdx && \
+    chown exporter:exporter /app/sfmon/.sf /app/sfmon/.sfdx
 
 # Use numeric UID so Kubernetes can verify non-root when runAsNonRoot is set
 USER ${EXPORTER_UID}
