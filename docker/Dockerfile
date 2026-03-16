@@ -34,11 +34,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl python3 py
     sf version --verbose --json && \
     /opt/venv/bin/pip list
 
-# Set the environment variables to use the venv #
+# Set the environment variables to use the venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # sf CLI writes config to $HOME/.sf and .sfdx. With read-only root FS, we mount emptyDir at
-# /app/sfmon/.sf and .sfdx; set HOME so the CLI uses that path (same pattern as SBX).
+# /app/sfmon/.sf and .sfdx; set HOME so the CLI uses that path
 ENV HOME=/app/sfmon
 
 # Create non-root user and sf CLI config dirs (mount points for writable volumes)
