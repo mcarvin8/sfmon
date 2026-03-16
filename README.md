@@ -10,7 +10,7 @@
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Using the Docker Image from Docker Hub
 
@@ -136,7 +136,7 @@ You should see Prometheus-formatted metrics output.
 
 ---
 
-## ☁️ Platform-Agnostic Design
+## Platform-Agnostic Design
 
 The SFMon container can be deployed in any of the following environments:
 
@@ -154,7 +154,7 @@ The core components that make this possible:
 
 ---
 
-## 📦 Core Components
+## Core Components
 
 ### Python Monitoring Scripts
 
@@ -181,9 +181,9 @@ Located in `docker`, it:
 
 ---
 
-## 🔨 Building the Docker Image (Advanced)
+## Building the Docker Image (Advanced)
 
-If you need to build the image yourself or customize it:
+If you need to build the image yourself to customize it:
 
 **Required build argument**: Salesforce org SFDX auth URL (`SALESFORCE_AUTH_URL`)
 
@@ -202,7 +202,7 @@ docker push your-repo/sfmon:latest
 
 ---
 
-## ⚙️ Customization
+## Customization
 
 ### Configuration File
 
@@ -431,13 +431,13 @@ Profiles listed in `FORBIDDEN_PROD_PROFILES` will trigger compliance alerts if a
 
 ---
 
-## 📊 Grafana Dashboard
+## Grafana Dashboards
 
 Import the JSON files in `grafana` to get started with ready-to-use SFMon dashboards for general ops, auditing, and tech debt. Customize based on your Prometheus data source, orgs and alerting requirements.
 
 ---
 
-## ✍️ Authors
+## Authors
 
 Originally developed by **Deep Suthar** and **Matt Carvin** for ECS deployment and Kubernetes deployment at Avalara.
 
