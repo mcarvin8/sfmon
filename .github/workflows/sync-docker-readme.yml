@@ -3,9 +3,11 @@ name: Sync Docker Hub README
 on:
   push:
     branches:
-      - main # Change to your default branch name (e.g., master, main)
+      - main
     paths:
-      - 'README.md' # Only run if README.md changes
+      - 'README.md'
+      - '.github/workflows/sync-docker-readme.yml'
+
 
 jobs:
   sync-readme:
@@ -21,3 +23,4 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: mcarvin8/sfmon
           readme-filepath: README.md
+          short-description: ${{ github.event.repository.description }}
