@@ -1,0 +1,27 @@
+README.md
+  5e95ba4c767d7013 7,11,13,15-16,26-27,29,31-32,34,37-39,45,47,49,53-55,57,60,64,66,72
+docs/ENVIRONMENT.md
+  5e95ba4c767d7013 1-55
+docs/CONFIGURATION.md
+  5e95ba4c767d7013 1-198
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.12",
+  "base_commit_sha": "f7ed62f236db65b1e4ed200fe315f6483838ecc1",
+  "prompts": {
+    "5e95ba4c767d7013": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5eb06cc9-c499-4105-9916-b34bfd52d553",
+        "model": "default"
+      },
+      "human_author": "Matt Carvin <90224411+mcarvin8@users.noreply.github.com>",
+      "messages": [],
+      "total_additions": 323,
+      "total_deletions": 442,
+      "accepted_lines": 299,
+      "overriden_lines": 0
+    }
+  }
+}
