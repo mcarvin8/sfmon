@@ -28,8 +28,8 @@ docker run -d \
 
 No config file is required: all collectors run on **default schedules**. Optional tuning:
 
-- **Environment variables** (timeouts, compliance lists, thresholds, log level, etc.) → **[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md)**
-- **Config file** (schedules, disable jobs, `exclude_users`) → **[docs/CONFIGURATION.md](docs/CONFIGURATION.md)** · template **`config.example.json`**
+- **Environment variables** (timeouts, compliance lists, thresholds, log level, etc.) → **[docs/ENVIRONMENT.md](https://github.com/mcarvin8/sfmon/blob/main/docs/ENVIRONMENT.md)**
+- **Config file** (schedules, disable jobs, `exclude_users`) → **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md)** · template **`config.example.json`**
 
 Example with a mounted config:
 
@@ -44,7 +44,7 @@ docker run -d --name sfmon -p 9001:9001 \
 
 ## When you need your own image
 
-The Hub image is meant for **standard** monitoring: env vars + optional JSON config.
+The default image is meant for **standard** monitoring: env vars + optional JSON config.
 
 **Build and run your own image** if you need to change **application code** (new checks, different logic, pinned dependencies, private registry policy, or anything not covered by env/config).
 
