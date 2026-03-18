@@ -11,7 +11,7 @@ SFMon runs in **Docker**, connects to your Salesforce org on a schedule, and exp
 | You might use SFMon if… | Notes |
 |-------------------------|--------|
 | You already run **Prometheus / Grafana** (or similar) and want **Salesforce next to apps, DBs, and K8s** in one place. | Same alerting patterns, retention, and on-call workflows as the rest of infra. |
-| You want **broad org signals** in one exporter: limits, Apex/async health, licenses, security/tech-debt style checks, compliance-oriented metrics, etc. | See **[docs/CONFIGURATION.md](docs/CONFIGURATION.md)** for what runs by default. |
+| You want **broad org signals** in one exporter: limits, Apex/async health, licenses, security/tech-debt style checks, compliance-oriented metrics, etc. | See **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md)** for what runs by default. |
 | You prefer **self-hosted, no extra Salesforce SKU** for this style of telemetry. | You pay for compute to run the container; no SFMon subscription. |
 
 **Compared to Salesforce proactive monitoring / paid optimizer-style products** — Those are Salesforce-native, guided, and often tied to editions or add-ons. SFMon is for teams that want **metrics in *their* observability stack**, custom Grafana dashboards, and **programmable** PromQL alerts—not a replacement for every Salesforce product feature, but a different integration model.
