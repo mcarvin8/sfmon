@@ -5,7 +5,7 @@ This is the primary orchestration module for monitoring a Salesforce org.
 It implements a comprehensive monitoring strategy with resource-optimized scheduling to track:
     - Salesforce org limits and API usage
     - Apex execution, errors, and flex queue
-    - Bulk API operations (daily and hourly)
+    - Bulk API 1.0 and 2.0 operations (daily and hourly)
     - User login events and geolocation analysis
     - Deployment and validation status
     - Org-wide sharing settings changes

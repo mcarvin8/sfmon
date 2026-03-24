@@ -122,7 +122,7 @@ maintenance_gauge = Gauge(
 )
 
 # =============================================================================
-# 4. Bulk API - Daily Metrics
+# 4. Bulk API 1.0 and 2.0 Metrics
 # =============================================================================
 daily_batch_count_metric = Gauge(
     "daily_bulk_api_batch_count",
@@ -141,9 +141,6 @@ daily_entity_type_count_metric = Gauge(
     ["user_id", "operation_type", "entity_type"],
 )
 
-# =============================================================================
-# 4. Bulk API - Hourly Metrics
-# =============================================================================
 hourly_batch_count_metric = Gauge(
     "hourly_bulk_api_batch_count",
     "Count of batches by job_id, user_id, and entity_type",
@@ -158,6 +155,42 @@ hourly_batch_count_metric = Gauge(
 hourly_entity_type_count_metric = Gauge(
     "hourly_entity_type_count",
     "Counts of ENTITY_TYPE by user_id and OPERATION_TYPE",
+    ["user_id", "operation_type", "entity_type"],
+)
+
+daily_bulk_api2_batch_count_metric = Gauge(
+    "daily_bulk_api2_batch_count",
+    "Count of Bulk API 2.0 batches by job_id, user_id, and entity_type",
+    [
+        "job_id",
+        "user_id",
+        "entity_type",
+        "total_records_failed",
+        "total_records_processed",
+    ],
+)
+
+daily_bulk_api2_entity_type_count_metric = Gauge(
+    "daily_bulk_api2_entity_type_count",
+    "Bulk API 2.0 counts of ENTITY_TYPE by user_id and OPERATION_TYPE",
+    ["user_id", "operation_type", "entity_type"],
+)
+
+hourly_bulk_api2_batch_count_metric = Gauge(
+    "hourly_bulk_api2_batch_count",
+    "Count of Bulk API 2.0 batches by job_id, user_id, and entity_type",
+    [
+        "job_id",
+        "user_id",
+        "entity_type",
+        "total_records_failed",
+        "total_records_processed",
+    ],
+)
+
+hourly_bulk_api2_entity_type_count_metric = Gauge(
+    "hourly_bulk_api2_entity_type_count",
+    "Bulk API 2.0 counts of ENTITY_TYPE by user_id and OPERATION_TYPE",
     ["user_id", "operation_type", "entity_type"],
 )
 

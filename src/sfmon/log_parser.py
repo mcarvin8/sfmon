@@ -9,13 +9,15 @@ EventLogFile Types Supported:
     - ApexExecution: Apex code execution logs
     - ApexUnexpectedException: Apex exception logs
     - API: API usage and large query logs
-    - BulkAPI: Bulk API operation logs
+    - BulkAPI: Bulk API 1.0 operation logs
+    - BulkAPI2: Bulk API 2.0 operation logs
     - LightningPageView: Lightning page performance logs
     - ReportExport: Report export activity
     - ConcurrentLongRunningApexLimit: Concurrent Apex limit violations
 
 Functions:
     - parse_logs: Main function that orchestrates log fetching and parsing
+    - fetch_event_log_csv_reader: Download CSV by EventLogFile Id (used when extra SOQL fields are needed)
 
 Process Flow:
     1. Execute SOQL query to find EventLogFile record
@@ -44,6 +46,30 @@ from logger import logger
 from query import query_records_all
 
 
+def fetch_event_log_csv_reader(sf, log_file_id):
+    """
+    Download the CSV for a given EventLogFile Id and return a csv.DictReader.
+    """
+    log_file_url = f"{sf.base_url}/sobjects/EventLogFile/{log_file_id}/LogFile"
+    log_file_response = requests.get(
+        log_file_url,
+        headers={"Authorization": f"Bearer {sf.session_id}"},
+        timeout=REQUESTS_TIMEOUT_SECONDS,
+    )
+    log_file_response.raise_for_status()
+
+    log_content = log_file_response.text
+    if not log_content:
+        return None
+
+    reader = csv.DictReader(StringIO(log_content))
+    if reader.fieldnames:
+        reader.fieldnames = [
+            (name or "").lstrip("\ufeff").strip() for name in reader.fieldnames
+        ]
+    return reader
+
+
 def parse_logs(sf, log_query):
     """
     Fetch and parse logs from given query
@@ -54,19 +80,7 @@ def parse_logs(sf, log_query):
             return None
 
         log_id = event_log_records[0]["Id"]
-        log_file_url = f"{sf.base_url}/sobjects/EventLogFile/{log_id}/LogFile"
-        log_file_response = requests.get(
-            log_file_url,
-            headers={"Authorization": f"Bearer {sf.session_id}"},
-            timeout=REQUESTS_TIMEOUT_SECONDS,
-        )
-        log_file_response.raise_for_status()
-
-        log_content = log_file_response.text
-        if not log_content:
-            return None
-
-        return csv.DictReader(StringIO(log_content))
+        return fetch_event_log_csv_reader(sf, log_id)
 
     except requests.RequestException as req_err:
         logger.error("Request error occurred in parse_logs : %s", req_err)
