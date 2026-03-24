@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.0](https://github.com/mcarvin8/sfmon/compare/v3.5.0...v3.6.0) (2026-03-24)
+
+
+### Features
+
+* add monitoring for bulk api 2.0 usage ([472fc36](https://github.com/mcarvin8/sfmon/commit/472fc366f9106864719f4112cb7d7fd42c18eebc))
+
 ## [3.5.0](https://github.com/mcarvin8/sfmon/compare/v3.4.0...v3.5.0) (2026-03-16)
 
 
