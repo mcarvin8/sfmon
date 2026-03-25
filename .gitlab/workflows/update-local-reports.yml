@@ -1,0 +1,80 @@
+# Example GitLab CI job: refresh PMD XML + minimal-perm-sets JSON, then push to default branch.
+#
+# Wire-up:
+#   1. In .gitlab-ci.yml add a `query` stage and:
+#        include:
+#          - local: '.gitlab/workflows/update-local-reports.yml'
+#   2. Create a Project access token (Project → Settings → Access tokens) with role
+#      Developer or higher, scopes that allow pushing (e.g. write_repository / api as
+#      required by your GitLab version). Add CI/CD variables: SALESFORCE_AUTH_URL,
+#      GITLAB_PUSH_USERNAME, GITLAB_PUSH_EMAIL, GITLAB_PUSH_TOKEN — see docs/ENVIRONMENT.md.
+#   3. Create a scheduled pipeline on the default branch; set variable JOB_NAME=codeSmells
+#      (must match `rules` below), or change `rules` to match your schedule naming.
+#
+# Paths match this repo: src/sfmon/tech_debt/
+
+update-local-reports:
+  image: eclipse-temurin:17
+  stage: query
+  allow_failure: true
+  cache: []
+  variables:
+    PMD_VERSION: "7.16.0"
+    RULESET_FILE: "src/sfmon/tech_debt/apexruleset.xml"
+    PMD_REPORT: "src/sfmon/tech_debt/pmd-report.xml"
+    MINIMAL_PERM_SET_REPORT: "src/sfmon/tech_debt/minimal-perm-sets.json"
+    SF_AUTOUPDATE_DISABLE: "true"
+    SF_USE_GENERIC_UNIX_KEYCHAIN: "true"
+    SF_DOMAIN_RETRY: "300"
+    SF_PROJECT_AUTOUPDATE_DISABLE_FOR_PACKAGE_CREATE: "true"
+    SF_PROJECT_AUTOUPDATE_DISABLE_FOR_PACKAGE_VERSION_CREATE: "true"
+    SF_DISABLE_DNS_CHECK: "true"
+    SF_DISABLE_SOURCE_MEMBER_POLLING: "true"
+    SF_HIDE_RELEASE_NOTES: "true"
+    SF_HIDE_RELEASE_NOTES_FOOTER: "true"
+    SF_SKIP_NEW_VERSION_CHECK: "true"
+    SF_CONTAINER_MODE: "true"
+    SF_CI_HEARTBEAT_FREQUENCY_MS: "60000"
+    NODE_NO_WARNINGS: "1"
+    PMD_JAVA_OPTS: "-Xmx1024m"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == 'schedule' && $JOB_NAME == 'codeSmells'
+      when: always
+  before_script:
+    - apt-get update
+    - apt-get install -y python3 curl git python3-venv unzip
+    - curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
+    - apt-get install -y nodejs
+    - npm install --global @salesforce/cli@latest
+    - sf version --verbose --json
+    - git fetch -q
+    - git config user.name "${GITLAB_PUSH_USERNAME}"
+    - git config user.email "${GITLAB_PUSH_EMAIL}"
+    - git checkout -q $CI_DEFAULT_BRANCH
+    - curl -fL -o pmd-dist.zip "https://github.com/pmd/pmd/releases/download/pmd_releases/${PMD_VERSION}/pmd-dist-${PMD_VERSION}-bin.zip"
+    - unzip -q pmd-dist.zip
+  script:
+    - echo "$SALESFORCE_AUTH_URL" | sf org login sfdx-url --set-default --sfdx-url-stdin
+    - sf project retrieve start -x manifest/package.xml -w 60
+    - |
+      set +e
+      pmd-bin-${PMD_VERSION}/bin/pmd check \
+        -d "force-app/main/default/classes" \
+        -d "force-app/main/default/triggers" \
+        -R "${RULESET_FILE}" -f xml -r "${PMD_REPORT}" -t 1 \
+        --no-cache --no-fail-on-error --no-fail-on-violation
+      rc=$?
+      set -e
+      test -f "${PMD_REPORT}"
+      if [ "$rc" -ne 0 ] && [ "$rc" -ne 4 ]; then exit "$rc"; fi
+    - python3 ./scripts/determine_minimal_perm_sets.py --output "${MINIMAL_PERM_SET_REPORT}"
+    - git add "${PMD_REPORT}" "${MINIMAL_PERM_SET_REPORT}"
+    - |
+      if git diff --staged --quiet; then
+        echo "No report changes; skipping commit."
+      else
+        git commit -m "chore: refresh PMD and minimal permission set reports"
+        git push "https://${GITLAB_PUSH_USERNAME}:${GITLAB_PUSH_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+      fi
+  tags:
+    - aws,prd,us-west-2

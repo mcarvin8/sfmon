@@ -9,7 +9,7 @@
 #   manifest/package.xml — retrieve manifest (Apex + permission sets, etc.)
 #   src/sfmon/tech_debt/apexruleset.xml — PMD ruleset (commit yours; starter included)
 #
-# Similar to GitLab job: retrieve → PMD → determine_minimal_perm_sets.py → git push
+# GitLab equivalent: .gitlab/workflows/update-local-reports.yml (include from .gitlab-ci.yml)
 #
 # If the default branch is protected, allow GitHub Actions to bypass or use a PAT with
 # push rights in a checkout action token (not covered here).
