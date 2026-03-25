@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.7.0](https://github.com/mcarvin8/sfmon/compare/v3.6.0...v3.7.0) (2026-03-25)
+
+
+### Features
+
+* **tech-debt:** optional PMD/minimal-perm metrics, report CI workflow, config opt-in ([0bcb173](https://github.com/mcarvin8/sfmon/commit/0bcb173865e5e9d1ef191cf63ef1d12982f95430))
+
 ## [3.6.0](https://github.com/mcarvin8/sfmon/compare/v3.5.0...v3.6.0) (2026-03-24)
 
 
