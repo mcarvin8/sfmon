@@ -13,7 +13,7 @@ It implements a comprehensive monitoring strategy with resource-optimized schedu
     - EPT/APT performance metrics
     - Report exports
     - Technical debt monitoring:
-        * Permission sets (unassigned, limited users)
+        * Permission sets (unassigned, limited users, minimal-perm-sets report)
         * Profiles (under 5 users, no active users)
         * Apex API versions (classes, triggers)
         * Security health check and risks
@@ -23,6 +23,7 @@ It implements a comprehensive monitoring strategy with resource-optimized schedu
         * Public groups (no members)
         * Dashboards (inactive running users)
         * Scheduled Apex jobs
+        * PMD Apex static analysis (ruleset + report XML; see docs)
 
 Resource Optimization Strategy:
     - Functions are staggered to prevent CPU/memory spikes
@@ -31,7 +32,7 @@ Resource Optimization Strategy:
     - Daily functions scheduled during off-peak hours to minimize business impact:
         * 06:00-07:35: Performance & Apex monitoring
         * 07:30-08:30: Daily business functions
-        * 02:00-06:00: Tech debt monitoring (17 functions) - OFF-PEAK
+        * 02:00-06:00: Tech debt monitoring (18 functions by default) - OFF-PEAK
 
 The service uses APScheduler with cron-style scheduling and exposes metrics
 via Prometheus on port 9001.
@@ -43,6 +44,7 @@ Environment Variables Optional:
     - CONFIG_FILE_PATH: Path to JSON configuration file (default: /app/sfmon/config.json)
     - QUERY_TIMEOUT_SECONDS: Timeout in seconds for Salesforce SOQL queries (default: 30)
     - METRICS_PORT: Prometheus metrics server port (default: 9001)
+    - PMD_RULESET_PATH: Path to PMD Apex ruleset XML; if unset or missing, PMD metrics are skipped
 
 Configuration File:
     A JSON configuration file is used to configure schedules, disable functions,
@@ -100,6 +102,7 @@ from tech_debt import (
     apex_used_limits_monitoring,
     unassigned_permission_sets,
     perm_sets_limited_users,
+    monitor_minimal_perm_sets,
     profile_assignment_under5,
     profile_no_active_users,
     security_health_check,
@@ -112,6 +115,7 @@ from tech_debt import (
     public_groups_with_no_members,
     dashboards_with_inactive_users,
     scheduled_apex_jobs_monitoring,
+    monitor_pmd_code_smells,
 )
 
 
@@ -227,6 +231,10 @@ def schedule_tasks(scheduler):
         - 05:30 - public_groups_with_no_members
         - 05:45 - dashboards_with_inactive_users
         - 05:55 - scheduled_apex_jobs_monitoring
+
+    Opt-in only (list under config.json schedules + mounted files; see docs/CONFIGURATION.md):
+        - monitor_minimal_perm_sets — minimal-perm-sets.json
+        - monitor_pmd_code_smells — pmd-report.xml and PMD_RULESET_PATH
     """
     scheduled_jobs = [
         (
@@ -284,6 +292,12 @@ def schedule_tasks(scheduler):
             "Permission Sets Limited Users",
         ),
         (
+            "monitor_minimal_perm_sets",
+            None,
+            monitor_minimal_perm_sets,
+            "Monitor Minimal Permission Sets",
+        ),
+        (
             "profile_assignment_under5",
             {"hour": "2", "minute": "30"},
             profile_assignment_under5,
@@ -306,6 +320,12 @@ def schedule_tasks(scheduler):
             {"hour": "3", "minute": "5"},
             apex_used_limits_monitoring,
             "Apex Used Limits Monitoring",
+        ),
+        (
+            "monitor_pmd_code_smells",
+            None,
+            monitor_pmd_code_smells,
+            "Monitor PMD Code Smells",
         ),
         (
             "apex_triggers_api_version",

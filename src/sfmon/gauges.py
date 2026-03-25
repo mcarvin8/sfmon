@@ -24,6 +24,8 @@ Metric Categories:
     16. Tech Debt - Queues & Groups: Queue and group management
     17. Tech Debt - Dashboards: Dashboards with inactive users
     18. Tech Debt - Scheduled Jobs: Scheduled Apex jobs
+    19. Tech Debt - PMD: PMD code smells
+    20. Tech Debt - Minimal Permission Sets: Permission sets with 5 or fewer permissions
 
 Constants:
     - TOTAL_LICENSES: Description for total license metrics
@@ -618,4 +620,24 @@ scheduled_apex_jobs_gauge = Gauge(
         "created_by",
         "created_date",
     ],
+)
+
+# =============================================================================
+# 19. Tech Debt - PMD and Minimal Permission Sets
+# =============================================================================
+pmd_code_smells_gauge = Gauge(
+    "pmd_code_smells",
+    "PMD code smells in the org",
+    ["rule_name", "rule_description"],
+)
+minimal_permission_sets_gauge = Gauge(
+    "minimal_permission_sets",
+    "Permission sets with 5 or fewer permissions",
+    ["permission_set_name", "file_path", "permission_count"],
+)
+
+minimal_permission_sets_percentage_gauge = Gauge(
+    "minimal_permission_sets_percentage",
+    "Percentage of minimal permission sets over total custom permission sets",
+    [],
 )

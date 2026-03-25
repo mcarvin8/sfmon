@@ -48,7 +48,8 @@
     "scheduled_apex_jobs_monitoring": "hour=13,minute=15",
 
     "_comment_optional": "Optional - uncomment to enable",
-    "expose_suspicious_records": "hour=7,minute=30"
+    "expose_suspicious_records": "hour=7,minute=30",
+    "_comment_file_metrics": "Opt-in: add monitor_minimal_perm_sets + monitor_pmd_code_smells only with mounted files / PMD_RULESET_PATH (see docs/ENVIRONMENT.md). Example: hour=9,minute=35 and hour=10,minute=20"
   },
   "integration_user_names": [
     "Integration User 1",

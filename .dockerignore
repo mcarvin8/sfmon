@@ -58,3 +58,9 @@ release-please.yml
 *.bak
 *.backup
 
+# Org-specific ruleset and CI-generated reports — not baked into the published image.
+# Forks that want these inside the image can remove these lines; otherwise mount at runtime (see docs).
+src/sfmon/tech_debt/apexruleset.xml
+src/sfmon/tech_debt/pmd-report.xml
+src/sfmon/tech_debt/minimal-perm-sets.json
+

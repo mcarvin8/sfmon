@@ -46,12 +46,14 @@ Or keep the file elsewhere and set:
 
 | Situation | Behavior |
 |-----------|----------|
-| **No config file** | Every registered job runs on its **default schedule** (see table below). |
-| **Config file exists, `schedules` missing or `{}`** | Same as no file: **all jobs**, **default schedules**. |
+| **No config file** | Every registered job with a **default schedule** runs (see tables below). Jobs marked **opt-in** have **no** default and do **not** run. |
+| **Config file exists, `schedules` missing or `{}`** | Same as no file: defaults for jobs that have them; **opt-in** jobs stay off. |
 | **Config file with a non-empty `schedules` object** | **Opt-in:** only jobs **listed** under `schedules` run. Jobs not listed are **not** run. |
 | **Job value `"disabled"`** (or `none` / empty) | That job does **not** run (only applies when the job is listed under `schedules`). |
 
 **Important:** As soon as you add **any** entry under `schedules`, you must list **every** job you want—including ones you only want at default cadence. Copy defaults from the table below or start from `config.example.json` and trim.
+
+**File-based metrics (PMD + minimal permission sets):** `monitor_pmd_code_smells` and `monitor_minimal_perm_sets` have **no default schedule**. They run only if you add them under `schedules` with a cron expression (for example `hour=3,minute=10` and `hour=2,minute=20`). You must also provide the files and env described in **[ENVIRONMENT.md](ENVIRONMENT.md#pmd-and-minimal-permission-sets-optional)** (`PMD_RULESET_PATH`, `pmd-report.xml`, `minimal-perm-sets.json` at the documented paths), typically via volume mounts or a private image build.
 
 ---
 
@@ -106,6 +108,17 @@ These are the schedules used when **no opt-in `schedules` block** applies. Times
 | `public_groups_with_no_members` | 05:30 | Public groups with no members. |
 | `dashboards_with_inactive_users` | 05:45 | Dashboards owned by or shared with inactive users. |
 | `scheduled_apex_jobs_monitoring` | 05:55 | Scheduled Apex job inventory / health. |
+
+### Opt-in only — file-based reports (no default schedule)
+
+Add these under `schedules` only after you mount or bake in the files from **[ENVIRONMENT.md](ENVIRONMENT.md#pmd-and-minimal-permission-sets-optional)**. Suggested times match the former defaults.
+
+| Job ID | Suggested time | Summary |
+|--------|----------------|---------|
+| `monitor_minimal_perm_sets` | `hour=2,minute=20` | Minimal permission sets from `minimal-perm-sets.json` (e.g. CI [workflow](../.github/workflows/update-local-reports.yml)). |
+| `monitor_pmd_code_smells` | `hour=3,minute=10` | PMD violations from `pmd-report.xml` and `PMD_RULESET_PATH`. |
+
+These jobs are **off** until you add them under `schedules`. That requires a **non-empty** `schedules` object (for example the full opt-in list from **`config.example.json`**, plus these entries). If you already use non-empty `schedules` for other reasons, append these two lines with your chosen cron strings.
 
 ### Daily performance & Apex (06:00–07:35)
 

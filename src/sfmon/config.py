@@ -6,9 +6,10 @@ allows users to customize schedules, enable functions, and set user-specific set
 without modifying code or using multiple environment variables.
 
 Scheduling Behavior:
-    - If NO config file exists: ALL jobs run with their DEFAULT schedules (works out of the box)
-    - If config file exists with schedules: OPT-IN approach - only listed jobs run
-    - Set a job to "disabled" to explicitly disable it
+    - If NO config file exists: Jobs with a default schedule run; jobs with default None are skipped (opt-in only).
+    - If config file exists with empty schedules: Same as no file (defaults for jobs that have them).
+    - If config file has a non-empty schedules object: OPT-IN — only listed jobs run (use suggested crons in docs for file-based jobs).
+    - Set a job to "disabled" to explicitly disable it when it appears under schedules.
 
 Configuration File Location:
     - Default: /app/sfmon/config.json (inside container)
@@ -228,9 +229,15 @@ def get_schedule_from_config(job_id, default_schedule):
     config = load_config()
     schedules = config.get("schedules", {})
 
-    # If no config file or empty schedules, use defaults for all jobs
+    # If no config file or empty schedules, use built-in default per job (may be None = opt-in only)
     if not has_custom_schedules():
-        logger.debug("Job %s using default schedule (no custom config)", job_id)
+        if default_schedule is None:
+            logger.debug(
+                "Job %s skipped (opt-in only; add to config schedules to enable)",
+                job_id,
+            )
+        else:
+            logger.debug("Job %s using default schedule (no custom config)", job_id)
         return default_schedule
 
     # Config file has schedules - use opt-in approach

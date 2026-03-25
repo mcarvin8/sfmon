@@ -52,13 +52,34 @@ docker run -d --name sfmon -p 9001:9001 \
   mcarvin8/sfmon:latest
 ```
 
+### PMD + minimal permission sets (optional, file-based)
+
+The **published** `mcarvin8/sfmon` image does **not** include an Apex ruleset, `pmd-report.xml`, or `minimal-perm-sets.json` (they stay in your repo/CI only; see **`.dockerignore`**). Collectors **`monitor_pmd_code_smells`** and **`monitor_minimal_perm_sets`** need those files **inside the container** at fixed paths:
+
+| File | In-container path |
+|------|-------------------|
+| PMD ruleset (XML) | Any path you choose; set **`PMD_RULESET_PATH`** to it |
+| PMD report | **`/app/sfmon/tech_debt/pmd-report.xml`** |
+| Minimal perm set report | **`/app/sfmon/tech_debt/minimal-perm-sets.json`** |
+
+**Typical flow:**
+
+1. **In your fork/clone** (with org access), enable **[`.github/workflows/update-local-reports.yml`](.github/workflows/update-local-reports.yml)** and set the **`SALESFORCE_AUTH_URL`** secret. Adjust **`manifest/package.xml`** and commit your **`src/sfmon/tech_debt/apexruleset.xml`**. The workflow retrieves metadata, runs PMD, runs **`scripts/determine_minimal_perm_sets.py`**, and **commits** updated reports under **`src/sfmon/tech_debt/`**.
+2. **Get those files into the runtime container** (pick one):
+   - **Mounts (no image rebuild):** copy or sync the committed files to the host/CI artifact store, then **bind-mount** or use a **ConfigMap** / volume (watch size limits for very large `pmd-report.xml`). Set **`PMD_RULESET_PATH`** and redeploy the **same** public image tag when you refresh reports.
+   - **Private image:** **`docker build -f docker/Dockerfile`** from a branch that contains the refreshed files and **remove or trim the `src/sfmon/tech_debt/*` lines in `.dockerignore`** so `COPY src/sfmon/` bakes them in; push to your registry and redeploy when reports change.
+
+3. **Opt in via `config.json`:** These collectors have **no default schedule**. Add **`monitor_pmd_code_smells`** and **`monitor_minimal_perm_sets`** under **`schedules`** with a cron string (see **[docs/CONFIGURATION.md](docs/CONFIGURATION.md#opt-in-only--file-based-reports-no-default-schedule)**). If your file uses a **non-empty** `schedules` block, list every other job you still want as well.
+
+If **`PMD_RULESET_PATH`** is unset or the ruleset file is missing, PMD metrics are skipped (quiet at INFO). If **`minimal-perm-sets.json`** is missing, that collector logs a warning and exits. More detail: **[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#pmd-and-minimal-permission-sets-optional)**.
+
 ---
 
 ## When you need your own image
 
-The default image is meant for **standard** monitoring: env vars + optional JSON config.
+The default image is meant for **standard** monitoring: env vars + optional JSON config. It also excludes org-specific PMD/perm-set files (see **`.dockerignore`**).
 
-**Build and run your own image** if you need to change **application code** (new checks, different logic, pinned dependencies, private registry policy, or anything not covered by env/config).
+**Build and run your own image** if you need to change **application code** (new checks, different logic, pinned dependencies, private registry policy, anything not covered by env/config) or to **bake in** local report files after adjusting **`.dockerignore`**.
 
 ```bash
 docker build \

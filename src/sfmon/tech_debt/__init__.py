@@ -34,6 +34,7 @@ from .permissions import (
     perm_sets_limited_users,
     profile_assignment_under5,
     profile_no_active_users,
+    monitor_minimal_perm_sets,
 )
 from .security import security_health_check, salesforce_health_risks
 from .users import dormant_salesforce_users, dormant_portal_users
@@ -45,6 +46,7 @@ from .queues_groups import (
 )
 from .dashboards import dashboards_with_inactive_users
 from .scheduled_jobs import scheduled_apex_jobs_monitoring
+from .pmd import monitor_pmd_code_smells
 
 __all__ = [
     # Code quality
@@ -57,6 +59,7 @@ __all__ = [
     "perm_sets_limited_users",
     "profile_assignment_under5",
     "profile_no_active_users",
+    "monitor_minimal_perm_sets",
     # Security
     "security_health_check",
     "salesforce_health_risks",
@@ -72,4 +75,6 @@ __all__ = [
     "dashboards_with_inactive_users",
     # Scheduled jobs
     "scheduled_apex_jobs_monitoring",
+    # PMD
+    "monitor_pmd_code_smells",
 ]

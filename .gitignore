@@ -16,3 +16,6 @@
 *.sw[mnop]
 __pycache__
 *.log
+.sf/*
+.sfdx/*
+pmd-bin-*/*
