@@ -1,0 +1,47 @@
+src/sfmon/tech_debt/pmd.py
+  d63bc92b40ece047 10,15-20,23-29,45
+src/sfmon/tech_debt/permissions.py
+  d63bc92b40ece047 8,18,20,29-30,163-261
+.github/workflows/update-local-reports.yml
+  d63bc92b40ece047 1-142
+src/sfmon/tech_debt/apexruleset.xml
+  d63bc92b40ece047 1-11
+.dockerignore
+  d63bc92b40ece047 61-66
+docs/ENVIRONMENT.md
+  d63bc92b40ece047 37-73
+src/sfmon/config.py
+  d63bc92b40ece047 9-12,232,234-239
+scripts/push_updated_reports.sh
+  d63bc92b40ece047 1-23
+scripts/determine_minimal_perm_sets.py
+  d63bc92b40ece047 1-230
+config.example.json
+  d63bc92b40ece047 51-52
+docs/CONFIGURATION.md
+  d63bc92b40ece047 49-50,56,112-122
+src/sfmon/salesforce_monitoring.py
+  d63bc92b40ece047 16,26,35,47,105,118,234-237,295-299,325-329
+README.md
+  d63bc92b40ece047 55-75,80,82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.12",
+  "base_commit_sha": "0bcb173865e5e9d1ef191cf63ef1d12982f95430",
+  "prompts": {
+    "d63bc92b40ece047": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "1757428d-02a9-47fb-9ad1-9f712567224a",
+        "model": "default"
+      },
+      "human_author": "Matt Carvin <90224411+mcarvin8@users.noreply.github.com>",
+      "messages": [],
+      "total_additions": 810,
+      "total_deletions": 175,
+      "accepted_lines": 652,
+      "overriden_lines": 0
+    }
+  }
+}
