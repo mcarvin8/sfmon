@@ -1,0 +1,33 @@
+docs/ENVIRONMENT.md
+  d63bc92b40ece047 41,54-81,84
+docs/CONFIGURATION.md
+  d63bc92b40ece047 118,212-213
+config.example.json
+  d63bc92b40ece047 52
+.github/workflows/update-local-reports.yml
+  d63bc92b40ece047 12
+.gitlab/workflows/update-local-reports.yml
+  d63bc92b40ece047 1-80
+README.md
+  d63bc92b40ece047 67-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.12",
+  "base_commit_sha": "58e579bc0603db2d7ed94551fa3fbaf925979068",
+  "prompts": {
+    "d63bc92b40ece047": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "1757428d-02a9-47fb-9ad1-9f712567224a",
+        "model": "default"
+      },
+      "human_author": "Matt Carvin <90224411+mcarvin8@users.noreply.github.com>",
+      "messages": [],
+      "total_additions": 135,
+      "total_deletions": 23,
+      "accepted_lines": 118,
+      "overriden_lines": 0
+    }
+  }
+}
