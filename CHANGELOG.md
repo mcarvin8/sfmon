@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.7.1](https://github.com/mcarvin8/sfmon/compare/v3.7.0...v3.7.1) (2026-03-26)
+
+
+### Bug Fixes
+
+* update base image to 24.04 ([ce09b42](https://github.com/mcarvin8/sfmon/commit/ce09b42670f887ffda7f5d674498b6f947f7eb37))
+
 ## [3.7.0](https://github.com/mcarvin8/sfmon/compare/v3.6.0...v3.7.0) (2026-03-25)
 
 
