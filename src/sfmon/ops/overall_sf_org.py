@@ -208,7 +208,6 @@ def get_salesforce_instance(sf):
     logger.info("Getting Salesforce instance info for Production...")
     try:
         pod = fetch_pod(sf)
-        incident_gauge.clear()
         get_salesforce_incidents("Production", pod)
         get_salesforce_maintenances({"Production": pod})
     except requests.RequestException as e:
@@ -228,6 +227,7 @@ def get_salesforce_incidents(org, instancepod):
         )
         response.raise_for_status()
         incidents = response.json()
+        incident_gauge.clear()
         incident_cnt = 0
 
         for element in incidents:
@@ -263,10 +263,6 @@ def get_salesforce_incidents(org, instancepod):
 
     except requests.RequestException as e:
         logger.error("Error fetching incidents: %s", e)
-        # Clear the specific gauge only in case of an error
-        incident_gauge.labels(
-            environment=org, pod=instancepod, severity="ok", incident_id=None
-        ).set(0)
 
 
 def get_salesforce_maintenances(pod_map):
