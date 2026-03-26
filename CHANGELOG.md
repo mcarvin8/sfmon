@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.7.2](https://github.com/mcarvin8/sfmon/compare/v3.7.1...v3.7.2) (2026-03-26)
+
+
+### Bug Fixes
+
+* **incidents:** only clear incidents after a good request is made ([801dbbc](https://github.com/mcarvin8/sfmon/commit/801dbbcc51419a8eda37678eef7f577978d315d8))
+
 ## [3.7.1](https://github.com/mcarvin8/sfmon/compare/v3.7.0...v3.7.1) (2026-03-26)
 
 
