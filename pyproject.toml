@@ -1,0 +1,7 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src/sfmon"]
+
+[tool.coverage.run]
+source = ["src/sfmon"]
+omit = ["tests/*"]
