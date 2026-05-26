@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.7.3](https://github.com/mcarvin8/sfmon/compare/v3.7.2...v3.7.3) (2026-05-26)
+
+
+### Bug Fixes
+
+* **docker:** add open container labels ([cdc6a4b](https://github.com/mcarvin8/sfmon/commit/cdc6a4b3425fdaa0bdae108eaa942d31d3ce88a2))
+
 ## [3.7.2](https://github.com/mcarvin8/sfmon/compare/v3.7.1...v3.7.2) (2026-03-26)
 
 
