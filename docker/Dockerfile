@@ -23,6 +23,12 @@ COPY README.md /app/sfmon/README.md
 COPY LICENSE.md /app/sfmon/LICENSE.md
 COPY version.txt /app/sfmon/version.txt
 
+LABEL org.opencontainers.image.title="sfmon" \
+      org.opencontainers.image.description="Monitor your Salesforce orgs using a custom Docker image to create Prometheus metrics." \
+      org.opencontainers.image.authors="Matt Carvin <matthewjcarvin@gmail.com>" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.source="https://github.com/mcarvin8/sfmon"
+
 # Install required Salesforce and Python dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends curl python3 python3-pip python3-venv && \
     python3 -m venv /opt/venv && \
