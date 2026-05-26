@@ -5,3 +5,7 @@ pythonpath = ["src/sfmon"]
 [tool.coverage.run]
 source = ["src/sfmon"]
 omit = ["tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
