@@ -630,6 +630,11 @@ pmd_code_smells_gauge = Gauge(
     "PMD code smells in the org",
     ["rule_name", "rule_description"],
 )
+pmd_apex_violations_gauge = Gauge(
+    "pmd_apex_violations",
+    "PMD violations per Apex class/trigger broken down by rule, with comma-separated start lines",
+    ["apex_name", "rule_name", "start_lines"],
+)
 minimal_permission_sets_gauge = Gauge(
     "minimal_permission_sets",
     "Permission sets with 5 or fewer permissions",
