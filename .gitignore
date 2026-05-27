@@ -19,3 +19,6 @@ __pycache__
 .sf/*
 .sfdx/*
 pmd-bin-*/*
+.coverage
+coverage.xml
+.pytest_cache/
