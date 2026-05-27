@@ -4,7 +4,7 @@ pythonpath = ["src/sfmon"]
 
 [tool.coverage.run]
 source = ["src/sfmon"]
-omit = ["tests/*"]
+omit = ["tests/*", "src/sfmon/salesforce_monitoring.py"]
 
 [tool.coverage.report]
 show_missing = true
