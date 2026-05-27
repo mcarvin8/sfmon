@@ -5,6 +5,7 @@ from collections import defaultdict
 from logger import logger
 from gauges import (
     pmd_code_smells_gauge,
+    pmd_apex_violations_gauge,
 )
 
 def monitor_pmd_code_smells(_sf):
@@ -54,6 +55,7 @@ def monitor_pmd_code_smells(_sf):
 
         # Clear existing Prometheus gauge labels once at the start
         pmd_code_smells_gauge.clear()
+        pmd_apex_violations_gauge.clear()
 
         if not os.path.exists(pmd_file_path):
             logger.warning("PMD report file not found at: %s", pmd_file_path)
@@ -75,6 +77,8 @@ def monitor_pmd_code_smells(_sf):
 
         # Count violations by rule name (code smell type)
         rule_names = defaultdict(int)
+        # Track start lines per (apex_name, rule_name) for per-class gauge
+        apex_rule_lines = defaultdict(list)
 
         # PMD XML has a namespace, so we need to handle it properly
         # Extract namespace from root tag if present
@@ -82,12 +86,16 @@ def monitor_pmd_code_smells(_sf):
         if root.tag.startswith("{"):
             namespace = root.tag.split("}")[0] + "}"
 
-        # PMD XML structure: <pmd><file><violation rule="RuleName">
+        # PMD XML structure: <pmd><file><violation rule="RuleName" beginline="N">
         for file_element in root.findall(f"{namespace}file"):
+            file_path = file_element.get("name", "")
+            apex_name = os.path.splitext(os.path.basename(file_path))[0] or "Unknown"
             for violation in file_element.findall(f"{namespace}violation"):
                 rule_name = violation.get("rule", "Unknown")
+                begin_line = violation.get("beginline", "")
                 rule_names[rule_name] += 1
-                logger.debug("Found rule violation: %s", rule_name)
+                apex_rule_lines[(apex_name, rule_name)].append(begin_line)
+                logger.debug("Found rule violation: %s in %s at line %s", rule_name, apex_name, begin_line)
 
         # Set gauge values for each code smell type from the report
         total_violations = 0
@@ -108,11 +116,28 @@ def monitor_pmd_code_smells(_sf):
         if total_violations > 0:
             pmd_code_smells_gauge.labels(rule_name="TOTAL").set(total_violations)
 
+        # Emit per-class/trigger gauge: value = violation count, start_lines = comma-separated list
+        for (apex_name, rule_name), lines in apex_rule_lines.items():
+            start_lines = ",".join(lines)
+            pmd_apex_violations_gauge.labels(
+                apex_name=apex_name,
+                rule_name=rule_name,
+                start_lines=start_lines,
+            ).set(len(lines))
+            logger.debug(
+                "PMD Apex Violation - %s / %s: %d violations at lines [%s]",
+                apex_name,
+                rule_name,
+                len(lines),
+                start_lines,
+            )
+
         logger.info(
-            "PMD monitoring completed. Total violations: %d, Unique rules: %d, Ruleset rules: %d",
+            "PMD monitoring completed. Total violations: %d, Unique rules: %d, Ruleset rules: %d, Apex files: %d",
             total_violations,
             len(rule_names),
             len(expected_rules),
+            len({apex for apex, _ in apex_rule_lines}),
         )
 
     # pylint: disable=broad-except
