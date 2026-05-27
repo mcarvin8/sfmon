@@ -11,7 +11,7 @@ SFMon is a **long-running Docker container** that connects to your Salesforce or
 
 ## Who is this for
 
-SFMon is aimed at **SRE and DevOps teams** who already operate a PPrometheus-compatible observability stack (Prometheus, Victoria Metrics, Grafana Cloud, or an OTel Collector pipeline)  and are also responsible for one or more Salesforce orgs. If you define alerts in PromQL, route pages through Alertmanager, and want Salesforce signals to behave exactly like any other scrape target — this is for you.
+SFMon is aimed at **SRE and DevOps teams** who already operate a Prometheus-compatible observability stack (Prometheus, Victoria Metrics, Grafana Cloud, or an OTel Collector pipeline)  and are also responsible for one or more Salesforce orgs. If you define alerts in PromQL, route pages through Alertmanager, and want Salesforce signals to behave exactly like any other scrape target — this is for you.
 
 It is **not** a Salesforce admin tool. It has no UI of its own; all visibility comes from your existing observability stack.
 
