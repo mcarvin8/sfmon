@@ -5,27 +5,38 @@
 ![Docker Image Size](https://img.shields.io/docker/image-size/mcarvin8/sfmon)
 ![Coverage](https://raw.githubusercontent.com/mcarvin8/sfmon/refs/heads/main/badges/coverage.svg)
 
-SFMon runs in **Docker**, connects to your Salesforce org on a schedule, and exposes **Prometheus** metrics at `/metrics` so you can graph and alert in **Grafana**, **Alertmanager**, or any tool that already monitors the rest of your stack.
-
-### Why use SFMon?
-
-| You might use SFMon if… | Notes |
-|-------------------------|--------|
-| You already run **Prometheus / Grafana** (or similar) and want **Salesforce next to apps, DBs, and K8s** in one place. | Same alerting patterns, retention, and on-call workflows as the rest of infra. |
-| You want **broad org signals** in one exporter: limits, Apex/async health, licenses, security/tech-debt style checks, compliance-oriented metrics, etc. | See **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md)** for what runs by default. |
-| You prefer **self-hosted, no extra Salesforce SKU** for this style of telemetry. | You pay for compute to run the container; no SFMon subscription. |
-
-**Compared to Salesforce proactive monitoring / paid optimizer-style products** — Those are Salesforce-native, guided, and often tied to editions or add-ons. SFMon is for teams that want **metrics in *their* observability stack**, custom Grafana dashboards, and **programmable** PromQL alerts—not a replacement for every Salesforce product feature, but a different integration model.
-
-**Compared to [sfdx-hardis](https://github.com/hardisgroupcom/sfdx-hardis)** — Its [org monitoring](https://sfdx-hardis.cloudity.com/salesforce-monitoring-home/) is built around **scheduled CI jobs** (e.g. nightly GitHub Actions): each run is **short-lived**, backs up metadata to Git, and surfaces results via **Slack / Microsoft Teams**, **pipeline artifacts**, and diffs in a monitoring repo. That is a different shape than a always-on metrics endpoint. Hardis docs show **Grafana** examples for some checks, but the default path is **not** a Prometheus **`/metrics` scrape target** like SFMon—you would wire Prometheus/Grafana yourself if you want that model. SFMon is a **long-running container** with **native Prom metrics** for the same “always graphable” alerting style as the rest of your stack. The two can complement each other (Hardis for metadata drift + CI checks, SFMon for continuous time-series in Prometheus).
+SFMon is a **long-running Docker container** that connects to your Salesforce org on a schedule and exposes a **Prometheus `/metrics` endpoint** — so your Salesforce org lives in the same Grafana dashboards, PromQL alerts, and on-call runbooks as the rest of your infrastructure.
 
 ---
 
-## Run the published image
+## Who is this for
 
-Image: **[mcarvin8/sfmon](https://hub.docker.com/r/mcarvin8/sfmon)**.
+SFMon is aimed at **SRE and DevOps teams** who already operate a Prometheus/Grafana stack and are also responsible for one or more Salesforce orgs. If you define alerts in PromQL, route pages through Alertmanager, and want Salesforce signals to behave exactly like any other scrape target — this is for you.
 
-1. **Auth URL** — from your machine: `sf org display --url-only` (or legacy `sfdx force:org:display --urlonly`).
+It is **not** a Salesforce admin tool. It has no UI of its own; all visibility comes from your existing observability stack.
+
+---
+
+## What you get
+
+| Category | What is measured |
+|----------|-----------------|
+| **Governor limits** | All org limits (API requests, bulk queries, data storage, etc.) — usage %, used, and max, every 5 minutes |
+| **Apex health** | Flex queue depth, long-running requests, concurrency errors, uncaught exceptions, async job status and summaries |
+| **Bulk API** | Daily summaries and hourly in-flight activity across Bulk API 1.0 and 2.0 |
+| **Licenses** | User licenses, permission set licenses, and usage-based entitlements — consumed vs. total, % used |
+| **Instance & trust** | Your org's pod, active incidents from trust.salesforce.com, and scheduled maintenance windows |
+| **Security & compliance** | Forbidden profile assignments, login volumes, geolocation anomalies, suspicious audit trail activity, report exports, large SOQL queries, org-wide sharing settings |
+| **Tech debt** | Dormant users (Salesforce + portal), deprecated Apex API versions, unassigned/minimal permission sets, workflow rules, empty queues/groups, PMD static analysis violations |
+| **Deployments** | In-flight metadata deployment status |
+
+Everything runs on a default schedule with no config file required. See **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md)** to scope down to a preset or tune individual jobs.
+
+---
+
+## Quick start
+
+1. **Get your auth URL:** `sf org display --url-only`
 2. **Run:**
 
 ```bash
@@ -37,24 +48,98 @@ docker run -d \
   mcarvin8/sfmon:latest
 ```
 
-3. **Prometheus** — scrape `http://<host>:9001/metrics` (match host/port to your publish mapping).
-4. **Sanity check:** `curl http://localhost:9001/metrics`
+3. **Verify:** `curl http://localhost:9001/metrics`
+4. **Scrape** — add to `prometheus.yml`:
 
-No config file is required: all collectors run on **default schedules**. Optional tuning:
-
-- **Environment variables** (timeouts, org label, compliance lists, thresholds, log level, etc.) → **[docs/ENVIRONMENT.md](https://github.com/mcarvin8/sfmon/blob/main/docs/ENVIRONMENT.md)**
-- **Config file** (schedules, disable jobs, `exclude_users`) → **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md)** · template **`config.example.json`**
-
-Example with a mounted config:
-
-```bash
-docker run -d --name sfmon -p 9001:9001 \
-  -e SALESFORCE_AUTH_URL="force://..." \
-  -v /path/on/host/config.json:/app/sfmon/config.json \
-  mcarvin8/sfmon:latest
+```yaml
+scrape_configs:
+  - job_name: sfmon
+    static_configs:
+      - targets: ["<host>:9001"]
 ```
 
-### PMD + minimal permission sets (optional, file-based)
+No config file is required: all collectors run on **default schedules** out of the box.
+
+Optional tuning:
+- **Environment variables** (timeouts, org label, compliance lists, thresholds, log level) → **[docs/ENVIRONMENT.md](https://github.com/mcarvin8/sfmon/blob/main/docs/ENVIRONMENT.md)**
+- **Config file** (schedules, presets, disable jobs, `exclude_users`) → **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md)** · template **`config.example.json`**
+
+---
+
+## Multiple orgs
+
+Run one container per org, each with a distinct `ORG_NAME`. All metrics carry the `org` label, so a single Prometheus instance can scrape all of them and you can filter or aggregate across orgs in PromQL.
+
+```yaml
+# prometheus.yml
+scrape_configs:
+  - job_name: sfmon
+    static_configs:
+      - targets: ["sfmon-prod:9001"]
+        labels: { org: "production" }
+      - targets: ["sfmon-uat:9001"]
+        labels: { org: "uat" }
+```
+
+Or simply set `ORG_NAME` on each container — the `org` label is injected into every metric automatically.
+
+---
+
+## Alerting in PromQL
+
+Because metrics live in Prometheus, alerts are just PromQL rules — same toolchain as the rest of your stack:
+
+```promql
+# Daily API limit over 80 % consumed
+sfmon_api_usage_percentage{limit_name="DailyApiRequests"} > 80
+
+# Active incident on this org's pod
+sfmon_incident_gauge{environment="production"} == 1
+
+# User license saturation
+sfmon_percent_user_licenses_used{license_name="Salesforce"} > 90
+```
+
+Route these through Alertmanager with the same receivers (PagerDuty, Slack, etc.) you use for every other service.
+
+---
+
+## Presets — scope down without a full config
+
+If you only want a focused slice of monitoring, set a preset in `config.json` instead of listing every job:
+
+```json
+{ "preset": "ops" }
+```
+
+| Preset | Focus |
+|--------|-------|
+| `ops` | Apex health, Bulk API, deployments, EPT/APT |
+| `audit` | Login events, geolocation, suspicious activity, report exports, sharing settings |
+| `tech-debt` | Dormant users, deprecated APIs, permission sets, workflow rules, queues, security health |
+
+Governor limits, instance/trust health, and license metrics are **always on** regardless of preset — they are the baseline signals you always want without having to ask.
+
+See **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md)** for the full scheduling reference.
+
+---
+
+## How it compares
+
+| | SFMon | Salesforce proactive monitoring (paid) | sfdx-hardis org monitoring |
+|--|-------|----------------------------------------|---------------------------|
+| **Model** | Always-on container, Prometheus `/metrics` endpoint | Salesforce TAM/CSM engagement + event log files | Scheduled CI jobs (GitHub Actions / GitLab CI) |
+| **Output** | Time-series metrics scraped by Prometheus | Salesforce-native reports and guided reviews | Git diffs, Slack/Teams notifications, pipeline artifacts |
+| **Alerting** | PromQL + Alertmanager — same as rest of infra | Salesforce notifications and Success Plan reviews | Slack/Teams webhooks from CI |
+| **Data stays in your stack** | Yes | No (Salesforce-hosted) | Partially (metadata to Git; notifications to Slack/Teams) |
+| **Extra cost** | Compute to run the container | Salesforce edition / add-on fee | Free (open source) |
+| **Best for** | SRE/DevOps teams already on Prometheus who want Salesforce as just another scrape target | Teams buying Salesforce-managed oversight and guidance | Teams wanting metadata drift detection and CI-integrated checks |
+
+SFMon and sfdx-hardis are complementary, not competitors: Hardis handles metadata backup and change detection via CI; SFMon provides continuous time-series for the same signals your infrastructure monitoring already tracks.
+
+---
+
+## PMD + minimal permission sets (optional, file-based)
 
 The **published** `mcarvin8/sfmon` image does **not** include an Apex ruleset, `pmd-report.xml`, or `minimal-perm-sets.json` (they stay in your repo/CI only; see **`.dockerignore`**). Collectors **`monitor_pmd_code_smells`** and **`monitor_minimal_perm_sets`** need those files **inside the container** at fixed paths:
 
