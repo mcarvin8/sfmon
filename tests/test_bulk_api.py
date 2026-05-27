@@ -257,3 +257,100 @@ class TestProcessBulkApiLogs:
         mock_entity = MagicMock()
         process_bulk_api_logs(reader, mock_batch, mock_entity, event_type="BulkAPI")
         mock_batch.labels.assert_not_called()
+
+
+class TestRunBulkLogAnalysis:
+    def test_returns_early_when_no_rows(self, mock_sf):
+        from ops.bulk_api import _run_bulk_log_analysis
+        mock_batch = MagicMock()
+        mock_entity = MagicMock()
+        with patch("ops.bulk_api.query_records_all", return_value=[]), \
+             patch("ops.bulk_api.fetch_event_log_csv_reader") as m_fetch:
+            _run_bulk_log_analysis(
+                mock_sf, "BulkAPI", "Hourly", mock_batch, mock_entity, "Bulk API 1.0"
+            )
+        m_fetch.assert_not_called()
+
+    def test_processes_rows_when_found(self, mock_sf):
+        from ops.bulk_api import _run_bulk_log_analysis
+        rows = [{"Id": "elf01", "LogFileFieldNames": "JOB_ID,USER_ID"}]
+        headers = ["JOB_ID", "USER_ID", "ENTITY_TYPE", "OPERATION_TYPE",
+                   "ROWS_PROCESSED", "NUMBER_FAILURES"]
+        data = [{"JOB_ID": "j1", "USER_ID": "u1", "ENTITY_TYPE": "Account",
+                 "OPERATION_TYPE": "insert", "ROWS_PROCESSED": "10", "NUMBER_FAILURES": "0"}]
+        reader = make_csv_reader(headers, data)
+        mock_batch = MagicMock()
+        mock_entity = MagicMock()
+        with patch("ops.bulk_api.query_records_all", return_value=rows), \
+             patch("ops.bulk_api.fetch_event_log_csv_reader", return_value=reader), \
+             patch("ops.bulk_api.process_bulk_api_logs") as m_process:
+            _run_bulk_log_analysis(
+                mock_sf, "BulkAPI", "Hourly", mock_batch, mock_entity, "Bulk API 1.0"
+            )
+        m_process.assert_called_once()
+
+    def test_handles_exception(self, mock_sf):
+        from ops.bulk_api import _run_bulk_log_analysis
+        mock_batch = MagicMock()
+        mock_entity = MagicMock()
+        with patch("ops.bulk_api.query_records_all", side_effect=RuntimeError("fail")):
+            _run_bulk_log_analysis(
+                mock_sf, "BulkAPI", "Hourly", mock_batch, mock_entity, "Bulk API 1.0"
+            )  # Should not raise
+
+
+class TestDailyAndHourlyAnalyseBulkApi:
+    def test_daily_calls_run_twice(self, mock_sf):
+        from ops.bulk_api import daily_analyse_bulk_api
+        with patch("ops.bulk_api._run_bulk_log_analysis") as m_run:
+            daily_analyse_bulk_api(mock_sf)
+        assert m_run.call_count == 2
+
+    def test_hourly_calls_run_twice(self, mock_sf):
+        from ops.bulk_api import hourly_analyse_bulk_api
+        with patch("ops.bulk_api._run_bulk_log_analysis") as m_run:
+            hourly_analyse_bulk_api(mock_sf)
+        assert m_run.call_count == 2
+
+
+class TestProcessBulkApi2Logs:
+    def _make_bulk2_reader(self):
+        headers = ["JOB_ID", "USER_ID", "ENTITY_TYPE", "OPERATION_TYPE",
+                   "RECORDS_PROCESSED", "RECORDS_FAILED"]
+        rows = [
+            {"JOB_ID": "j1", "USER_ID": "u1", "ENTITY_TYPE": "Contact",
+             "OPERATION_TYPE": "insert", "RECORDS_PROCESSED": "200", "RECORDS_FAILED": "0"},
+        ]
+        return make_csv_reader(headers, rows)
+
+    def test_processes_bulk_api2_logs(self):
+        from ops.bulk_api import process_bulk_api_logs
+        reader = self._make_bulk2_reader()
+        mock_batch = MagicMock()
+        mock_entity = MagicMock()
+        process_bulk_api_logs(
+            reader, mock_batch, mock_entity,
+            event_type="BulkAPI2",
+            processed_keys=(),
+            failed_keys=(),
+        )
+        mock_batch.labels.assert_called_once()
+
+    def test_bulk_api2_logs_unknown_headers_infers_column(self):
+        from ops.bulk_api import process_bulk_api_logs
+        headers = ["JOB_ID", "USER_ID", "ENTITY_TYPE", "OPERATION_TYPE",
+                   "MY_ROW_COUNT", "MY_FAIL_COUNT"]
+        rows = [
+            {"JOB_ID": "j1", "USER_ID": "u1", "ENTITY_TYPE": "Lead",
+             "OPERATION_TYPE": "update", "MY_ROW_COUNT": "50", "MY_FAIL_COUNT": "5"},
+        ]
+        reader = make_csv_reader(headers, rows)
+        mock_batch = MagicMock()
+        mock_entity = MagicMock()
+        # Should not crash even with unknown headers
+        process_bulk_api_logs(
+            reader, mock_batch, mock_entity,
+            event_type="BulkAPI2",
+            processed_keys=(),
+            failed_keys=(),
+        )

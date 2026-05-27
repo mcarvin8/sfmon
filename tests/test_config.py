@@ -219,3 +219,40 @@ class TestGettersFromConfig:
         import config
         config.load_config(force_reload=True)
         assert config.get_exclude_users() == ["Admin", "Bot"]
+
+
+class TestLoadConfigExceptions:
+    def test_generic_exception_returns_defaults(self, tmp_path, monkeypatch):
+        """Test that a non-JSON error (e.g. PermissionError) falls through to defaults."""
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text('{"schedules": {}}')
+        monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
+        import config
+        from unittest.mock import patch as _patch
+        with _patch("builtins.open", side_effect=PermissionError("no access")):
+            result = config.load_config(force_reload=True)
+        assert result["schedules"] == {}
+
+    def test_has_custom_schedules_triggers_load_when_cache_empty(self, tmp_path, monkeypatch):
+        """has_custom_schedules() must call load_config() when cache is None."""
+        monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
+        import config
+        # Reset so _config_file_has_schedules is None
+        config._config_file_has_schedules = None
+        result = config.has_custom_schedules()
+        assert result is False  # No file → False
+
+
+class TestParseCronScheduleUnparseable:
+    def test_unparseable_string_returns_none(self):
+        import config
+        # "@ special" doesn't match any parser
+        result = config.parse_cron_schedule("@ special cron")
+        assert result is None
+
+    def test_json_with_decode_error_falls_through(self):
+        import config
+        # Starts with { but invalid JSON → _parse_json_cron returns None → tries other parsers
+        result = config.parse_cron_schedule('{"broken"')
+        # Falls through to other parsers; none match either → returns None (with warning)
+        assert result is None
