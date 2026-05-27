@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.0](https://github.com/mcarvin8/sfmon/compare/v3.7.3...v3.8.0) (2026-05-27)
+
+
+### Features
+
+* add per-Apex PMD violations gauge with start lines ([#33](https://github.com/mcarvin8/sfmon/issues/33)) ([175fbb3](https://github.com/mcarvin8/sfmon/commit/175fbb33e043d00f8124d0dd57b19587e826bcca))
+
 ## [3.7.3](https://github.com/mcarvin8/sfmon/compare/v3.7.2...v3.7.3) (2026-05-26)
 
 
