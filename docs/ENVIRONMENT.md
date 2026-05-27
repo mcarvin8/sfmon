@@ -15,6 +15,7 @@
 | `QUERY_TIMEOUT_SECONDS` | `30` | SOQL query timeout |
 | `REQUESTS_TIMEOUT_SECONDS` | `300` | HTTP timeout (Event Log, Trust API, etc.) |
 | `LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` |
+| `ORG_NAME` | `""` | Value injected as the `org` label on **every** Prometheus metric. Set this to a human-readable identifier for your Salesforce org (e.g. `production`, `sandbox-uat`) so you can filter or aggregate across multiple SFMon instances in the same Prometheus/Grafana setup. If unset, the label is present but empty. |
 
 ## Optional — compliance
 
@@ -90,6 +91,7 @@ For GitHub branch-protection bypass or PAT substitution, see comments in the Git
 ```bash
 docker run -d --name sfmon -p 9001:9001 \
   -e SALESFORCE_AUTH_URL="force://..." \
+  -e ORG_NAME="production" \
   -e PMD_RULESET_PATH=/app/sfmon/config/apexruleset.xml \
   -v /host/path/apexruleset.xml:/app/sfmon/config/apexruleset.xml:ro \
   -v /host/path/pmd-report.xml:/app/sfmon/tech_debt/pmd-report.xml:ro \
