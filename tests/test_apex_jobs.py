@@ -314,3 +314,54 @@ class TestAsyncApexExecutionSummary:
         from ops.apex_jobs import async_apex_execution_summary
         with patch("ops.apex_jobs.parse_logs", side_effect=RuntimeError("fail")):
             async_apex_execution_summary(mock_sf)  # Should not raise
+
+
+class TestExposeApexExceptionMetricsExceptions:
+    """Tests for exception branches in expose_apex_exception_metrics."""
+
+    def test_handles_key_error_in_row(self, mock_sf):
+        from ops.apex_jobs import expose_apex_exception_metrics
+        # Row missing required keys → KeyError
+        logs = [{"EXCEPTION_CATEGORY": "ApexException"}]
+        mock_detail = MagicMock()
+        mock_detail.labels.side_effect = KeyError("EXCEPTION_TYPE")
+        mock_category = MagicMock()
+        with patch("ops.apex_jobs.parse_logs", return_value=iter(logs)), \
+             patch("ops.apex_jobs.apex_exception_details_gauge", mock_detail), \
+             patch("ops.apex_jobs.apex_exception_category_count_gauge", mock_category):
+            expose_apex_exception_metrics(mock_sf)  # Should not raise
+
+    def test_handles_category_count_exception(self, mock_sf):
+        from ops.apex_jobs import expose_apex_exception_metrics
+        logs = [{"EXCEPTION_CATEGORY": "ApexException", "REQUEST_ID": "r1",
+                 "EXCEPTION_TYPE": "System.NullPointerException",
+                 "EXCEPTION_MESSAGE": "msg", "STACK_TRACE": "trace",
+                 "TIMESTAMP_DERIVED": "2024-01-15T10:00:00Z"}]
+        mock_detail = MagicMock()
+        mock_category = MagicMock()
+        mock_category.labels.side_effect = RuntimeError("gauge error")
+        with patch("ops.apex_jobs.parse_logs", return_value=iter(logs)), \
+             patch("ops.apex_jobs.apex_exception_details_gauge", mock_detail), \
+             patch("ops.apex_jobs.apex_exception_category_count_gauge", mock_category):
+            expose_apex_exception_metrics(mock_sf)  # Should not raise
+
+
+class TestExposeConcurrentErrorsExceptions:
+    """Tests for KeyError branches in concurrent error gauge functions."""
+
+    def test_avg_runtime_handles_key_error(self):
+        import pandas as pd
+        from ops.apex_jobs import expose_concurrent_errors_metrics_sorted_by_average_runtime
+        # Pass DataFrame missing required column
+        df = pd.DataFrame({"ENTRY_POINT": ["EP1"], "MISSING": [1.0]})
+        mock_gauge = MagicMock()
+        with patch("ops.apex_jobs.top_apex_concurrent_errors_sorted_by_avg_runtime", mock_gauge):
+            expose_concurrent_errors_metrics_sorted_by_average_runtime(df)  # Should not raise
+
+    def test_request_count_handles_key_error(self):
+        import pandas as pd
+        from ops.apex_jobs import expose_concurrent_errors_metrics_sorted_by_request_count
+        df = pd.DataFrame({"ENTRY_POINT": ["EP1"], "MISSING": [1.0]})
+        mock_gauge = MagicMock()
+        with patch("ops.apex_jobs.top_apex_concurrent_errors_sorted_by_count", mock_gauge):
+            expose_concurrent_errors_metrics_sorted_by_request_count(df)  # Should not raise

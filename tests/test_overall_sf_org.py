@@ -248,3 +248,114 @@ class TestGetSalesforceMaintenances:
         with patch("ops.overall_sf_org.maintenance_gauge", mock_gauge):
             get_salesforce_maintenances({"Production": "NA1"})
         mock_gauge.labels.assert_not_called()
+
+
+class TestGetSalesforcePermSetAndUsageEntitlements:
+    def test_perm_set_licenses_processed(self, mock_sf):
+        from ops.overall_sf_org import get_salesforce_licenses
+        user_lic = []
+        perm_lic = [{"MasterLabel": "Sales Cloud", "Status": "Active",
+                     "TotalLicenses": 50, "UsedLicenses": 20, "ExpirationDate": "2025-01-01"}]
+        usage_lic = []
+        with patch("ops.overall_sf_org.query_records_all", side_effect=[user_lic, perm_lic, usage_lic]), \
+             patch("ops.overall_sf_org.total_user_licenses_gauge"), \
+             patch("ops.overall_sf_org.used_user_licenses_gauge"), \
+             patch("ops.overall_sf_org.percent_user_licenses_used_gauge"), \
+             patch("ops.overall_sf_org.total_permissionset_licenses_gauge") as m_total_ps, \
+             patch("ops.overall_sf_org.used_permissionset_licenses_gauge") as m_used_ps, \
+             patch("ops.overall_sf_org.percent_permissionset_used_gauge") as m_pct_ps, \
+             patch("ops.overall_sf_org.total_usage_based_entitlements_licenses_gauge"), \
+             patch("ops.overall_sf_org.used_usage_based_entitlements_licenses_gauge"), \
+             patch("ops.overall_sf_org.percent_usage_based_entitlements_used_gauge"):
+            get_salesforce_licenses(mock_sf)
+        m_total_ps.labels.assert_called_once()
+        m_used_ps.labels.assert_called_once()
+        m_pct_ps.labels.assert_called_once()
+
+    def test_usage_based_entitlements_processed(self, mock_sf):
+        from ops.overall_sf_org import get_salesforce_licenses
+        usage_lic = [{"MasterLabel": "API Calls", "CurrentAmountAllowed": 1000,
+                      "AmountUsed": 300, "EndDate": "2025-12-31"}]
+        with patch("ops.overall_sf_org.query_records_all", side_effect=[[], [], usage_lic]), \
+             patch("ops.overall_sf_org.total_user_licenses_gauge"), \
+             patch("ops.overall_sf_org.used_user_licenses_gauge"), \
+             patch("ops.overall_sf_org.percent_user_licenses_used_gauge"), \
+             patch("ops.overall_sf_org.total_permissionset_licenses_gauge"), \
+             patch("ops.overall_sf_org.used_permissionset_licenses_gauge"), \
+             patch("ops.overall_sf_org.percent_permissionset_used_gauge"), \
+             patch("ops.overall_sf_org.total_usage_based_entitlements_licenses_gauge") as m_total_ube, \
+             patch("ops.overall_sf_org.used_usage_based_entitlements_licenses_gauge") as m_used_ube, \
+             patch("ops.overall_sf_org.percent_usage_based_entitlements_used_gauge") as m_pct_ube:
+            get_salesforce_licenses(mock_sf)
+        m_total_ube.labels.assert_called_once()
+        m_used_ube.labels.assert_called_once()
+        m_pct_ube.labels.assert_called_once()
+
+    def test_zero_usage_entitlement_skips_percent(self, mock_sf):
+        from ops.overall_sf_org import get_salesforce_licenses
+        usage_lic = [{"MasterLabel": "API Calls", "CurrentAmountAllowed": 0,
+                      "AmountUsed": None, "EndDate": "2025-12-31"}]
+        with patch("ops.overall_sf_org.query_records_all", side_effect=[[], [], usage_lic]), \
+             patch("ops.overall_sf_org.total_user_licenses_gauge"), \
+             patch("ops.overall_sf_org.used_user_licenses_gauge"), \
+             patch("ops.overall_sf_org.percent_user_licenses_used_gauge"), \
+             patch("ops.overall_sf_org.total_permissionset_licenses_gauge"), \
+             patch("ops.overall_sf_org.used_permissionset_licenses_gauge"), \
+             patch("ops.overall_sf_org.percent_permissionset_used_gauge"), \
+             patch("ops.overall_sf_org.total_usage_based_entitlements_licenses_gauge"), \
+             patch("ops.overall_sf_org.used_usage_based_entitlements_licenses_gauge"), \
+             patch("ops.overall_sf_org.percent_usage_based_entitlements_used_gauge") as m_pct_ube:
+            get_salesforce_licenses(mock_sf)
+        m_pct_ube.labels.assert_not_called()
+
+
+class TestGetSalesforceInstance:
+    def test_successful_instance_fetch(self, mock_sf):
+        from ops.overall_sf_org import get_salesforce_instance
+        with patch("ops.overall_sf_org.fetch_pod", return_value="NA1") as m_pod, \
+             patch("ops.overall_sf_org.get_salesforce_incidents") as m_inc, \
+             patch("ops.overall_sf_org.get_salesforce_maintenances") as m_maint:
+            get_salesforce_instance(mock_sf)
+        m_pod.assert_called_once_with(mock_sf)
+        m_inc.assert_called_once_with("Production", "NA1")
+        m_maint.assert_called_once_with({"Production": "NA1"})
+
+    def test_handles_exception(self, mock_sf):
+        from ops.overall_sf_org import get_salesforce_instance
+        with patch("ops.overall_sf_org.fetch_pod", side_effect=RuntimeError("fail")):
+            get_salesforce_instance(mock_sf)  # Should not raise
+
+
+class TestGetSalesforceIncidentsEdgeCases:
+    @responses_lib.activate
+    def test_malformed_incident_element_skipped(self):
+        from ops.overall_sf_org import get_salesforce_incidents
+        # Element missing IncidentImpacts → KeyError → logged and skipped
+        incidents = [{"id": "INC-BAD", "instanceKeys": ["NA1"]}]
+        responses_lib.add(
+            responses_lib.GET,
+            f"{TRUST_API}/v1/incidents/active",
+            json=incidents,
+            status=200,
+        )
+        mock_gauge = MagicMock()
+        with patch("ops.overall_sf_org.incident_gauge", mock_gauge):
+            get_salesforce_incidents("Production", "NA1")  # Should not raise
+        # Falls through to ok gauge since incident_cnt == 0
+        mock_gauge.labels.assert_called_with(
+            environment="Production", pod="NA1", severity="ok", incident_id=None
+        )
+
+
+class TestGetSalesforceMaintenancesRequestError:
+    @responses_lib.activate
+    def test_handles_request_error(self):
+        from ops.overall_sf_org import get_salesforce_maintenances
+        import requests as req_lib
+        responses_lib.add(
+            responses_lib.GET,
+            f"{TRUST_API}/v1/maintenances",
+            body=req_lib.exceptions.ConnectionError("down"),
+        )
+        with patch("ops.overall_sf_org.maintenance_gauge"):
+            get_salesforce_maintenances({"Production": "NA1"})  # Should not raise
