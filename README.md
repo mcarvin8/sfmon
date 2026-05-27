@@ -33,6 +33,7 @@ docker run -d \
   --name sfmon \
   -p 9001:9001 \
   -e SALESFORCE_AUTH_URL="force://PlatformCLI::..." \
+  -e ORG_NAME="production" \
   mcarvin8/sfmon:latest
 ```
 
@@ -41,7 +42,7 @@ docker run -d \
 
 No config file is required: all collectors run on **default schedules**. Optional tuning:
 
-- **Environment variables** (timeouts, compliance lists, thresholds, log level, etc.) → **[docs/ENVIRONMENT.md](https://github.com/mcarvin8/sfmon/blob/main/docs/ENVIRONMENT.md)**
+- **Environment variables** (timeouts, org label, compliance lists, thresholds, log level, etc.) → **[docs/ENVIRONMENT.md](https://github.com/mcarvin8/sfmon/blob/main/docs/ENVIRONMENT.md)**
 - **Config file** (schedules, disable jobs, `exclude_users`) → **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md)** · template **`config.example.json`**
 
 Example with a mounted config:
