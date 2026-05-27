@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.9.0](https://github.com/mcarvin8/sfmon/compare/v3.8.0...v3.9.0) (2026-05-27)
+
+
+### Features
+
+* **gauges:** replace Prometheus Gauge with OrgAwareGauge for automatic org labeling ([#35](https://github.com/mcarvin8/sfmon/issues/35)) ([c648cbd](https://github.com/mcarvin8/sfmon/commit/c648cbd2fb80b7eebfa43b3b981051298a876fae))
+
 ## [3.8.0](https://github.com/mcarvin8/sfmon/compare/v3.7.3...v3.8.0) (2026-05-27)
 
 
