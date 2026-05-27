@@ -10,6 +10,8 @@ Scheduling Behavior:
     - If config file exists with empty schedules: Same as no file (defaults for jobs that have them).
     - If config file has a non-empty schedules object: OPT-IN — only listed jobs run (use suggested crons in docs for file-based jobs).
     - Set a job to "disabled" to explicitly disable it when it appears under schedules.
+    - If config file has a "preset" key: The named preset's jobs are used as the base schedule (opt-in mode).
+      Explicit schedules override preset entries; both together are valid.
 
 Configuration File Location:
     - Default: /app/sfmon/config.json (inside container)
@@ -24,6 +26,21 @@ Configuration Structure:
         },
         "integration_user_names": ["User 1", "User 2"],
         "exclude_users": ["Admin User", "Integration User"]
+    }
+
+Preset Structure (alternative to a full schedules block):
+    {
+        "preset": "ops"
+    }
+
+    Valid preset values: "ops", "audit", "tech-debt"
+    Combine with schedules to add file-based opt-in jobs on top of a preset:
+    {
+        "preset": "tech-debt",
+        "schedules": {
+            "monitor_pmd_code_smells": "hour=3,minute=10",
+            "monitor_minimal_perm_sets": "hour=2,minute=20"
+        }
     }
 """
 
@@ -40,6 +57,62 @@ _cached_config = None
 
 # Track whether a config file was found and has schedules defined
 _config_file_has_schedules = None
+
+# ---------------------------------------------------------------------------
+# Preset definitions — each maps job_id → cron string using default timings
+# ---------------------------------------------------------------------------
+PRESETS = {
+    "ops": {
+        "monitor_salesforce_limits": "*/5",
+        "get_salesforce_instance": "*/5",
+        "monitor_apex_flex_queue": "*/5",
+        "hourly_analyse_bulk_api": "minute=5",
+        "get_salesforce_licenses": "minute=15",
+        "get_deployment_status": "minute=55",
+        "get_salesforce_ept_and_apt": "hour=6,minute=0",
+        "async_apex_job_status": "hour=6,minute=30",
+        "monitor_apex_execution_time": "hour=6,minute=45",
+        "async_apex_execution_summary": "hour=7,minute=0",
+        "concurrent_apex_errors": "hour=7,minute=15",
+        "expose_apex_exception_metrics": "hour=7,minute=25",
+        "expose_concurrent_long_running_apex_errors": "hour=7,minute=35",
+        "daily_analyse_bulk_api": "hour=7,minute=30",
+    },
+    "audit": {
+        "monitor_salesforce_limits": "*/5",
+        "get_salesforce_instance": "*/5",
+        "hourly_observe_user_querying_large_records": "minute=25",
+        "monitor_forbidden_profile_assignments": "minute=35",
+        "hourly_report_export_records": "minute=45",
+        "monitor_login_events": "hour=6,minute=15",
+        "geolocation": "hour=8,minute=0",
+        "expose_suspicious_records": "hour=8,minute=15",
+        "monitor_org_wide_sharing_settings": "hour=8,minute=30",
+    },
+    "tech-debt": {
+        "monitor_salesforce_limits": "*/5",
+        "get_salesforce_instance": "*/5",
+        "get_salesforce_licenses": "minute=15",
+        "unassigned_permission_sets": "hour=2,minute=0",
+        "perm_sets_limited_users": "hour=2,minute=15",
+        "profile_assignment_under5": "hour=2,minute=30",
+        "profile_no_active_users": "hour=2,minute=45",
+        "apex_classes_api_version": "hour=3,minute=0",
+        "apex_used_limits_monitoring": "hour=3,minute=5",
+        "apex_triggers_api_version": "hour=3,minute=15",
+        "security_health_check": "hour=3,minute=30",
+        "salesforce_health_risks": "hour=3,minute=45",
+        "workflow_rules_monitoring": "hour=4,minute=0",
+        "dormant_salesforce_users": "hour=4,minute=15",
+        "dormant_portal_users": "hour=4,minute=30",
+        "total_queues_per_object": "hour=4,minute=45",
+        "queues_with_no_members": "hour=5,minute=0",
+        "queues_with_zero_open_cases": "hour=5,minute=15",
+        "public_groups_with_no_members": "hour=5,minute=30",
+        "dashboards_with_inactive_users": "hour=5,minute=45",
+        "scheduled_apex_jobs_monitoring": "hour=5,minute=55",
+    },
+}
 
 
 def load_config(force_reload=False):
@@ -63,6 +136,7 @@ def load_config(force_reload=False):
         "schedules": {},
         "integration_user_names": None,
         "exclude_users": [],
+        "preset": None,
     }
 
     if not os.path.exists(config_file_path):
@@ -83,6 +157,28 @@ def load_config(force_reload=False):
         result["schedules"] = config.get("schedules", {})
         result["integration_user_names"] = config.get("integration_user_names")
         result["exclude_users"] = config.get("exclude_users", [])
+        result["preset"] = None
+
+        # Expand preset if specified, merging with any explicit schedules (explicit wins)
+        preset_name = config.get("preset", "").strip().lower()
+        if preset_name:
+            if preset_name in PRESETS:
+                merged = {**PRESETS[preset_name], **result["schedules"]}
+                result["schedules"] = merged
+                result["preset"] = preset_name
+                logger.info(
+                    "Applying preset '%s' (%d jobs) from %s",
+                    preset_name,
+                    len(merged),
+                    config_file_path,
+                )
+            else:
+                logger.warning(
+                    "Unknown preset '%s' in %s. Valid presets: %s. Ignoring preset.",
+                    preset_name,
+                    config_file_path,
+                    ", ".join(PRESETS.keys()),
+                )
 
         # Track whether the config file has any schedules defined
         _config_file_has_schedules = bool(result["schedules"])
@@ -134,6 +230,17 @@ def has_custom_schedules():
     if _config_file_has_schedules is None:
         load_config()
     return _config_file_has_schedules
+
+
+def get_active_preset():
+    """
+    Return the name of the active preset, or None if no preset is set.
+
+    Returns:
+        str or None: Preset name (e.g. 'ops', 'audit', 'tech-debt'), or None
+    """
+    config = load_config()
+    return config.get("preset")
 
 
 def _parse_json_cron(schedule_str):

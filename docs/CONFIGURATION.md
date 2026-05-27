@@ -48,10 +48,54 @@ Or keep the file elsewhere and set:
 |-----------|----------|
 | **No config file** | Every registered job with a **default schedule** runs (see tables below). Jobs marked **opt-in** have **no** default and do **not** run. |
 | **Config file exists, `schedules` missing or `{}`** | Same as no file: defaults for jobs that have them; **opt-in** jobs stay off. |
+| **Config file with `preset`** | Opt-in mode: only the jobs belonging to the named preset run. See **[Presets](#presets)** below. |
 | **Config file with a non-empty `schedules` object** | **Opt-in:** only jobs **listed** under `schedules` run. Jobs not listed are **not** run. |
 | **Job value `"disabled"`** (or `none` / empty) | That job does **not** run (only applies when the job is listed under `schedules`). |
 
 **Important:** As soon as you add **any** entry under `schedules`, you must list **every** job you want—including ones you only want at default cadence. Copy defaults from the table below or start from `config.example.json` and trim.
+
+---
+
+## Presets
+
+Presets let you opt into a focused set of jobs with a single config key instead of maintaining a full `schedules` block. The default behavior (no config file) runs **all** jobs — presets narrow that down to one area.
+
+```json
+{ "preset": "ops" }
+```
+
+| Preset | Jobs included |
+|--------|---------------|
+| `ops` | Limits, instance health, Apex flex queue, Bulk API (daily + hourly), licenses, EPT/APT, Apex execution metrics + errors, deployments |
+| `audit` | Limits, instance health, large queries, forbidden profiles, report exports, login events, geolocation, suspicious audit trail, org-wide sharing |
+| `tech-debt` | Limits, instance health, licenses, permission sets, profiles, Apex API versions + code size, security health check, workflow rules, dormant users, queues, public groups, dashboards, scheduled jobs |
+
+**Note:** The file-based jobs (`monitor_pmd_code_smells`, `monitor_minimal_perm_sets`) are **never** included in a preset — they require mounted files and are always opt-in. Add them explicitly under `schedules` on top of a preset if needed (see example below).
+
+**Combining a preset with extra jobs:**
+
+```json
+{
+  "preset": "tech-debt",
+  "schedules": {
+    "monitor_pmd_code_smells": "hour=3,minute=10",
+    "monitor_minimal_perm_sets": "hour=2,minute=20"
+  }
+}
+```
+
+Explicit `schedules` entries are **merged on top of** the preset — they override a preset job's schedule if the same job ID appears in both.
+
+**Overriding a preset job's schedule:**
+
+```json
+{
+  "preset": "ops",
+  "schedules": {
+    "daily_analyse_bulk_api": "hour=9,minute=0"
+  }
+}
+```
 
 **File-based metrics (PMD + minimal permission sets):** `monitor_pmd_code_smells` and `monitor_minimal_perm_sets` have **no default schedule**. They run only if you add them under `schedules` with a cron expression (for example `hour=3,minute=10` and `hour=2,minute=20`). You must also provide the files and env described in **[ENVIRONMENT.md](ENVIRONMENT.md#pmd-and-minimal-permission-sets-optional)** (`PMD_RULESET_PATH`, `pmd-report.xml`, `minimal-perm-sets.json` at the documented paths), typically via volume mounts or a private image build.
 
