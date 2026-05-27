@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.0](https://github.com/mcarvin8/sfmon/compare/v3.9.0...v3.10.0) (2026-05-27)
+
+
+### Features
+
+* **config:** add preset support for ops, audit, and tech-debt and set always-on monitoring functions ([#38](https://github.com/mcarvin8/sfmon/issues/38)) ([1418052](https://github.com/mcarvin8/sfmon/commit/14180526fef26f9899bf1077f6dd2be7b65fd762))
+
 ## [3.9.0](https://github.com/mcarvin8/sfmon/compare/v3.8.0...v3.9.0) (2026-05-27)
 
 
