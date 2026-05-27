@@ -270,7 +270,7 @@ class TestPresets:
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg))
         result = config.load_config(force_reload=True)
         assert config.has_custom_schedules() is True
-        assert "monitor_salesforce_limits" in result["schedules"]
+        assert "monitor_apex_flex_queue" in result["schedules"]
         assert "daily_analyse_bulk_api" in result["schedules"]
 
     def test_audit_preset_contains_expected_jobs(self, tmp_path, monkeypatch):
@@ -352,3 +352,66 @@ class TestPresets:
     def test_preset_names_exposed_in_presets_dict(self):
         import config
         assert set(config.PRESETS.keys()) == {"ops", "audit", "tech-debt"}
+
+    def test_presets_do_not_contain_always_on_jobs(self):
+        import config
+        always_on = {"monitor_salesforce_limits", "get_salesforce_instance", "get_salesforce_licenses"}
+        for preset_name, jobs in config.PRESETS.items():
+            for job in always_on:
+                assert job not in jobs, f"{job} should not be in preset '{preset_name}'"
+
+
+# ---------------------------------------------------------------------------
+# get_always_on_schedule
+# ---------------------------------------------------------------------------
+
+class TestGetAlwaysOnSchedule:
+    def test_no_config_returns_default(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
+        import config
+        config.load_config(force_reload=True)
+        default = {"minute": "*/5"}
+        result = config.get_always_on_schedule("monitor_salesforce_limits", default)
+        assert result == default
+
+    def test_opt_in_mode_not_listed_still_returns_default(self, tmp_path, monkeypatch):
+        cfg = {"schedules": {"some_other_job": "*/10"}}
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps(cfg))
+        monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
+        import config
+        config.load_config(force_reload=True)
+        default = {"minute": "*/5"}
+        result = config.get_always_on_schedule("monitor_salesforce_limits", default)
+        assert result == default
+
+    def test_explicit_override_in_config(self, tmp_path, monkeypatch):
+        cfg = {"schedules": {"monitor_salesforce_limits": "hour=1,minute=0"}}
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps(cfg))
+        monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
+        import config
+        config.load_config(force_reload=True)
+        result = config.get_always_on_schedule("monitor_salesforce_limits", {"minute": "*/5"})
+        assert result == {"hour": "1", "minute": "0"}
+
+    def test_explicit_disable_in_config_returns_none(self, tmp_path, monkeypatch):
+        cfg = {"schedules": {"monitor_salesforce_limits": "disabled"}}
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps(cfg))
+        monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
+        import config
+        config.load_config(force_reload=True)
+        result = config.get_always_on_schedule("monitor_salesforce_limits", {"minute": "*/5"})
+        assert result is None
+
+    def test_preset_mode_not_listed_still_returns_default(self, tmp_path, monkeypatch):
+        cfg = {"preset": "audit"}
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps(cfg))
+        monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
+        import config
+        config.load_config(force_reload=True)
+        default = {"minute": "*/5"}
+        result = config.get_always_on_schedule("monitor_salesforce_limits", default)
+        assert result == default

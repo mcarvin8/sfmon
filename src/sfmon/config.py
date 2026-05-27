@@ -63,11 +63,8 @@ _config_file_has_schedules = None
 # ---------------------------------------------------------------------------
 PRESETS = {
     "ops": {
-        "monitor_salesforce_limits": "*/5",
-        "get_salesforce_instance": "*/5",
         "monitor_apex_flex_queue": "*/5",
         "hourly_analyse_bulk_api": "minute=5",
-        "get_salesforce_licenses": "minute=15",
         "get_deployment_status": "minute=55",
         "get_salesforce_ept_and_apt": "hour=6,minute=0",
         "async_apex_job_status": "hour=6,minute=30",
@@ -79,8 +76,6 @@ PRESETS = {
         "daily_analyse_bulk_api": "hour=7,minute=30",
     },
     "audit": {
-        "monitor_salesforce_limits": "*/5",
-        "get_salesforce_instance": "*/5",
         "hourly_observe_user_querying_large_records": "minute=25",
         "monitor_forbidden_profile_assignments": "minute=35",
         "hourly_report_export_records": "minute=45",
@@ -90,9 +85,6 @@ PRESETS = {
         "monitor_org_wide_sharing_settings": "hour=8,minute=30",
     },
     "tech-debt": {
-        "monitor_salesforce_limits": "*/5",
-        "get_salesforce_instance": "*/5",
-        "get_salesforce_licenses": "minute=15",
         "unassigned_permission_sets": "hour=2,minute=0",
         "perm_sets_limited_users": "hour=2,minute=15",
         "profile_assignment_under5": "hour=2,minute=30",
@@ -366,6 +358,38 @@ def get_schedule_from_config(job_id, default_schedule):
 
     logger.info("Job %s enabled with custom schedule: %s", job_id, config_schedule)
     return parsed
+
+
+def get_always_on_schedule(job_id, default_schedule):
+    """
+    Get schedule for an always-on job. Always returns default_schedule unless
+    the job is explicitly listed in the config schedules block (which allows
+    overriding or disabling it via "disabled").
+
+    Args:
+        job_id: The job identifier
+        default_schedule: Default schedule dict for CronTrigger
+
+    Returns:
+        dict or None: Schedule configuration for CronTrigger, None if explicitly disabled
+    """
+    config = load_config()
+    schedules = config.get("schedules", {})
+
+    if job_id.lower() in schedules:
+        parsed = parse_cron_schedule(schedules[job_id.lower()])
+        if parsed is None:
+            logger.info("Always-on job %s explicitly disabled in config file", job_id)
+        else:
+            logger.info(
+                "Always-on job %s using custom schedule from config: %s",
+                job_id,
+                schedules[job_id.lower()],
+            )
+        return parsed
+
+    logger.debug("Always-on job %s using default schedule", job_id)
+    return default_schedule
 
 
 def get_integration_user_names():

@@ -1,19 +1,7 @@
 """
-Salesforce Organization-Level Monitoring Module
+Core Org-Level Monitoring Module
 
-This module monitors organization-wide status, health, and resource utilization for
-the production Salesforce org. It tracks org limits, licenses, active incidents, and
-scheduled maintenance to provide comprehensive visibility into org health.
-
-Key Monitoring Areas:
-    1. Org Limits: All Salesforce platform limits (API, storage, async jobs, etc.)
-    2. Licenses: User licenses, permission set licenses, usage-based entitlements
-    3. Incidents: Active Salesforce Trust site incidents affecting the org's pod
-    4. Maintenance: Scheduled Salesforce maintenance windows
-
-Environment Variables:
-    - SALESFORCE_STATUS_API_URL: Base URL for Salesforce Trust status API
-                                  (default: https://api.status.salesforce.com)
+Always-on baseline functions that run regardless of preset or opt-in mode.
 
 Functions:
     - monitor_salesforce_limits: Tracks all org limits with usage percentages
@@ -29,17 +17,9 @@ Data Sources:
     - UserLicense, PermissionSetLicense, TenantUsageEntitlement objects
     - Salesforce Trust Status API (configurable via SALESFORCE_STATUS_API_URL)
 
-Metrics Exposed:
-    - API usage percentage for each limit with descriptions
-    - Total, used, and percentage for all license types
-    - Incident count and severity by pod
-    - Maintenance windows with status and time ranges
-
-Alert Thresholds:
-    - License usage > 80%
-    - API limits > 80%
-    - Any active incidents on prod pod
-    - Scheduled maintenance within 24 hours
+Environment Variables:
+    - SALESFORCE_STATUS_API_URL: Base URL for Salesforce Trust status API
+                                  (default: https://api.status.salesforce.com)
 """
 
 import os
@@ -232,10 +212,7 @@ def get_salesforce_incidents(org, instancepod):
 
         for element in incidents:
             try:
-                # Extract incident ID for building trust site URL
                 incident_id = element.get("id", "unknown")
-
-                # Access the IncidentImpacts to get the severity
                 severity = element["IncidentImpacts"][0].get("severity", "unknown")
                 pods = (
                     str(element["instanceKeys"])
@@ -255,7 +232,6 @@ def get_salesforce_incidents(org, instancepod):
             except (KeyError, IndexError) as e:
                 logger.warning("Error processing incident element: %s", e)
 
-        # If no incidents were counted, ensure the gauge is set to 0 with severity 'ok'
         if incident_cnt == 0:
             incident_gauge.labels(
                 environment=org, pod=instancepod, severity="ok", incident_id=None
