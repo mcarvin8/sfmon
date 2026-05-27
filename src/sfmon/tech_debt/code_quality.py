@@ -21,7 +21,7 @@ import os
 import re
 
 from logger import logger
-from gauges import (
+from .gauges import (
     deprecated_apex_class_gauge,
     deprecated_apex_trigger_gauge,
     workflow_rules_gauge,

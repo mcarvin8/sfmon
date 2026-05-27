@@ -11,7 +11,7 @@ Data Sources:
 """
 
 from logger import logger
-from gauges import scheduled_apex_jobs_gauge
+from .gauges import scheduled_apex_jobs_gauge
 from query import query_records_all
 
 

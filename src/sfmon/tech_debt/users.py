@@ -15,7 +15,7 @@ Data Sources:
 import os
 
 from logger import logger
-from gauges import (
+from .gauges import (
     dormant_salesforce_users_gauge,
     dormant_portal_users_gauge,
 )

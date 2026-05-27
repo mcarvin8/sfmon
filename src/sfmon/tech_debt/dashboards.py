@@ -9,7 +9,7 @@ Data Sources:
 """
 
 from logger import logger
-from gauges import dashboards_with_inactive_users_gauge
+from .gauges import dashboards_with_inactive_users_gauge
 from query import query_records_all
 
 

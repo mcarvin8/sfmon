@@ -31,7 +31,7 @@ Use Cases:
 from collections import defaultdict
 
 from logger import logger
-from gauges import (
+from .gauges import (
     daily_batch_count_metric,
     daily_bulk_api2_batch_count_metric,
     daily_bulk_api2_entity_type_count_metric,
