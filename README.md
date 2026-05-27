@@ -3,6 +3,7 @@
 ![Docker Image Version](https://img.shields.io/docker/v/mcarvin8/sfmon?sort=date)
 ![Docker Pulls](https://img.shields.io/docker/pulls/mcarvin8/sfmon)
 ![Docker Image Size](https://img.shields.io/docker/image-size/mcarvin8/sfmon)
+![Coverage](https://raw.githubusercontent.com/mcarvin8/sfmon/refs/heads/main/badges/coverage.svg)
 
 SFMon runs in **Docker**, connects to your Salesforce org on a schedule, and exposes **Prometheus** metrics at `/metrics` so you can graph and alert in **Grafana**, **Alertmanager**, or any tool that already monitors the rest of your stack.
 
