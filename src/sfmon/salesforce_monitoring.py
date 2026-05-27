@@ -65,6 +65,13 @@ from apscheduler.triggers.cron import CronTrigger
 from logger import logger
 from connection_sf import get_salesforce_connection_url
 
+# Always-on baseline functions (core package)
+from core import (
+    monitor_salesforce_limits,
+    get_salesforce_licenses,
+    get_salesforce_instance,
+)
+
 # Operations monitoring functions (ops package)
 from ops import (
     monitor_apex_flex_queue,
@@ -76,9 +83,6 @@ from ops import (
     async_apex_execution_summary,
     daily_analyse_bulk_api,
     hourly_analyse_bulk_api,
-    monitor_salesforce_limits,
-    get_salesforce_licenses,
-    get_salesforce_instance,
     get_salesforce_ept_and_apt,
 )
 
@@ -142,23 +146,20 @@ def reauthenticate_connections():
 
 def get_schedule_config(job_id, default_schedule):
     """
-    Get schedule configuration for a job from config file, environment variable, or use default.
-
-    Priority:
-    1. Environment variable SCHEDULE_<JOB_ID> (highest priority)
-    2. Config file schedules.<job_id>
-    3. Default schedule (lowest priority)
-
-    Args:
-        job_id: The job identifier
-        default_schedule: Default schedule dict for CronTrigger, or None to skip by default
-
-    Returns:
-        dict or None: Schedule configuration for CronTrigger, None if disabled
+    Get schedule for an opt-in job. Returns None if job is not listed when opt-in mode is active.
     """
     from config import get_schedule_from_config
 
     return get_schedule_from_config(job_id, default_schedule)
+
+
+def get_always_on_config(job_id, default_schedule):
+    """
+    Get schedule for an always-on job. Always uses default unless explicitly overridden or disabled.
+    """
+    from config import get_always_on_schedule
+
+    return get_always_on_schedule(job_id, default_schedule)
 
 
 def _add_job_with_schedule(scheduler, sf, job_id, schedule, func, job_name):
@@ -183,14 +184,16 @@ def schedule_tasks(scheduler):
 
     SCHEDULE OVERVIEW:
 
+    Always-On Functions (run regardless of preset/opt-in mode):
+        - monitor_salesforce_limits (every 5 minutes)
+        - get_salesforce_instance (every 5 minutes)
+        - get_salesforce_licenses (hourly at :15)
+
     Critical Functions (Every 5 minutes):
-        - monitor_salesforce_limits
-        - get_salesforce_instance
         - monitor_apex_flex_queue
 
     Hourly Functions (staggered 5 mins off the hour):
         - :05 - hourly_analyse_bulk_api
-        - :15 - get_salesforce_licenses
         - :25 - hourly_observe_user_querying_large_records
         - :35 - monitor_forbidden_profile_assignments
         - :45 - hourly_report_export_records
@@ -236,7 +239,8 @@ def schedule_tasks(scheduler):
         - monitor_minimal_perm_sets — minimal-perm-sets.json
         - monitor_pmd_code_smells — pmd-report.xml and PMD_RULESET_PATH
     """
-    scheduled_jobs = [
+    # Always-on jobs: run regardless of preset/opt-in mode; can only be disabled explicitly
+    always_on_jobs = [
         (
             "monitor_salesforce_limits",
             {"minute": "*/5"},
@@ -249,6 +253,22 @@ def schedule_tasks(scheduler):
             get_salesforce_instance,
             "Get Salesforce Instance",
         ),
+        (
+            "get_salesforce_licenses",
+            {"minute": "15"},
+            get_salesforce_licenses,
+            "Get Salesforce Licenses",
+        ),
+    ]
+    for job_id, default_schedule, func, job_name in always_on_jobs:
+        schedule = get_always_on_config(job_id, default_schedule)
+        if schedule:
+            func(sf_connection)
+            _add_job_with_schedule(
+                scheduler, sf_connection, job_id, schedule, func, job_name
+            )
+
+    scheduled_jobs = [
         (
             "monitor_apex_flex_queue",
             {"minute": "*/5"},
@@ -452,12 +472,6 @@ def schedule_tasks(scheduler):
             {"minute": "5"},
             hourly_analyse_bulk_api,
             "Hourly Analyse Bulk API",
-        ),
-        (
-            "get_salesforce_licenses",
-            {"minute": "15"},
-            get_salesforce_licenses,
-            "Get Salesforce Licenses",
         ),
         (
             "hourly_observe_user_querying_large_records",
