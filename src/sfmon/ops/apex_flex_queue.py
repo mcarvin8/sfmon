@@ -10,7 +10,7 @@ Functions:
 """
 
 from logger import logger
-from gauges import apex_flex_queue
+from .gauges import apex_flex_queue
 from query import query_records_all
 
 

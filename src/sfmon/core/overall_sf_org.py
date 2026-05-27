@@ -27,7 +27,7 @@ import requests
 
 from logger import logger
 from constants import REQUESTS_TIMEOUT_SECONDS
-from gauges import (
+from .gauges import (
     api_usage_percentage_gauge,
     incident_gauge,
     total_permissionset_licenses_gauge,

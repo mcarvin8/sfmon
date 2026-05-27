@@ -21,7 +21,7 @@ import json
 import os
 
 from logger import logger
-from gauges import (
+from .gauges import (
     unused_permissionsets,
     limited_permissionsets,
     five_or_less_profile_assignees,

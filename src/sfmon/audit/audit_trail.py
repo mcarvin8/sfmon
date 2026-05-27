@@ -18,7 +18,7 @@ Functions:
 from constants import ALLOWED_SECTIONS_ACTIONS
 from .utils import categorize_user_group
 from logger import logger
-from gauges import suspicious_records_gauge
+from .gauges import suspicious_records_gauge
 from query import query_records_all
 
 

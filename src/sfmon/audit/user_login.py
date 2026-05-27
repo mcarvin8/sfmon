@@ -42,7 +42,7 @@ import pandas as pd
 
 from logger import logger
 from constants import REQUESTS_TIMEOUT_SECONDS
-from gauges import (
+from .gauges import (
     login_failure_gauge,
     login_success_gauge,
     geolocation_gauge,

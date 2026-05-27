@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 
 from logger import logger
-from gauges import (
+from .gauges import (
     pmd_code_smells_gauge,
     pmd_apex_violations_gauge,
 )

@@ -35,7 +35,7 @@ Performance Thresholds:
 import os
 
 from logger import logger
-from gauges import (
+from .gauges import (
     async_job_status_gauge,
     run_time_metric,
     cpu_time_metric,

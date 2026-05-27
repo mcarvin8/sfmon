@@ -15,7 +15,7 @@ Data Sources:
 """
 
 from logger import logger
-from gauges import (
+from .gauges import (
     total_queues_per_object_gauge,
     queues_with_no_members_gauge,
     queues_with_zero_open_cases_gauge,

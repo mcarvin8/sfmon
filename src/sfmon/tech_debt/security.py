@@ -11,7 +11,7 @@ Data Sources:
 """
 
 from logger import logger
-from gauges import (
+from .gauges import (
     security_health_check_gauge,
     salesforce_health_risks_gauge,
 )

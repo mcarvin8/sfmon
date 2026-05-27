@@ -15,7 +15,7 @@ Functions:
 
 import os
 from logger import logger
-from gauges import forbidden_profile_users_gauge
+from .gauges import forbidden_profile_users_gauge
 from query import query_records_all
 
 
