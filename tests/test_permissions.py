@@ -138,3 +138,19 @@ class TestMonitorMinimalPermSets:
         (tmp_path / "minimal-perm-sets.json").write_text("NOT JSON")
         with patch("tech_debt.permissions.os.path.dirname", return_value=str(tmp_path)):
             monitor_minimal_perm_sets(mock_sf)  # Should not raise
+
+    def test_handles_file_not_found(self, mock_sf, tmp_path):
+        from tech_debt.permissions import monitor_minimal_perm_sets
+        # File must exist so os.path.exists passes, then open raises FileNotFoundError
+        (tmp_path / "minimal-perm-sets.json").write_text("{}")
+        with patch("tech_debt.permissions.os.path.dirname", return_value=str(tmp_path)), \
+             patch("builtins.open", side_effect=FileNotFoundError("no file")):
+            monitor_minimal_perm_sets(mock_sf)  # Should not raise
+
+    def test_handles_generic_exception(self, mock_sf, tmp_path):
+        from tech_debt.permissions import monitor_minimal_perm_sets
+        # File must exist so os.path.exists passes, then open raises RuntimeError
+        (tmp_path / "minimal-perm-sets.json").write_text("{}")
+        with patch("tech_debt.permissions.os.path.dirname", return_value=str(tmp_path)), \
+             patch("builtins.open", side_effect=RuntimeError("unexpected error")):
+            monitor_minimal_perm_sets(mock_sf)  # Should not raise

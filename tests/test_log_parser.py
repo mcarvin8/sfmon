@@ -79,6 +79,14 @@ class TestParseLogs:
             result = parse_logs(self._make_sf(), "SELECT Id FROM EventLogFile")
         assert result is None
 
+    def test_returns_none_on_csv_error(self):
+        from log_parser import parse_logs
+        records = [{"Id": "elf001"}]
+        with patch("log_parser.query_records_all", return_value=records), \
+             patch("log_parser.fetch_event_log_csv_reader", side_effect=csv.Error("bad csv")):
+            result = parse_logs(self._make_sf(), "SELECT Id FROM EventLogFile")
+        assert result is None
+
     def test_returns_none_on_generic_exception(self):
         from log_parser import parse_logs
         with patch("log_parser.query_records_all", side_effect=RuntimeError("unexpected")):

@@ -10,7 +10,7 @@ import os
 
 _parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _parent_dir not in sys.path:
-    sys.path.insert(0, _parent_dir)
+    sys.path.insert(0, _parent_dir)  # pragma: no cover
 
 from .overall_sf_org import (
     monitor_salesforce_limits,

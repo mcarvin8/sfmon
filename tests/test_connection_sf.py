@@ -6,6 +6,13 @@ from unittest.mock import MagicMock, patch
 
 
 class TestGetSfCommand:
+    def test_finds_sf_cmd_on_windows(self):
+        import connection_sf
+        with patch("sys.platform", "win32"), \
+             patch("shutil.which", return_value="C:\\path\\sf.cmd"):
+            result = connection_sf._get_sf_command()
+        assert result == "C:\\path\\sf.cmd"
+
     def test_finds_sf_on_unix(self):
         with patch("shutil.which", return_value="/usr/local/bin/sf") as mock_which:
             import connection_sf
@@ -97,6 +104,45 @@ class TestGetSalesforceConnectionUrl:
             import connection_sf
             with pytest.raises(subprocess.CalledProcessError):
                 connection_sf.get_salesforce_connection_url("force://bad_token@instance")
+
+    def test_windows_temp_file_oserror_on_cleanup(self):
+        sf_display_output = json.dumps({
+            "result": {
+                "accessToken": "win_token",
+                "instanceUrl": "https://myorg.my.salesforce.com",
+                "apiVersion": "58.0",
+            }
+        })
+        mock_run = MagicMock()
+        mock_run.stdout = sf_display_output.encode("utf-8")
+
+        with patch("sys.platform", "win32"), \
+             patch("shutil.which", return_value="C:\\path\\sf.cmd"), \
+             patch("subprocess.run", return_value=mock_run), \
+             patch("os.unlink", side_effect=OSError("permission denied")), \
+             patch("connection_sf.Salesforce", return_value=MagicMock()):
+            import connection_sf
+            result = connection_sf.get_salesforce_connection_url("force://token@instance")
+        assert result is not None
+
+    def test_windows_uses_temp_file(self):
+        sf_display_output = json.dumps({
+            "result": {
+                "accessToken": "win_token",
+                "instanceUrl": "https://myorg.my.salesforce.com",
+                "apiVersion": "58.0",
+            }
+        })
+        mock_run = MagicMock()
+        mock_run.stdout = sf_display_output.encode("utf-8")
+
+        with patch("sys.platform", "win32"), \
+             patch("shutil.which", return_value="C:\\path\\sf.cmd"), \
+             patch("subprocess.run", return_value=mock_run), \
+             patch("connection_sf.Salesforce", return_value=MagicMock()):
+            import connection_sf
+            result = connection_sf.get_salesforce_connection_url("force://token@instance")
+        assert result is not None
 
     def test_missing_key_propagates(self):
         sf_display_output = json.dumps({"result": {}})

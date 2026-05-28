@@ -136,6 +136,16 @@ class TestProcessSuspiciousRecords:
         mock_gauge.labels().set.assert_called_once_with(1)
 
 
+class TestQuerySetupAuditTrail:
+    def test_returns_records_from_sf(self, mock_sf):
+        from audit.audit_trail import query_setup_audit_trail
+        records = [{"Action": "test", "CreatedById": "001", "CreatedDate": "2024-01-01",
+                    "Display": "did something", "Section": "Manage Users"}]
+        with patch("audit.audit_trail.query_records_all", return_value=records):
+            result = query_setup_audit_trail(mock_sf)
+        assert result == records
+
+
 class TestExposeSuspiciousRecords:
     def test_calls_query_and_processes(self, mock_sf):
         from audit.audit_trail import expose_suspicious_records
