@@ -134,3 +134,18 @@ class TestToolingQueryRecordsAll:
             result = tooling_query_records_all(mock_sf, "SELECT Id FROM ApexClass")
 
         assert result == records
+
+    def test_expired_session_retry_also_fails(self, mock_sf):
+        from query import tooling_query_records_all
+        mock_sf.toolingexecute.side_effect = SalesforceExpiredSession(
+            "https://example.com", 401, "Expired", "EXPIRED"
+        )
+
+        mock_module = MagicMock()
+        mock_module.reauthenticate_connections.side_effect = RuntimeError("reauth failed")
+        mock_module.sf_connection = None
+
+        with patch.dict("sys.modules", {"salesforce_monitoring": mock_module}):
+            result = tooling_query_records_all(mock_sf, "SELECT Id FROM ApexClass")
+
+        assert result == []

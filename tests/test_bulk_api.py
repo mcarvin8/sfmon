@@ -354,3 +354,56 @@ class TestProcessBulkApi2Logs:
             processed_keys=(),
             failed_keys=(),
         )
+
+
+class TestBulkApi2ZeroRecordWarning:
+    def test_warns_when_batch_rows_but_zero_record_counts(self):
+        from ops.bulk_api import process_bulk_api_logs
+        # Headers with no recognizable record count column → processed_col=None, failed_col=None
+        headers = ["JOB_ID", "USER_ID", "ENTITY_TYPE", "OPERATION_TYPE"]
+        rows = [
+            {"JOB_ID": "j1", "USER_ID": "u1", "ENTITY_TYPE": "Contact", "OPERATION_TYPE": "insert"},
+        ]
+        reader = make_csv_reader(headers, rows)
+        mock_batch = MagicMock()
+        mock_entity = MagicMock()
+        # Should not raise; warning is emitted internally
+        process_bulk_api_logs(
+            reader, mock_batch, mock_entity,
+            event_type="BulkAPI2",
+            processed_keys=(),
+            failed_keys=(),
+        )
+
+
+class TestResolveElfColumnEdgeCases:
+    def test_skips_empty_fieldname_in_list(self):
+        from ops.bulk_api import _resolve_elf_column
+        result = _resolve_elf_column(["", "ROWS_PROCESSED"], ("ROWS_PROCESSED",))
+        assert result == "ROWS_PROCESSED"
+
+
+class TestInferNumericCountColumn:
+    def test_returns_none_for_empty_rows(self):
+        from ops.bulk_api import _infer_numeric_count_column
+        result = _infer_numeric_count_column([], ["MY_ROW_COUNT"], failures=False)
+        assert result is None
+
+    def test_returns_none_for_none_fieldnames(self):
+        from ops.bulk_api import _infer_numeric_count_column
+        result = _infer_numeric_count_column([{"COL": "1"}], None, failures=False)
+        assert result is None
+
+    def test_skips_empty_fieldname(self):
+        from ops.bulk_api import _infer_numeric_count_column
+        # Empty string in fieldnames → continue; MY_ROW_COUNT still found
+        rows = [{"MY_ROW_COUNT": "5"}]
+        result = _infer_numeric_count_column(rows, ["", "MY_ROW_COUNT"], failures=False)
+        assert result == "MY_ROW_COUNT"
+
+    def test_returns_none_when_no_matching_volume_token(self):
+        from ops.bulk_api import _infer_numeric_count_column
+        # "DURATION_MS" has no FAIL/ERROR and no ROW/RECORD/COUNT/etc. → continue at line 424
+        rows = [{"DURATION_MS": "100"}]
+        result = _infer_numeric_count_column(rows, ["DURATION_MS"], failures=False)
+        assert result is None

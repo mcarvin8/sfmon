@@ -365,3 +365,51 @@ class TestExposeConcurrentErrorsExceptions:
         mock_gauge = MagicMock()
         with patch("ops.apex_jobs.top_apex_concurrent_errors_sorted_by_count", mock_gauge):
             expose_concurrent_errors_metrics_sorted_by_request_count(df)  # Should not raise
+
+    def test_avg_runtime_handles_exception(self):
+        import pandas as pd
+        from ops.apex_jobs import expose_concurrent_errors_metrics_sorted_by_average_runtime
+        df = pd.DataFrame({"ENTRY_POINT": ["EP1"], "RUN_TIME": [1.0], "EXEC_TIME": [0.5], "DB_TOTAL_TIME": [0.2]})
+        mock_gauge = MagicMock()
+        mock_gauge.clear.side_effect = RuntimeError("gauge error")
+        with patch("ops.apex_jobs.top_apex_concurrent_errors_sorted_by_avg_runtime", mock_gauge):
+            expose_concurrent_errors_metrics_sorted_by_average_runtime(df)  # Should not raise
+
+    def test_request_count_handles_exception(self):
+        import pandas as pd
+        from ops.apex_jobs import expose_concurrent_errors_metrics_sorted_by_request_count
+        df = pd.DataFrame({"ENTRY_POINT": ["EP1"], "RUN_TIME": [1.0], "EXEC_TIME": [0.5], "DB_TOTAL_TIME": [0.2]})
+        mock_gauge = MagicMock()
+        mock_gauge.clear.side_effect = RuntimeError("gauge error")
+        with patch("ops.apex_jobs.top_apex_concurrent_errors_sorted_by_count", mock_gauge):
+            expose_concurrent_errors_metrics_sorted_by_request_count(df)  # Should not raise
+
+
+class TestExposeApexExceptionMetricsTypeAndGenericErrors:
+    """Tests for TypeError and generic Exception branches in expose_apex_exception_metrics."""
+
+    def test_handles_type_error_in_row(self, mock_sf):
+        from ops.apex_jobs import expose_apex_exception_metrics
+        logs = [{"EXCEPTION_CATEGORY": "ApexException", "REQUEST_ID": "r1",
+                 "EXCEPTION_TYPE": "NullPointerException", "EXCEPTION_MESSAGE": "msg",
+                 "STACK_TRACE": "trace", "TIMESTAMP_DERIVED": "2024-01-15"}]
+        mock_detail = MagicMock()
+        mock_detail.labels.side_effect = TypeError("bad type")
+        mock_category = MagicMock()
+        with patch("ops.apex_jobs.parse_logs", return_value=iter(logs)), \
+             patch("ops.apex_jobs.apex_exception_details_gauge", mock_detail), \
+             patch("ops.apex_jobs.apex_exception_category_count_gauge", mock_category):
+            expose_apex_exception_metrics(mock_sf)  # Should not raise
+
+    def test_handles_generic_exception_in_row(self, mock_sf):
+        from ops.apex_jobs import expose_apex_exception_metrics
+        logs = [{"EXCEPTION_CATEGORY": "ApexException", "REQUEST_ID": "r1",
+                 "EXCEPTION_TYPE": "NullPointerException", "EXCEPTION_MESSAGE": "msg",
+                 "STACK_TRACE": "trace", "TIMESTAMP_DERIVED": "2024-01-15"}]
+        mock_detail = MagicMock()
+        mock_detail.labels.side_effect = RuntimeError("unexpected error")
+        mock_category = MagicMock()
+        with patch("ops.apex_jobs.parse_logs", return_value=iter(logs)), \
+             patch("ops.apex_jobs.apex_exception_details_gauge", mock_detail), \
+             patch("ops.apex_jobs.apex_exception_category_count_gauge", mock_category):
+            expose_apex_exception_metrics(mock_sf)  # Should not raise

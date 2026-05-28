@@ -34,6 +34,15 @@ class TestTimeoutConstants:
         assert constants.QUERY_TIMEOUT_SECONDS == 45
 
 
+class TestLoadExcludeUsers:
+    def test_returns_empty_list_on_exception(self):
+        from unittest.mock import patch
+        import constants
+        with patch("config.get_exclude_users", side_effect=RuntimeError("config error")):
+            result = constants._load_exclude_users()
+        assert result == []
+
+
 class TestAllowedSectionsActions:
     @pytest.fixture(autouse=True)
     def _import(self):

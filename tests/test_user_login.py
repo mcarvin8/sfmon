@@ -169,6 +169,18 @@ class TestGeolocation:
         with patch("audit.user_login.query_records_all", side_effect=RuntimeError("fail")):
             geolocation(mock_sf, chunk_size=100)  # Should not raise
 
+    def test_uses_default_chunk_size(self, mock_sf):
+        from audit.user_login import geolocation
+        with patch("audit.user_login.query_records_all", return_value=[]), \
+             patch("audit.user_login.geolocation_gauge"):
+            geolocation(mock_sf)  # no chunk_size arg → hits line 140
+
+    def test_handles_key_error_in_record(self, mock_sf):
+        from audit.user_login import geolocation
+        # Record missing UserId → KeyError in list comprehension
+        with patch("audit.user_login.query_records_all", return_value=[{"NoUserId": "xxx"}]):
+            geolocation(mock_sf, chunk_size=100)  # Should not raise
+
     def test_chunks_user_lookups(self, mock_sf):
         from audit.user_login import geolocation
         # 3 users, chunk_size=2 → 2 user queries

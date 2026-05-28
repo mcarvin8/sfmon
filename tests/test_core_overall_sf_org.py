@@ -325,6 +325,12 @@ class TestGetSalesforceInstance:
         with patch("core.overall_sf_org.fetch_pod", side_effect=RuntimeError("fail")):
             get_salesforce_instance(mock_sf)  # Should not raise
 
+    def test_handles_requests_exception(self, mock_sf):
+        import requests
+        from core.overall_sf_org import get_salesforce_instance
+        with patch("core.overall_sf_org.fetch_pod", side_effect=requests.RequestException("conn error")):
+            get_salesforce_instance(mock_sf)  # Should not raise
+
 
 class TestGetSalesforceIncidentsEdgeCases:
     @responses_lib.activate
