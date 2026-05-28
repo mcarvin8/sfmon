@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.1](https://github.com/mcarvin8/sfmon/compare/v3.10.0...v3.10.1) (2026-05-28)
+
+
+### Bug Fixes
+
+* only expose non-test Apex classes in used-limits gauge ([#42](https://github.com/mcarvin8/sfmon/issues/42)) ([f58e974](https://github.com/mcarvin8/sfmon/commit/f58e974f7802cf8d4c7ef70e08ff498e8c9d379e))
+
 ## [3.10.0](https://github.com/mcarvin8/sfmon/compare/v3.9.0...v3.10.0) (2026-05-27)
 
 
