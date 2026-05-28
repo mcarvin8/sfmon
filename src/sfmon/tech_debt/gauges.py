@@ -37,13 +37,13 @@ deprecated_apex_trigger_gauge = OrgAwareGauge(
 )
 apex_class_length_without_comments_gauge = OrgAwareGauge(
     "apex_class_length_without_comments",
-    "Apex class character count excluding comments (Apex Used Limits). Custom classes only.",
-    ["id", "name", "is_test"],
+    "Apex class character count excluding comments (Apex Used Limits). Non-test custom classes only.",
+    ["id", "name"],
 )
 apex_trigger_length_without_comments_gauge = OrgAwareGauge(
     "apex_trigger_length_without_comments",
     "Apex trigger character count excluding comments (Apex Used Limits). Custom triggers only.",
-    ["id", "name", "is_test"],
+    ["id", "name"],
 )
 apex_character_limit_percentage_gauge = OrgAwareGauge(
     "apex_character_limit_percentage",
