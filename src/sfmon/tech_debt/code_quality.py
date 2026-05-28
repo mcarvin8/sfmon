@@ -183,19 +183,19 @@ def apex_used_limits_monitoring(sf):
 
         total_classes = 0
         for record in classes:
+            if _is_test_class(record.get("Body")):
+                continue
             length = int(record.get("LengthWithoutComments") or 0)
-            is_test = "true" if _is_test_class(record.get("Body")) else "false"
             apex_class_length_without_comments_gauge.labels(
-                id=record["Id"], name=record["Name"], is_test=is_test
+                id=record["Id"], name=record["Name"]
             ).set(length)
-            if is_test == "false":
-                total_classes += length
+            total_classes += length
 
         total_triggers = 0
         for record in triggers:
             length = int(record.get("LengthWithoutComments") or 0)
             apex_trigger_length_without_comments_gauge.labels(
-                id=record["Id"], name=record["Name"], is_test="false"
+                id=record["Id"], name=record["Name"]
             ).set(length)
             total_triggers += length
 

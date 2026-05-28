@@ -1030,16 +1030,15 @@
                 },
                 "includeByName": {},
                 "indexByName": {
-                  "Length Without Comments": 14,
+                  "Length Without Comments": 13,
                   "Time": 0,
-                  "Value #A": 12,
-                  "Value #B": 13,
+                  "Value #A": 11,
+                  "Value #B": 12,
                   "__name__": 1,
                   "container": 2,
                   "endpoint": 3,
                   "id": 4,
                   "instance": 5,
-                  "is_test": 11,
                   "job": 6,
                   "name": 7,
                   "namespace": 8,
@@ -1048,8 +1047,7 @@
                 },
                 "renameByName": {
                   "id": "Id",
-                  "instance": "",
-                  "is_test": "Is Test"
+                  "instance": ""
                 }
               }
             }

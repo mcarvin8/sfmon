@@ -142,11 +142,11 @@ class TestApexUsedLimitsMonitoring:
              patch("tech_debt.code_quality.apex_trigger_length_without_comments_gauge", mock_trigger_gauge), \
              patch("tech_debt.code_quality.apex_character_limit_percentage_gauge", mock_pct_gauge):
             apex_used_limits_monitoring(mock_sf)
-        mock_class_gauge.labels.assert_called_once()
-        mock_trigger_gauge.labels.assert_called_once()
+        mock_class_gauge.labels.assert_called_once_with(id="c01", name="Foo")
+        mock_trigger_gauge.labels.assert_called_once_with(id="t01", name="FooTrigger")
         mock_pct_gauge.set.assert_called_once()
 
-    def test_excludes_test_class_from_total(self, mock_sf):
+    def test_excludes_test_class_from_gauge_and_total(self, mock_sf):
         from tech_debt.code_quality import apex_used_limits_monitoring
         test_body = "@isTest\npublic class MyTest {}"
         classes = [{"Id": "c01", "Name": "MyTest", "LengthWithoutComments": "2000", "Body": test_body}]
@@ -161,7 +161,9 @@ class TestApexUsedLimitsMonitoring:
              patch("tech_debt.code_quality.apex_trigger_length_without_comments_gauge", mock_trigger_gauge), \
              patch("tech_debt.code_quality.apex_character_limit_percentage_gauge", mock_pct_gauge):
             apex_used_limits_monitoring(mock_sf)
-        # Test class excluded, so total_chars = 0
+        # Test class not added to gauge at all
+        mock_class_gauge.labels.assert_not_called()
+        # And excluded from percentage total
         assert captured_pct["v"] == 0.0
 
     def test_handles_exception(self, mock_sf):
