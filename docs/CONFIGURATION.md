@@ -298,6 +298,7 @@ By default SFMon monitors one org (`SALESFORCE_AUTH_URL` / `ORG_NAME`). Add an `
 - Every metric gets `org="<name>"` automatically — no per-collector changes needed.
 - An org whose auth URL is missing or invalid is logged and skipped at startup; the rest of the fleet still runs.
 - See [ENVIRONMENT.md — Fleet mode](ENVIRONMENT.md#fleet-mode--monitoring-multiple-orgs-from-one-container) for the env var details and `SCHEDULER_MAX_WORKERS`.
+- See **`config.example.fleet.json`** in the repository for a runnable example with `orgs` and `org_overrides`.
 
 Omitting `orgs` (or an empty array) keeps single-org behavior exactly as before.
 
@@ -305,7 +306,7 @@ Omitting `orgs` (or an empty array) keeps single-org behavior exactly as before.
 
 ## Reference template
 
-See **`config.example.json`** in the repository for a large opt-in example. **Note:** example files may drift from code defaults; the **default schedule table above** matches `salesforce_monitoring.py` in this repo.
+See **`config.example.json`** in the repository for a large single-org opt-in example, or **`config.example.fleet.json`** for fleet mode. **Note:** example files may drift from code defaults; the **default schedule table above** matches `salesforce_monitoring.py` in this repo.
 
 For environment-based tuning (timeouts, thresholds, compliance env vars), see **[ENVIRONMENT.md](ENVIRONMENT.md)**.
 

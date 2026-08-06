@@ -110,7 +110,7 @@ docker run -d \
   mcarvin8/sfmon:latest
 ```
 
-`org_overrides` is optional and lets one org diverge from the fleet-wide `schedules`. An org whose credentials fail to authenticate is logged and skipped at startup — it doesn't block the rest of the fleet. `ORG_NAME` is ignored once `orgs` is set. See **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md#fleet-mode--multiple-orgs)**.
+`org_overrides` is optional and lets one org diverge from the fleet-wide `schedules`. An org whose credentials fail to authenticate is logged and skipped at startup — it doesn't block the rest of the fleet. `ORG_NAME` is ignored once `orgs` is set. See **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md#fleet-mode--multiple-orgs)** · template **`config.example.fleet.json`**.
 
 ### One container per org (alternate)
 
