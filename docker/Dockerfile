@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM python:3.11-slim
 
 # Set working directory to script
 WORKDIR /app/sfmon
@@ -16,26 +16,21 @@ LABEL org.opencontainers.image.title="sfmon" \
       org.opencontainers.image.source="https://github.com/mcarvin8/sfmon"
 
 # Install required Python dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends curl python3 python3-pip python3-venv && \
-    python3 -m venv /opt/venv && \
-    rm -rf /var/lib/apt/lists/* && \
-    /opt/venv/bin/pip install --no-cache-dir simple_salesforce prometheus_client requests apscheduler pandas && \
-    /opt/venv/bin/pip list
-
-# Set the environment variables to use the venv
-ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --no-cache-dir simple_salesforce prometheus_client requests apscheduler pandas && \
+    pip list
 
 # Create non-root user
 ARG EXPORTER_UID=1001
 RUN useradd --uid ${EXPORTER_UID} --create-home --shell /bin/bash exporter && \
-    chown -R exporter:exporter /app/sfmon /opt/venv
+    chown -R exporter:exporter /app/sfmon
 
 # Use numeric UID so Kubernetes can verify non-root when runAsNonRoot is set
 USER ${EXPORTER_UID}
 
-# Health check: metrics endpoint on METRICS_PORT (default 9001)
+# Health check: metrics endpoint on METRICS_PORT (default 9001). Uses python3
+# (already required by the app) instead of curl so no extra package is needed.
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD curl -f "http://localhost:${METRICS_PORT:-9001}/metrics" || exit 1
+  CMD python3 -c "import urllib.request, os; urllib.request.urlopen(f'http://localhost:{os.environ.get(\"METRICS_PORT\", 9001)}/metrics', timeout=2)" || exit 1
 
 # Run the application
 ENTRYPOINT ["python3", "salesforce_monitoring.py"]
