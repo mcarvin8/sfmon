@@ -121,3 +121,39 @@ class TestOrgAwareGaugeAttributeDelegation:
         # _labelnames is an attribute of the underlying Gauge
         assert hasattr(gauge._gauge, "_labelnames")
         assert gauge._labelnames == ("foo", "org")
+
+
+class TestOrgAwareGaugeContextVar:
+    """Fleet mode: set_current_org() takes priority over ORG_NAME for the
+    duration it's set, letting the scheduler label each org's jobs correctly
+    without threading org through every collector call site."""
+
+    def test_context_org_takes_priority_over_env(self):
+        from org_gauge import set_current_org
+
+        gauge = make_gauge("g_ctx_1", "doc", ["foo"])
+        with patch.dict(os.environ, {"ORG_NAME": "env-org"}):
+            set_current_org("fleet-org")
+            gauge.labels(foo="v").set(1)
+        sample = next(s for s in collect_samples(gauge) if s.value == 1)
+        assert sample.labels["org"] == "fleet-org"
+
+    def test_sequential_org_contexts_do_not_bleed_into_each_other(self):
+        from org_gauge import set_current_org
+
+        gauge = make_gauge("g_ctx_2", "doc", ["foo"])
+        set_current_org("org-a")
+        gauge.labels(foo="a").set(1)
+        set_current_org("org-b")
+        gauge.labels(foo="b").set(2)
+
+        samples = {s.labels["foo"]: s.labels["org"] for s in collect_samples(gauge)}
+        assert samples["a"] == "org-a"
+        assert samples["b"] == "org-b"
+
+    def test_falls_back_to_env_when_context_unset(self):
+        gauge = make_gauge("g_ctx_3", "doc", ["foo"])
+        with patch.dict(os.environ, {"ORG_NAME": "legacy-org"}):
+            gauge.labels(foo="v").set(1)
+        sample = next(s for s in collect_samples(gauge) if s.value == 1)
+        assert sample.labels["org"] == "legacy-org"

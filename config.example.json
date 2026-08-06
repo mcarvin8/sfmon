@@ -1,5 +1,5 @@
 {
-  "_comment": "SFMon Configuration - OPT-IN: Only jobs listed in 'schedules' will run. Remove jobs you don't need.",
+  "_comment": "SFMon Configuration - OPT-IN: Only jobs listed in 'schedules' will run. Remove jobs you don't need. This file is single-org mode (SALESFORCE_AUTH_URL / ORG_NAME). For monitoring multiple orgs from one container, see config.example.fleet.json instead.",
   "schedules": {
     "_comment_critical": "Critical functions - every 5 minutes",
     "monitor_salesforce_limits": "*/5",

@@ -28,6 +28,23 @@ Configuration Structure:
         "exclude_users": ["Admin User", "Integration User"]
     }
 
+Fleet Mode (multiple orgs from one container):
+    {
+        "orgs": ["prod", "sandbox-uat"],
+        "schedules": { "monitor_salesforce_limits": "*/5" },
+        "org_overrides": {
+            "sandbox-uat": {
+                "schedules": { "monitor_salesforce_limits": "*/15" }
+            }
+        }
+    }
+
+    Each name in "orgs" resolves to a SALESFORCE_AUTH_URL_<NAME> environment
+    variable (e.g. "prod" -> SALESFORCE_AUTH_URL_PROD). "org_overrides" is
+    optional and merges per-org schedule entries over the fleet-wide
+    "schedules" block (explicit per-org entry wins). Omitting "orgs" keeps
+    legacy single-org behavior, driven by SALESFORCE_AUTH_URL/ORG_NAME.
+
 Preset Structure (alternative to a full schedules block):
     {
         "preset": "ops"
@@ -129,6 +146,8 @@ def load_config(force_reload=False):
         "integration_user_names": None,
         "exclude_users": [],
         "preset": None,
+        "orgs": [],
+        "org_overrides": {},
     }
 
     if not os.path.exists(config_file_path):
@@ -150,6 +169,8 @@ def load_config(force_reload=False):
         result["integration_user_names"] = config.get("integration_user_names")
         result["exclude_users"] = config.get("exclude_users", [])
         result["preset"] = None
+        result["orgs"] = config.get("orgs", [])
+        result["org_overrides"] = config.get("org_overrides", {})
 
         # Expand preset if specified, merging with any explicit schedules (explicit wins)
         preset_name = config.get("preset", "").strip().lower()
@@ -309,7 +330,22 @@ def parse_cron_schedule(schedule_str):
     return None
 
 
-def get_schedule_from_config(job_id, default_schedule):
+def _effective_schedules(config, org_name=None):
+    """Return the schedules dict to use, with org_overrides[org_name] layered
+    on top of the fleet-wide schedules block (explicit per-org entry wins).
+    """
+    schedules = config.get("schedules", {})
+    if org_name is None:
+        return schedules
+    org_schedules = config.get("org_overrides", {}).get(org_name, {}).get(
+        "schedules", {}
+    )
+    if not org_schedules:
+        return schedules
+    return {**schedules, **org_schedules}
+
+
+def get_schedule_from_config(job_id, default_schedule, org_name=None):
     """
     Get schedule for a job from config file or use default.
 
@@ -321,12 +357,14 @@ def get_schedule_from_config(job_id, default_schedule):
     Args:
         job_id: The job identifier
         default_schedule: Default schedule dict for CronTrigger
+        org_name: If given, org_overrides[org_name]["schedules"] is merged
+            over the fleet-wide schedules before lookup (per-org override).
 
     Returns:
         dict or None: Schedule configuration for CronTrigger, None if disabled
     """
     config = load_config()
-    schedules = config.get("schedules", {})
+    schedules = _effective_schedules(config, org_name)
 
     # If no config file or empty schedules, use built-in default per job (may be None = opt-in only)
     if not has_custom_schedules():
@@ -360,7 +398,7 @@ def get_schedule_from_config(job_id, default_schedule):
     return parsed
 
 
-def get_always_on_schedule(job_id, default_schedule):
+def get_always_on_schedule(job_id, default_schedule, org_name=None):
     """
     Get schedule for an always-on job. Always returns default_schedule unless
     the job is explicitly listed in the config schedules block (which allows
@@ -369,12 +407,14 @@ def get_always_on_schedule(job_id, default_schedule):
     Args:
         job_id: The job identifier
         default_schedule: Default schedule dict for CronTrigger
+        org_name: If given, org_overrides[org_name]["schedules"] is merged
+            over the fleet-wide schedules before lookup (per-org override).
 
     Returns:
         dict or None: Schedule configuration for CronTrigger, None if explicitly disabled
     """
     config = load_config()
-    schedules = config.get("schedules", {})
+    schedules = _effective_schedules(config, org_name)
 
     if job_id.lower() in schedules:
         parsed = parse_cron_schedule(schedules[job_id.lower()])

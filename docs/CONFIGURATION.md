@@ -39,6 +39,8 @@ Or keep the file elsewhere and set:
 | `schedules` | object | Job id → schedule string (see below). |
 | `exclude_users` | array (optional) | Usernames excluded from certain compliance checks (e.g. suspicious audit activity). |
 | `integration_user_names` | array (optional) | Parsed from config but **not used** by current collectors—set **`INTEGRATION_USER_NAMES`** (env) for integration-user labeling; see [ENVIRONMENT.md](ENVIRONMENT.md). |
+| `orgs` | array (optional) | Fleet mode: list of org names to monitor from this one container. See [Fleet mode](#fleet-mode--multiple-orgs) below. Omit for single-org mode. |
+| `org_overrides` | object (optional) | Fleet mode: per-org `{"schedules": {...}}` merged over the fleet-wide `schedules` block. |
 
 ---
 
@@ -270,9 +272,41 @@ Use the same job id with a new expression, e.g. run tech-debt block at 09:00 ins
 
 ---
 
+## Fleet mode — multiple orgs
+
+By default SFMon monitors one org (`SALESFORCE_AUTH_URL` / `ORG_NAME`). Add an `orgs` array to monitor several orgs from the same container:
+
+```json
+{
+  "orgs": ["prod", "sandbox-uat"],
+  "schedules": {
+    "monitor_salesforce_limits": "*/5"
+  },
+  "org_overrides": {
+    "sandbox-uat": {
+      "schedules": {
+        "monitor_salesforce_limits": "*/15"
+      }
+    }
+  }
+}
+```
+
+- Each org name resolves to a `SALESFORCE_AUTH_URL_<NAME>` env var (name uppercased, non-alphanumerics replaced with `_`): `"prod"` → `SALESFORCE_AUTH_URL_PROD`, `"sandbox-uat"` → `SALESFORCE_AUTH_URL_SANDBOX_UAT`.
+- The fleet-wide `schedules` block applies to every org. `org_overrides.<name>.schedules` layers on top for that org only — the same "explicit wins" merge presets use.
+- All the normal opt-in/preset/disable rules still apply; they're just evaluated per org (with that org's override merged in first).
+- Every metric gets `org="<name>"` automatically — no per-collector changes needed.
+- An org whose auth URL is missing or invalid is logged and skipped at startup; the rest of the fleet still runs.
+- See [ENVIRONMENT.md — Fleet mode](ENVIRONMENT.md#fleet-mode--monitoring-multiple-orgs-from-one-container) for the env var details and `SCHEDULER_MAX_WORKERS`.
+- See **`config.example.fleet.json`** in the repository for a runnable example with `orgs` and `org_overrides`.
+
+Omitting `orgs` (or an empty array) keeps single-org behavior exactly as before.
+
+---
+
 ## Reference template
 
-See **`config.example.json`** in the repository for a large opt-in example. **Note:** example files may drift from code defaults; the **default schedule table above** matches `salesforce_monitoring.py` in this repo.
+See **`config.example.json`** in the repository for a large single-org opt-in example, or **`config.example.fleet.json`** for fleet mode. **Note:** example files may drift from code defaults; the **default schedule table above** matches `salesforce_monitoring.py` in this repo.
 
 For environment-based tuning (timeouts, thresholds, compliance env vars), see **[ENVIRONMENT.md](ENVIRONMENT.md)**.
 

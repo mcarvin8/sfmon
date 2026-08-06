@@ -415,3 +415,130 @@ class TestGetAlwaysOnSchedule:
         default = {"minute": "*/5"}
         result = config.get_always_on_schedule("monitor_salesforce_limits", default)
         assert result == default
+
+
+# ---------------------------------------------------------------------------
+# Fleet mode: orgs / org_overrides
+# ---------------------------------------------------------------------------
+
+class TestLoadConfigOrgs:
+    def test_no_file_returns_empty_orgs(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
+        import config
+        result = config.load_config(force_reload=True)
+        assert result["orgs"] == []
+        assert result["org_overrides"] == {}
+
+    def test_orgs_and_overrides_loaded(self, tmp_path, monkeypatch):
+        cfg = {
+            "orgs": ["prod", "sandbox-uat"],
+            "schedules": {"monitor_salesforce_limits": "*/5"},
+            "org_overrides": {
+                "sandbox-uat": {"schedules": {"monitor_salesforce_limits": "*/15"}}
+            },
+        }
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps(cfg))
+        monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
+        import config
+        result = config.load_config(force_reload=True)
+        assert result["orgs"] == ["prod", "sandbox-uat"]
+        assert result["org_overrides"] == {
+            "sandbox-uat": {"schedules": {"monitor_salesforce_limits": "*/15"}}
+        }
+
+
+class TestGetScheduleFromConfigOrgOverrides:
+    def test_org_without_override_uses_fleet_schedule(self, tmp_path, monkeypatch):
+        cfg = {
+            "orgs": ["prod", "sandbox-uat"],
+            "schedules": {"my_job": "*/5"},
+            "org_overrides": {
+                "sandbox-uat": {"schedules": {"my_job": "*/15"}}
+            },
+        }
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps(cfg))
+        monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
+        import config
+        config.load_config(force_reload=True)
+        result = config.get_schedule_from_config(
+            "my_job", {"minute": "*/1"}, org_name="prod"
+        )
+        assert result == {"minute": "*/5"}
+
+    def test_org_with_override_uses_org_schedule(self, tmp_path, monkeypatch):
+        cfg = {
+            "orgs": ["prod", "sandbox-uat"],
+            "schedules": {"my_job": "*/5"},
+            "org_overrides": {
+                "sandbox-uat": {"schedules": {"my_job": "*/15"}}
+            },
+        }
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps(cfg))
+        monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
+        import config
+        config.load_config(force_reload=True)
+        result = config.get_schedule_from_config(
+            "my_job", {"minute": "*/1"}, org_name="sandbox-uat"
+        )
+        assert result == {"minute": "*/15"}
+
+    def test_org_override_adds_new_job_not_in_fleet_schedules(self, tmp_path, monkeypatch):
+        cfg = {
+            "orgs": ["prod", "sandbox-uat"],
+            "schedules": {"my_job": "*/5"},
+            "org_overrides": {
+                "sandbox-uat": {"schedules": {"only_sandbox_job": "*/20"}}
+            },
+        }
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps(cfg))
+        monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
+        import config
+        config.load_config(force_reload=True)
+        assert config.get_schedule_from_config(
+            "only_sandbox_job", None, org_name="sandbox-uat"
+        ) == {"minute": "*/20"}
+        assert config.get_schedule_from_config(
+            "only_sandbox_job", None, org_name="prod"
+        ) is None
+
+    def test_no_org_name_behaves_as_before(self, tmp_path, monkeypatch):
+        cfg = {
+            "orgs": ["prod", "sandbox-uat"],
+            "schedules": {"my_job": "*/5"},
+            "org_overrides": {
+                "sandbox-uat": {"schedules": {"my_job": "*/15"}}
+            },
+        }
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps(cfg))
+        monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
+        import config
+        config.load_config(force_reload=True)
+        result = config.get_schedule_from_config("my_job", {"minute": "*/1"})
+        assert result == {"minute": "*/5"}
+
+
+class TestGetAlwaysOnScheduleOrgOverrides:
+    def test_org_override_wins_over_fleet_schedule(self, tmp_path, monkeypatch):
+        cfg = {
+            "orgs": ["prod", "sandbox-uat"],
+            "schedules": {"monitor_salesforce_limits": "*/5"},
+            "org_overrides": {
+                "sandbox-uat": {
+                    "schedules": {"monitor_salesforce_limits": "*/15"}
+                }
+            },
+        }
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps(cfg))
+        monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
+        import config
+        config.load_config(force_reload=True)
+        result = config.get_always_on_schedule(
+            "monitor_salesforce_limits", {"minute": "*/5"}, org_name="sandbox-uat"
+        )
+        assert result == {"minute": "*/15"}

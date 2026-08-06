@@ -9,6 +9,18 @@ SFMon is a **long-running Docker container** that connects to your Salesforce or
 
 ---
 
+## How it works
+
+One process, no database, no UI:
+
+1. On startup the container authenticates to your org (OAuth2 refresh token flow) and starts an internal **APScheduler** cron loop.
+2. Each collector job runs on its own schedule (every 5 minutes, hourly, or once daily off-peak — see [Presets](#presets--scope-down-without-a-full-config)), queries the org via SOQL/REST/Tooling API, and sets Prometheus gauges.
+3. Those gauges are served on **`:9001/metrics`**, forever, until Prometheus (or whatever scrapes you) pulls them.
+
+There's no persistence and no historical storage inside SFMon itself — your Prometheus-compatible backend owns the time series. Restarting the container just re-authenticates and resumes the schedule.
+
+---
+
 ## Who is this for
 
 SFMon is aimed at **SRE and DevOps teams** who already operate a Prometheus-compatible observability stack (Prometheus, Victoria Metrics, Grafana Cloud, or an OTel Collector pipeline)  and are also responsible for one or more Salesforce orgs. If you define alerts in PromQL, route pages through Alertmanager, and want Salesforce signals to behave exactly like any other scrape target — this is for you.
@@ -35,6 +47,8 @@ Everything runs on a default schedule with no config file required. See **[docs/
 ---
 
 ## Quick start
+
+**Prerequisites:** the Salesforce CLI (`sf`) installed and logged in to the target org (`sf org login web`), and API access enabled for that user. SFMon itself doesn't touch the CLI at runtime — it only needs the auth URL the CLI hands you once, up front.
 
 1. **Get your auth URL:** `sf org display --url-only`
 2. **Run:**
@@ -68,7 +82,39 @@ Optional tuning:
 
 ## Multiple orgs
 
-Run one container per org, each with a distinct `ORG_NAME`. All metrics carry the `org` label, so a single Prometheus-compatible backend can scrape all of them and you can filter or aggregate across orgs in PromQL.
+Two ways to monitor more than one org. Both label every metric with `org` so a single Prometheus-compatible backend can scrape and filter/aggregate across orgs in PromQL.
+
+### Fleet mode (one container, several orgs)
+
+Add an `orgs` array to `config.json` and the same container polls every org on its own schedule:
+
+```json
+{
+  "orgs": ["prod", "sandbox-uat"],
+  "schedules": { "monitor_salesforce_limits": "*/5" },
+  "org_overrides": {
+    "sandbox-uat": { "schedules": { "monitor_salesforce_limits": "*/15" } }
+  }
+}
+```
+
+Each name resolves to a `SALESFORCE_AUTH_URL_<NAME>` env var (uppercased, non-alphanumerics → `_`):
+
+```bash
+docker run -d \
+  --name sfmon \
+  -p 9001:9001 \
+  -v /host/path/config.json:/app/sfmon/config.json \
+  -e SALESFORCE_AUTH_URL_PROD="force://PlatformCLI::...@prod.my.salesforce.com" \
+  -e SALESFORCE_AUTH_URL_SANDBOX_UAT="force://PlatformCLI::...@sandbox-uat.my.salesforce.com" \
+  mcarvin8/sfmon:latest
+```
+
+`org_overrides` is optional and lets one org diverge from the fleet-wide `schedules`. An org whose credentials fail to authenticate is logged and skipped at startup — it doesn't block the rest of the fleet. `ORG_NAME` is ignored once `orgs` is set. See **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md#fleet-mode--multiple-orgs)** · template **`config.example.fleet.json`**.
+
+### One container per org (alternate)
+
+Run a separate container per org, each with a distinct `ORG_NAME` and `SALESFORCE_AUTH_URL`:
 
 ```yaml
 # prometheus.yml
@@ -81,7 +127,7 @@ scrape_configs:
         labels: { org: "uat" }
 ```
 
-Or simply set `ORG_NAME` on each container — the `org` label is injected into every metric automatically.
+Prefer this when you want full process/resource isolation per org (independent restarts, separate resource limits) rather than a shared scheduler.
 
 ---
 

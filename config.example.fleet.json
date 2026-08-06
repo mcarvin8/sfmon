@@ -1,0 +1,41 @@
+{
+  "_comment": "SFMon Fleet Mode - monitors every org listed in 'orgs' from this one container. Each name resolves to a SALESFORCE_AUTH_URL_<NAME> env var (uppercased, non-alphanumerics -> '_'): 'prod' -> SALESFORCE_AUTH_URL_PROD, 'sandbox-uat' -> SALESFORCE_AUTH_URL_SANDBOX_UAT. ORG_NAME is ignored once 'orgs' is set. See docs/CONFIGURATION.md#fleet-mode--multiple-orgs.",
+  "orgs": ["prod", "sandbox-uat"],
+  "schedules": {
+    "_comment_critical": "Critical functions - every 5 minutes - applies to every org unless overridden below",
+    "monitor_salesforce_limits": "*/5",
+    "get_salesforce_instance": "*/5",
+    "monitor_apex_flex_queue": "*/5",
+
+    "_comment_hourly": "Hourly functions - staggered throughout the hour",
+    "hourly_analyse_bulk_api": "minute=0",
+    "get_salesforce_licenses": "minute=10,50",
+    "hourly_observe_user_querying_large_records": "minute=20",
+    "hourly_report_export_records": "minute=40",
+
+    "_comment_business": "Daily Business Functions",
+    "daily_analyse_bulk_api": "hour=7,minute=30",
+    "get_deployment_status": "hour=7,minute=45",
+    "geolocation": "hour=8,minute=0",
+    "monitor_org_wide_sharing_settings": "hour=8,minute=45"
+  },
+  "_comment_org_overrides": "Optional: per-org schedule entries merged over 'schedules' above (explicit per-org entry wins). Any job id valid under 'schedules' is valid here too.",
+  "org_overrides": {
+    "sandbox-uat": {
+      "schedules": {
+        "monitor_salesforce_limits": "*/15",
+        "geolocation": "disabled"
+      }
+    }
+  },
+  "integration_user_names": [
+    "Integration User 1",
+    "Integration User 2",
+    "Service Account"
+  ],
+  "exclude_users": [
+    "Admin User",
+    "Integration User",
+    "Service Account"
+  ]
+}
