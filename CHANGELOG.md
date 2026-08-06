@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.2](https://github.com/mcarvin8/sfmon/compare/v3.10.1...v3.10.2) (2026-08-06)
+
+
+### Bug Fixes
+
+* replace sf CLI auth with direct OAuth2 refresh token flow ([#48](https://github.com/mcarvin8/sfmon/issues/48)) ([cb5829e](https://github.com/mcarvin8/sfmon/commit/cb5829ec16754cab9ac0739edc1aa8c0fc84c6a0))
+
 ## [3.10.1](https://github.com/mcarvin8/sfmon/compare/v3.10.0...v3.10.1) (2026-05-28)
 
 
