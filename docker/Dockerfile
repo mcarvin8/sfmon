@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM python:3.11-slim
 
 # Set working directory to script
 WORKDIR /app/sfmon
@@ -15,20 +15,16 @@ LABEL org.opencontainers.image.title="sfmon" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.source="https://github.com/mcarvin8/sfmon"
 
-# Install required Python dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends curl python3 python3-pip python3-venv && \
-    python3 -m venv /opt/venv && \
+# Install curl for HEALTHCHECK, then the required Python dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/* && \
-    /opt/venv/bin/pip install --no-cache-dir simple_salesforce prometheus_client requests apscheduler pandas && \
-    /opt/venv/bin/pip list
-
-# Set the environment variables to use the venv
-ENV PATH="/opt/venv/bin:$PATH"
+    pip install --no-cache-dir simple_salesforce prometheus_client requests apscheduler pandas && \
+    pip list
 
 # Create non-root user
 ARG EXPORTER_UID=1001
 RUN useradd --uid ${EXPORTER_UID} --create-home --shell /bin/bash exporter && \
-    chown -R exporter:exporter /app/sfmon /opt/venv
+    chown -R exporter:exporter /app/sfmon
 
 # Use numeric UID so Kubernetes can verify non-root when runAsNonRoot is set
 USER ${EXPORTER_UID}
