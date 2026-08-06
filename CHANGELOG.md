@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.0](https://github.com/mcarvin8/sfmon/compare/v3.10.3...v3.11.0) (2026-08-06)
+
+
+### Features
+
+* fleet mode for monitoring multiple Salesforce orgs from one container ([#52](https://github.com/mcarvin8/sfmon/issues/52)) ([a6c013f](https://github.com/mcarvin8/sfmon/commit/a6c013f98ef5b47db6e65a0520fc74c233cd8255))
+
 ## [3.10.3](https://github.com/mcarvin8/sfmon/compare/v3.10.2...v3.10.3) (2026-08-06)
 
 
