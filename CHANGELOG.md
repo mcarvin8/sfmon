@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.3](https://github.com/mcarvin8/sfmon/compare/v3.10.2...v3.10.3) (2026-08-06)
+
+
+### Bug Fixes
+
+* switch Docker base to python:3.11-slim + add CI build check ([#50](https://github.com/mcarvin8/sfmon/issues/50)) ([35f5a20](https://github.com/mcarvin8/sfmon/commit/35f5a203a975a1f90af9ff23eba9136cd3fdf7df))
+
 ## [3.10.2](https://github.com/mcarvin8/sfmon/compare/v3.10.1...v3.10.2) (2026-08-06)
 
 
