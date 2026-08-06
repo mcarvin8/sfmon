@@ -1,21 +1,37 @@
 """OrgAwareGauge: drop-in Prometheus Gauge wrapper that auto-injects an 'org' label.
 
-The org value is read from the ORG_NAME environment variable at metric-record time,
-so all call sites that use .labels() or .set() continue to work unchanged.
+The org value comes from a per-job contextvar (set by the scheduler via
+set_current_org() before each job runs), falling back to the ORG_NAME
+environment variable when no contextvar has been set (e.g. single-org mode,
+or direct calls outside the scheduler such as tests). All call sites that use
+.labels() or .set() continue to work unchanged.
 """
 
 import os
+from contextvars import ContextVar
 
 from prometheus_client import Gauge
 
+_current_org: ContextVar = ContextVar("current_org", default=None)
+
+
+def set_current_org(org_name):
+    """Set the org label used by every OrgAwareGauge for the current job run.
+
+    Called once per job invocation by the scheduler before it calls into a
+    collector, so collectors themselves never need to know which org they're
+    running against.
+    """
+    _current_org.set(org_name)
+
 
 class OrgAwareGauge:
-    """Wraps prometheus_client.Gauge to auto-append an 'org' label from ORG_NAME.
+    """Wraps prometheus_client.Gauge to auto-append an 'org' label.
 
     Usage is identical to prometheus_client.Gauge — the 'org' label is appended
     automatically to the label list and injected on every .labels() call.  For
     gauges that previously had no labels, .set() is forwarded through
-    .labels(org=ORG_NAME).set() so existing call sites need no changes.
+    .labels(org=...).set() so existing call sites need no changes.
     """
 
     def __init__(self, name, documentation, labelnames=None, **kwargs):
@@ -27,7 +43,8 @@ class OrgAwareGauge:
         )
 
     def _org(self):
-        return os.getenv("ORG_NAME", "")
+        org = _current_org.get()
+        return org if org is not None else os.getenv("ORG_NAME", "")
 
     def labels(self, *args, **kwargs):
         if args:

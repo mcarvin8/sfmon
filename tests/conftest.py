@@ -15,6 +15,16 @@ def reset_config_cache():
     config._config_file_has_schedules = None
 
 
+@pytest.fixture(autouse=True)
+def reset_current_org():
+    """Reset the org_gauge contextvar between tests so set_current_org() calls
+    in one test don't leak into the next (same interpreter thread in pytest)."""
+    import org_gauge
+    token = org_gauge._current_org.set(None)
+    yield
+    org_gauge._current_org.reset(token)
+
+
 @pytest.fixture
 def mock_sf():
     """Return a mock Simple Salesforce connection object."""

@@ -4,7 +4,7 @@
 
 | Variable | Description |
 |----------|-------------|
-| `SALESFORCE_AUTH_URL` | SFDX auth URL (`sf org display --url-only`). Format: `force://PlatformCLI::...` |
+| `SALESFORCE_AUTH_URL` | SFDX auth URL (`sf org display --url-only`). Format: `force://PlatformCLI::...`. Not used in fleet mode — see below. |
 
 ## Optional — runtime
 
@@ -15,7 +15,28 @@
 | `QUERY_TIMEOUT_SECONDS` | `30` | SOQL query timeout |
 | `REQUESTS_TIMEOUT_SECONDS` | `300` | HTTP timeout (Event Log, Trust API, etc.) |
 | `LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` |
-| `ORG_NAME` | `""` | Value injected as the `org` label on **every** Prometheus metric. Set this to a human-readable identifier for your Salesforce org (e.g. `production`, `sandbox-uat`) so you can filter or aggregate across multiple SFMon instances in the same Prometheus/Grafana setup. If unset, the label is present but empty. |
+| `ORG_NAME` | `""` | Value injected as the `org` label on **every** Prometheus metric. Set this to a human-readable identifier for your Salesforce org (e.g. `production`, `sandbox-uat`) so you can filter or aggregate across multiple SFMon instances in the same Prometheus/Grafana setup. If unset, the label is present but empty. **Ignored in fleet mode** — org names there come from `config.json`'s `orgs` list instead. |
+| `SCHEDULER_MAX_WORKERS` | `min(orgs * 2, 20)` | Size of the APScheduler thread pool. Raise this if you run many orgs and see jobs queueing behind each other at shared cron ticks. |
+
+## Fleet mode — monitoring multiple orgs from one container
+
+Add an `orgs` array to `config.json` to monitor several Salesforce orgs from a single SFMon container instead of running one container per org:
+
+```json
+{
+  "orgs": ["prod", "sandbox-uat"],
+  "schedules": { "monitor_salesforce_limits": "*/5" },
+  "org_overrides": {
+    "sandbox-uat": {
+      "schedules": { "monitor_salesforce_limits": "*/15" }
+    }
+  }
+}
+```
+
+Each name in `orgs` resolves to a `SALESFORCE_AUTH_URL_<NAME>` environment variable (uppercased, non-alphanumeric characters replaced with `_`) — e.g. `"prod"` → `SALESFORCE_AUTH_URL_PROD`, `"sandbox-uat"` → `SALESFORCE_AUTH_URL_SANDBOX_UAT`. Every metric is labeled `org="prod"` / `org="sandbox-uat"` accordingly. `org_overrides` is optional and lets one org's schedule diverge from the fleet-wide `schedules` block. An org whose credentials fail to authenticate is logged and skipped at startup — it doesn't block the rest of the fleet. See [CONFIGURATION.md](CONFIGURATION.md) for the full schedule format.
+
+Omitting `orgs` (or leaving it empty) keeps today's single-org behavior unchanged, driven by `SALESFORCE_AUTH_URL` and `ORG_NAME`.
 
 ## Optional — compliance
 

@@ -1,5 +1,6 @@
 {
   "_comment": "SFMon Configuration - OPT-IN: Only jobs listed in 'schedules' will run. Remove jobs you don't need.",
+  "_comment_fleet": "Fleet mode (optional): monitor multiple orgs from this one container. Uncomment and adjust: \"orgs\": [\"prod\", \"sandbox-uat\"] resolves credentials from SALESFORCE_AUTH_URL_PROD / SALESFORCE_AUTH_URL_SANDBOX_UAT. Add \"org_overrides\": {\"sandbox-uat\": {\"schedules\": {\"monitor_salesforce_limits\": \"*/15\"}}} to diverge one org's cadence. See docs/CONFIGURATION.md#fleet-mode--multiple-orgs. Omit both keys for single-org mode (SALESFORCE_AUTH_URL / ORG_NAME).",
   "schedules": {
     "_comment_critical": "Critical functions - every 5 minutes",
     "monitor_salesforce_limits": "*/5",

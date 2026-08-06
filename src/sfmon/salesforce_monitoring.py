@@ -38,13 +38,19 @@ The service uses APScheduler with cron-style scheduling and exposes metrics
 via Prometheus on port 9001.
 
 Environment Variables Required:
-    - SALESFORCE_AUTH_URL: SFDX authentication URL for org
+    - SALESFORCE_AUTH_URL: SFDX authentication URL for org (single-org mode; fleet mode
+      uses SALESFORCE_AUTH_URL_<ORG_NAME> per org listed in config.json's "orgs")
 
 Environment Variables Optional:
     - CONFIG_FILE_PATH: Path to JSON configuration file (default: /app/sfmon/config.json)
     - QUERY_TIMEOUT_SECONDS: Timeout in seconds for Salesforce SOQL queries (default: 30)
     - METRICS_PORT: Prometheus metrics server port (default: 9001)
     - PMD_RULESET_PATH: Path to PMD Apex ruleset XML; if unset or missing, PMD metrics are skipped
+    - SCHEDULER_MAX_WORKERS: APScheduler thread pool size (default: min(orgs * 2, 20))
+
+Fleet Mode:
+    Add "orgs": ["prod", "sandbox-uat"] to config.json to monitor multiple orgs from
+    this one container. See docs/CONFIGURATION.md and docs/ENVIRONMENT.md for details.
 
 Configuration File:
     A JSON configuration file is used to configure schedules, disable functions,
@@ -60,9 +66,12 @@ import os
 from prometheus_client import start_http_server
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.executors.pool import ThreadPoolExecutor
 
 # Shared modules from root
 from logger import logger
+import orgs
+from org_gauge import set_current_org
 from connection_sf import get_salesforce_connection_url
 
 # Always-on baseline functions (core package)
@@ -123,52 +132,67 @@ from tech_debt import (
 )
 
 
-# Global connection store - allows re-authentication to update connection
-sf_connection = None
+# Global connection store - one Salesforce connection per org name, allows
+# re-authentication to update connections in place.
+sf_connections = {}
 
 
 def reauthenticate_connections():
     """
-    Re-authenticate to Salesforce org.
-    Refreshes the authentication token by re-logging in using the SFDX auth URL.
+    Re-authenticate to every configured Salesforce org.
+    Refreshes each org's authentication token independently; a failure on one
+    org is logged and does not prevent the others from refreshing.
     """
-    global sf_connection
-    logger.info("Starting re-authentication to Salesforce org...")
-    try:
-        sf_connection = get_salesforce_connection_url(
-            url=os.getenv("SALESFORCE_AUTH_URL")
-        )
-        logger.info("Successfully re-authenticated to Salesforce org.")
-    except Exception as e:
-        logger.error("Failed to re-authenticate to Salesforce org: %s", e)
+    global sf_connections
+    logger.info("Starting re-authentication to Salesforce orgs...")
+    for org_name in orgs.get_org_names():
+        env_var = orgs.auth_url_env_var(org_name)
+        try:
+            sf_connections[org_name] = get_salesforce_connection_url(
+                url=os.getenv(env_var)
+            )
+            logger.info("Successfully re-authenticated to org '%s'.", org_name)
+        except Exception as e:
+            logger.error("Failed to re-authenticate to org '%s': %s", org_name, e)
     logger.info("Re-authentication complete")
 
 
-def get_schedule_config(job_id, default_schedule):
+def get_schedule_config(job_id, default_schedule, org_name=None):
     """
     Get schedule for an opt-in job. Returns None if job is not listed when opt-in mode is active.
     """
     from config import get_schedule_from_config
 
-    return get_schedule_from_config(job_id, default_schedule)
+    return get_schedule_from_config(job_id, default_schedule, org_name=org_name)
 
 
-def get_always_on_config(job_id, default_schedule):
+def get_always_on_config(job_id, default_schedule, org_name=None):
     """
     Get schedule for an always-on job. Always uses default unless explicitly overridden or disabled.
     """
     from config import get_always_on_schedule
 
-    return get_always_on_schedule(job_id, default_schedule)
+    return get_always_on_schedule(job_id, default_schedule, org_name=org_name)
 
 
-def _add_job_with_schedule(scheduler, sf, job_id, schedule, func, job_name):
-    """Add a job to the scheduler with the given schedule."""
+def _run_job(org_name, sf, func, job_name):
+    """Run a single org's job, isolating failures so one org never blocks others."""
+    set_current_org(org_name)
+    try:
+        func(sf)
+    except Exception as e:
+        logger.error(
+            "Job '%s' failed for org '%s': %s", job_name, org_name, e
+        )
+
+
+def _add_job_with_schedule(scheduler, org_name, sf, job_id, schedule, func, job_name):
+    """Add a job to the scheduler with the given schedule, scoped to one org."""
     scheduler.add_job(
-        func=lambda f=func: f(sf),
+        func=lambda: _run_job(org_name, sf, func, job_name),
         trigger=CronTrigger(**schedule),
-        id=job_id,
-        name=job_name,
+        id=f"{job_id}::{org_name}",
+        name=f"{job_name} [{org_name}]",
     )
 
 
@@ -260,13 +284,14 @@ def schedule_tasks(scheduler):
             "Get Salesforce Licenses",
         ),
     ]
-    for job_id, default_schedule, func, job_name in always_on_jobs:
-        schedule = get_always_on_config(job_id, default_schedule)
-        if schedule:
-            func(sf_connection)
-            _add_job_with_schedule(
-                scheduler, sf_connection, job_id, schedule, func, job_name
-            )
+    for org_name, sf in sf_connections.items():
+        for job_id, default_schedule, func, job_name in always_on_jobs:
+            schedule = get_always_on_config(job_id, default_schedule, org_name=org_name)
+            if schedule:
+                _run_job(org_name, sf, func, job_name)
+                _add_job_with_schedule(
+                    scheduler, org_name, sf, job_id, schedule, func, job_name
+                )
 
     scheduled_jobs = [
         (
@@ -499,13 +524,14 @@ def schedule_tasks(scheduler):
         ),
     ]
     logger.info("Executing enabled tasks at startup (respecting config)...")
-    for job_id, default_schedule, func, job_name in scheduled_jobs:
-        schedule = get_schedule_config(job_id, default_schedule)
-        if schedule:
-            func(sf_connection)  # initial run only for jobs enabled by config
-            _add_job_with_schedule(
-                scheduler, sf_connection, job_id, schedule, func, job_name
-            )
+    for org_name, sf in sf_connections.items():
+        for job_id, default_schedule, func, job_name in scheduled_jobs:
+            schedule = get_schedule_config(job_id, default_schedule, org_name=org_name)
+            if schedule:
+                _run_job(org_name, sf, func, job_name)  # initial run only for jobs enabled by config
+                _add_job_with_schedule(
+                    scheduler, org_name, sf, job_id, schedule, func, job_name
+                )
     logger.info("Initial execution completed, all jobs scheduled with APScheduler")
 
 
@@ -513,14 +539,25 @@ def main():
     """
     Main function. Runs tasks using APScheduler with cron syntax for precise timing.
     """
-    global sf_connection
+    global sf_connections
     # Start Prometheus metrics server
     metrics_port = int(os.getenv("METRICS_PORT", 9001))
     start_http_server(metrics_port)
-    # Connect to Salesforce org
-    sf_connection = get_salesforce_connection_url(url=os.getenv("SALESFORCE_AUTH_URL"))
-    # Initialize APScheduler
-    scheduler = BlockingScheduler()
+    # Connect to every configured Salesforce org (one org in legacy/default mode)
+    sf_connections = orgs.build_connections()
+    if not sf_connections:
+        raise RuntimeError(
+            "No Salesforce org connections could be established. Check "
+            "SALESFORCE_AUTH_URL (or SALESFORCE_AUTH_URL_<ORG> for fleet mode)."
+        )
+    # Initialize APScheduler, sizing the worker pool to the fleet so every
+    # org's jobs firing at the same cron tick don't queue up behind each other
+    max_workers = int(
+        os.getenv("SCHEDULER_MAX_WORKERS", min(len(sf_connections) * 2, 20))
+    )
+    scheduler = BlockingScheduler(
+        executors={"default": ThreadPoolExecutor(max_workers)}
+    )
     # Schedule all tasks
     schedule_tasks(scheduler)
     try:
