@@ -1,30 +1,9 @@
-"""Unit tests for connection_sf.py – subprocess and shutil are mocked."""
+"""Unit tests for connection_sf.py – requests is mocked, no sf CLI involved."""
 
-import json
 import pytest
 from unittest.mock import MagicMock, patch
 
-
-class TestGetSfCommand:
-    def test_finds_sf_cmd_on_windows(self):
-        import connection_sf
-        with patch("sys.platform", "win32"), \
-             patch("shutil.which", return_value="C:\\path\\sf.cmd"):
-            result = connection_sf._get_sf_command()
-        assert result == "C:\\path\\sf.cmd"
-
-    def test_finds_sf_on_unix(self):
-        with patch("shutil.which", return_value="/usr/local/bin/sf") as mock_which:
-            import connection_sf
-            result = connection_sf._get_sf_command()
-            mock_which.assert_called_with("sf")
-            assert result == "/usr/local/bin/sf"
-
-    def test_raises_when_sf_not_found(self):
-        with patch("shutil.which", return_value=None):
-            import connection_sf
-            with pytest.raises(FileNotFoundError, match="Salesforce CLI"):
-                connection_sf._get_sf_command()
+import requests
 
 
 class TestGetSalesforceConnectionUrl:
@@ -38,120 +17,102 @@ class TestGetSalesforceConnectionUrl:
         with pytest.raises(ValueError):
             connection_sf.get_salesforce_connection_url(None)
 
-    def test_successful_connection(self):
-        sf_display_output = json.dumps({
-            "result": {
-                "accessToken": "test_token_abc123",
-                "instanceUrl": "https://myorg.my.salesforce.com",
-                "apiVersion": "58.0",
-            }
-        })
+    def test_raises_on_malformed_url(self):
+        import connection_sf
+        with pytest.raises(ValueError, match="Invalid SFDX auth URL format"):
+            connection_sf.get_salesforce_connection_url("not-a-valid-sfdx-url")
 
-        mock_run = MagicMock()
-        mock_run.stdout = sf_display_output.encode("utf-8")
-        mock_run.returncode = 0
+    def test_successful_connection(self):
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "access_token": "test_token_abc123",
+            "instance_url": "https://myorg.my.salesforce.com",
+        }
 
         mock_sf_instance = MagicMock()
 
-        with patch("shutil.which", return_value="/usr/local/bin/sf"), \
-             patch("subprocess.run", return_value=mock_run), \
+        with patch("requests.post", return_value=mock_response) as mock_post, \
              patch("connection_sf.Salesforce", return_value=mock_sf_instance) as mock_sf_cls:
 
             import connection_sf
-            result = connection_sf.get_salesforce_connection_url("force://token@instance")
+            result = connection_sf.get_salesforce_connection_url(
+                "force://clientid:clientsecret:refreshtoken@https://login.salesforce.com"
+            )
 
             assert result is mock_sf_instance
+            mock_post.assert_called_once_with(
+                "https://login.salesforce.com/services/oauth2/token",
+                data={
+                    "grant_type": "refresh_token",
+                    "client_id": "clientid",
+                    "refresh_token": "refreshtoken",
+                    "client_secret": "clientsecret",
+                },
+                timeout=30,
+            )
             mock_sf_cls.assert_called_once_with(
                 instance_url="https://myorg.my.salesforce.com",
                 session_id="test_token_abc123",
                 domain="login",
-                version="58.0",
             )
 
+    def test_platform_cli_url_with_empty_secret(self):
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "access_token": "test_token_abc123",
+            "instance_url": "https://myorg.my.salesforce.com",
+        }
+
+        with patch("requests.post", return_value=mock_response) as mock_post, \
+             patch("connection_sf.Salesforce", return_value=MagicMock()):
+
+            import connection_sf
+            connection_sf.get_salesforce_connection_url(
+                "force://PlatformCLI::refreshtoken@https://login.salesforce.com"
+            )
+
+            _, kwargs = mock_post.call_args
+            assert "client_secret" not in kwargs["data"]
+            assert kwargs["data"]["client_id"] == "PlatformCLI"
+
     def test_sandbox_url_uses_test_domain(self):
-        sf_display_output = json.dumps({
-            "result": {
-                "accessToken": "sandbox_token",
-                "instanceUrl": "https://myorg--sandbox.sandbox.my.salesforce.com",
-                "apiVersion": "59.0",
-            }
-        })
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "access_token": "sandbox_token",
+            "instance_url": "https://myorg--sandbox.sandbox.my.salesforce.com",
+        }
 
-        mock_run = MagicMock()
-        mock_run.stdout = sf_display_output.encode("utf-8")
-
-        with patch("shutil.which", return_value="/usr/local/bin/sf"), \
-             patch("subprocess.run", return_value=mock_run), \
+        with patch("requests.post", return_value=mock_response), \
              patch("connection_sf.Salesforce") as mock_sf_cls:
 
             mock_sf_cls.return_value = MagicMock()
             import connection_sf
-            connection_sf.get_salesforce_connection_url("force://token@sandbox")
+            connection_sf.get_salesforce_connection_url(
+                "force://clientid:clientsecret:refreshtoken@https://test.salesforce.com"
+            )
 
             _, kwargs = mock_sf_cls.call_args
             assert kwargs["domain"] == "test"
 
-    def test_subprocess_error_propagates(self):
-        import subprocess
-        with patch("shutil.which", return_value="/usr/local/bin/sf"), \
-             patch("subprocess.run") as mock_run:
+    def test_http_error_propagates(self):
+        mock_response = MagicMock()
+        mock_response.raise_for_status.side_effect = requests.HTTPError("Auth failed")
+        mock_response.text = "Auth failed"
 
-            err = subprocess.CalledProcessError(1, "sf")
-            err.stderr = b"Auth failed"
-            err.stdout = b""
-            mock_run.side_effect = err
-
+        with patch("requests.post", return_value=mock_response):
             import connection_sf
-            with pytest.raises(subprocess.CalledProcessError):
-                connection_sf.get_salesforce_connection_url("force://bad_token@instance")
-
-    def test_windows_temp_file_oserror_on_cleanup(self):
-        sf_display_output = json.dumps({
-            "result": {
-                "accessToken": "win_token",
-                "instanceUrl": "https://myorg.my.salesforce.com",
-                "apiVersion": "58.0",
-            }
-        })
-        mock_run = MagicMock()
-        mock_run.stdout = sf_display_output.encode("utf-8")
-
-        with patch("sys.platform", "win32"), \
-             patch("shutil.which", return_value="C:\\path\\sf.cmd"), \
-             patch("subprocess.run", return_value=mock_run), \
-             patch("os.unlink", side_effect=OSError("permission denied")), \
-             patch("connection_sf.Salesforce", return_value=MagicMock()):
-            import connection_sf
-            result = connection_sf.get_salesforce_connection_url("force://token@instance")
-        assert result is not None
-
-    def test_windows_uses_temp_file(self):
-        sf_display_output = json.dumps({
-            "result": {
-                "accessToken": "win_token",
-                "instanceUrl": "https://myorg.my.salesforce.com",
-                "apiVersion": "58.0",
-            }
-        })
-        mock_run = MagicMock()
-        mock_run.stdout = sf_display_output.encode("utf-8")
-
-        with patch("sys.platform", "win32"), \
-             patch("shutil.which", return_value="C:\\path\\sf.cmd"), \
-             patch("subprocess.run", return_value=mock_run), \
-             patch("connection_sf.Salesforce", return_value=MagicMock()):
-            import connection_sf
-            result = connection_sf.get_salesforce_connection_url("force://token@instance")
-        assert result is not None
+            with pytest.raises(requests.HTTPError):
+                connection_sf.get_salesforce_connection_url(
+                    "force://clientid:clientsecret:badtoken@https://login.salesforce.com"
+                )
 
     def test_missing_key_propagates(self):
-        sf_display_output = json.dumps({"result": {}})
-        mock_run = MagicMock()
-        mock_run.stdout = sf_display_output.encode("utf-8")
+        mock_response = MagicMock()
+        mock_response.json.return_value = {}
 
-        with patch("shutil.which", return_value="/usr/local/bin/sf"), \
-             patch("subprocess.run", return_value=mock_run):
-
+        with patch("requests.post", return_value=mock_response):
             import connection_sf
             with pytest.raises(KeyError):
-                connection_sf.get_salesforce_connection_url("force://token@instance")
+                connection_sf.get_salesforce_connection_url(
+                    "force://clientid:clientsecret:refreshtoken@https://login.salesforce.com"
+                )
