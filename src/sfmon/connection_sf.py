@@ -17,6 +17,7 @@ import re
 
 import requests
 from simple_salesforce import Salesforce
+from simple_salesforce.api import DEFAULT_API_VERSION
 
 from logger import logger
 
@@ -75,11 +76,13 @@ def get_salesforce_connection_url(url):
         access_token = token_data["access_token"]
         actual_instance_url = token_data["instance_url"]
         domain = "test" if "sandbox" in actual_instance_url else "login"
+        api_version = _get_latest_api_version(actual_instance_url, access_token)
 
         return Salesforce(
             instance_url=actual_instance_url,
             session_id=access_token,
             domain=domain,
+            version=api_version,
         )
 
     except requests.HTTPError as e:
@@ -89,3 +92,27 @@ def get_salesforce_connection_url(url):
     except KeyError as e:
         logger.error("Missing expected key in OAuth response: %s", e)
         raise
+
+
+def _get_latest_api_version(instance_url, access_token):
+    """
+    Look up the highest REST API version the org's instance supports.
+
+    Falls back to simple_salesforce's bundled default if the discovery
+    call fails, so a transient error here never blocks the connection.
+    """
+    try:
+        response = requests.get(
+            f"{instance_url}/services/data/",
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=30,
+        )
+        response.raise_for_status()
+        versions = response.json()
+        return max(versions, key=lambda v: float(v["version"]))["version"]
+    except (requests.RequestException, ValueError, KeyError, TypeError) as e:
+        logger.warning(
+            "Could not determine org API version, using simple_salesforce default: %s",
+            e,
+        )
+        return DEFAULT_API_VERSION
