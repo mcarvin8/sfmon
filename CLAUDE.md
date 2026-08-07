@@ -19,7 +19,7 @@ pytest tests/test_limits.py -v
 pytest tests/test_config.py::test_load_config_with_preset -v
 
 # Install deps (matches CI exactly)
-pip install pytest pytest-cov pytest-mock responses simple_salesforce prometheus_client apscheduler pandas cffi genbadge[coverage]
+pip install pytest pytest-cov pytest-mock responses simple_salesforce prometheus_client apscheduler pandas cffi opentelemetry-sdk opentelemetry-exporter-prometheus opentelemetry-exporter-otlp-proto-http opentelemetry-instrumentation-logging genbadge[coverage]
 ```
 
 There is no build step — this is pure Python. The Docker image is built from `docker/Dockerfile`.
