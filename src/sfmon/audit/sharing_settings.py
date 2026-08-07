@@ -35,12 +35,21 @@ def monitor_org_wide_sharing_settings(sf):
                     user_name = get_user_name(sf, user_id)
                     user_group = categorize_user_group(user_name)
                     details = change.get("Display", "Unknown")
+                    logger.info(
+                        "Org-wide sharing setting change detected",
+                        extra={
+                            "event": {
+                                "date": created_date,
+                                "user": user_name,
+                                "user_group": user_group,
+                                "action": action,
+                                "display": details,
+                            }
+                        },
+                    )
                     org_wide_sharing__setting_changes.labels(
-                        date=created_date,
-                        user=user_name,
                         user_group=user_group,
                         action=action,
-                        display=details,
                     ).set(1)
                     has_sharing_changes = True
 
@@ -48,11 +57,8 @@ def monitor_org_wide_sharing_settings(sf):
         if not has_sharing_changes:
             logger.info("No changes found in Org-Wide Sharing Settings for today.")
             org_wide_sharing__setting_changes.labels(
-                date="none",
-                user="No Changes",
                 user_group="Other",
                 action="none",
-                display="No org-wide sharing setting changes",
             ).set(0)
     # pylint: disable=broad-except
     except Exception as e:

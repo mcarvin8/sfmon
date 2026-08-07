@@ -3,51 +3,39 @@
 from org_gauge import OrgAwareGauge
 
 # Deployments
+# Per-deployment detail (deployment_id, start/completed timestamps) is unbounded
+# over the org's history and does not belong in a label; it's logged as a
+# structured event by audit/deployments.py instead. Labels here stay bounded
+# by (deployer, status).
 deployment_details_gauge = OrgAwareGauge(
     "deployment_details",
     "Salesforce Deployment details",
-    [
-        "pending_time",
-        "deployment_time",
-        "deployed_by",
-        "status",
-        "deployment_id",
-        "start_date",
-        "completed_date",
-    ],
+    ["deployed_by", "status"],
 )
 pending_time_gauge = OrgAwareGauge(
     "deployment_pending_time",
     "Pending time before starting the deployment",
-    ["deployment_id", "deployed_by", "status", "start_date", "completed_date"],
+    ["deployed_by", "status"],
 )
 deployment_time_gauge = OrgAwareGauge(
     "deployment_time",
     "Time taken for the deployment",
-    ["deployment_id", "deployed_by", "status", "start_date", "completed_date"],
+    ["deployed_by", "status"],
 )
 validation_details_gauge = OrgAwareGauge(
     "validation_details",
     "Salesforce Validation Deployment details",
-    [
-        "pending_time",
-        "deployment_time",
-        "deployed_by",
-        "status",
-        "deployment_id",
-        "start_date",
-        "completed_date",
-    ],
+    ["deployed_by", "status"],
 )
 validation_pending_time_gauge = OrgAwareGauge(
     "validation_pending_time",
     "Pending time before starting the validation",
-    ["deployment_id", "deployed_by", "status", "start_date", "completed_date"],
+    ["deployed_by", "status"],
 )
 validation_time_gauge = OrgAwareGauge(
     "validation_time",
     "Time taken for the validation",
-    ["deployment_id", "deployed_by", "status", "start_date", "completed_date"],
+    ["deployed_by", "status"],
 )
 
 # User Activity - Login Metrics
@@ -62,10 +50,13 @@ unique_login_attempts_gauge = OrgAwareGauge(
 )
 
 # User Activity - Geolocation
+# Per-user lat/long is unbounded (grows with every distinct login location);
+# it's logged as a structured event by audit/user_login.py. Labels here count
+# logins by (browser, status) within the lookback window instead.
 geolocation_gauge = OrgAwareGauge(
     "user_location",
-    "Longitude and Latitude of user location",
-    ["user", "longitude", "latitude", "browser", "status"],
+    "Count of user logins by browser and status in the lookback window",
+    ["browser", "status"],
 )
 
 # Compliance - Large Queries
@@ -76,25 +67,22 @@ hourly_large_query_metric = OrgAwareGauge(
 )
 
 # Compliance - Audit Trail
+# Per-record detail (user, created_date, display, delegate_user) is unbounded
+# over time; it's logged as a structured event by audit/audit_trail.py. Labels
+# here stay bounded by (action, section, user_group).
 suspicious_records_gauge = OrgAwareGauge(
     "suspicious_records",
     "Suspicious records from Audit Trail logs",
-    [
-        "action",
-        "section",
-        "user",
-        "user_group",
-        "created_date",
-        "display",
-        "delegate_user",
-    ],
+    ["action", "section", "user_group"],
 )
 
 # Compliance - Org-Wide Sharing Settings
+# Per-change detail (date, user, display) is unbounded over time; it's logged
+# as a structured event by audit/sharing_settings.py.
 org_wide_sharing__setting_changes = OrgAwareGauge(
     "org_wide_sharing_changes",
     "Track changes in Org-Wide Sharing Settings",
-    ["date", "user", "user_group", "action", "display"],
+    ["action", "user_group"],
 )
 
 # Compliance - Forbidden Profiles
@@ -105,8 +93,11 @@ forbidden_profile_users_gauge = OrgAwareGauge(
 )
 
 # Report Exports
+# Per-export detail (user, timestamp, report name) is unbounded over time;
+# it's logged as a structured event by audit/report_export.py. Labels here
+# count exports by report type within the hour.
 hourly_report_export_metric = OrgAwareGauge(
     "hourly_report_export",
-    "Report export details",
-    ["user_name", "timestamp", "report_name", "report_type_api_name"],
+    "Count of report exports by report type in the hour",
+    ["report_type_api_name"],
 )

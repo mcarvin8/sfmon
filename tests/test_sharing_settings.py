@@ -35,9 +35,9 @@ class TestMonitorOrgWideSharingSettings:
         with patch("audit.sharing_settings.query_setup_audit_trail", return_value=changes), \
              patch("audit.sharing_settings.org_wide_sharing__setting_changes", mock_gauge):
             monitor_org_wide_sharing_settings(mock_sf)
-        # no_changes branch → labels called once with "No Changes"
+        # no_changes branch → labels called once with placeholder action
         labels_kwargs = mock_gauge.labels.call_args.kwargs
-        assert labels_kwargs["user"] == "No Changes"
+        assert labels_kwargs["action"] == "none"
 
     def test_no_changes_sets_placeholder(self, mock_sf):
         from audit.sharing_settings import monitor_org_wide_sharing_settings
@@ -46,11 +46,8 @@ class TestMonitorOrgWideSharingSettings:
              patch("audit.sharing_settings.org_wide_sharing__setting_changes", mock_gauge):
             monitor_org_wide_sharing_settings(mock_sf)
         mock_gauge.labels.assert_called_once_with(
-            date="none",
-            user="No Changes",
             user_group="Other",
             action="none",
-            display="No org-wide sharing setting changes",
         )
         mock_gauge.labels().set.assert_called_once_with(0)
 

@@ -19,8 +19,8 @@ class TestHourlyReportExportRecords:
              patch("audit.report_export.query_records_all", return_value=report), \
              patch("audit.report_export.hourly_report_export_metric", mock_gauge):
             hourly_report_export_records(mock_sf)
-        mock_gauge.labels.assert_called_once()
-        mock_gauge.labels().set.assert_called_once_with(1)
+        mock_gauge.labels.assert_called_once_with(report_type_api_name="AccountList")
+        mock_gauge.labels().inc.assert_called_once()
 
     def test_skips_invalid_report_id(self, mock_sf):
         from audit.report_export import hourly_report_export_records
@@ -57,7 +57,7 @@ class TestHourlyReportExportRecords:
              patch("audit.report_export.hourly_report_export_metric"):
             hourly_report_export_records(mock_sf)  # Should not raise
 
-    def test_sets_none_report_name_when_no_result(self, mock_sf):
+    def test_falls_back_to_unknown_report_type_when_no_result(self, mock_sf):
         from audit.report_export import hourly_report_export_records
         rows = [self._make_row()]
         mock_gauge = MagicMock()
@@ -68,4 +68,4 @@ class TestHourlyReportExportRecords:
              patch("audit.report_export.query_records_all", return_value=[]), \
              patch("audit.report_export.hourly_report_export_metric", mock_gauge):
             hourly_report_export_records(mock_sf)
-        assert captured.get("report_name") is None
+        assert captured.get("report_type_api_name") == "Unknown"

@@ -80,19 +80,28 @@ def hourly_report_export_records(sf):
             # SOQL; modified_id validated as Salesforce Id format (B608)
             report_detail_query = f"SELECT Id, Name, ReportTypeApiName FROM Report WHERE Id = '{modified_id}'"  # nosec B608
             result = query_records_all(sf, report_detail_query)
+            report_name = result[0].get("Name") if result and len(result) > 0 else None
+            report_type_api_name = (
+                result[0].get("ReportTypeApiName")
+                if result and len(result) > 0
+                else None
+            )
 
+            logger.info(
+                "Report export detected",
+                extra={
+                    "event": {
+                        "user_name": user_name,
+                        "timestamp": timestamp,
+                        "report_id": modified_id,
+                        "report_name": report_name,
+                        "report_type_api_name": report_type_api_name,
+                    }
+                },
+            )
             hourly_report_export_metric.labels(
-                user_name=user_name if user_name else None,
-                timestamp=timestamp,
-                report_name=(
-                    result[0].get("Name") if result and len(result) > 0 else None
-                ),
-                report_type_api_name=(
-                    result[0].get("ReportTypeApiName")
-                    if result and len(result) > 0
-                    else None
-                ),
-            ).set(1)
+                report_type_api_name=report_type_api_name or "Unknown",
+            ).inc()
     # pylint: disable=broad-except
     except Exception as e:
         logger.error("An error occurred in report_export_records : %s", e)

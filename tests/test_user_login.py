@@ -144,8 +144,9 @@ class TestGeolocation:
         with patch("audit.user_login.query_records_all", side_effect=[locations, [{"Id": "u01", "Name": "Alice"}]]), \
              patch("audit.user_login.geolocation_gauge", mock_gauge):
             geolocation(mock_sf, chunk_size=100)
-        mock_gauge.labels.assert_called_once()
-        mock_gauge.labels().set.assert_called_once_with(1)
+        mock_gauge.clear.assert_called_once()
+        mock_gauge.labels.assert_called_once_with(browser="Chrome", status="Success")
+        mock_gauge.labels().inc.assert_called_once()
 
     def test_skips_record_without_geo(self, mock_sf):
         from audit.user_login import geolocation

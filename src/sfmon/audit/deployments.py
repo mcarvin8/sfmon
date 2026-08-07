@@ -124,7 +124,8 @@ def report_deployment_metrics(
     record, deployment_time, pending_time, status_mapping, is_validation
 ):
     """
-    Send deployment-related metrics to Prometheus gauges.
+    Log the full deployment record as a structured event and send its
+    low-cardinality (deployer, status) fields to Prometheus gauges.
 
     Args:
         record (dict): Deployment record.
@@ -138,55 +139,39 @@ def report_deployment_metrics(
     start_date = record.get("StartDate") or ""
     completed_date = record.get("CompletedDate") or ""
 
+    logger.info(
+        "Validation record processed" if is_validation else "Deployment record processed",
+        extra={
+            "event": {
+                "deployment_id": deployment_id,
+                "deployed_by": deployed_by,
+                "status": status,
+                "start_date": start_date,
+                "completed_date": completed_date,
+                "pending_time_minutes": pending_time,
+                "deployment_time_minutes": deployment_time,
+                "is_validation": is_validation,
+            }
+        },
+    )
+
     if is_validation:
         validation_details_gauge.labels(
-            pending_time=pending_time,
-            deployment_time=deployment_time,
-            deployment_id=deployment_id,
-            deployed_by=deployed_by,
-            status=status,
-            start_date=start_date,
-            completed_date=completed_date,
+            deployed_by=deployed_by, status=status
         ).set(status_mapping.get(status, -1))
-
         validation_pending_time_gauge.labels(
-            deployment_id=deployment_id,
-            deployed_by=deployed_by,
-            status=status,
-            start_date=start_date,
-            completed_date=completed_date,
+            deployed_by=deployed_by, status=status
         ).set(pending_time)
-
         validation_time_gauge.labels(
-            deployment_id=deployment_id,
-            deployed_by=deployed_by,
-            status=status,
-            start_date=start_date,
-            completed_date=completed_date,
+            deployed_by=deployed_by, status=status
         ).set(deployment_time)
     else:
         deployment_details_gauge.labels(
-            pending_time=pending_time,
-            deployment_time=deployment_time,
-            deployment_id=deployment_id,
-            deployed_by=deployed_by,
-            status=status,
-            start_date=start_date,
-            completed_date=completed_date,
+            deployed_by=deployed_by, status=status
         ).set(status_mapping.get(status, -1))
-
         pending_time_gauge.labels(
-            deployment_id=deployment_id,
-            deployed_by=deployed_by,
-            status=status,
-            start_date=start_date,
-            completed_date=completed_date,
+            deployed_by=deployed_by, status=status
         ).set(pending_time)
-
         deployment_time_gauge.labels(
-            deployment_id=deployment_id,
-            deployed_by=deployed_by,
-            status=status,
-            start_date=start_date,
-            completed_date=completed_date,
+            deployed_by=deployed_by, status=status
         ).set(deployment_time)
