@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.1](https://github.com/mcarvin8/sfmon/compare/v3.11.0...v3.11.1) (2026-08-07)
+
+
+### Bug Fixes
+
+* split event-shaped audit metrics into aggregate gauges + structured logs ([#54](https://github.com/mcarvin8/sfmon/issues/54)) ([3ac06af](https://github.com/mcarvin8/sfmon/commit/3ac06afca8478b1b93154e2eba0d072724bbe664))
+
 ## [3.11.0](https://github.com/mcarvin8/sfmon/compare/v3.10.3...v3.11.0) (2026-08-06)
 
 
