@@ -58,8 +58,16 @@ def extract_record_data(record):
 
 
 def expose_record_metric(gauge, record_data):
-    """Expose the record data as a metric."""
-    gauge.labels(**record_data).set(1)
+    """Expose the record's low-cardinality fields as a metric and log the full
+    record (user, timestamp, display, delegate) as a structured event."""
+    gauge.labels(
+        action=record_data["action"],
+        section=record_data["section"],
+        user_group=record_data["user_group"],
+    ).set(1)
+    logger.info(
+        "Suspicious audit trail record detected", extra={"event": record_data}
+    )
 
 
 def process_suspicious_records(records):
@@ -77,11 +85,7 @@ def process_suspicious_records(records):
         suspicious_records_gauge.labels(
             action="none",
             section="none",
-            user="No Suspicious Records",
             user_group="Other",
-            created_date="none",
-            display="none",
-            delegate_user="none",
         ).set(0)
 
 

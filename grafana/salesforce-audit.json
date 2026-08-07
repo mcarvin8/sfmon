@@ -175,7 +175,7 @@
         "type": "prometheus",
         "uid": "cip-o11y-aws-prd-us-west-2-theta"
       },
-      "description": "Changes from SetupAuditTrail",
+      "description": "Changes from SetupAuditTrail (aggregate view by action/section/user group — full per-record detail including user, timestamp, delegate user, and display text is emitted as structured JSON logs, see audit/audit_trail.py)",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -228,7 +228,7 @@
         "sortBy": [
           {
             "desc": true,
-            "displayName": "created_date"
+            "displayName": "Time"
           }
         ]
       },
@@ -267,11 +267,8 @@
             "indexByName": {},
             "renameByName": {
               "action": "Action",
-              "created_date": "Created Date",
-              "delegate_user": "Delegate User",
-              "display": "Display",
               "section": "Section",
-              "user": "User"
+              "user_group": "User Group"
             }
           }
         },
@@ -283,23 +280,11 @@
                 "aggregations": [],
                 "operation": "groupby"
               },
-              "Created Date": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "Delegate User": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "Display": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
               "Section": {
                 "aggregations": [],
                 "operation": "groupby"
               },
-              "User": {
+              "User Group": {
                 "aggregations": [],
                 "operation": "groupby"
               }
@@ -325,7 +310,7 @@
             "type": "prometheus",
             "uid": "cip-o11y-aws-prd-us-west-2-theta"
           },
-          "description": "Changes to organization-wide default sharing settings",
+          "description": "Changes to organization-wide default sharing settings (aggregate view by action/user group — full per-change detail including date, user, and display text is emitted as structured JSON logs, see audit/sharing_settings.py)",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -379,7 +364,7 @@
             "sortBy": [
               {
                 "desc": true,
-                "displayName": "date"
+                "displayName": "Time"
               }
             ]
           },
@@ -418,9 +403,7 @@
                 "indexByName": {},
                 "renameByName": {
                   "action": "Action",
-                  "date": "Date",
-                  "display": "Display",
-                  "user": "User"
+                  "user_group": "User Group"
                 }
               }
             },
@@ -432,15 +415,7 @@
                     "aggregations": [],
                     "operation": "groupby"
                   },
-                  "Date": {
-                    "aggregations": [],
-                    "operation": "groupby"
-                  },
-                  "Display": {
-                    "aggregations": [],
-                    "operation": "groupby"
-                  },
-                  "User": {
+                  "User Group": {
                     "aggregations": [],
                     "operation": "groupby"
                   }
@@ -677,24 +652,21 @@
             "type": "prometheus",
             "uid": "cip-o11y-aws-prd-us-west-2-theta"
           },
-          "description": "User location based on their login coordinates",
+          "description": "Count of user logins by browser and status in the lookback window. Per-login coordinates (lat/long, user) are no longer Prometheus labels — they're emitted as structured JSON logs, see audit/user_login.py geolocation()",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "fixedColor": "orange",
-                "mode": "fixed",
-                "seriesBy": "last"
+                "mode": "thresholds"
               },
               "custom": {
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                }
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "filterable": true,
+                "inspect": false
               },
-              "fieldMinMax": false,
               "mappings": [],
-              "min": 0,
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -714,81 +686,24 @@
             "y": 36
           },
           "id": 15,
-          "interval": "12h",
           "options": {
-            "basemap": {
-              "config": {},
-              "name": "Layer 0",
-              "opacity": 1,
-              "tooltip": true,
-              "type": "osm-standard"
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "enablePagination": true,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
             },
-            "controls": {
-              "mouseWheelZoom": true,
-              "showAttribution": true,
-              "showDebug": false,
-              "showMeasure": false,
-              "showScale": false,
-              "showZoom": true
-            },
-            "layers": [
+            "showHeader": true,
+            "sortBy": [
               {
-                "config": {
-                  "showLegend": false,
-                  "style": {
-                    "color": {
-                      "fixed": "semi-dark-orange"
-                    },
-                    "opacity": 1,
-                    "rotation": {
-                      "fixed": 0,
-                      "max": 360,
-                      "min": -360,
-                      "mode": "mod"
-                    },
-                    "size": {
-                      "fixed": 10,
-                      "max": 15,
-                      "min": 2
-                    },
-                    "symbol": {
-                      "fixed": "img/icons/unicons/user-location.svg",
-                      "mode": "fixed"
-                    },
-                    "symbolAlign": {
-                      "horizontal": "center",
-                      "vertical": "center"
-                    },
-                    "textConfig": {
-                      "fontSize": 12,
-                      "offsetX": 0,
-                      "offsetY": 0,
-                      "textAlign": "center",
-                      "textBaseline": "middle"
-                    }
-                  }
-                },
-                "location": {
-                  "mode": "auto"
-                },
-                "name": "Layer 1",
-                "tooltip": false,
-                "type": "markers"
+                "desc": true,
+                "displayName": "Login Count"
               }
-            ],
-            "tooltip": {
-              "mode": "details"
-            },
-            "view": {
-              "allLayers": true,
-              "id": "fit",
-              "lastOnly": false,
-              "lat": 0,
-              "layer": "Layer 1",
-              "lon": 0,
-              "shared": false,
-              "zoom": 15
-            }
+            ]
           },
           "pluginVersion": "12.0.5",
           "targets": [
@@ -797,23 +712,41 @@
                 "type": "prometheus",
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
-              "disableTextWrap": false,
               "editorMode": "code",
-              "exemplar": false,
               "expr": "user_location",
               "format": "table",
-              "fullMetaSearch": false,
-              "includeNullMetadata": false,
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A",
-              "useBackend": false
+              "instant": true,
+              "range": false,
+              "refId": "A"
             }
           ],
-          "title": "Users Geolocation",
+          "title": "User Logins by Browser & Status",
           "transparent": true,
-          "type": "geomap"
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "container": true,
+                  "endpoint": true,
+                  "instance": true,
+                  "job": true,
+                  "namespace": true,
+                  "pod": true,
+                  "service": true
+                },
+                "indexByName": {},
+                "renameByName": {
+                  "browser": "Browser",
+                  "status": "Status",
+                  "Value": "Login Count"
+                }
+              }
+            }
+          ]
         },
         {
           "datasource": {

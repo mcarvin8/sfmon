@@ -145,6 +145,7 @@ def geolocation(sf, chunk_size=None):
         chunk_size,
     )
     try:
+        geolocation_gauge.clear()
         end_time = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         start_time = (
             datetime.now(timezone.utc) - timedelta(hours=GEOLOCATION_LOOKBACK_HOURS)
@@ -173,13 +174,22 @@ def geolocation(sf, chunk_size=None):
                 username = record["UserName"]
                 browser = record["Browser"]
                 login_status = record["Status"]
+                logger.info(
+                    "User login geolocation recorded",
+                    extra={
+                        "event": {
+                            "user": username,
+                            "latitude": latitude,
+                            "longitude": longitude,
+                            "browser": browser,
+                            "status": login_status,
+                        }
+                    },
+                )
                 geolocation_gauge.labels(
-                    user=username,
-                    longitude=longitude,
-                    latitude=latitude,
                     browser=browser,
                     status=login_status,
-                ).set(1)
+                ).inc()
 
     except KeyError as e:
         logger.error("Key error: %s", e)
