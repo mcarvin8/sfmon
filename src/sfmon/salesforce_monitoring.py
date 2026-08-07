@@ -47,6 +47,9 @@ Environment Variables Optional:
     - METRICS_PORT: Prometheus metrics server port (default: 9001)
     - PMD_RULESET_PATH: Path to PMD Apex ruleset XML; if unset or missing, PMD metrics are skipped
     - SCHEDULER_MAX_WORKERS: APScheduler thread pool size (default: min(orgs * 2, 20))
+    - OTEL_EXPORTER_OTLP_ENDPOINT: OTLP collector URL; if set, metrics and logs also
+      push there in addition to /metrics and stdout (default: unset, push disabled).
+      See docs/ENVIRONMENT.md.
 
 Fleet Mode:
     Add "orgs": ["prod", "sandbox-uat"] to config.json to monitor multiple orgs from

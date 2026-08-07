@@ -18,6 +18,18 @@
 | `ORG_NAME` | `""` | Value injected as the `org` label on **every** Prometheus metric. Set this to a human-readable identifier for your Salesforce org (e.g. `production`, `sandbox-uat`) so you can filter or aggregate across multiple SFMon instances in the same Prometheus/Grafana setup. If unset, the label is present but empty. **Ignored in fleet mode** — org names there come from `config.json`'s `orgs` list instead. |
 | `SCHEDULER_MAX_WORKERS` | `min(orgs * 2, 20)` | Size of the APScheduler thread pool. Raise this if you run many orgs and see jobs queueing behind each other at shared cron ticks. |
 
+## Optional — OTLP push
+
+Metrics and logs are always available the same way as before: metrics on `/metrics` (Prometheus scrape format), logs as JSON lines on stdout. Setting `OTEL_EXPORTER_OTLP_ENDPOINT` additionally **pushes** both to an OTLP-compatible collector or backend (Datadog, Honeycomb, Grafana Alloy, an OTel Collector, ...) — useful when you don't want to run a Prometheus scrape target, or your log pipeline ingests OTLP directly instead of tailing container stdout. Leaving it unset keeps today's behavior exactly as-is.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | unset | Base URL of an OTLP/HTTP collector, e.g. `http://otel-collector:4318`. When set, metrics push on a periodic interval (default 60s) in addition to being scrapeable, and log records push in addition to stdout. |
+
+Standard OTel SDK environment variables (`OTEL_EXPORTER_OTLP_HEADERS` for auth, `OTEL_METRIC_EXPORT_INTERVAL` to change the push interval, `OTEL_EXPORTER_OTLP_TIMEOUT`, etc.) are read automatically by the underlying SDK — no SFMon-specific wiring needed for those. See the [OpenTelemetry SDK environment variable spec](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/) for the full list.
+
+The structured `event` payload on log records (see [logger.py](../src/sfmon/logger.py)) survives as a nested log attribute over OTLP — unlike Prometheus metric labels, OTLP log attributes support nested values, so no data is lost in the push path.
+
 ## Fleet mode — monitoring multiple orgs from one container
 
 Add an `orgs` array to `config.json` to monitor several Salesforce orgs from a single SFMon container instead of running one container per org:

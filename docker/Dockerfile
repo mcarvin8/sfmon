@@ -16,7 +16,9 @@ LABEL org.opencontainers.image.title="sfmon" \
       org.opencontainers.image.source="https://github.com/mcarvin8/sfmon"
 
 # Install required Python dependencies
-RUN pip install --no-cache-dir simple_salesforce prometheus_client requests apscheduler pandas && \
+RUN pip install --no-cache-dir simple_salesforce prometheus_client requests apscheduler pandas \
+        opentelemetry-sdk opentelemetry-exporter-prometheus opentelemetry-exporter-otlp-proto-http \
+        opentelemetry-instrumentation-logging && \
     pip list
 
 # Create non-root user
