@@ -1,0 +1,63 @@
+name: Package Build
+
+# Builds the sfmon sdist/wheel and smoke-tests it the same way docker-build.yml
+# smoke-tests the Docker image: install into a clean environment and verify the
+# package imports and the console script actually runs. This is separate from
+# publish-pypi (release-please.yml), which only runs after a release is cut —
+# this job catches a broken package build on every push/PR instead.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  package-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Build sdist and wheel
+        run: |
+          pip install build
+          python -m build
+
+      - name: Install built wheel into a clean venv
+        run: |
+          python -m venv /tmp/sfmon-venv
+          /tmp/sfmon-venv/bin/pip install dist/*.whl
+
+      - name: Verify package imports cleanly
+        run: |
+          /tmp/sfmon-venv/bin/python -c "
+          import sfmon
+          import sfmon.core
+          import sfmon.ops
+          import sfmon.audit
+          import sfmon.tech_debt
+          import sfmon.salesforce_monitoring
+          print('Import OK')
+          "
+
+      - name: Verify console script runs and reaches app logic
+        run: |
+          set +e
+          SALESFORCE_AUTH_URL="force://invalid" /tmp/sfmon-venv/bin/sfmon > /tmp/sfmon-run.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/sfmon-run.log
+          if [ "$status" -eq 0 ]; then
+            echo "Expected the sfmon console script to exit non-zero on an invalid auth URL"
+            exit 1
+          fi
+          grep -q "Invalid SFDX auth URL format" /tmp/sfmon-run.log
