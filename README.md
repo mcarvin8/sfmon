@@ -1,8 +1,13 @@
 # Salesforce Monitoring (SFMon)
 
+![PyPI](https://img.shields.io/pypi/v/sfmon)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sfmon)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/sfmon)
+
 ![Docker Image Version](https://img.shields.io/docker/v/mcarvin8/sfmon?sort=date)
 ![Docker Pulls](https://img.shields.io/docker/pulls/mcarvin8/sfmon)
 ![Docker Image Size](https://img.shields.io/docker/image-size/mcarvin8/sfmon)
+
 ![Coverage](https://raw.githubusercontent.com/mcarvin8/sfmon/refs/heads/main/badges/coverage.svg)
 
 SFMon is a **long-running Docker container** that connects to your Salesforce org on a schedule and exposes a **standard `/metrics` endpoint** compatible with Prometheus, Victoria Metrics, Grafana Cloud, Mimir, and any OpenTelemetry Collector pipeline — so your Salesforce org lives in the same Grafana dashboards, PromQL alerts, and on-call runbooks as the rest of your infrastructure. Metrics are instrumented with OpenTelemetry and structured logs are emitted as JSON; both can optionally **push** over OTLP instead of only being scraped/tailed — see [Metrics and logs](#metrics-and-logs).
