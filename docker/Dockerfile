@@ -11,7 +11,7 @@ COPY LICENSE.md /app/sfmon/LICENSE.md
 COPY version.txt /app/sfmon/version.txt
 
 LABEL org.opencontainers.image.title="sfmon" \
-      org.opencontainers.image.description="Monitor your Salesforce orgs using a custom Docker image to create Prometheus metrics." \
+      org.opencontainers.image.description="Monitor a Salesforce org and expose Prometheus metrics from a long-running Python service." \
       org.opencontainers.image.authors="Matt Carvin <matthewjcarvin@gmail.com>" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.source="https://github.com/mcarvin8/sfmon"
