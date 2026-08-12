@@ -11,7 +11,7 @@
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `METRICS_PORT` | `9001` | Prometheus scrape port inside the container |
-| `CONFIG_FILE_PATH` | `/app/sfmon/config.json` | JSON config path (optional; mount file + set path if needed) |
+| `CONFIG_FILE_PATH` | `/app/sfmon/config.json` | JSON config path (optional; mount file + set path if needed). Default only exists inside the Docker image — pip installs (`sfmon` console script) must set this explicitly, e.g. `/etc/sfmon/config.json` |
 | `QUERY_TIMEOUT_SECONDS` | `30` | SOQL query timeout |
 | `REQUESTS_TIMEOUT_SECONDS` | `300` | HTTP timeout (Event Log, Trust API, etc.) |
 | `LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` |
@@ -84,6 +84,8 @@ The files are **not** included in the **published** Docker image: **`.dockerigno
 |-----------|------|------------------------|
 | PMD | Report XML | **`/app/sfmon/tech_debt/pmd-report.xml`** |
 | Minimal permission sets | JSON | **`/app/sfmon/tech_debt/minimal-perm-sets.json`** |
+
+These paths aren't a configurable constant — both collectors resolve them at runtime relative to their own module file (`tech_debt/pmd.py`'s and `tech_debt/permissions.py`'s own directory). In the Docker image that directory is `/app/sfmon/tech_debt/`, matching the table above. **pip installs** resolve this to wherever `pip` put the package — typically `<venv>/lib/pythonX.Y/site-packages/sfmon/tech_debt/` — so you'd need to drop the report files directly into site-packages, which isn't a normal workflow. These two file-based collectors are effectively Docker/container-only; pip installs are better suited to the other collectors that only need `SALESFORCE_AUTH_URL` and env vars.
 
 ### Refreshing reports in CI (GitHub or GitLab)
 

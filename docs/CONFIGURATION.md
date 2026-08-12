@@ -22,6 +22,12 @@ Or keep the file elsewhere and set:
 -v /host/path/my-config.json:/app/config/my-config.json
 ```
 
+**pip install (`sfmon` console script):** there's no container, so no default `/app/sfmon/config.json` exists on disk. Always set `CONFIG_FILE_PATH` explicitly to a real path on the host, e.g.:
+
+```bash
+CONFIG_FILE_PATH=/etc/sfmon/config.json sfmon
+```
+
 ## Structure
 
 ```json
