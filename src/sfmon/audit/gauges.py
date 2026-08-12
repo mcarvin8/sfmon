@@ -1,6 +1,6 @@
 """Prometheus metric definitions for audit and compliance monitoring."""
 
-from org_gauge import OrgAwareGauge
+from ..org_gauge import OrgAwareGauge
 
 # Deployments
 # Per-deployment detail (deployment_id, start/completed timestamps) is unbounded

@@ -12,8 +12,8 @@ plain SALESFORCE_AUTH_URL environment variable.
 import os
 import re
 
-from logger import logger
-from connection_sf import get_salesforce_connection_url
+from .logger import logger
+from .connection_sf import get_salesforce_connection_url
 
 
 def _sanitize_env_suffix(org_name):
@@ -26,7 +26,7 @@ def get_org_names():
     Reads "orgs" from config.json (fleet mode). Falls back to a single
     legacy org named by ORG_NAME (or "default") when "orgs" is absent/empty.
     """
-    from config import load_config
+    from .config import load_config
 
     orgs = load_config().get("orgs") or []
     if orgs:
@@ -35,7 +35,7 @@ def get_org_names():
 
 
 def is_fleet_mode():
-    from config import load_config
+    from .config import load_config
 
     return bool(load_config().get("orgs"))
 

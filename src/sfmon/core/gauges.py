@@ -1,6 +1,6 @@
 """Prometheus metric definitions for always-on core monitoring."""
 
-from org_gauge import OrgAwareGauge
+from ..org_gauge import OrgAwareGauge
 
 TOTAL_LICENSES = "Total Salesforce licenses"
 USED_LICENSES = "Used Salesforce licenses"

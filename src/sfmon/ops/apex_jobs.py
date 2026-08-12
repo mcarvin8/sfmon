@@ -34,7 +34,7 @@ Performance Thresholds:
 
 import os
 
-from logger import logger
+from ..logger import logger
 from .gauges import (
     async_job_status_gauge,
     run_time_metric,
@@ -57,9 +57,9 @@ from .gauges import (
     apex_runtime_gt_10s_count,
     apex_runtime_gt_5s_percentage,
 )
-from log_parser import parse_logs
+from ..log_parser import parse_logs
 import pandas as pd
-from query import query_records_all
+from ..query import query_records_all
 
 # Thresholds for long-running Apex requests (in milliseconds)
 LONG_RUNNING_APEX_MS = int(os.getenv("LONG_RUNNING_APEX_MS", 5000))

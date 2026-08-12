@@ -41,9 +41,9 @@ import csv
 from io import StringIO
 import requests
 
-from constants import REQUESTS_TIMEOUT_SECONDS
-from logger import logger
-from query import query_records_all
+from .constants import REQUESTS_TIMEOUT_SECONDS
+from .logger import logger
+from .query import query_records_all
 
 
 def fetch_event_log_csv_reader(sf, log_file_id):

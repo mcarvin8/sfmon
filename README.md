@@ -74,6 +74,17 @@ scrape_configs:
 
 No config file is required: all collectors run on **default schedules** out of the box.
 
+### Alternative: pip install
+
+Prefer running on bare metal/VM instead of Docker, or want to import individual collectors in your own scripts? SFMon is also published to PyPI:
+
+```bash
+pip install sfmon
+SALESFORCE_AUTH_URL="force://PlatformCLI::..." ORG_NAME="production" sfmon
+```
+
+The `sfmon` console script runs the same always-on daemon as the Docker image. `CONFIG_FILE_PATH` defaults to `/app/sfmon/config.json` (the Docker path) — set it explicitly for non-Docker installs. `sfmon` is also an importable library, e.g. `from sfmon.core.limits import salesforce_limits_descriptions`.
+
 Optional tuning:
 - **Environment variables** (timeouts, org label, compliance lists, thresholds, log level) → **[docs/ENVIRONMENT.md](https://github.com/mcarvin8/sfmon/blob/main/docs/ENVIRONMENT.md)**
 - **Config file** (schedules, presets, disable jobs, `exclude_users`) → **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md)** · template **`config.example.json`**

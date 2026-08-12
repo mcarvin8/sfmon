@@ -20,7 +20,7 @@ Data Sources:
 import json
 import os
 
-from logger import logger
+from ..logger import logger
 from .gauges import (
     unused_permissionsets,
     limited_permissionsets,
@@ -29,7 +29,7 @@ from .gauges import (
     minimal_permission_sets_gauge,
     minimal_permission_sets_percentage_gauge,
 )
-from query import query_records_all
+from ..query import query_records_all
 
 # Thresholds for flagging permission sets and profiles
 PERMSET_LIMITED_USERS_THRESHOLD = int(os.getenv("PERMSET_LIMITED_USERS_THRESHOLD", 10))

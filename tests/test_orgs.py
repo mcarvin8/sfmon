@@ -10,14 +10,14 @@ class TestGetOrgNames:
     def test_legacy_mode_uses_org_name_env(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
         monkeypatch.setenv("ORG_NAME", "my-org")
-        import config, orgs
+        from sfmon import config, orgs
         config.load_config(force_reload=True)
         assert orgs.get_org_names() == ["my-org"]
 
     def test_legacy_mode_defaults_to_default_when_org_name_unset(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
         monkeypatch.delenv("ORG_NAME", raising=False)
-        import config, orgs
+        from sfmon import config, orgs
         config.load_config(force_reload=True)
         assert orgs.get_org_names() == ["default"]
 
@@ -26,7 +26,7 @@ class TestGetOrgNames:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config, orgs
+        from sfmon import config, orgs
         config.load_config(force_reload=True)
         assert orgs.get_org_names() == ["prod", "sandbox-uat"]
 
@@ -34,7 +34,7 @@ class TestGetOrgNames:
 class TestIsFleetMode:
     def test_false_without_orgs(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
-        import config, orgs
+        from sfmon import config, orgs
         config.load_config(force_reload=True)
         assert orgs.is_fleet_mode() is False
 
@@ -43,7 +43,7 @@ class TestIsFleetMode:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config, orgs
+        from sfmon import config, orgs
         config.load_config(force_reload=True)
         assert orgs.is_fleet_mode() is True
 
@@ -51,7 +51,7 @@ class TestIsFleetMode:
 class TestAuthUrlEnvVar:
     def test_legacy_mode_uses_plain_var(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
-        import config, orgs
+        from sfmon import config, orgs
         config.load_config(force_reload=True)
         assert orgs.auth_url_env_var("default") == "SALESFORCE_AUTH_URL"
 
@@ -60,7 +60,7 @@ class TestAuthUrlEnvVar:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config, orgs
+        from sfmon import config, orgs
         config.load_config(force_reload=True)
         assert orgs.auth_url_env_var("prod") == "SALESFORCE_AUTH_URL_PROD"
         assert orgs.auth_url_env_var("sandbox-uat") == "SALESFORCE_AUTH_URL_SANDBOX_UAT"
@@ -74,11 +74,11 @@ class TestBuildConnections:
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
         monkeypatch.setenv("SALESFORCE_AUTH_URL_PROD", "force://id:secret:token@prod.my.salesforce.com")
         monkeypatch.setenv("SALESFORCE_AUTH_URL_SANDBOX", "force://id:secret:token@sandbox.my.salesforce.com")
-        import config, orgs
+        from sfmon import config, orgs
         config.load_config(force_reload=True)
 
         fake_conn = object()
-        with patch("orgs.get_salesforce_connection_url", return_value=fake_conn) as mock_connect:
+        with patch("sfmon.orgs.get_salesforce_connection_url", return_value=fake_conn) as mock_connect:
             connections = orgs.build_connections()
 
         assert connections == {"prod": fake_conn, "sandbox": fake_conn}
@@ -91,7 +91,7 @@ class TestBuildConnections:
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
         monkeypatch.setenv("SALESFORCE_AUTH_URL_PROD", "force://id:secret:token@prod.my.salesforce.com")
         monkeypatch.delenv("SALESFORCE_AUTH_URL_BROKEN", raising=False)
-        import config, orgs
+        from sfmon import config, orgs
         config.load_config(force_reload=True)
 
         fake_conn = object()
@@ -101,7 +101,7 @@ class TestBuildConnections:
                 raise ValueError("SFDX authentication URL is required")
             return fake_conn
 
-        with patch("orgs.get_salesforce_connection_url", side_effect=fake_connect):
+        with patch("sfmon.orgs.get_salesforce_connection_url", side_effect=fake_connect):
             connections = orgs.build_connections()
 
         assert connections == {"prod": fake_conn}
@@ -110,11 +110,11 @@ class TestBuildConnections:
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
         monkeypatch.setenv("ORG_NAME", "prod")
         monkeypatch.setenv("SALESFORCE_AUTH_URL", "force://id:secret:token@my.salesforce.com")
-        import config, orgs
+        from sfmon import config, orgs
         config.load_config(force_reload=True)
 
         fake_conn = object()
-        with patch("orgs.get_salesforce_connection_url", return_value=fake_conn) as mock_connect:
+        with patch("sfmon.orgs.get_salesforce_connection_url", return_value=fake_conn) as mock_connect:
             connections = orgs.build_connections()
 
         assert connections == {"prod": fake_conn}

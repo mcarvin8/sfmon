@@ -11,7 +11,7 @@ Functions:
 
 from .utils import get_user_name, categorize_user_group
 from .audit_trail import query_setup_audit_trail
-from logger import logger
+from ..logger import logger
 from .gauges import org_wide_sharing__setting_changes
 
 

@@ -15,38 +15,38 @@ class TestFetchEventLogCsvReader:
         return sf
 
     def test_returns_dict_reader_on_success(self):
-        from log_parser import fetch_event_log_csv_reader
+        from sfmon.log_parser import fetch_event_log_csv_reader
         csv_content = "FIELD1,FIELD2\nval1,val2\n"
         mock_resp = MagicMock()
         mock_resp.text = csv_content
-        with patch("log_parser.requests.get", return_value=mock_resp):
+        with patch("sfmon.log_parser.requests.get", return_value=mock_resp):
             result = fetch_event_log_csv_reader(self._make_sf(), "logId123")
         assert result is not None
         assert "FIELD1" in result.fieldnames
 
     def test_returns_none_for_empty_content(self):
-        from log_parser import fetch_event_log_csv_reader
+        from sfmon.log_parser import fetch_event_log_csv_reader
         mock_resp = MagicMock()
         mock_resp.text = ""
-        with patch("log_parser.requests.get", return_value=mock_resp):
+        with patch("sfmon.log_parser.requests.get", return_value=mock_resp):
             result = fetch_event_log_csv_reader(self._make_sf(), "logId123")
         assert result is None
 
     def test_strips_bom_from_fieldnames(self):
-        from log_parser import fetch_event_log_csv_reader
+        from sfmon.log_parser import fetch_event_log_csv_reader
         csv_content = "﻿FIELD1,FIELD2\nval1,val2\n"
         mock_resp = MagicMock()
         mock_resp.text = csv_content
-        with patch("log_parser.requests.get", return_value=mock_resp):
+        with patch("sfmon.log_parser.requests.get", return_value=mock_resp):
             result = fetch_event_log_csv_reader(self._make_sf(), "logId123")
         assert "FIELD1" in result.fieldnames
         assert "﻿FIELD1" not in result.fieldnames
 
     def test_raises_on_http_error(self):
-        from log_parser import fetch_event_log_csv_reader
+        from sfmon.log_parser import fetch_event_log_csv_reader
         mock_resp = MagicMock()
         mock_resp.raise_for_status.side_effect = requests.HTTPError("404")
-        with patch("log_parser.requests.get", return_value=mock_resp):
+        with patch("sfmon.log_parser.requests.get", return_value=mock_resp):
             with pytest.raises(requests.HTTPError):
                 fetch_event_log_csv_reader(self._make_sf(), "logId123")
 
@@ -59,36 +59,36 @@ class TestParseLogs:
         return sf
 
     def test_returns_none_when_no_records(self):
-        from log_parser import parse_logs
-        with patch("log_parser.query_records_all", return_value=[]):
+        from sfmon.log_parser import parse_logs
+        with patch("sfmon.log_parser.query_records_all", return_value=[]):
             result = parse_logs(self._make_sf(), "SELECT Id FROM EventLogFile")
         assert result is None
 
     def test_returns_reader_when_records_found(self):
-        from log_parser import parse_logs
+        from sfmon.log_parser import parse_logs
         records = [{"Id": "elf001"}]
         mock_reader = MagicMock()
-        with patch("log_parser.query_records_all", return_value=records), \
-             patch("log_parser.fetch_event_log_csv_reader", return_value=mock_reader):
+        with patch("sfmon.log_parser.query_records_all", return_value=records), \
+             patch("sfmon.log_parser.fetch_event_log_csv_reader", return_value=mock_reader):
             result = parse_logs(self._make_sf(), "SELECT Id FROM EventLogFile")
         assert result is mock_reader
 
     def test_returns_none_on_request_exception(self):
-        from log_parser import parse_logs
-        with patch("log_parser.query_records_all", side_effect=requests.ConnectionError("fail")):
+        from sfmon.log_parser import parse_logs
+        with patch("sfmon.log_parser.query_records_all", side_effect=requests.ConnectionError("fail")):
             result = parse_logs(self._make_sf(), "SELECT Id FROM EventLogFile")
         assert result is None
 
     def test_returns_none_on_csv_error(self):
-        from log_parser import parse_logs
+        from sfmon.log_parser import parse_logs
         records = [{"Id": "elf001"}]
-        with patch("log_parser.query_records_all", return_value=records), \
-             patch("log_parser.fetch_event_log_csv_reader", side_effect=csv.Error("bad csv")):
+        with patch("sfmon.log_parser.query_records_all", return_value=records), \
+             patch("sfmon.log_parser.fetch_event_log_csv_reader", side_effect=csv.Error("bad csv")):
             result = parse_logs(self._make_sf(), "SELECT Id FROM EventLogFile")
         assert result is None
 
     def test_returns_none_on_generic_exception(self):
-        from log_parser import parse_logs
-        with patch("log_parser.query_records_all", side_effect=RuntimeError("unexpected")):
+        from sfmon.log_parser import parse_logs
+        with patch("sfmon.log_parser.query_records_all", side_effect=RuntimeError("unexpected")):
             result = parse_logs(self._make_sf(), "SELECT Id FROM EventLogFile")
         assert result is None

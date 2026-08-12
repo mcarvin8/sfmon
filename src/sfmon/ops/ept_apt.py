@@ -42,10 +42,10 @@ import io
 
 import requests
 
-from logger import logger
-from constants import REQUESTS_TIMEOUT_SECONDS
+from ..logger import logger
+from ..constants import REQUESTS_TIMEOUT_SECONDS
 from .gauges import ept_metric, apt_metric
-from query import query_records_all
+from ..query import query_records_all
 
 
 def get_salesforce_ept_and_apt(sf):

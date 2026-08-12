@@ -12,14 +12,6 @@ including:
 Main monitoring functions are re-exported for clean imports.
 """
 
-import sys
-import os
-
-# Add parent directory to path for importing shared modules
-_parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if _parent_dir not in sys.path:
-    sys.path.insert(0, _parent_dir)  # pragma: no cover
-
 # Re-export main functions for clean imports
 from .apex_flex_queue import monitor_apex_flex_queue
 from .apex_jobs import (

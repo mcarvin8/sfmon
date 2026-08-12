@@ -18,8 +18,8 @@ Functions:
 import os
 
 from .utils import get_user_name
-from logger import logger
-from log_parser import parse_logs
+from ..logger import logger
+from ..log_parser import parse_logs
 from .gauges import hourly_large_query_metric
 
 # Number of rows that constitutes a "large query"

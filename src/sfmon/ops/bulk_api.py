@@ -30,7 +30,7 @@ Use Cases:
 
 from collections import defaultdict
 
-from logger import logger
+from ..logger import logger
 from .gauges import (
     daily_batch_count_metric,
     daily_bulk_api2_batch_count_metric,
@@ -41,8 +41,8 @@ from .gauges import (
     hourly_bulk_api2_entity_type_count_metric,
     hourly_entity_type_count_metric,
 )
-from log_parser import fetch_event_log_csv_reader
-from query import query_records_all
+from ..log_parser import fetch_event_log_csv_reader
+from ..query import query_records_all
 
 # BulkAPI (1.0) CSV uses ROWS_PROCESSED / NUMBER_FAILURES. BulkAPI2 column names vary by
 # release and operation (ingest vs query); some orgs use names that match the Bulk 2.0

@@ -16,14 +16,6 @@ Optional grouped functions (for convenience):
 - run_daily_audit: Runs all daily audit checks together
 """
 
-import sys
-import os
-
-# Add parent directory to path for importing shared modules
-_parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if _parent_dir not in sys.path:
-    sys.path.insert(0, _parent_dir)  # pragma: no cover
-
 # Re-export main functions for clean imports
 from .audit import run_hourly_audit, run_daily_audit
 from .large_queries import hourly_observe_user_querying_large_records

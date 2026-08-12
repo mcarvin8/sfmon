@@ -21,17 +21,17 @@ def _mock_versions_response():
 
 class TestGetSalesforceConnectionUrl:
     def test_raises_on_empty_url(self):
-        import connection_sf
+        from sfmon import connection_sf
         with pytest.raises(ValueError, match="SFDX authentication URL"):
             connection_sf.get_salesforce_connection_url("")
 
     def test_raises_on_none_url(self):
-        import connection_sf
+        from sfmon import connection_sf
         with pytest.raises(ValueError):
             connection_sf.get_salesforce_connection_url(None)
 
     def test_raises_on_malformed_url(self):
-        import connection_sf
+        from sfmon import connection_sf
         with pytest.raises(ValueError, match="Invalid SFDX auth URL format"):
             connection_sf.get_salesforce_connection_url("not-a-valid-sfdx-url")
 
@@ -46,9 +46,9 @@ class TestGetSalesforceConnectionUrl:
 
         with patch("requests.post", return_value=mock_token_response) as mock_post, \
              patch("requests.get", return_value=_mock_versions_response()), \
-             patch("connection_sf.Salesforce", return_value=mock_sf_instance) as mock_sf_cls:
+             patch("sfmon.connection_sf.Salesforce", return_value=mock_sf_instance) as mock_sf_cls:
 
-            import connection_sf
+            from sfmon import connection_sf
             result = connection_sf.get_salesforce_connection_url(
                 "force://clientid:clientsecret:refreshtoken@https://login.salesforce.com"
             )
@@ -80,9 +80,9 @@ class TestGetSalesforceConnectionUrl:
 
         with patch("requests.post", return_value=mock_token_response) as mock_post, \
              patch("requests.get", return_value=_mock_versions_response()), \
-             patch("connection_sf.Salesforce", return_value=MagicMock()):
+             patch("sfmon.connection_sf.Salesforce", return_value=MagicMock()):
 
-            import connection_sf
+            from sfmon import connection_sf
             connection_sf.get_salesforce_connection_url(
                 "force://PlatformCLI::refreshtoken@https://login.salesforce.com"
             )
@@ -100,10 +100,10 @@ class TestGetSalesforceConnectionUrl:
 
         with patch("requests.post", return_value=mock_token_response), \
              patch("requests.get", return_value=_mock_versions_response()), \
-             patch("connection_sf.Salesforce") as mock_sf_cls:
+             patch("sfmon.connection_sf.Salesforce") as mock_sf_cls:
 
             mock_sf_cls.return_value = MagicMock()
-            import connection_sf
+            from sfmon import connection_sf
             connection_sf.get_salesforce_connection_url(
                 "force://clientid:clientsecret:refreshtoken@https://test.salesforce.com"
             )
@@ -117,7 +117,7 @@ class TestGetSalesforceConnectionUrl:
         mock_response.text = "Auth failed"
 
         with patch("requests.post", return_value=mock_response):
-            import connection_sf
+            from sfmon import connection_sf
             with pytest.raises(requests.HTTPError):
                 connection_sf.get_salesforce_connection_url(
                     "force://clientid:clientsecret:badtoken@https://login.salesforce.com"
@@ -128,7 +128,7 @@ class TestGetSalesforceConnectionUrl:
         mock_response.json.return_value = {}
 
         with patch("requests.post", return_value=mock_response):
-            import connection_sf
+            from sfmon import connection_sf
             with pytest.raises(KeyError):
                 connection_sf.get_salesforce_connection_url(
                     "force://clientid:clientsecret:refreshtoken@https://login.salesforce.com"
@@ -137,7 +137,7 @@ class TestGetSalesforceConnectionUrl:
 
 class TestGetLatestApiVersion:
     def test_returns_highest_version(self):
-        import connection_sf
+        from sfmon import connection_sf
         with patch("requests.get", return_value=_mock_versions_response()):
             result = connection_sf._get_latest_api_version(
                 "https://myorg.my.salesforce.com", "token"
@@ -145,7 +145,7 @@ class TestGetLatestApiVersion:
         assert result == "60.0"
 
     def test_falls_back_on_request_exception(self):
-        import connection_sf
+        from sfmon import connection_sf
         with patch("requests.get", side_effect=requests.ConnectionError("network down")):
             result = connection_sf._get_latest_api_version(
                 "https://myorg.my.salesforce.com", "token"
@@ -153,7 +153,7 @@ class TestGetLatestApiVersion:
         assert result == connection_sf.DEFAULT_API_VERSION
 
     def test_falls_back_on_malformed_json(self):
-        import connection_sf
+        from sfmon import connection_sf
         mock_response = MagicMock()
         mock_response.raise_for_status.return_value = None
         mock_response.json.return_value = "not-a-list"
@@ -164,7 +164,7 @@ class TestGetLatestApiVersion:
         assert result == connection_sf.DEFAULT_API_VERSION
 
     def test_falls_back_on_missing_version_key(self):
-        import connection_sf
+        from sfmon import connection_sf
         mock_response = MagicMock()
         mock_response.raise_for_status.return_value = None
         mock_response.json.return_value = [{"label": "no version key here"}]

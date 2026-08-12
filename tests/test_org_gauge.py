@@ -7,7 +7,7 @@ import prometheus_client
 
 
 def make_gauge(name, documentation, labelnames=None):
-    from org_gauge import OrgAwareGauge
+    from sfmon.org_gauge import OrgAwareGauge
 
     if labelnames is not None:
         return OrgAwareGauge(name, documentation, labelnames)
@@ -122,7 +122,7 @@ class TestOrgAwareGaugeContextVar:
     without threading org through every collector call site."""
 
     def test_context_org_takes_priority_over_env(self):
-        from org_gauge import set_current_org
+        from sfmon.org_gauge import set_current_org
 
         gauge = make_gauge("g_ctx_1", "doc", ["foo"])
         with patch.dict(os.environ, {"ORG_NAME": "env-org"}):
@@ -132,7 +132,7 @@ class TestOrgAwareGaugeContextVar:
         assert dict(child._key)["org"] == "fleet-org"
 
     def test_sequential_org_contexts_do_not_bleed_into_each_other(self):
-        from org_gauge import set_current_org
+        from sfmon.org_gauge import set_current_org
 
         gauge = make_gauge("g_ctx_2", "doc", ["foo"])
         set_current_org("org-a")
@@ -146,7 +146,7 @@ class TestOrgAwareGaugeContextVar:
         assert dict(child_b._key)["org"] == "org-b"
 
     def test_falls_back_to_env_when_context_unset(self):
-        from org_gauge import _current_org
+        from sfmon.org_gauge import _current_org
 
         gauge = make_gauge("g_ctx_3", "doc", ["foo"])
         token = _current_org.set(None)
@@ -161,7 +161,7 @@ class TestOrgAwareGaugeContextVar:
 
 class TestBuildMetricReaders:
     def test_only_prometheus_reader_when_otlp_unset(self):
-        from org_gauge import _build_metric_readers
+        from sfmon.org_gauge import _build_metric_readers
         from opentelemetry.exporter.prometheus import PrometheusMetricReader
 
         env = {k: v for k, v in os.environ.items() if k != "OTEL_EXPORTER_OTLP_ENDPOINT"}
@@ -171,7 +171,7 @@ class TestBuildMetricReaders:
         assert isinstance(readers[0], PrometheusMetricReader)
 
     def test_adds_otlp_reader_when_endpoint_set(self):
-        from org_gauge import _build_metric_readers
+        from sfmon.org_gauge import _build_metric_readers
 
         with patch.dict(os.environ, {"OTEL_EXPORTER_OTLP_ENDPOINT": "http://collector:4318"}), \
              patch("opentelemetry.exporter.otlp.proto.http.metric_exporter.OTLPMetricExporter") as mock_exporter:

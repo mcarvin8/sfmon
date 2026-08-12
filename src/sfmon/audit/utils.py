@@ -14,8 +14,8 @@ Functions:
 """
 
 import os
-from logger import logger
-from query import query_records_all
+from ..logger import logger
+from ..query import query_records_all
 
 
 _UNKNOWN_USER = "Unknown User"

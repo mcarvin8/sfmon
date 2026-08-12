@@ -1,7 +1,8 @@
 FROM python:3.11-slim
 
-# Set working directory to script
-WORKDIR /app/sfmon
+# Working directory is the parent of the sfmon/ package so it can be run as
+# `python3 -m sfmon.salesforce_monitoring` (package-relative imports require this).
+WORKDIR /app
 COPY src/sfmon/ /app/sfmon/
 
 # Copy documentation and license
@@ -35,5 +36,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD python3 -c "import urllib.request, os; urllib.request.urlopen(f'http://localhost:{os.environ.get(\"METRICS_PORT\", 9001)}/metrics', timeout=2)" || exit 1
 
 # Run the application
-ENTRYPOINT ["python3", "salesforce_monitoring.py"]
+ENTRYPOINT ["python3", "-m", "sfmon.salesforce_monitoring"]
 EXPOSE 9001

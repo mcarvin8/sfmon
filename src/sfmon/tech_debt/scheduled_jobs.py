@@ -10,9 +10,9 @@ Data Sources:
     - CronTrigger object (with CronJobDetail relationship)
 """
 
-from logger import logger
+from ..logger import logger
 from .gauges import scheduled_apex_jobs_gauge
-from query import query_records_all
+from ..query import query_records_all
 
 
 def scheduled_apex_jobs_monitoring(sf):

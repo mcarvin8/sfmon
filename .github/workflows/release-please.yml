@@ -10,12 +10,17 @@ name: Release Please
 #    - A semantic version tag (e.g., v1.2.3)
 #    - A GitHub release with changelog
 # 4. publish-docker runs only when a release is created and builds/pushes to Docker Hub
+# 5. publish-pypi runs only when a release is created and builds/pushes the sfmon package to PyPI
 #
 # Commit message format (Conventional Commits):
 # - feat: New feature (minor version bump)
 # - fix: Bug fix (patch version bump)
 # - feat!: Breaking change (major version bump)
 # - docs, perf, refactor, test, build, ci, chore: No version bump by default
+#
+# publish-pypi uses PyPI Trusted Publishing (OIDC) instead of a stored API token.
+# One-time setup on pypi.org: project Settings -> Publishing -> add a trusted
+# publisher for this repo, workflow file "release-please.yml", job "publish-pypi".
 
 on:
   push:
@@ -92,3 +97,39 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  publish-pypi:
+    runs-on: ubuntu-latest
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout repository at release tag
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.release-please.outputs.tag_name }}
+
+      - name: Verify tag is on main branch
+        run: |
+          git fetch origin main
+          if ! git merge-base --is-ancestor "${{ needs.release-please.outputs.tag_name }}" origin/main; then
+            echo "Tag is not on main branch, skipping"
+            exit 1
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Build sdist and wheel
+        run: |
+          pip install build
+          python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

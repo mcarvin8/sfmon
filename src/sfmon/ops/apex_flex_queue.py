@@ -9,9 +9,9 @@ Functions:
     - monitor_apex_flex_queue: Queries and reports jobs in holding status
 """
 
-from logger import logger
+from ..logger import logger
 from .gauges import apex_flex_queue
-from query import query_records_all
+from ..query import query_records_all
 
 
 def monitor_apex_flex_queue(sf):

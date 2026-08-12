@@ -20,7 +20,7 @@ Data Sources:
 import os
 import re
 
-from logger import logger
+from ..logger import logger
 from .gauges import (
     deprecated_apex_class_gauge,
     deprecated_apex_trigger_gauge,
@@ -29,7 +29,7 @@ from .gauges import (
     apex_class_length_without_comments_gauge,
     apex_trigger_length_without_comments_gauge,
 )
-from query import query_records_all, tooling_query_records_all
+from ..query import query_records_all, tooling_query_records_all
 
 # API versions at or below this threshold are considered deprecated
 DEPRECATED_API_VERSION = int(os.getenv("DEPRECATED_API_VERSION", 50))

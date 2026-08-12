@@ -1,6 +1,6 @@
 """Prometheus metric definitions for tech debt monitoring."""
 
-from org_gauge import OrgAwareGauge
+from ..org_gauge import OrgAwareGauge
 
 # Permission Sets
 unused_permissionsets = OrgAwareGauge(

@@ -25,8 +25,8 @@ Environment Variables:
 import os
 import requests
 
-from logger import logger
-from constants import REQUESTS_TIMEOUT_SECONDS
+from ..logger import logger
+from ..constants import REQUESTS_TIMEOUT_SECONDS
 from .gauges import (
     api_usage_percentage_gauge,
     incident_gauge,
@@ -42,7 +42,7 @@ from .gauges import (
     maintenance_gauge,
 )
 from .limits import salesforce_limits_descriptions
-from query import query_records_all
+from ..query import query_records_all
 
 # Salesforce Trust Status API base URL
 SALESFORCE_STATUS_API_URL = os.getenv(

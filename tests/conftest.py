@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 @pytest.fixture(autouse=True)
 def reset_config_cache():
     """Reset config module cache between tests."""
-    import config
+    from sfmon import config
     config._cached_config = None
     config._config_file_has_schedules = None
     yield
@@ -19,7 +19,7 @@ def reset_config_cache():
 def reset_current_org():
     """Reset the org_gauge contextvar between tests so set_current_org() calls
     in one test don't leak into the next (same interpreter thread in pytest)."""
-    import org_gauge
+    from sfmon import org_gauge
     token = org_gauge._current_org.set(None)
     yield
     org_gauge._current_org.reset(token)

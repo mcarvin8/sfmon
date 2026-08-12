@@ -64,7 +64,7 @@ Preset Structure (alternative to a full schedules block):
 import json
 import os
 import re
-from logger import logger
+from .logger import logger
 
 # Default config file path
 DEFAULT_CONFIG_PATH = "/app/sfmon/config.json"

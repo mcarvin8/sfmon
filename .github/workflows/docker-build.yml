@@ -29,4 +29,4 @@ jobs:
           tags: sfmon:ci-test
 
       - name: Verify image starts and dependencies resolve
-        run: docker run --rm --entrypoint python3 sfmon:ci-test -c "import salesforce_monitoring; print('Import OK')"
+        run: docker run --rm --entrypoint python3 sfmon:ci-test -c "import sfmon.salesforce_monitoring; print('Import OK')"

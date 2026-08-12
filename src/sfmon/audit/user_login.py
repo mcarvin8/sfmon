@@ -40,15 +40,15 @@ import os
 import requests
 import pandas as pd
 
-from logger import logger
-from constants import REQUESTS_TIMEOUT_SECONDS
+from ..logger import logger
+from ..constants import REQUESTS_TIMEOUT_SECONDS
 from .gauges import (
     login_failure_gauge,
     login_success_gauge,
     geolocation_gauge,
     unique_login_attempts_gauge,
 )
-from query import query_records_all
+from ..query import query_records_all
 
 # Geolocation configuration
 GEOLOCATION_CHUNK_SIZE = int(os.getenv("GEOLOCATION_CHUNK_SIZE", 100))
