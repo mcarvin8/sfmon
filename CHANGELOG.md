@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.14.0](https://github.com/mcarvin8/sfmon/compare/v3.13.0...v3.14.0) (2026-08-12)
+
+
+### Features
+
+* add --once/--job one-shot CLI mode ([#62](https://github.com/mcarvin8/sfmon/issues/62)) ([82bc86e](https://github.com/mcarvin8/sfmon/commit/82bc86e18d1a563679f9fa7e99b5d208adf03c66))
+* add AWS Secrets Manager backend for SALESFORCE_AUTH_URL ([#60](https://github.com/mcarvin8/sfmon/issues/60)) ([bb18b62](https://github.com/mcarvin8/sfmon/commit/bb18b6226f0ef30ef5603dffe39205e6cbf0254a))
+
 ## [3.13.0](https://github.com/mcarvin8/sfmon/compare/v3.12.0...v3.13.0) (2026-08-12)
 
 
