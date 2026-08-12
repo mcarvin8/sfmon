@@ -59,14 +59,24 @@ Configuration File:
     A JSON configuration file is used to configure schedules, disable functions,
     and set integration user names. See README for configuration file format and examples.
 
+CLI Flags (one-shot / CI-cron mode, similar to sfdx-hardis's org monitoring):
+    --once            Run enabled jobs once, print Prometheus exposition text to
+                       stdout, and exit — instead of starting the always-on daemon.
+                       Exit code 0 if every run job succeeded, 1 if any failed.
+    --job JOB_ID       With --once, run only this job by id (forces it to run
+                       regardless of config/opt-in state). Requires --once.
+
 Functions:
     - schedule_tasks: Configures all APScheduler jobs with optimized timing
-    - main: Entry point that initializes connection and starts scheduler
+    - run_once: Runs enabled jobs (or one job) a single time and exits (--once)
+    - main: Entry point; parses CLI args, then dispatches to run_once() or the daemon
 """
 
+import argparse
 import os
+import sys
 
-from prometheus_client import start_http_server
+from prometheus_client import generate_latest, start_http_server
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.executors.pool import ThreadPoolExecutor
@@ -139,6 +149,263 @@ from .tech_debt import (
 # re-authentication to update connections in place.
 sf_connections = {}
 
+# Always-on jobs: run regardless of preset/opt-in mode; can only be disabled
+# explicitly. Shared by schedule_tasks() (the always-on daemon) and run_once()
+# (the --once CLI path) so the job list only lives in one place.
+ALWAYS_ON_JOBS = [
+    (
+        "monitor_salesforce_limits",
+        {"minute": "*/5"},
+        monitor_salesforce_limits,
+        "Monitor Salesforce Limits",
+    ),
+    (
+        "get_salesforce_instance",
+        {"minute": "*/5"},
+        get_salesforce_instance,
+        "Get Salesforce Instance",
+    ),
+    (
+        "get_salesforce_licenses",
+        {"minute": "15"},
+        get_salesforce_licenses,
+        "Get Salesforce Licenses",
+    ),
+]
+
+# Opt-in-by-default jobs: run on their default schedule unless config.json
+# switches to opt-in mode (only listed jobs run) or explicitly disables one.
+SCHEDULED_JOBS = [
+    (
+        "monitor_apex_flex_queue",
+        {"minute": "*/5"},
+        monitor_apex_flex_queue,
+        "Monitor Apex Flex Queue",
+    ),
+    (
+        "daily_analyse_bulk_api",
+        {"hour": "7", "minute": "30"},
+        daily_analyse_bulk_api,
+        "Daily Analyse Bulk API",
+    ),
+    (
+        "geolocation",
+        {"hour": "8", "minute": "0"},
+        geolocation,
+        "Geolocation Analysis",
+    ),
+    (
+        "expose_suspicious_records",
+        {"hour": "8", "minute": "15"},
+        expose_suspicious_records,
+        "Expose Suspicious Records",
+    ),
+    (
+        "monitor_org_wide_sharing_settings",
+        {"hour": "8", "minute": "30"},
+        monitor_org_wide_sharing_settings,
+        "Monitor Org Wide Sharing Settings",
+    ),
+    (
+        "unassigned_permission_sets",
+        {"hour": "2", "minute": "0"},
+        unassigned_permission_sets,
+        "Unassigned Permission Sets",
+    ),
+    (
+        "perm_sets_limited_users",
+        {"hour": "2", "minute": "15"},
+        perm_sets_limited_users,
+        "Permission Sets Limited Users",
+    ),
+    (
+        "monitor_minimal_perm_sets",
+        None,
+        monitor_minimal_perm_sets,
+        "Monitor Minimal Permission Sets",
+    ),
+    (
+        "profile_assignment_under5",
+        {"hour": "2", "minute": "30"},
+        profile_assignment_under5,
+        "Profile Assignment Under 5",
+    ),
+    (
+        "profile_no_active_users",
+        {"hour": "2", "minute": "45"},
+        profile_no_active_users,
+        "Profile No Active Users",
+    ),
+    (
+        "apex_classes_api_version",
+        {"hour": "3", "minute": "0"},
+        apex_classes_api_version,
+        "Apex Classes API Version",
+    ),
+    (
+        "apex_used_limits_monitoring",
+        {"hour": "3", "minute": "5"},
+        apex_used_limits_monitoring,
+        "Apex Used Limits Monitoring",
+    ),
+    (
+        "monitor_pmd_code_smells",
+        None,
+        monitor_pmd_code_smells,
+        "Monitor PMD Code Smells",
+    ),
+    (
+        "apex_triggers_api_version",
+        {"hour": "3", "minute": "15"},
+        apex_triggers_api_version,
+        "Apex Triggers API Version",
+    ),
+    (
+        "security_health_check",
+        {"hour": "3", "minute": "30"},
+        security_health_check,
+        "Security Health Check",
+    ),
+    (
+        "salesforce_health_risks",
+        {"hour": "3", "minute": "45"},
+        salesforce_health_risks,
+        "Salesforce Health Risks",
+    ),
+    (
+        "workflow_rules_monitoring",
+        {"hour": "4", "minute": "0"},
+        workflow_rules_monitoring,
+        "Workflow Rules Monitoring",
+    ),
+    (
+        "dormant_salesforce_users",
+        {"hour": "4", "minute": "15"},
+        dormant_salesforce_users,
+        "Dormant Salesforce Users",
+    ),
+    (
+        "dormant_portal_users",
+        {"hour": "4", "minute": "30"},
+        dormant_portal_users,
+        "Dormant Portal Users",
+    ),
+    (
+        "total_queues_per_object",
+        {"hour": "4", "minute": "45"},
+        total_queues_per_object,
+        "Total Queues Per Object",
+    ),
+    (
+        "queues_with_no_members",
+        {"hour": "5", "minute": "0"},
+        queues_with_no_members,
+        "Queues With No Members",
+    ),
+    (
+        "queues_with_zero_open_cases",
+        {"hour": "5", "minute": "15"},
+        queues_with_zero_open_cases,
+        "Queues With Zero Open Cases",
+    ),
+    (
+        "public_groups_with_no_members",
+        {"hour": "5", "minute": "30"},
+        public_groups_with_no_members,
+        "Public Groups With No Members",
+    ),
+    (
+        "dashboards_with_inactive_users",
+        {"hour": "5", "minute": "45"},
+        dashboards_with_inactive_users,
+        "Dashboards With Inactive Users",
+    ),
+    (
+        "scheduled_apex_jobs_monitoring",
+        {"hour": "5", "minute": "55"},
+        scheduled_apex_jobs_monitoring,
+        "Scheduled Apex Jobs Monitoring",
+    ),
+    (
+        "get_salesforce_ept_and_apt",
+        {"hour": "6", "minute": "0"},
+        get_salesforce_ept_and_apt,
+        "Get Salesforce EPT and APT",
+    ),
+    (
+        "monitor_login_events",
+        {"hour": "6", "minute": "15"},
+        monitor_login_events,
+        "Monitor Login Events",
+    ),
+    (
+        "async_apex_job_status",
+        {"hour": "6", "minute": "30"},
+        async_apex_job_status,
+        "Async Apex Job Status",
+    ),
+    (
+        "monitor_apex_execution_time",
+        {"hour": "6", "minute": "45"},
+        monitor_apex_execution_time,
+        "Monitor Apex Execution Time",
+    ),
+    (
+        "async_apex_execution_summary",
+        {"hour": "7", "minute": "0"},
+        async_apex_execution_summary,
+        "Async Apex Execution Summary",
+    ),
+    (
+        "concurrent_apex_errors",
+        {"hour": "7", "minute": "15"},
+        concurrent_apex_errors,
+        "Concurrent Apex Errors",
+    ),
+    (
+        "expose_apex_exception_metrics",
+        {"hour": "7", "minute": "25"},
+        expose_apex_exception_metrics,
+        "Expose Apex Exception Metrics",
+    ),
+    (
+        "expose_concurrent_long_running_apex_errors",
+        {"hour": "7", "minute": "35"},
+        expose_concurrent_long_running_apex_errors,
+        "Expose Concurrent Long Running Apex Errors",
+    ),
+    (
+        "hourly_analyse_bulk_api",
+        {"minute": "5"},
+        hourly_analyse_bulk_api,
+        "Hourly Analyse Bulk API",
+    ),
+    (
+        "hourly_observe_user_querying_large_records",
+        {"minute": "25"},
+        hourly_observe_user_querying_large_records,
+        "Hourly Observe User Querying Large Records",
+    ),
+    (
+        "monitor_forbidden_profile_assignments",
+        {"minute": "35"},
+        monitor_forbidden_profile_assignments,
+        "Monitor Forbidden Profile Assignments",
+    ),
+    (
+        "hourly_report_export_records",
+        {"minute": "45"},
+        hourly_report_export_records,
+        "Hourly Report Export Records",
+    ),
+    (
+        "get_deployment_status",
+        {"minute": "55"},
+        get_deployment_status,
+        "Get Deployment Status",
+    ),
+]
+
 
 def reauthenticate_connections():
     """
@@ -178,14 +445,19 @@ def get_always_on_config(job_id, default_schedule, org_name=None):
 
 
 def _run_job(org_name, sf, func, job_name):
-    """Run a single org's job, isolating failures so one org never blocks others."""
+    """Run a single org's job, isolating failures so one org never blocks others.
+
+    Returns True on success, False if the job raised (already logged).
+    """
     set_current_org(org_name)
     try:
         func(sf)
+        return True
     except Exception as e:
         logger.error(
             "Job '%s' failed for org '%s': %s", job_name, org_name, e
         )
+        return False
 
 
 def _add_job_with_schedule(scheduler, org_name, sf, job_id, schedule, func, job_name):
@@ -265,29 +537,10 @@ def schedule_tasks(scheduler):
         - monitor_minimal_perm_sets — minimal-perm-sets.json
         - monitor_pmd_code_smells — pmd-report.xml and PMD_RULESET_PATH
     """
-    # Always-on jobs: run regardless of preset/opt-in mode; can only be disabled explicitly
-    always_on_jobs = [
-        (
-            "monitor_salesforce_limits",
-            {"minute": "*/5"},
-            monitor_salesforce_limits,
-            "Monitor Salesforce Limits",
-        ),
-        (
-            "get_salesforce_instance",
-            {"minute": "*/5"},
-            get_salesforce_instance,
-            "Get Salesforce Instance",
-        ),
-        (
-            "get_salesforce_licenses",
-            {"minute": "15"},
-            get_salesforce_licenses,
-            "Get Salesforce Licenses",
-        ),
-    ]
+    # Job lists live at module level (ALWAYS_ON_JOBS / SCHEDULED_JOBS) so
+    # run_once() (the --once CLI path) can share them without duplication.
     for org_name, sf in sf_connections.items():
-        for job_id, default_schedule, func, job_name in always_on_jobs:
+        for job_id, default_schedule, func, job_name in ALWAYS_ON_JOBS:
             schedule = get_always_on_config(job_id, default_schedule, org_name=org_name)
             if schedule:
                 _run_job(org_name, sf, func, job_name)
@@ -295,239 +548,9 @@ def schedule_tasks(scheduler):
                     scheduler, org_name, sf, job_id, schedule, func, job_name
                 )
 
-    scheduled_jobs = [
-        (
-            "monitor_apex_flex_queue",
-            {"minute": "*/5"},
-            monitor_apex_flex_queue,
-            "Monitor Apex Flex Queue",
-        ),
-        (
-            "daily_analyse_bulk_api",
-            {"hour": "7", "minute": "30"},
-            daily_analyse_bulk_api,
-            "Daily Analyse Bulk API",
-        ),
-        (
-            "geolocation",
-            {"hour": "8", "minute": "0"},
-            geolocation,
-            "Geolocation Analysis",
-        ),
-        (
-            "expose_suspicious_records",
-            {"hour": "8", "minute": "15"},
-            expose_suspicious_records,
-            "Expose Suspicious Records",
-        ),
-        (
-            "monitor_org_wide_sharing_settings",
-            {"hour": "8", "minute": "30"},
-            monitor_org_wide_sharing_settings,
-            "Monitor Org Wide Sharing Settings",
-        ),
-        (
-            "unassigned_permission_sets",
-            {"hour": "2", "minute": "0"},
-            unassigned_permission_sets,
-            "Unassigned Permission Sets",
-        ),
-        (
-            "perm_sets_limited_users",
-            {"hour": "2", "minute": "15"},
-            perm_sets_limited_users,
-            "Permission Sets Limited Users",
-        ),
-        (
-            "monitor_minimal_perm_sets",
-            None,
-            monitor_minimal_perm_sets,
-            "Monitor Minimal Permission Sets",
-        ),
-        (
-            "profile_assignment_under5",
-            {"hour": "2", "minute": "30"},
-            profile_assignment_under5,
-            "Profile Assignment Under 5",
-        ),
-        (
-            "profile_no_active_users",
-            {"hour": "2", "minute": "45"},
-            profile_no_active_users,
-            "Profile No Active Users",
-        ),
-        (
-            "apex_classes_api_version",
-            {"hour": "3", "minute": "0"},
-            apex_classes_api_version,
-            "Apex Classes API Version",
-        ),
-        (
-            "apex_used_limits_monitoring",
-            {"hour": "3", "minute": "5"},
-            apex_used_limits_monitoring,
-            "Apex Used Limits Monitoring",
-        ),
-        (
-            "monitor_pmd_code_smells",
-            None,
-            monitor_pmd_code_smells,
-            "Monitor PMD Code Smells",
-        ),
-        (
-            "apex_triggers_api_version",
-            {"hour": "3", "minute": "15"},
-            apex_triggers_api_version,
-            "Apex Triggers API Version",
-        ),
-        (
-            "security_health_check",
-            {"hour": "3", "minute": "30"},
-            security_health_check,
-            "Security Health Check",
-        ),
-        (
-            "salesforce_health_risks",
-            {"hour": "3", "minute": "45"},
-            salesforce_health_risks,
-            "Salesforce Health Risks",
-        ),
-        (
-            "workflow_rules_monitoring",
-            {"hour": "4", "minute": "0"},
-            workflow_rules_monitoring,
-            "Workflow Rules Monitoring",
-        ),
-        (
-            "dormant_salesforce_users",
-            {"hour": "4", "minute": "15"},
-            dormant_salesforce_users,
-            "Dormant Salesforce Users",
-        ),
-        (
-            "dormant_portal_users",
-            {"hour": "4", "minute": "30"},
-            dormant_portal_users,
-            "Dormant Portal Users",
-        ),
-        (
-            "total_queues_per_object",
-            {"hour": "4", "minute": "45"},
-            total_queues_per_object,
-            "Total Queues Per Object",
-        ),
-        (
-            "queues_with_no_members",
-            {"hour": "5", "minute": "0"},
-            queues_with_no_members,
-            "Queues With No Members",
-        ),
-        (
-            "queues_with_zero_open_cases",
-            {"hour": "5", "minute": "15"},
-            queues_with_zero_open_cases,
-            "Queues With Zero Open Cases",
-        ),
-        (
-            "public_groups_with_no_members",
-            {"hour": "5", "minute": "30"},
-            public_groups_with_no_members,
-            "Public Groups With No Members",
-        ),
-        (
-            "dashboards_with_inactive_users",
-            {"hour": "5", "minute": "45"},
-            dashboards_with_inactive_users,
-            "Dashboards With Inactive Users",
-        ),
-        (
-            "scheduled_apex_jobs_monitoring",
-            {"hour": "5", "minute": "55"},
-            scheduled_apex_jobs_monitoring,
-            "Scheduled Apex Jobs Monitoring",
-        ),
-        (
-            "get_salesforce_ept_and_apt",
-            {"hour": "6", "minute": "0"},
-            get_salesforce_ept_and_apt,
-            "Get Salesforce EPT and APT",
-        ),
-        (
-            "monitor_login_events",
-            {"hour": "6", "minute": "15"},
-            monitor_login_events,
-            "Monitor Login Events",
-        ),
-        (
-            "async_apex_job_status",
-            {"hour": "6", "minute": "30"},
-            async_apex_job_status,
-            "Async Apex Job Status",
-        ),
-        (
-            "monitor_apex_execution_time",
-            {"hour": "6", "minute": "45"},
-            monitor_apex_execution_time,
-            "Monitor Apex Execution Time",
-        ),
-        (
-            "async_apex_execution_summary",
-            {"hour": "7", "minute": "0"},
-            async_apex_execution_summary,
-            "Async Apex Execution Summary",
-        ),
-        (
-            "concurrent_apex_errors",
-            {"hour": "7", "minute": "15"},
-            concurrent_apex_errors,
-            "Concurrent Apex Errors",
-        ),
-        (
-            "expose_apex_exception_metrics",
-            {"hour": "7", "minute": "25"},
-            expose_apex_exception_metrics,
-            "Expose Apex Exception Metrics",
-        ),
-        (
-            "expose_concurrent_long_running_apex_errors",
-            {"hour": "7", "minute": "35"},
-            expose_concurrent_long_running_apex_errors,
-            "Expose Concurrent Long Running Apex Errors",
-        ),
-        (
-            "hourly_analyse_bulk_api",
-            {"minute": "5"},
-            hourly_analyse_bulk_api,
-            "Hourly Analyse Bulk API",
-        ),
-        (
-            "hourly_observe_user_querying_large_records",
-            {"minute": "25"},
-            hourly_observe_user_querying_large_records,
-            "Hourly Observe User Querying Large Records",
-        ),
-        (
-            "monitor_forbidden_profile_assignments",
-            {"minute": "35"},
-            monitor_forbidden_profile_assignments,
-            "Monitor Forbidden Profile Assignments",
-        ),
-        (
-            "hourly_report_export_records",
-            {"minute": "45"},
-            hourly_report_export_records,
-            "Hourly Report Export Records",
-        ),
-        (
-            "get_deployment_status",
-            {"minute": "55"},
-            get_deployment_status,
-            "Get Deployment Status",
-        ),
-    ]
     logger.info("Executing enabled tasks at startup (respecting config)...")
     for org_name, sf in sf_connections.items():
-        for job_id, default_schedule, func, job_name in scheduled_jobs:
+        for job_id, default_schedule, func, job_name in SCHEDULED_JOBS:
             schedule = get_schedule_config(job_id, default_schedule, org_name=org_name)
             if schedule:
                 _run_job(org_name, sf, func, job_name)  # initial run only for jobs enabled by config
@@ -537,11 +560,101 @@ def schedule_tasks(scheduler):
     logger.info("Initial execution completed, all jobs scheduled with APScheduler")
 
 
+def run_once(job_filter=None):
+    """Run every enabled job once (or a single job by id if job_filter is
+    given), print the resulting Prometheus exposition text to stdout, and
+    return an exit code.
+
+    This is the --once / CI-cron path (see module docstring), not the
+    always-on daemon: it skips the Prometheus HTTP server and APScheduler
+    entirely, and exits instead of blocking forever. A job_filter forces
+    that one job to run regardless of its config/opt-in state — with no
+    filter, only jobs enabled per the current config (same rules as the
+    daemon's startup run) are executed.
+
+    Returns:
+        0 if every run job succeeded, 1 if any job (or the initial org
+        connection step) failed, 2 if job_filter names an unknown job id.
+    """
+    all_jobs = ALWAYS_ON_JOBS + SCHEDULED_JOBS
+    always_on_ids = {job_id for job_id, *_ in ALWAYS_ON_JOBS}
+    known_ids = {job_id for job_id, *_ in all_jobs}
+
+    if job_filter and job_filter not in known_ids:
+        logger.error(
+            "Unknown job '%s'. Known jobs: %s", job_filter, ", ".join(sorted(known_ids))
+        )
+        return 2
+
+    connections = orgs.build_connections()
+    if not connections:
+        logger.error(
+            "No Salesforce org connections could be established. Check "
+            "SALESFORCE_AUTH_URL (or SALESFORCE_AUTH_URL_<ORG> for fleet mode)."
+        )
+        return 1
+
+    had_failure = False
+    for org_name, sf in connections.items():
+        for job_id, default_schedule, func, job_name in all_jobs:
+            if job_filter:
+                if job_id != job_filter:
+                    continue
+                # Explicit --job forces a run regardless of opt-in/disabled config.
+            else:
+                get_config = (
+                    get_always_on_config if job_id in always_on_ids else get_schedule_config
+                )
+                if not get_config(job_id, default_schedule, org_name=org_name):
+                    continue
+            if not _run_job(org_name, sf, func, job_name):
+                had_failure = True
+
+    sys.stdout.write(generate_latest().decode("utf-8"))
+    return 1 if had_failure else 0
+
+
+def _parse_args(argv=None):
+    parser = argparse.ArgumentParser(
+        prog="sfmon",
+        description="Monitor a Salesforce org and expose Prometheus metrics.",
+    )
+    parser.add_argument(
+        "--once",
+        action="store_true",
+        help=(
+            "Run enabled jobs once and exit instead of starting the always-on "
+            "daemon. Prints Prometheus exposition text to stdout. For "
+            "CI/cron-triggered checks (similar to sfdx-hardis's org monitoring)."
+        ),
+    )
+    parser.add_argument(
+        "--job",
+        metavar="JOB_ID",
+        default=None,
+        help=(
+            "With --once, run only this job by id, regardless of its config/"
+            "opt-in state. Requires --once."
+        ),
+    )
+    return parser.parse_args(argv)
+
+
 def main():
     """
-    Main function. Runs tasks using APScheduler with cron syntax for precise timing.
+    Main function. Parses CLI args, then either runs once and exits
+    (--once) or starts the always-on APScheduler daemon (default).
     """
     global sf_connections
+    args = _parse_args()
+
+    if args.job and not args.once:
+        logger.error("--job requires --once")
+        sys.exit(2)
+
+    if args.once:
+        sys.exit(run_once(job_filter=args.job))
+
     # Start Prometheus metrics server
     metrics_port = int(os.getenv("METRICS_PORT", 9001))
     start_http_server(metrics_port)

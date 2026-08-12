@@ -31,7 +31,7 @@ There is no build step for running tests — this is pure Python, and pytest's `
 
 ### Entry point
 
-`src/sfmon/salesforce_monitoring.py` (`sfmon.salesforce_monitoring:main`) — initializes APScheduler, registers all jobs, starts the Prometheus HTTP server, and blocks forever. Invoked as `python -m sfmon.salesforce_monitoring` (Docker `ENTRYPOINT`) or via the `sfmon` console script (PyPI install).
+`src/sfmon/salesforce_monitoring.py` (`sfmon.salesforce_monitoring:main`) — initializes APScheduler, registers all jobs, starts the Prometheus HTTP server, and blocks forever. Invoked as `python -m sfmon.salesforce_monitoring` (Docker `ENTRYPOINT`) or via the `sfmon` console script (PyPI install). `main()` first parses CLI args: `--once` runs `run_once()` instead — every enabled job (or one job via `--job JOB_ID`) a single time, prints Prometheus exposition text to stdout, exits with 0/1/2 — for CI/cron-triggered checks instead of the daemon. `ALWAYS_ON_JOBS`/`SCHEDULED_JOBS` (module-level) are the single source of truth for the job list, shared by `schedule_tasks()` and `run_once()`.
 
 All internal imports are package-qualified (`from .logger import logger`, `from ..core.gauges import ...`) — `sfmon/` is a real installable package (`src/sfmon/__init__.py`), not a flat script directory. Docker still copies the package to `/app/sfmon/` and runs it with `WORKDIR /app`, so absolute in-container paths like `/app/sfmon/config.json` are unchanged.
 

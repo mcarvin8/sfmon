@@ -2,6 +2,8 @@
 
 Optional JSON file that controls **which jobs run**, **when they run**, and some **user lists** for compliance-style metrics.
 
+This file drives the always-on daemon's schedule. For a one-shot run instead — `sfmon --once` (every enabled job, once) or `sfmon --once --job JOB_ID` (one job by id, run in-CI style) — see the [README](../README.md#one-shot-mode--run-from-a-ci-cron-job-instead-of-a-daemon). Job ids are the same ones used under `schedules` below and listed in [Default schedules (built-in)](#default-schedules-built-in).
+
 ## Location
 
 | Where | Value |
