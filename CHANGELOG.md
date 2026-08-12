@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.13.0](https://github.com/mcarvin8/sfmon/compare/v3.12.0...v3.13.0) (2026-08-12)
+
+
+### Features
+
+* publish sfmon as a PyPI package alongside the Docker image ([#58](https://github.com/mcarvin8/sfmon/issues/58)) ([f3290a1](https://github.com/mcarvin8/sfmon/commit/f3290a19dd4b8f687b7d2372234a3cae5e2c2d25))
+
 ## [3.12.0](https://github.com/mcarvin8/sfmon/compare/v3.11.1...v3.12.0) (2026-08-12)
 
 
