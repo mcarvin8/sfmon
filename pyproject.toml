@@ -1,6 +1,56 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sfmon"
+dynamic = ["version"]
+description = "Monitor a Salesforce org and expose Prometheus metrics from a long-running Python service."
+readme = "README.md"
+license = { file = "LICENSE.md" }
+authors = [
+    { name = "Matt Carvin", email = "matthewjcarvin@gmail.com" },
+]
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: System :: Monitoring",
+]
+dependencies = [
+    "simple_salesforce",
+    "prometheus_client",
+    "requests",
+    "apscheduler",
+    "pandas",
+    "opentelemetry-sdk",
+    "opentelemetry-exporter-prometheus",
+    "opentelemetry-exporter-otlp-proto-http",
+    "opentelemetry-instrumentation-logging",
+]
+
+[project.urls]
+Homepage = "https://github.com/mcarvin8/sfmon"
+Documentation = "https://github.com/mcarvin8/sfmon/tree/main/docs"
+Issues = "https://github.com/mcarvin8/sfmon/issues"
+
+[project.scripts]
+sfmon = "sfmon.salesforce_monitoring:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+version = { file = ["version.txt"] }
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src/sfmon"]
+pythonpath = ["src"]
 
 [tool.coverage.run]
 source = ["src/sfmon"]

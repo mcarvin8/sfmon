@@ -1,6 +1,6 @@
 """Prometheus metric definitions for operations monitoring."""
 
-from org_gauge import OrgAwareGauge
+from ..org_gauge import OrgAwareGauge
 
 # Bulk API 1.0
 daily_batch_count_metric = OrgAwareGauge(

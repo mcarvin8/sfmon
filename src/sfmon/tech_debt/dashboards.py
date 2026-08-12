@@ -8,9 +8,9 @@ Data Sources:
     - Dashboard object with RunningUser relationship
 """
 
-from logger import logger
+from ..logger import logger
 from .gauges import dashboards_with_inactive_users_gauge
-from query import query_records_all
+from ..query import query_records_all
 
 
 def dashboards_with_inactive_users(sf):

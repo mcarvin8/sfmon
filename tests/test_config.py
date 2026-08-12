@@ -12,7 +12,7 @@ import pytest
 class TestLoadConfig:
     def test_no_file_returns_defaults(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "nonexistent.json"))
-        import config
+        from sfmon import config
         result = config.load_config(force_reload=True)
         assert result["schedules"] == {}
         assert result["integration_user_names"] is None
@@ -27,7 +27,7 @@ class TestLoadConfig:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         result = config.load_config(force_reload=True)
         assert result["schedules"] == {"monitor_salesforce_limits": "*/5"}
         assert result["integration_user_names"] == ["Bot1"]
@@ -37,7 +37,7 @@ class TestLoadConfig:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text("not valid json {{{")
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         result = config.load_config(force_reload=True)
         assert result["schedules"] == {}
 
@@ -46,7 +46,7 @@ class TestLoadConfig:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         result = config.load_config(force_reload=True)
         assert result["schedules"] == {}
 
@@ -55,7 +55,7 @@ class TestLoadConfig:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         first = config.load_config(force_reload=True)
         # Overwrite the file - cached value should still be returned
         cfg_file.write_text(json.dumps({"schedules": {"job_b": "*/20"}}))
@@ -70,7 +70,7 @@ class TestLoadConfig:
 class TestHasCustomSchedules:
     def test_no_file_returns_false(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         assert config.has_custom_schedules() is False
 
@@ -79,7 +79,7 @@ class TestHasCustomSchedules:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         assert config.has_custom_schedules() is True
 
@@ -91,7 +91,7 @@ class TestHasCustomSchedules:
 class TestParseCronSchedule:
     @pytest.fixture(autouse=True)
     def _import(self):
-        import config as c
+        from sfmon import config as c
         self.c = c
 
     def test_disabled_returns_none(self):
@@ -141,7 +141,7 @@ class TestParseCronSchedule:
 class TestGetScheduleFromConfig:
     def test_no_config_uses_default(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         default = {"minute": "*/5"}
         result = config.get_schedule_from_config("my_job", default)
@@ -149,7 +149,7 @@ class TestGetScheduleFromConfig:
 
     def test_no_config_opt_in_job_returns_none(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         result = config.get_schedule_from_config("pmd_job", None)
         assert result is None
@@ -159,7 +159,7 @@ class TestGetScheduleFromConfig:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         result = config.get_schedule_from_config("my_job", {"minute": "*/5"})
         assert result is None
@@ -169,7 +169,7 @@ class TestGetScheduleFromConfig:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         result = config.get_schedule_from_config("my_job", {"minute": "*/5"})
         assert result == {"minute": "*/15"}
@@ -179,7 +179,7 @@ class TestGetScheduleFromConfig:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         result = config.get_schedule_from_config("my_job", {"minute": "*/5"})
         assert result is None
@@ -192,7 +192,7 @@ class TestGetScheduleFromConfig:
 class TestGettersFromConfig:
     def test_get_integration_user_names_none_when_unset(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         assert config.get_integration_user_names() is None
 
@@ -201,13 +201,13 @@ class TestGettersFromConfig:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         assert config.get_integration_user_names() == ["Bot"]
 
     def test_get_exclude_users_empty_default(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         assert config.get_exclude_users() == []
 
@@ -216,7 +216,7 @@ class TestGettersFromConfig:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         assert config.get_exclude_users() == ["Admin", "Bot"]
 
@@ -227,7 +227,7 @@ class TestLoadConfigExceptions:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text('{"schedules": {}}')
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         from unittest.mock import patch as _patch
         with _patch("builtins.open", side_effect=PermissionError("no access")):
             result = config.load_config(force_reload=True)
@@ -236,7 +236,7 @@ class TestLoadConfigExceptions:
     def test_has_custom_schedules_triggers_load_when_cache_empty(self, tmp_path, monkeypatch):
         """has_custom_schedules() must call load_config() when cache is None."""
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
-        import config
+        from sfmon import config
         # Reset so _config_file_has_schedules is None
         config._config_file_has_schedules = None
         result = config.has_custom_schedules()
@@ -245,13 +245,13 @@ class TestLoadConfigExceptions:
 
 class TestParseCronScheduleUnparseable:
     def test_unparseable_string_returns_none(self):
-        import config
+        from sfmon import config
         # "@ special" doesn't match any parser
         result = config.parse_cron_schedule("@ special cron")
         assert result is None
 
     def test_json_with_decode_error_falls_through(self):
-        import config
+        from sfmon import config
         # Starts with { but invalid JSON → _parse_json_cron returns None → tries other parsers
         result = config.parse_cron_schedule('{"broken"')
         # Falls through to other parsers; none match either → returns None (with warning)
@@ -264,7 +264,7 @@ class TestPresets:
         path.write_text(json.dumps(content))
 
     def test_ops_preset_sets_opt_in_mode(self, tmp_path, monkeypatch):
-        import config
+        from sfmon import config
         cfg = tmp_path / "config.json"
         self._write_config(cfg, {"preset": "ops"})
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg))
@@ -274,7 +274,7 @@ class TestPresets:
         assert "daily_analyse_bulk_api" in result["schedules"]
 
     def test_audit_preset_contains_expected_jobs(self, tmp_path, monkeypatch):
-        import config
+        from sfmon import config
         cfg = tmp_path / "config.json"
         self._write_config(cfg, {"preset": "audit"})
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg))
@@ -284,7 +284,7 @@ class TestPresets:
         assert "monitor_org_wide_sharing_settings" in result["schedules"]
 
     def test_tech_debt_preset_contains_expected_jobs(self, tmp_path, monkeypatch):
-        import config
+        from sfmon import config
         cfg = tmp_path / "config.json"
         self._write_config(cfg, {"preset": "tech-debt"})
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg))
@@ -294,7 +294,7 @@ class TestPresets:
         assert "security_health_check" in result["schedules"]
 
     def test_preset_does_not_include_opt_in_only_jobs(self, tmp_path, monkeypatch):
-        import config
+        from sfmon import config
         for preset_name in ("ops", "audit", "tech-debt"):
             cfg = tmp_path / f"config_{preset_name}.json"
             self._write_config(cfg, {"preset": preset_name})
@@ -304,7 +304,7 @@ class TestPresets:
             assert "monitor_minimal_perm_sets" not in result["schedules"], preset_name
 
     def test_explicit_schedules_override_preset(self, tmp_path, monkeypatch):
-        import config
+        from sfmon import config
         cfg = tmp_path / "config.json"
         self._write_config(cfg, {
             "preset": "ops",
@@ -315,7 +315,7 @@ class TestPresets:
         assert result["schedules"]["monitor_salesforce_limits"] == "hour=1,minute=0"
 
     def test_explicit_schedules_add_to_preset(self, tmp_path, monkeypatch):
-        import config
+        from sfmon import config
         cfg = tmp_path / "config.json"
         self._write_config(cfg, {
             "preset": "tech-debt",
@@ -327,7 +327,7 @@ class TestPresets:
         assert "unassigned_permission_sets" in result["schedules"]
 
     def test_unknown_preset_falls_back_to_defaults(self, tmp_path, monkeypatch):
-        import config
+        from sfmon import config
         cfg = tmp_path / "config.json"
         self._write_config(cfg, {"preset": "nonexistent"})
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg))
@@ -336,7 +336,7 @@ class TestPresets:
         assert config.has_custom_schedules() is False
 
     def test_get_active_preset_returns_name(self, tmp_path, monkeypatch):
-        import config
+        from sfmon import config
         cfg = tmp_path / "config.json"
         self._write_config(cfg, {"preset": "audit"})
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg))
@@ -344,17 +344,17 @@ class TestPresets:
         assert config.get_active_preset() == "audit"
 
     def test_get_active_preset_returns_none_without_preset(self, tmp_path, monkeypatch):
-        import config
+        from sfmon import config
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
         config.load_config(force_reload=True)
         assert config.get_active_preset() is None
 
     def test_preset_names_exposed_in_presets_dict(self):
-        import config
+        from sfmon import config
         assert set(config.PRESETS.keys()) == {"ops", "audit", "tech-debt"}
 
     def test_presets_do_not_contain_always_on_jobs(self):
-        import config
+        from sfmon import config
         always_on = {"monitor_salesforce_limits", "get_salesforce_instance", "get_salesforce_licenses"}
         for preset_name, jobs in config.PRESETS.items():
             for job in always_on:
@@ -368,7 +368,7 @@ class TestPresets:
 class TestGetAlwaysOnSchedule:
     def test_no_config_returns_default(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         default = {"minute": "*/5"}
         result = config.get_always_on_schedule("monitor_salesforce_limits", default)
@@ -379,7 +379,7 @@ class TestGetAlwaysOnSchedule:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         default = {"minute": "*/5"}
         result = config.get_always_on_schedule("monitor_salesforce_limits", default)
@@ -390,7 +390,7 @@ class TestGetAlwaysOnSchedule:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         result = config.get_always_on_schedule("monitor_salesforce_limits", {"minute": "*/5"})
         assert result == {"hour": "1", "minute": "0"}
@@ -400,7 +400,7 @@ class TestGetAlwaysOnSchedule:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         result = config.get_always_on_schedule("monitor_salesforce_limits", {"minute": "*/5"})
         assert result is None
@@ -410,7 +410,7 @@ class TestGetAlwaysOnSchedule:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         default = {"minute": "*/5"}
         result = config.get_always_on_schedule("monitor_salesforce_limits", default)
@@ -424,7 +424,7 @@ class TestGetAlwaysOnSchedule:
 class TestLoadConfigOrgs:
     def test_no_file_returns_empty_orgs(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
-        import config
+        from sfmon import config
         result = config.load_config(force_reload=True)
         assert result["orgs"] == []
         assert result["org_overrides"] == {}
@@ -440,7 +440,7 @@ class TestLoadConfigOrgs:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         result = config.load_config(force_reload=True)
         assert result["orgs"] == ["prod", "sandbox-uat"]
         assert result["org_overrides"] == {
@@ -460,7 +460,7 @@ class TestGetScheduleFromConfigOrgOverrides:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         result = config.get_schedule_from_config(
             "my_job", {"minute": "*/1"}, org_name="prod"
@@ -478,7 +478,7 @@ class TestGetScheduleFromConfigOrgOverrides:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         result = config.get_schedule_from_config(
             "my_job", {"minute": "*/1"}, org_name="sandbox-uat"
@@ -496,7 +496,7 @@ class TestGetScheduleFromConfigOrgOverrides:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         assert config.get_schedule_from_config(
             "only_sandbox_job", None, org_name="sandbox-uat"
@@ -516,7 +516,7 @@ class TestGetScheduleFromConfigOrgOverrides:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         result = config.get_schedule_from_config("my_job", {"minute": "*/1"})
         assert result == {"minute": "*/5"}
@@ -536,7 +536,7 @@ class TestGetAlwaysOnScheduleOrgOverrides:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        import config
+        from sfmon import config
         config.load_config(force_reload=True)
         result = config.get_always_on_schedule(
             "monitor_salesforce_limits", {"minute": "*/5"}, org_name="sandbox-uat"

@@ -100,7 +100,7 @@ ALLOWED_SECTIONS_ACTIONS = {
 def _load_exclude_users():
     """Load exclude users from config file."""
     try:
-        from config import get_exclude_users
+        from .config import get_exclude_users
 
         return get_exclude_users()
     except Exception:

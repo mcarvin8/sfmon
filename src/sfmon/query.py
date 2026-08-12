@@ -19,8 +19,8 @@ Features:
 
 import requests
 
-from constants import QUERY_TIMEOUT_SECONDS
-from logger import logger
+from .constants import QUERY_TIMEOUT_SECONDS
+from .logger import logger
 from simple_salesforce.exceptions import (
     SalesforceExpiredSession,
     SalesforceMalformedRequest,
@@ -35,7 +35,7 @@ def query_records_all(sf, soql_query):
     except SalesforceExpiredSession as e:
         logger.warning("Salesforce session expired, re-authenticating: %s", e)
         try:
-            import salesforce_monitoring
+            from . import salesforce_monitoring
 
             salesforce_monitoring.reauthenticate_connections()
             sf = salesforce_monitoring.sf_connection
@@ -66,7 +66,7 @@ def tooling_query_records_all(sf, soql_query):
     except SalesforceExpiredSession as e:
         logger.warning("Salesforce session expired, re-authenticating: %s", e)
         try:
-            import salesforce_monitoring
+            from . import salesforce_monitoring
 
             salesforce_monitoring.reauthenticate_connections()
             sf = salesforce_monitoring.sf_connection

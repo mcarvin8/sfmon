@@ -25,7 +25,7 @@ from .sharing_settings import monitor_org_wide_sharing_settings
 from .forbidden_profiles import monitor_forbidden_profile_assignments
 from .deployments import get_deployment_status
 from .user_login import monitor_login_events, geolocation
-from logger import logger
+from ..logger import logger
 
 
 def run_hourly_audit(sf):

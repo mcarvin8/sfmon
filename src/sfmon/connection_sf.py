@@ -19,7 +19,7 @@ import requests
 from simple_salesforce import Salesforce
 from simple_salesforce.api import DEFAULT_API_VERSION
 
-from logger import logger
+from .logger import logger
 
 # SFDX auth URL format: force://<clientId>:<clientSecret>:<refreshToken>@<instanceUrl>
 # clientSecret is empty for public/PKCE connected apps (e.g. force://PlatformCLI::<token>@...)

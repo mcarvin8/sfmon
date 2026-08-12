@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-SFMon is a long-running Docker container that monitors a Salesforce org and exposes metrics via a Prometheus `/metrics` endpoint (port 9001). It uses APScheduler for cron-based job scheduling and `simple_salesforce` for SOQL queries and Salesforce API calls.
+SFMon is a long-running service that monitors a Salesforce org and exposes metrics via a Prometheus `/metrics` endpoint (port 9001). It uses APScheduler for cron-based job scheduling and `simple_salesforce` for SOQL queries and Salesforce API calls. Distributed two ways: a Docker image (`mcarvin8/sfmon`) and a PyPI package (`sfmon`, console script + importable library).
 
 ## Commands
 
@@ -13,22 +13,27 @@ SFMon is a long-running Docker container that monitors a Salesforce org and expo
 pytest tests/ -v --cov=src/sfmon --cov-report=xml --cov-report=term-missing
 
 # Run a single test file
-pytest tests/test_limits.py -v
+pytest tests/test_orgs.py -v
 
 # Run a single test
 pytest tests/test_config.py::test_load_config_with_preset -v
 
 # Install deps (matches CI exactly)
 pip install pytest pytest-cov pytest-mock responses simple_salesforce prometheus_client apscheduler pandas cffi opentelemetry-sdk opentelemetry-exporter-prometheus opentelemetry-exporter-otlp-proto-http opentelemetry-instrumentation-logging genbadge[coverage]
+
+# Build the sdist/wheel locally
+pip install build && python -m build
 ```
 
-There is no build step — this is pure Python. The Docker image is built from `docker/Dockerfile`.
+There is no build step for running tests — this is pure Python, and pytest's `pythonpath = ["src"]` (see `pyproject.toml`) makes `sfmon` importable without installing it. The Docker image is built from `docker/Dockerfile`; the PyPI package is built/published from `pyproject.toml` via `.github/workflows/release-please.yml`.
 
 ## Architecture
 
 ### Entry point
 
-`src/sfmon/salesforce_monitoring.py` — initializes APScheduler, registers all jobs, starts the Prometheus HTTP server, and blocks forever.
+`src/sfmon/salesforce_monitoring.py` (`sfmon.salesforce_monitoring:main`) — initializes APScheduler, registers all jobs, starts the Prometheus HTTP server, and blocks forever. Invoked as `python -m sfmon.salesforce_monitoring` (Docker `ENTRYPOINT`) or via the `sfmon` console script (PyPI install).
+
+All internal imports are package-qualified (`from .logger import logger`, `from ..core.gauges import ...`) — `sfmon/` is a real installable package (`src/sfmon/__init__.py`), not a flat script directory. Docker still copies the package to `/app/sfmon/` and runs it with `WORKDIR /app`, so absolute in-container paths like `/app/sfmon/config.json` are unchanged.
 
 ### Module layout
 

@@ -14,9 +14,9 @@ Functions:
 """
 
 import os
-from logger import logger
+from ..logger import logger
 from .gauges import forbidden_profile_users_gauge
-from query import query_records_all
+from ..query import query_records_all
 
 
 def _get_forbidden_profiles():

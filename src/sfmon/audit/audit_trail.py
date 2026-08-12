@@ -15,11 +15,11 @@ Functions:
     - query_setup_audit_trail: Fetches audit trail records
 """
 
-from constants import ALLOWED_SECTIONS_ACTIONS
+from ..constants import ALLOWED_SECTIONS_ACTIONS
 from .utils import categorize_user_group
-from logger import logger
+from ..logger import logger
 from .gauges import suspicious_records_gauge
-from query import query_records_all
+from ..query import query_records_all
 
 
 def build_audit_trail_query():

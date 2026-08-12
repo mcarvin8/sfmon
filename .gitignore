@@ -16,6 +16,9 @@
 *.sw[mnop]
 __pycache__
 *.log
+*.egg-info/
+build/
+dist/
 .sf/*
 .sfdx/*
 pmd-bin-*/*

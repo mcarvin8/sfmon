@@ -35,8 +35,8 @@ Use Cases:
 
 from datetime import datetime
 
-from logger import logger
-from query import tooling_query_records_all
+from ..logger import logger
+from ..query import tooling_query_records_all
 from .gauges import (
     deployment_details_gauge,
     pending_time_gauge,

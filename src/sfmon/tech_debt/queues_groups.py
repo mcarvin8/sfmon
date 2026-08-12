@@ -14,14 +14,14 @@ Data Sources:
     - Case object
 """
 
-from logger import logger
+from ..logger import logger
 from .gauges import (
     total_queues_per_object_gauge,
     queues_with_no_members_gauge,
     queues_with_zero_open_cases_gauge,
     public_groups_with_no_members_gauge,
 )
-from query import query_records_all
+from ..query import query_records_all
 
 
 def total_queues_per_object(sf):

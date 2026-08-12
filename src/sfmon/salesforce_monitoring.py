@@ -72,20 +72,20 @@ from apscheduler.triggers.cron import CronTrigger
 from apscheduler.executors.pool import ThreadPoolExecutor
 
 # Shared modules from root
-from logger import logger
-import orgs
-from org_gauge import set_current_org
-from connection_sf import get_salesforce_connection_url
+from .logger import logger
+from . import orgs
+from .org_gauge import set_current_org
+from .connection_sf import get_salesforce_connection_url
 
 # Always-on baseline functions (core package)
-from core import (
+from .core import (
     monitor_salesforce_limits,
     get_salesforce_licenses,
     get_salesforce_instance,
 )
 
 # Operations monitoring functions (ops package)
-from ops import (
+from .ops import (
     monitor_apex_flex_queue,
     async_apex_job_status,
     monitor_apex_execution_time,
@@ -99,7 +99,7 @@ from ops import (
 )
 
 # Audit and compliance functions (audit package)
-from audit import (
+from .audit import (
     hourly_observe_user_querying_large_records,
     expose_suspicious_records,
     monitor_org_wide_sharing_settings,
@@ -111,7 +111,7 @@ from audit import (
 )
 
 # Tech debt monitoring functions (tech_debt package)
-from tech_debt import (
+from .tech_debt import (
     apex_classes_api_version,
     apex_triggers_api_version,
     workflow_rules_monitoring,
@@ -164,7 +164,7 @@ def get_schedule_config(job_id, default_schedule, org_name=None):
     """
     Get schedule for an opt-in job. Returns None if job is not listed when opt-in mode is active.
     """
-    from config import get_schedule_from_config
+    from .config import get_schedule_from_config
 
     return get_schedule_from_config(job_id, default_schedule, org_name=org_name)
 
@@ -173,7 +173,7 @@ def get_always_on_config(job_id, default_schedule, org_name=None):
     """
     Get schedule for an always-on job. Always uses default unless explicitly overridden or disabled.
     """
-    from config import get_always_on_schedule
+    from .config import get_always_on_schedule
 
     return get_always_on_schedule(job_id, default_schedule, org_name=org_name)
 

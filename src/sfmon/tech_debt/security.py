@@ -10,12 +10,12 @@ Data Sources:
     - SecurityHealthCheckRisks (via Tooling API)
 """
 
-from logger import logger
+from ..logger import logger
 from .gauges import (
     security_health_check_gauge,
     salesforce_health_risks_gauge,
 )
-from query import tooling_query_records_all
+from ..query import tooling_query_records_all
 
 
 def security_health_check(sf):
