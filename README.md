@@ -175,6 +175,25 @@ Route these through Alertmanager with the same receivers (PagerDuty, Slack, etc.
 
 ---
 
+## One-shot mode — run from a CI cron job instead of a daemon
+
+Don't want an always-on container? `sfmon --once` runs every enabled job a single time, prints the resulting Prometheus exposition text to stdout, and exits — the same model sfdx-hardis's org monitoring uses (a scheduled CI/CD pipeline instead of a long-running process). Works with either distribution:
+
+```bash
+# Docker
+docker run --rm -e SALESFORCE_AUTH_URL="force://PlatformCLI::..." mcarvin8/sfmon:latest --once
+
+# pip install
+SALESFORCE_AUTH_URL="force://PlatformCLI::..." sfmon --once
+```
+
+- Exit code is `0` if every job that ran succeeded, `1` if any job (or the initial org connection) failed — so a scheduled pipeline goes red on a real problem, the same way a failed CI step would.
+- Add `--job JOB_ID` to run exactly one job (its id from the tables in [docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md)) instead of everything currently enabled — `--job` forces that job to run regardless of its opt-in/disabled state in `config.json`, useful for ad-hoc checks. `--job` requires `--once`.
+- Without `--job`, `--once` respects the same config as the daemon (presets, opt-in `schedules`, `disabled` entries) — it runs whatever would run at container startup, just without then staying up to serve `/metrics` or wait for the next cron tick.
+- Pipe the output wherever it's useful: archive it as a pipeline artifact, `curl --data-binary` it to a Pushgateway, or `grep` it for a threshold check.
+
+---
+
 ## Presets — scope down without a full config
 
 If you only want a focused slice of monitoring, set a preset in `config.json` instead of listing every job:
@@ -199,7 +218,7 @@ See **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/C
 
 | | SFMon | Salesforce proactive monitoring (paid) | sfdx-hardis org monitoring |
 |--|-------|----------------------------------------|---------------------------|
-| **Model** | Always-on container, Prometheus `/metrics` endpoint | Salesforce TAM/CSM engagement + event log files | Scheduled CI jobs (GitHub Actions / GitLab CI) |
+| **Model** | Always-on container/process (Prometheus `/metrics`), or a scheduled CI job via `--once` | Salesforce TAM/CSM engagement + event log files | Scheduled CI jobs (GitHub Actions / GitLab CI) |
 | **Output** | Time-series metrics scraped by Prometheus | Salesforce-native reports and guided reviews | Git diffs, Slack/Teams notifications, pipeline artifacts |
 | **Alerting** | PromQL + Alertmanager — same as rest of infra | Salesforce notifications and Success Plan reviews | Slack/Teams webhooks from CI |
 | **Data stays in your stack** | Yes | No (Salesforce-hosted) | Partially (metadata to Git; notifications to Slack/Teams) |

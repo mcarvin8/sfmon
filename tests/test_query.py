@@ -60,7 +60,7 @@ class TestQueryRecordsAll:
         mock_module.reauthenticate_connections = MagicMock()
         mock_module.sf_connection = recovered_sf
 
-        with patch.dict("sys.modules", {"sfmon.salesforce_monitoring": mock_module}):
+        with patch("sfmon.salesforce_monitoring", mock_module, create=True):
             result = query_records_all(mock_sf, "SELECT Id FROM Account")
 
         assert result == records
@@ -75,7 +75,7 @@ class TestQueryRecordsAll:
         mock_module.reauthenticate_connections.side_effect = RuntimeError("reauth failed")
         mock_module.sf_connection = None
 
-        with patch.dict("sys.modules", {"sfmon.salesforce_monitoring": mock_module}):
+        with patch("sfmon.salesforce_monitoring", mock_module, create=True):
             result = query_records_all(mock_sf, "SELECT Id FROM Account")
 
         assert result == []
@@ -130,7 +130,7 @@ class TestToolingQueryRecordsAll:
         mock_module.reauthenticate_connections = MagicMock()
         mock_module.sf_connection = recovered_sf
 
-        with patch.dict("sys.modules", {"sfmon.salesforce_monitoring": mock_module}):
+        with patch("sfmon.salesforce_monitoring", mock_module, create=True):
             result = tooling_query_records_all(mock_sf, "SELECT Id FROM ApexClass")
 
         assert result == records
@@ -145,7 +145,7 @@ class TestToolingQueryRecordsAll:
         mock_module.reauthenticate_connections.side_effect = RuntimeError("reauth failed")
         mock_module.sf_connection = None
 
-        with patch.dict("sys.modules", {"sfmon.salesforce_monitoring": mock_module}):
+        with patch("sfmon.salesforce_monitoring", mock_module, create=True):
             result = tooling_query_records_all(mock_sf, "SELECT Id FROM ApexClass")
 
         assert result == []
