@@ -1,12 +1,12 @@
 # Salesforce Monitoring (SFMon)
 
-![PyPI](https://img.shields.io/pypi/v/sfmon)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sfmon)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/sfmon)
-
 ![Docker Image Version](https://img.shields.io/docker/v/mcarvin8/sfmon?sort=date)
 ![Docker Pulls](https://img.shields.io/docker/pulls/mcarvin8/sfmon)
 ![Docker Image Size](https://img.shields.io/docker/image-size/mcarvin8/sfmon)
+
+![PyPI](https://img.shields.io/pypi/v/sfmon)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sfmon)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/sfmon)
 
 ![Coverage](https://raw.githubusercontent.com/mcarvin8/sfmon/refs/heads/main/badges/coverage.svg)
 
