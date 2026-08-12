@@ -7,6 +7,11 @@ mounted config file.
 Legacy single-org mode (no "orgs" configured): behaves exactly as before —
 one org, named by ORG_NAME (or "default" if unset), authenticated via the
 plain SALESFORCE_AUTH_URL environment variable.
+
+Secrets backend (optional): set SECRETS_BACKEND=aws to fetch the auth URL
+from AWS Secrets Manager instead of the environment, using the same
+SALESFORCE_AUTH_URL[_<NAME>] name (optionally prefixed via AWS_SECRETS_PREFIX)
+as the secret name. See docs/ENVIRONMENT.md.
 """
 
 import os
@@ -14,6 +19,8 @@ import re
 
 from .logger import logger
 from .connection_sf import get_salesforce_connection_url
+
+SUPPORTED_SECRETS_BACKENDS = {"aws"}
 
 
 def _sanitize_env_suffix(org_name):
@@ -47,6 +54,37 @@ def auth_url_env_var(org_name):
     return "SALESFORCE_AUTH_URL"
 
 
+def resolve_auth_url(org_name):
+    """Resolve org_name's SFDX auth URL from the configured source.
+
+    Defaults to the plain environment variable (SALESFORCE_AUTH_URL or
+    SALESFORCE_AUTH_URL_<NAME>). If SECRETS_BACKEND is set, fetches from that
+    backend instead, using the same name (optionally prefixed via
+    AWS_SECRETS_PREFIX for the "aws" backend) as the secret identifier.
+    """
+    env_var = auth_url_env_var(org_name)
+    backend = os.getenv("SECRETS_BACKEND", "").strip().lower()
+    if not backend:
+        return os.getenv(env_var)
+
+    if backend not in SUPPORTED_SECRETS_BACKENDS:
+        raise ValueError(
+            f"Unsupported SECRETS_BACKEND '{backend}'. Supported: "
+            f"{', '.join(sorted(SUPPORTED_SECRETS_BACKENDS))}"
+        )
+
+    try:
+        from .secrets_manager import get_secret_aws
+    except ImportError as e:
+        raise RuntimeError(
+            "SECRETS_BACKEND=aws requires the boto3 package. "
+            'Install with: pip install "sfmon[aws]"'
+        ) from e
+
+    secret_name = os.getenv("AWS_SECRETS_PREFIX", "") + env_var
+    return get_secret_aws(secret_name)
+
+
 def build_connections():
     """Authenticate to every configured org.
 
@@ -59,7 +97,7 @@ def build_connections():
         env_var = auth_url_env_var(org_name)
         try:
             connections[org_name] = get_salesforce_connection_url(
-                url=os.getenv(env_var)
+                url=resolve_auth_url(org_name)
             )
             logger.info("Connected to org '%s' (%s)", org_name, env_var)
         except Exception as e:

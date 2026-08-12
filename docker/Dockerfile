@@ -16,10 +16,12 @@ LABEL org.opencontainers.image.title="sfmon" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.source="https://github.com/mcarvin8/sfmon"
 
-# Install required Python dependencies
+# Install required Python dependencies. boto3 is only used when
+# SECRETS_BACKEND=aws is set (see src/sfmon/secrets_manager.py) but is
+# installed unconditionally so no rebuild is needed to opt in.
 RUN pip install --no-cache-dir simple_salesforce prometheus_client requests apscheduler pandas \
         opentelemetry-sdk opentelemetry-exporter-prometheus opentelemetry-exporter-otlp-proto-http \
-        opentelemetry-instrumentation-logging && \
+        opentelemetry-instrumentation-logging boto3 && \
     pip list
 
 # Create non-root user

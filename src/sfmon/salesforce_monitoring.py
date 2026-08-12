@@ -149,10 +149,9 @@ def reauthenticate_connections():
     global sf_connections
     logger.info("Starting re-authentication to Salesforce orgs...")
     for org_name in orgs.get_org_names():
-        env_var = orgs.auth_url_env_var(org_name)
         try:
             sf_connections[org_name] = get_salesforce_connection_url(
-                url=os.getenv(env_var)
+                url=orgs.resolve_auth_url(org_name)
             )
             logger.info("Successfully re-authenticated to org '%s'.", org_name)
         except Exception as e:
