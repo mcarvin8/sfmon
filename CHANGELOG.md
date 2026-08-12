@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.12.0](https://github.com/mcarvin8/sfmon/compare/v3.11.1...v3.12.0) (2026-08-12)
+
+
+### Features
+
+* move metrics to OpenTelemetry SDK, add optional OTLP push for metrics and logs ([#56](https://github.com/mcarvin8/sfmon/issues/56)) ([0744dde](https://github.com/mcarvin8/sfmon/commit/0744dde8f4c8fd4b576131ef5f7f4fb40cf4be8e))
+
 ## [3.11.1](https://github.com/mcarvin8/sfmon/compare/v3.11.0...v3.11.1) (2026-08-07)
 
 
