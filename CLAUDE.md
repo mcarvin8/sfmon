@@ -19,7 +19,7 @@ pytest tests/test_orgs.py -v
 pytest tests/test_config.py::test_load_config_with_preset -v
 
 # Install deps (matches CI exactly)
-pip install pytest pytest-cov pytest-mock responses simple_salesforce prometheus_client apscheduler pandas cffi opentelemetry-sdk opentelemetry-exporter-prometheus opentelemetry-exporter-otlp-proto-http opentelemetry-instrumentation-logging genbadge[coverage]
+pip install pytest pytest-cov pytest-mock responses simple_salesforce prometheus_client apscheduler pandas cffi opentelemetry-sdk opentelemetry-exporter-prometheus opentelemetry-exporter-otlp-proto-http opentelemetry-instrumentation-logging boto3 genbadge[coverage]
 
 # Build the sdist/wheel locally
 pip install build && python -m build
@@ -48,6 +48,7 @@ All internal imports are package-qualified (`from .logger import logger`, `from 
 
 - `src/sfmon/org_gauge.py` — `OrgGauge` base class. All metrics are Prometheus `Gauge`s with an `org` label. Every collector inherits or instantiates from this.
 - `src/sfmon/connection_sf.py` — Salesforce auth (SFDX auth URL) and SOQL execution. All collectors receive a shared connection object.
+- `src/sfmon/orgs.py` — resolves org names and their auth URLs (`resolve_auth_url`); plain env var by default, or a secrets backend (`SECRETS_BACKEND=aws` → `src/sfmon/secrets_manager.py`, lazily imported so `boto3` stays optional for non-AWS users).
 - `src/sfmon/config.py` — Loads `config.json` (optional), resolves presets, merges `schedules` overrides. Determines which jobs run and at what cadence.
 - `src/sfmon/query.py` — Shared SOQL query strings.
 - `src/sfmon/constants.py` — Shared constants.

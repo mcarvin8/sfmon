@@ -88,6 +88,7 @@ The `sfmon` console script runs the same always-on daemon as the Docker image. `
 Optional tuning:
 - **Environment variables** (timeouts, org label, compliance lists, thresholds, log level) → **[docs/ENVIRONMENT.md](https://github.com/mcarvin8/sfmon/blob/main/docs/ENVIRONMENT.md)**
 - **Config file** (schedules, presets, disable jobs, `exclude_users`) → **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md)** · template **`config.example.json`**
+- **Secrets backend** — fetch `SALESFORCE_AUTH_URL`/`SALESFORCE_AUTH_URL_<NAME>` from AWS Secrets Manager instead of the environment (`SECRETS_BACKEND=aws`) → **[docs/ENVIRONMENT.md](https://github.com/mcarvin8/sfmon/blob/main/docs/ENVIRONMENT.md#optional--secrets-backend)**
 
 ---
 

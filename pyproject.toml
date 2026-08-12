@@ -31,6 +31,9 @@ dependencies = [
     "opentelemetry-instrumentation-logging",
 ]
 
+[project.optional-dependencies]
+aws = ["boto3"]
+
 [project.urls]
 Homepage = "https://github.com/mcarvin8/sfmon"
 Documentation = "https://github.com/mcarvin8/sfmon/tree/main/docs"

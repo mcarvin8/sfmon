@@ -2,6 +2,7 @@
 
 import json
 import os
+import sys
 import pytest
 from unittest.mock import patch
 
@@ -121,3 +122,62 @@ class TestBuildConnections:
         mock_connect.assert_called_once_with(
             url="force://id:secret:token@my.salesforce.com"
         )
+
+
+class TestResolveAuthUrl:
+    def test_no_backend_falls_back_to_env_var(self, monkeypatch):
+        monkeypatch.delenv("SECRETS_BACKEND", raising=False)
+        monkeypatch.setenv("SALESFORCE_AUTH_URL", "force://id:secret:token@my.salesforce.com")
+        from sfmon import orgs
+        assert orgs.resolve_auth_url("default") == "force://id:secret:token@my.salesforce.com"
+
+    def test_unsupported_backend_raises(self, monkeypatch):
+        monkeypatch.setenv("SECRETS_BACKEND", "vault")
+        from sfmon import orgs
+        with pytest.raises(ValueError, match="Unsupported SECRETS_BACKEND 'vault'"):
+            orgs.resolve_auth_url("default")
+
+    def test_aws_backend_fetches_secret_by_env_var_name(self, monkeypatch):
+        monkeypatch.setenv("SECRETS_BACKEND", "aws")
+        monkeypatch.delenv("AWS_SECRETS_PREFIX", raising=False)
+        monkeypatch.setenv("ORG_NAME", "prod")
+        from sfmon import orgs
+        with patch("sfmon.secrets_manager.get_secret_aws", return_value="force://a:b:c@x.salesforce.com") as mock_get:
+            result = orgs.resolve_auth_url("prod")
+
+        assert result == "force://a:b:c@x.salesforce.com"
+        mock_get.assert_called_once_with("SALESFORCE_AUTH_URL")
+
+    def test_aws_backend_honors_secrets_prefix(self, tmp_path, monkeypatch):
+        cfg = {"orgs": ["prod"]}
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps(cfg))
+        monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
+        monkeypatch.setenv("SECRETS_BACKEND", "aws")
+        monkeypatch.setenv("AWS_SECRETS_PREFIX", "sfmon/")
+        from sfmon import config, orgs
+        config.load_config(force_reload=True)
+        with patch("sfmon.secrets_manager.get_secret_aws", return_value="force://a:b:c@x.salesforce.com") as mock_get:
+            orgs.resolve_auth_url("prod")
+
+        mock_get.assert_called_once_with("sfmon/SALESFORCE_AUTH_URL_PROD")
+
+    def test_aws_backend_missing_boto3_raises_clear_error(self, monkeypatch):
+        monkeypatch.setenv("SECRETS_BACKEND", "aws")
+        from sfmon import orgs
+        with patch.dict(sys.modules, {"sfmon.secrets_manager": None}):
+            with pytest.raises(RuntimeError, match="requires the boto3 package"):
+                orgs.resolve_auth_url("default")
+
+    def test_build_connections_skips_org_on_unsupported_backend(self, tmp_path, monkeypatch):
+        cfg = {"orgs": ["prod"]}
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps(cfg))
+        monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
+        monkeypatch.setenv("SECRETS_BACKEND", "azure")
+        from sfmon import config, orgs
+        config.load_config(force_reload=True)
+
+        connections = orgs.build_connections()
+
+        assert connections == {}

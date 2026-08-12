@@ -18,6 +18,22 @@
 | `ORG_NAME` | `""` | Value injected as the `org` label on **every** Prometheus metric. Set this to a human-readable identifier for your Salesforce org (e.g. `production`, `sandbox-uat`) so you can filter or aggregate across multiple SFMon instances in the same Prometheus/Grafana setup. If unset, the label is present but empty. **Ignored in fleet mode** — org names there come from `config.json`'s `orgs` list instead. |
 | `SCHEDULER_MAX_WORKERS` | `min(orgs * 2, 20)` | Size of the APScheduler thread pool. Raise this if you run many orgs and see jobs queueing behind each other at shared cron ticks. |
 
+## Optional — secrets backend
+
+By default, auth URLs come straight from the environment (`SALESFORCE_AUTH_URL` / `SALESFORCE_AUTH_URL_<NAME>`). Setting `SECRETS_BACKEND` fetches them from a secrets manager instead, using the same name as the secret identifier — so switching backends doesn't change how orgs are named anywhere else (fleet mode, `config.json`, logs).
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SECRETS_BACKEND` | unset | Set to `aws` to fetch auth URLs from AWS Secrets Manager instead of the environment. Any other non-empty value fails fast with a clear error rather than silently falling back to the environment. |
+| `AWS_SECRETS_PREFIX` | `""` | Prepended to the secret name looked up in AWS Secrets Manager, e.g. `sfmon/` turns `SALESFORCE_AUTH_URL_PROD` into `sfmon/SALESFORCE_AUTH_URL_PROD`. Only used when `SECRETS_BACKEND=aws`. |
+
+**AWS Secrets Manager (`SECRETS_BACKEND=aws`):**
+- Requires the `boto3` package. The Docker image includes it by default; pip installs need `pip install "sfmon[aws]"`. If it's missing, SFMon raises a clear error naming the fix instead of an opaque `ModuleNotFoundError`.
+- Store the secret's value as a **SecretString** — the raw SFDX auth URL (`force://...`), not JSON. Binary secrets aren't supported.
+- Region and credentials come from boto3's standard resolution chain (`AWS_REGION`/`AWS_DEFAULT_REGION`, an IAM role, `~/.aws/credentials`, etc.) — no SFMon-specific wiring.
+- Minimum IAM permission: `secretsmanager:GetSecretValue` on the secret(s) SFMon reads.
+- Secrets are fetched fresh on every connect/reconnect (startup and the session-expiry retry path in `query.py`), not cached across the process lifetime — so rotating a secret takes effect on the next reauthentication without a restart.
+
 ## Optional — OTLP push
 
 Metrics and logs are always available the same way as before: metrics on `/metrics` (Prometheus scrape format), logs as JSON lines on stdout. Setting `OTEL_EXPORTER_OTLP_ENDPOINT` additionally **pushes** both to an OTLP-compatible collector or backend (Datadog, Honeycomb, Grafana Alloy, an OTel Collector, ...) — useful when you don't want to run a Prometheus scrape target, or your log pipeline ingests OTLP directly instead of tailing container stdout. Leaving it unset keeps today's behavior exactly as-is.
