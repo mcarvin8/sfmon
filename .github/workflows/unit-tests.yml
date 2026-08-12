@@ -36,6 +36,10 @@ jobs:
             apscheduler \
             pandas \
             cffi \
+            opentelemetry-sdk \
+            opentelemetry-exporter-prometheus \
+            opentelemetry-exporter-otlp-proto-http \
+            opentelemetry-instrumentation-logging \
             "genbadge[coverage]"
 
       - name: Run unit tests with coverage

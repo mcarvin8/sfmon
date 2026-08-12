@@ -5,7 +5,7 @@
 ![Docker Image Size](https://img.shields.io/docker/image-size/mcarvin8/sfmon)
 ![Coverage](https://raw.githubusercontent.com/mcarvin8/sfmon/refs/heads/main/badges/coverage.svg)
 
-SFMon is a **long-running Docker container** that connects to your Salesforce org on a schedule and exposes a **standard `/metrics` endpoint** compatible with Prometheus, Victoria Metrics, Grafana Cloud, Mimir, and any OpenTelemetry Collector pipeline — so your Salesforce org lives in the same Grafana dashboards, PromQL alerts, and on-call runbooks as the rest of your infrastructure.
+SFMon is a **long-running Docker container** that connects to your Salesforce org on a schedule and exposes a **standard `/metrics` endpoint** compatible with Prometheus, Victoria Metrics, Grafana Cloud, Mimir, and any OpenTelemetry Collector pipeline — so your Salesforce org lives in the same Grafana dashboards, PromQL alerts, and on-call runbooks as the rest of your infrastructure. Metrics are instrumented with OpenTelemetry and structured logs are emitted as JSON; both can optionally **push** over OTLP instead of only being scraped/tailed — see [Metrics and logs](#metrics-and-logs).
 
 ---
 
@@ -23,7 +23,7 @@ There's no persistence and no historical storage inside SFMon itself — your Pr
 
 ## Who is this for
 
-SFMon is aimed at **SRE and DevOps teams** who already operate a Prometheus-compatible observability stack (Prometheus, Victoria Metrics, Grafana Cloud, or an OTel Collector pipeline)  and are also responsible for one or more Salesforce orgs. If you define alerts in PromQL, route pages through Alertmanager, and want Salesforce signals to behave exactly like any other scrape target — this is for you.
+SFMon is aimed at **SRE and DevOps teams** who already operate a Prometheus-compatible observability stack (Prometheus, Victoria Metrics, Grafana Cloud, or an OTel Collector pipeline)  and are also responsible for one or more Salesforce orgs. If you define alerts in PromQL, route pages through Alertmanager, and want Salesforce signals to behave exactly like any other scrape target — this is for you. Don't run a scrape-based stack at all? Push metrics and logs over OTLP instead — see [Metrics and logs](#metrics-and-logs).
 
 It is **not** a Salesforce admin tool. It has no UI of its own; all visibility comes from your existing observability stack.
 
@@ -128,6 +128,19 @@ scrape_configs:
 ```
 
 Prefer this when you want full process/resource isolation per org (independent restarts, separate resource limits) rather than a shared scheduler.
+
+---
+
+## Metrics and logs
+
+Two output shapes, matched to two different questions:
+
+- **Metrics** (`:9001/metrics`) answer *"is something wrong right now"* — governor limit %, license usage, active incidents, aggregate counts of suspicious activity by action/section/user group. Low-cardinality labels only.
+- **Logs** (stdout, JSON lines) answer *"who did it and what exactly happened"* — the per-record detail behind those aggregates: user, timestamp, display text, deployment IDs, login coordinates. Anything that would otherwise blow up metric cardinality goes here instead, under a structured `event` field. Pipe stdout to any log backend that reads JSON (Loki, Vector, Fluent Bit, CloudWatch Logs, Datadog Logs).
+
+Both default to pull/tail with no extra setup: metrics are scraped from `/metrics`, logs are read from container stdout. If you'd rather **push** — no Prometheus in your stack, or the container sits somewhere scraping is awkward — set `OTEL_EXPORTER_OTLP_ENDPOINT` and both metrics and logs also push to an OTLP collector or backend (Datadog, Honeycomb, Grafana Alloy, an OTel Collector, ...) in addition to `/metrics` and stdout. Unset, behavior is unchanged. See **[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#optional--otlp-push)**.
+
+No traces — there's no request-tracing use case here, so that OTel signal isn't used.
 
 ---
 
