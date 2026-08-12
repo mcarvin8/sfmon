@@ -1,12 +1,12 @@
 # Salesforce Monitoring (SFMon)
 
-![Docker Image Version](https://img.shields.io/docker/v/mcarvin8/sfmon?sort=date)
-![Docker Pulls](https://img.shields.io/docker/pulls/mcarvin8/sfmon)
-![Docker Image Size](https://img.shields.io/docker/image-size/mcarvin8/sfmon)
+[![Docker Image Version](https://img.shields.io/docker/v/mcarvin8/sfmon?sort=date)](https://hub.docker.com/r/mcarvin8/sfmon)
+[![Docker Pulls](https://img.shields.io/docker/pulls/mcarvin8/sfmon)](https://hub.docker.com/r/mcarvin8/sfmon)
+[![Docker Image Size](https://img.shields.io/docker/image-size/mcarvin8/sfmon)](https://hub.docker.com/r/mcarvin8/sfmon)
 
-![PyPI](https://img.shields.io/pypi/v/sfmon)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sfmon)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/sfmon)
+[![PyPI Version](https://img.shields.io/pypi/v/sfmon)](https://pypi.org/project/sfmon/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sfmon)](https://pypi.org/project/sfmon/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/sfmon)](https://pypi.org/project/sfmon/)
 
 ![Coverage](https://raw.githubusercontent.com/mcarvin8/sfmon/refs/heads/main/badges/coverage.svg)
 
