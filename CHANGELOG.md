@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.14.1](https://github.com/mcarvin8/sfmon/compare/v3.14.0...v3.14.1) (2026-08-13)
+
+
+### Bug Fixes
+
+* add 18 missing Salesforce limit descriptions ([81db17d](https://github.com/mcarvin8/sfmon/commit/81db17db3fe70989d0d68d9a225b012bd5ac29ff))
+
 ## [3.14.0](https://github.com/mcarvin8/sfmon/compare/v3.13.0...v3.14.0) (2026-08-12)
 
 
