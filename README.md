@@ -113,9 +113,21 @@ No config file is required: all collectors run on **default schedules** out of t
 
 Prefer running on bare metal/VM instead of Docker, or want to import individual collectors in your own scripts? SFMon is also published to PyPI:
 
+1. **Install and run:**
+
 ```bash
 pip install sfmon
 SALESFORCE_AUTH_URL="force://PlatformCLI::..." ORG_NAME="production" sfmon
+```
+
+2. **Verify:** `curl http://localhost:9001/metrics`
+3. **Scrape** — add to `prometheus.yml`:
+
+```yaml
+scrape_configs:
+  - job_name: sfmon
+    static_configs:
+      - targets: ["<host>:9001"]
 ```
 
 The `sfmon` console script runs the same always-on daemon as the Docker image. `CONFIG_FILE_PATH` defaults to `/app/sfmon/config.json` (the Docker path) — set it explicitly for non-Docker installs. `sfmon` is also an importable library, e.g. `from sfmon.core.limits import salesforce_limits_descriptions`.
