@@ -171,3 +171,15 @@ Very large reports may exceed **Kubernetes ConfigMap** size limits; use a **Secr
 | Variable | Default |
 |----------|---------|
 | `SALESFORCE_STATUS_API_URL` | `https://api.status.salesforce.com` |
+
+## Optional — Slack alerting
+
+Threshold/compliance breaches can optionally post to a Slack channel via an [incoming webhook](https://api.slack.com/messaging/webhooks). Alerts are edge-triggered: a Slack message fires when an alert item first appears ("opened") and again when it disappears ("resolved"), never on every scheduler tick while it stays active. State is cached to disk per `(org, category)` so this dedup works across restarts and `--once` CI-cron invocations, not just within one long-lived process. Leaving `SLACK_WEBHOOK_URL` unset disables alerting entirely — no cache reads/writes, no HTTP calls.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SLACK_WEBHOOK_URL` | unset | Slack incoming webhook URL. Unset = alerting disabled. |
+| `SLACK_ALERT_CACHE_DIR` | `./sfmon_alert_cache` | Directory for the on-disk alert state cache (one JSON file per org/category). Relative paths resolve against the current working directory. Mount a persistent volume here if you want `--once`/cron runs to dedup across invocations; an ephemeral/ container-local path just means the first alert after every restart re-fires once. |
+| `LIMIT_ALERT_THRESHOLD_PERCENT` | `80` | Usage percentage at/above which a Salesforce limit (from `monitor_salesforce_limits`) triggers a Slack alert. Limits at 95%+ are flagged `critical`, otherwise `warning`. |
+
+Currently wired into `monitor_salesforce_limits` only; the underlying `sync_alerts()` API in [`slack_notify.py`](../src/sfmon/slack_notify.py) is generic and intended to be reused by other collectors over time.

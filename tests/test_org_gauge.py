@@ -52,6 +52,27 @@ class TestOrgAwareGaugeLabels:
         assert dict(child._key)["org"] == "custom-org"
 
 
+class TestGetCurrentOrg:
+    def test_returns_contextvar_value_when_set(self):
+        from sfmon.org_gauge import get_current_org, set_current_org
+
+        set_current_org("sandbox-uat")
+        assert get_current_org() == "sandbox-uat"
+
+    def test_falls_back_to_org_name_env_when_unset(self):
+        from sfmon.org_gauge import get_current_org
+
+        with patch.dict(os.environ, {"ORG_NAME": "prod-org"}):
+            assert get_current_org() == "prod-org"
+
+    def test_falls_back_to_empty_string_when_nothing_set(self):
+        from sfmon.org_gauge import get_current_org
+
+        env = {k: v for k, v in os.environ.items() if k != "ORG_NAME"}
+        with patch.dict(os.environ, env, clear=True):
+            assert get_current_org() == ""
+
+
 class TestOrgAwareGaugePositionalArgs:
     def test_positional_args_converted_to_kwargs(self):
         gauge = make_gauge("g_pos_1", "doc", ["entry_point", "quiddity"])
