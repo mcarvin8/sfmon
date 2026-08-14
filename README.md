@@ -16,7 +16,10 @@ Metrics are instrumented with OpenTelemetry and structured logs are emitted as J
 - [Who is this for](#who-is-this-for)
 - [What you get](#what-you-get)
 - [Quick start](#quick-start)
-  - [Alternative: pip install](#alternative-pip-install)
+  - [Prerequisites](#prerequisites)
+  - [Run via Docker](#run-via-docker)
+  - [Run via Python Pip](#run-via-python-pip)
+  - [Optional Tuning](#optional-tuning)
 - [Multiple orgs](#multiple-orgs)
   - [Fleet mode (one container, several orgs)](#fleet-mode-one-container-several-orgs)
   - [One container per org (alternate)](#one-container-per-org-alternate)
@@ -72,14 +75,18 @@ Everything runs on a default schedule with no config file required. See **[docs/
 
 ## Quick start
 
-**Prerequisites:** 
+### Prerequisites
 
 On your local machine, you need to have the Salesforce CLI (`sf`) installed and logged in to the target org(s) via applicable monitoring users. The monitoring user in each Salesforce org must have API access enabled and have the appropriate permissions to monitor the various metrics. Preferably, the monitoring user should have the "Password Does Not Expire" and "Api Only User" system permissions granted either via a profile or permission set.
 
+**Get your auth URL for each org:** `sf org auth show-sfdx-auth-url --target-org my-org --json > authFile.json`
+
 SFMon itself doesn't use the Salesforce CLI at runtime — it only needs the auth URL, provided via environment variable or AWS Secrets Manager.
 
-1. **Get your auth URL for each org:** `sf org auth show-sfdx-auth-url --target-org my-org --json > authFile.json`
-2. **Run:**
+### Run via Docker
+
+
+1. **Run container:**
 
 ```bash
 docker run -d \
@@ -90,8 +97,8 @@ docker run -d \
   mcarvin8/sfmon:latest
 ```
 
-3. **Verify:** `curl http://localhost:9001/metrics`
-4. **Scrape** — add to `prometheus.yml`:
+2. **Verify:** `curl http://localhost:9001/metrics`
+3. **Scrape** — add to `prometheus.yml`:
 
 ```yaml
 scrape_configs:
@@ -102,7 +109,7 @@ scrape_configs:
 
 No config file is required: all collectors run on **default schedules** out of the box.
 
-### Alternative: pip install
+### Run via Python pip
 
 Prefer running on bare metal/VM instead of Docker, or want to import individual collectors in your own scripts? SFMon is also published to PyPI:
 
@@ -113,7 +120,8 @@ SALESFORCE_AUTH_URL="force://PlatformCLI::..." ORG_NAME="production" sfmon
 
 The `sfmon` console script runs the same always-on daemon as the Docker image. `CONFIG_FILE_PATH` defaults to `/app/sfmon/config.json` (the Docker path) — set it explicitly for non-Docker installs. `sfmon` is also an importable library, e.g. `from sfmon.core.limits import salesforce_limits_descriptions`.
 
-Optional tuning:
+### Optional Tuning
+
 - **Environment variables** (timeouts, org label, compliance lists, thresholds, log level) → **[docs/ENVIRONMENT.md](https://github.com/mcarvin8/sfmon/blob/main/docs/ENVIRONMENT.md)**
 - **Config file** (schedules, presets, disable jobs, `exclude_users`) → **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md)** · template **`config.example.json`**
 - **Secrets backend** — fetch `SALESFORCE_AUTH_URL`/`SALESFORCE_AUTH_URL_<NAME>` from AWS Secrets Manager instead of the environment (`SECRETS_BACKEND=aws`) → **[docs/ENVIRONMENT.md](https://github.com/mcarvin8/sfmon/blob/main/docs/ENVIRONMENT.md#optional--secrets-backend)**
