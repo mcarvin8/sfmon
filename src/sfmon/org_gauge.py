@@ -76,6 +76,14 @@ def set_current_org(org_name):
     _current_org.set(org_name)
 
 
+def get_current_org():
+    """Return the org for the current job run (contextvar, falling back to
+    ORG_NAME) — same lookup OrgAwareGauge uses to label metrics, exposed for
+    non-gauge call sites like slack_notify that need to key/tag by org too."""
+    org = _current_org.get()
+    return org if org is not None else os.getenv("ORG_NAME", "")
+
+
 class _Child:
     """Bound label-values handle returned by OrgAwareGauge.labels(...)."""
 
@@ -119,8 +127,7 @@ class OrgAwareGauge:
             yield Observation(value, attributes=dict(key))
 
     def _org(self):
-        org = _current_org.get()
-        return org if org is not None else os.getenv("ORG_NAME", "")
+        return get_current_org()
 
     def labels(self, *args, **kwargs):
         if args:

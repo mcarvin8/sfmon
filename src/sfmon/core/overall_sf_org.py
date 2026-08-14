@@ -20,6 +20,9 @@ Data Sources:
 Environment Variables:
     - SALESFORCE_STATUS_API_URL: Base URL for Salesforce Trust status API
                                   (default: https://api.status.salesforce.com)
+    - LIMIT_ALERT_THRESHOLD_PERCENT: Usage percentage at/above which a limit
+                                      triggers a Slack alert, if SLACK_WEBHOOK_URL
+                                      is set (default: 80)
 """
 
 import os
@@ -27,6 +30,7 @@ import requests
 
 from ..logger import logger
 from ..constants import REQUESTS_TIMEOUT_SECONDS
+from ..slack_notify import sync_alerts
 from .gauges import (
     api_usage_percentage_gauge,
     incident_gauge,
@@ -48,16 +52,21 @@ from ..query import query_records_all
 SALESFORCE_STATUS_API_URL = os.getenv(
     "SALESFORCE_STATUS_API_URL", "https://api.status.salesforce.com"
 )
+LIMIT_ALERT_THRESHOLD_PERCENT = float(os.getenv("LIMIT_ALERT_THRESHOLD_PERCENT", 80))
 
 
 def monitor_salesforce_limits(sf):
     """
     Monitor all Salesforce limits.
+
+    Limits at or above LIMIT_ALERT_THRESHOLD_PERCENT usage are also passed to
+    sync_alerts() for Slack notification (no-op unless SLACK_WEBHOOK_URL is set).
     """
     try:
         logger.info("Getting Salesforce API limits...")
         limits = dict(sf.limits())
         api_usage_percentage_gauge.clear()
+        breached_limits = {}
         for limit_name, limit_data in limits.items():
             max_limit = limit_data["Max"]
             remaining = limit_data["Remaining"]
@@ -65,14 +74,26 @@ def monitor_salesforce_limits(sf):
 
             if max_limit != 0:
                 usage_percentage = (used * 100) / max_limit
+                description = salesforce_limits_descriptions.get(
+                    limit_name, "Description not available"
+                )
                 api_usage_percentage_gauge.labels(
                     limit_name=limit_name,
-                    limit_description=salesforce_limits_descriptions.get(
-                        limit_name, "Description not available"
-                    ),
+                    limit_description=description,
                     limit_utilized=used,
                     max_limit=max_limit,
                 ).set(usage_percentage)
+
+                if usage_percentage >= LIMIT_ALERT_THRESHOLD_PERCENT:
+                    breached_limits[limit_name] = {
+                        "title": f"{limit_name} at {usage_percentage:.1f}% of limit",
+                        "message": (
+                            f"{description} Used {used}/{max_limit} "
+                            f"({usage_percentage:.1f}%)."
+                        ),
+                        "severity": "critical" if usage_percentage >= 95 else "warning",
+                    }
+        sync_alerts("salesforce_limits", breached_limits)
     except Exception as e:
         logger.error("Error getting limits: %s", e)
 

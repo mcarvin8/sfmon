@@ -49,6 +49,54 @@ class TestMonitorSalesforceLimits:
             monitor_salesforce_limits(mock_sf)
         assert captured["pct"] == pytest.approx(25.0)
 
+    def test_syncs_alerts_with_breached_limits_above_threshold(self, mock_sf):
+        from sfmon.core.overall_sf_org import monitor_salesforce_limits
+        mock_sf.limits.return_value = {
+            "DailyApiRequests": {"Max": 1000, "Remaining": 100},  # 90% used
+            "DataStorageMB": {"Max": 1000, "Remaining": 900},  # 10% used
+        }
+        with patch("sfmon.core.overall_sf_org.api_usage_percentage_gauge"), \
+             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+            monitor_salesforce_limits(mock_sf)
+        mock_sync.assert_called_once()
+        category, breached = mock_sync.call_args.args
+        assert category == "salesforce_limits"
+        assert set(breached) == {"DailyApiRequests"}
+        assert breached["DailyApiRequests"]["severity"] == "warning"
+
+    def test_marks_critical_severity_at_95_percent(self, mock_sf):
+        from sfmon.core.overall_sf_org import monitor_salesforce_limits
+        mock_sf.limits.return_value = {
+            "DailyApiRequests": {"Max": 1000, "Remaining": 40},  # 96% used
+        }
+        with patch("sfmon.core.overall_sf_org.api_usage_percentage_gauge"), \
+             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+            monitor_salesforce_limits(mock_sf)
+        _, breached = mock_sync.call_args.args
+        assert breached["DailyApiRequests"]["severity"] == "critical"
+
+    def test_syncs_empty_alerts_when_nothing_breached(self, mock_sf):
+        from sfmon.core.overall_sf_org import monitor_salesforce_limits
+        mock_sf.limits.return_value = {
+            "DailyApiRequests": {"Max": 1000, "Remaining": 900},  # 10% used
+        }
+        with patch("sfmon.core.overall_sf_org.api_usage_percentage_gauge"), \
+             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+            monitor_salesforce_limits(mock_sf)
+        mock_sync.assert_called_once_with("salesforce_limits", {})
+
+    def test_custom_threshold_constant(self, mock_sf):
+        import sfmon.core.overall_sf_org as overall_sf_org
+
+        mock_sf.limits.return_value = {
+            "DailyApiRequests": {"Max": 1000, "Remaining": 550},  # 45% used
+        }
+        with patch.object(overall_sf_org, "LIMIT_ALERT_THRESHOLD_PERCENT", 50), \
+             patch.object(overall_sf_org, "api_usage_percentage_gauge"), \
+             patch.object(overall_sf_org, "sync_alerts") as mock_sync:
+            overall_sf_org.monitor_salesforce_limits(mock_sf)
+        mock_sync.assert_called_once_with("salesforce_limits", {})
+
 
 class TestGetSalesforceLicenses:
     def test_user_licenses_processed(self, mock_sf):
