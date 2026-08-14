@@ -182,7 +182,7 @@ For teams that don't run a full PromQL/Alertmanager stack, SFMon can also post d
 
 Alerts are edge-triggered — a Slack message fires once when a breach opens and once when it resolves, not on every scheduler tick while it stays active — using an on-disk cache (`SLACK_ALERT_CACHE_DIR`) keyed per org so state survives both the long-lived daemon and `--once` CI-cron restarts.
 
-Currently wired into governor limits monitoring: any limit at/above `LIMIT_ALERT_THRESHOLD_PERCENT` (default `80`, `critical` at 95%+) posts to Slack. See **[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#optional--slack-alerting)**. The underlying `sync_alerts()` API is generic and other collectors can adopt it over time.
+Currently wired into governor limits monitoring (any limit at/above `LIMIT_ALERT_THRESHOLD_PERCENT`, default `80`, `critical` at 95%+) and Salesforce Trust API incidents (an active incident on your org's pod posts on open and again on resolve). See **[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#optional--slack-alerting)**. The underlying `sync_alerts()` API is generic and other collectors can adopt it over time.
 
 ---
 

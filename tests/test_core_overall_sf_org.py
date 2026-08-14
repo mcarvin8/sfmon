@@ -227,6 +227,89 @@ class TestGetSalesforceIncidents:
         with patch("sfmon.core.overall_sf_org.incident_gauge", mock_gauge):
             get_salesforce_incidents("Production", "NA1")  # Should not raise
 
+    @responses_lib.activate
+    def test_matching_incident_syncs_alert(self):
+        from sfmon.core.overall_sf_org import get_salesforce_incidents
+        incidents = [
+            {
+                "id": "INC-001",
+                "instanceKeys": ["NA1"],
+                "IncidentImpacts": [{"severity": "major"}],
+            }
+        ]
+        responses_lib.add(
+            responses_lib.GET,
+            f"{TRUST_API}/v1/incidents/active",
+            json=incidents,
+            status=200,
+        )
+        with patch("sfmon.core.overall_sf_org.incident_gauge"), \
+             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+            get_salesforce_incidents("Production", "NA1")
+        mock_sync.assert_called_once()
+        category, active = mock_sync.call_args.args
+        assert category == "salesforce_incidents"
+        assert set(active) == {"INC-001"}
+        assert active["INC-001"]["severity"] == "critical"
+        assert "NA1" in active["INC-001"]["title"]
+
+    @responses_lib.activate
+    def test_minor_severity_maps_to_warning(self):
+        from sfmon.core.overall_sf_org import get_salesforce_incidents
+        incidents = [
+            {
+                "id": "INC-003",
+                "instanceKeys": ["NA1"],
+                "IncidentImpacts": [{"severity": "minor"}],
+            }
+        ]
+        responses_lib.add(
+            responses_lib.GET,
+            f"{TRUST_API}/v1/incidents/active",
+            json=incidents,
+            status=200,
+        )
+        with patch("sfmon.core.overall_sf_org.incident_gauge"), \
+             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+            get_salesforce_incidents("Production", "NA1")
+        _, active = mock_sync.call_args.args
+        assert active["INC-003"]["severity"] == "warning"
+
+    @responses_lib.activate
+    def test_no_matching_incidents_syncs_empty_alerts(self):
+        from sfmon.core.overall_sf_org import get_salesforce_incidents
+        incidents = [
+            {
+                "id": "INC-002",
+                "instanceKeys": ["EU1"],
+                "IncidentImpacts": [{"severity": "minor"}],
+            }
+        ]
+        responses_lib.add(
+            responses_lib.GET,
+            f"{TRUST_API}/v1/incidents/active",
+            json=incidents,
+            status=200,
+        )
+        with patch("sfmon.core.overall_sf_org.incident_gauge"), \
+             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+            get_salesforce_incidents("Production", "NA1")
+        mock_sync.assert_called_once_with("salesforce_incidents", {})
+
+    @responses_lib.activate
+    def test_request_error_does_not_sync_alerts(self):
+        from sfmon.core.overall_sf_org import get_salesforce_incidents
+        import requests as req_lib
+        responses_lib.add(
+            responses_lib.GET,
+            f"{TRUST_API}/v1/incidents/active",
+            body=req_lib.exceptions.ConnectionError("network error"),
+        )
+        with patch("sfmon.core.overall_sf_org.incident_gauge"), \
+             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+            get_salesforce_incidents("Production", "NA1")
+        mock_sync.assert_not_called()
+
 
 class TestGetSalesforceMaintenances:
     @responses_lib.activate
