@@ -74,11 +74,11 @@ Everything runs on a default schedule with no config file required. See **[docs/
 
 **Prerequisites:** 
 
-On your local machine, you need to have the Salesforce CLI (`sf`) installed and logged in to the target org(s) via `sf org auth show-sfdx-auth-url --target-org my-org --json > authFile.json` in order to create the auth URLs. The monitoring user in each Salesforce org must have API access enabled and have the approriate permissions to monitor the various metrics. Preferably, the monitoring user should have the "Password Does Not Expire" and "Api Only User" system permissions granted either via a profile or permission set.
+On your local machine, you need to have the Salesforce CLI (`sf`) installed and logged in to the target org(s) via applicable monitoring users. The monitoring user in each Salesforce org must have API access enabled and have the appropriate permissions to monitor the various metrics. Preferably, the monitoring user should have the "Password Does Not Expire" and "Api Only User" system permissions granted either via a profile or permission set.
 
 SFMon itself doesn't use the Salesforce CLI at runtime — it only needs the auth URLs that you will provide to the app either via enviornment variables or AWS secrets manager.
 
-1. **Get your auth URL:** `sf org display --url-only`
+1. **Get your auth URL for each org:** `sf org auth show-sfdx-auth-url --target-org my-org --json > authFile.json`
 2. **Run:**
 
 ```bash
