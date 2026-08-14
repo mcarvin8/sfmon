@@ -278,7 +278,7 @@ See **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/C
 | **Output** | Time-series metrics scraped by Prometheus | Salesforce-native reports and guided reviews | Git diffs, Slack/Teams notifications, pipeline artifacts |
 | **Alerting** | PromQL + Alertmanager (same as rest of infra), or built-in Slack webhook alerting with no Alertmanager needed | Salesforce notifications and Success Plan reviews | Slack/Teams webhooks from CI |
 | **Data stays in your stack** | Yes | No (Salesforce-hosted) | Partially (metadata to Git; notifications to Slack/Teams) |
-| **Extra cost** | Compute to run the container | Salesforce edition / add-on fee | Free (open source) |
+| **Extra cost** | Free (open source) — compute to run the container, or a CI cron job via `--once` | Salesforce edition / add-on fee | Free (open source) — compute for the CI cron job |
 | **Best for** | SRE/DevOps teams already on Prometheus who want Salesforce as just another scrape target | Teams buying Salesforce-managed oversight and guidance | Teams wanting metadata drift detection and CI-integrated checks |
 
 SFMon and sfdx-hardis are complementary, not competitors: Hardis handles metadata backup and change detection via CI; SFMon provides continuous time-series for the same signals your infrastructure monitoring already tracks.
