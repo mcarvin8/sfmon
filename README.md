@@ -8,9 +8,28 @@
 [![PyPI Downloads](https://img.shields.io/pypi/dm/sfmon)](https://pypi.org/project/sfmon/)
 ![Coverage](https://raw.githubusercontent.com/mcarvin8/sfmon/refs/heads/main/badges/coverage.svg)
 
-SFMon is a **long-running Python application** that connects to your Salesforce org(s) on a schedule and exposes a **standard `/metrics` endpoint** compatible with Prometheus — so your Salesforce org lives in the same Grafana dashboards, PromQL alerts, and on-call runbooks as the rest of your infrastructure.
+SFMon is a **long-running Python application** that connects to your Salesforce org(s) on a schedule and exposes a **standard `/metrics` endpoint** compatible with Prometheus — so you can monitor your orgs with the same tech stack as the rest of your infrastructure.
 
 Metrics are instrumented with OpenTelemetry and structured logs are emitted as JSON; both can optionally **push** over OTLP instead of only being scraped/tailed — see [Metrics and logs](#metrics-and-logs).
+
+- [How it works](#how-it-works)
+- [Who is this for](#who-is-this-for)
+- [What you get](#what-you-get)
+- [Quick start](#quick-start)
+  - [Alternative: pip install](#alternative-pip-install)
+- [Multiple orgs](#multiple-orgs)
+  - [Fleet mode (one container, several orgs)](#fleet-mode-one-container-several-orgs)
+  - [One container per org (alternate)](#one-container-per-org-alternate)
+- [Metrics and logs](#metrics-and-logs)
+- [Alerting in PromQL](#alerting-in-promql)
+  - [Built-in Slack alerting (optional, no Alertmanager required)](#built-in-slack-alerting-optional-no-alertmanager-required)
+- [One-shot mode — run from a CI cron job instead of a daemon](#one-shot-mode--run-from-a-ci-cron-job-instead-of-a-daemon)
+- [Presets — scope down without a full config](#presets--scope-down-without-a-full-config)
+- [How it compares](#how-it-compares)
+- [PMD + minimal permission sets (optional, file-based)](#pmd--minimal-permission-sets-optional-file-based)
+- [When you need your own image](#when-you-need-your-own-image)
+- [Grafana](#grafana)
+- [Authors](#authors)
 
 ---
 
@@ -18,11 +37,11 @@ Metrics are instrumented with OpenTelemetry and structured logs are emitted as J
 
 One process, no database, no UI:
 
-1. On startup the container authenticates to your org (OAuth2 refresh token flow) and starts an internal **APScheduler** cron loop.
+1. On startup SFMon authenticates to your org (OAuth2 refresh token flow) and starts an internal **APScheduler** cron loop.
 2. Each collector job runs on its own schedule (every 5 minutes, hourly, or once daily off-peak — see [Presets](#presets--scope-down-without-a-full-config)), queries the org via SOQL/REST/Tooling API, and sets Prometheus gauges.
 3. Those gauges are served on **`:9001/metrics`**, forever, until Prometheus (or whatever scrapes you) pulls them.
 
-There's no persistence and no historical storage inside SFMon itself — your Prometheus-compatible backend owns the time series. Restarting the container just re-authenticates and resumes the schedule.
+There's no persistence and no historical storage inside SFMon itself — your Prometheus-compatible backend owns the time series. Restarting it just re-authenticates and resumes the schedule.
 
 ---
 
