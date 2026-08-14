@@ -79,7 +79,7 @@ Everything runs on a default schedule with no config file required. See **[docs/
 
 On your local machine, you need to have the Salesforce CLI (`sf`) installed and logged in to the target org(s) via applicable monitoring users. The monitoring user in each Salesforce org must have API access enabled and have the appropriate permissions to monitor the various metrics. Preferably, the monitoring user should have the "Password Does Not Expire" and "Api Only User" system permissions granted either via a profile or permission set.
 
-**Get your auth URL for each org:** `sf org auth show-sfdx-auth-url --target-org my-org --json > authFile.json`
+**Get your auth URL for each org (`force://PlatformCLI::...`):** `sf org auth show-sfdx-auth-url --target-org my-org --json > authFile.json`
 
 SFMon itself doesn't use the Salesforce CLI at runtime — it only needs the auth URL, provided via environment variable or AWS Secrets Manager.
 
@@ -227,7 +227,9 @@ For teams that don't run a full PromQL/Alertmanager stack, SFMon can also post d
 
 Alerts are edge-triggered — a Slack message fires once when a breach opens and once when it resolves, not on every scheduler tick while it stays active — using an on-disk cache (`SLACK_ALERT_CACHE_DIR`) keyed per org so state survives both the long-lived daemon and `--once` CI-cron restarts.
 
-Currently wired into governor limits (`LIMIT_ALERT_THRESHOLD_PERCENT`, default `80`), Salesforce Trust API incidents (an active incident on your org's pod posts on open and again on resolve), license seat usage (`LICENSE_ALERT_THRESHOLD_PERCENT`, default `90`), the org-wide Apex character limit (`APEX_CHARACTER_ALERT_THRESHOLD_PERCENT`, default `80`), and Apex Flex Queue depth (`FLEX_QUEUE_ALERT_THRESHOLD_PERCENT`, default `80`, `critical` once the queue actually hits its 100-job cap) — all `critical` at 95%+ except where noted. See **[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#optional--slack-alerting)**. The underlying `sync_alerts()` API is generic and other collectors can adopt it over time.
+Currently wired into governor limits (`LIMIT_ALERT_THRESHOLD_PERCENT`, default `80`), Salesforce Trust API incidents (an active incident on your org's pod posts on open and again on resolve), license seat usage (`LICENSE_ALERT_THRESHOLD_PERCENT`, default `90`), the org-wide Apex character limit (`APEX_CHARACTER_ALERT_THRESHOLD_PERCENT`, default `80`), and Apex Flex Queue depth (`FLEX_QUEUE_ALERT_THRESHOLD_PERCENT`, default `80`, `critical` once the queue actually hits its 100-job cap) — all `critical` at 95%+ except where noted. See **[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#optional--slack-alerting)**. 
+
+The underlying `sync_alerts()` API is generic and other collectors can adopt it over time. Please create a GitHub issue to request any new alerts.
 
 ---
 
