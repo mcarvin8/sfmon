@@ -4,7 +4,7 @@
 
 | Variable | Description |
 |----------|-------------|
-| `SALESFORCE_AUTH_URL` | SFDX auth URL (`sf org display --url-only`). Format: `force://PlatformCLI::...`. Not used in fleet mode — see below. |
+| `SALESFORCE_AUTH_URL` | SFDX auth URL (`sf org auth show-sfdx-auth-url --target-org my-org --json > authFile.json`). Format: `force://PlatformCLI::...`. Not used in fleet mode — see below. |
 
 ## Optional — runtime
 
