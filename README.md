@@ -47,7 +47,7 @@ There's no persistence and no historical storage inside SFMon itself — your Pr
 
 ## Who is this for
 
-SFMon is aimed at **SRE and DevOps teams** who already operate a Prometheus-compatible observability stack (Prometheus, Victoria Metrics, Grafana Cloud, or an OTel Collector pipeline)  and are also responsible for one or more Salesforce orgs. If you define alerts in PromQL, route pages through Alertmanager, and want Salesforce signals to behave exactly like any other scrape target — this is for you. Don't run a scrape-based stack at all? Push metrics and logs over OTLP instead — see [Metrics and logs](#metrics-and-logs).
+SFMon is aimed at **SRE and DevOps teams** who already operate a Prometheus-compatible observability stack (Prometheus, Victoria Metrics, Grafana Cloud, or an OTel Collector pipeline) and are also responsible for one or more Salesforce orgs — teams who define alerts in PromQL, route pages through Alertmanager, and want Salesforce signals to behave like any other scrape target. Don't run a scrape-based stack? Push metrics and logs over OTLP instead — see [Metrics and logs](#metrics-and-logs).
 
 It is **not** a Salesforce admin tool. It has no UI of its own; all visibility comes from your existing observability stack.
 
@@ -76,7 +76,7 @@ Everything runs on a default schedule with no config file required. See **[docs/
 
 On your local machine, you need to have the Salesforce CLI (`sf`) installed and logged in to the target org(s) via applicable monitoring users. The monitoring user in each Salesforce org must have API access enabled and have the appropriate permissions to monitor the various metrics. Preferably, the monitoring user should have the "Password Does Not Expire" and "Api Only User" system permissions granted either via a profile or permission set.
 
-SFMon itself doesn't use the Salesforce CLI at runtime — it only needs the auth URLs that you will provide to the app either via enviornment variables or AWS secrets manager.
+SFMon itself doesn't use the Salesforce CLI at runtime — it only needs the auth URL, provided via environment variable or AWS Secrets Manager.
 
 1. **Get your auth URL for each org:** `sf org auth show-sfdx-auth-url --target-org my-org --json > authFile.json`
 2. **Run:**
@@ -292,14 +292,13 @@ If **`PMD_RULESET_PATH`** is unset or the ruleset file is missing, PMD metrics a
 
 ## When you need your own image
 
-The default image is meant for **standard** monitoring: env vars + optional JSON config. It also excludes org-specific PMD/perm-set files (see **`.dockerignore`**).
+The default image covers **standard** monitoring: env vars + optional JSON config. It excludes org-specific PMD/perm-set files by default (see **`.dockerignore`**) — for baking those in, see [PMD + minimal permission sets](#pmd--minimal-permission-sets-optional-file-based) above.
 
-**Build and run your own image** if you need to change **application code** (new checks, different logic, pinned dependencies, private registry policy, anything not covered by env/config) or to **bake in** local report files after adjusting **`.dockerignore`**.
+**Build and run your own image** if you need to change **application code** — new checks, different logic, pinned dependencies, private registry policy, or anything not covered by env/config.
 
 ```bash
 docker build \
   -f docker/Dockerfile \
-  --build-arg SALESFORCE_AUTH_URL="$SALESFORCE_AUTH_URL" \
   -t your-registry/sfmon:latest .
 
 docker push your-registry/sfmon:latest   # if using a registry
