@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.15.0](https://github.com/mcarvin8/sfmon/compare/v3.14.1...v3.15.0) (2026-08-14)
+
+
+### Features
+
+* add generic Slack alerting layer, wire into limits monitoring ([#64](https://github.com/mcarvin8/sfmon/issues/64)) ([a9e264a](https://github.com/mcarvin8/sfmon/commit/a9e264a99081851fa91efa4b43889686173f89c8))
+* add Slack alerting for active Salesforce Trust incidents ([#66](https://github.com/mcarvin8/sfmon/issues/66)) ([1a7e461](https://github.com/mcarvin8/sfmon/commit/1a7e461f9260ad0c5bad33ea033a9e7fff491cab))
+* add Slack alerting for Apex Flex Queue depth ([#68](https://github.com/mcarvin8/sfmon/issues/68)) ([c397404](https://github.com/mcarvin8/sfmon/commit/c397404caf40067f754c1341e0ba2159c57e3256))
+* add Slack alerting for license usage and Apex character limit ([#67](https://github.com/mcarvin8/sfmon/issues/67)) ([776d79b](https://github.com/mcarvin8/sfmon/commit/776d79b0ae9daab406ced0196e1a0875adaceda4))
+
 ## [3.14.1](https://github.com/mcarvin8/sfmon/compare/v3.14.0...v3.14.1) (2026-08-13)
 
 
