@@ -176,6 +176,14 @@ sfmon_percent_user_licenses_used{license_name="Salesforce"} > 90
 
 Route these through Alertmanager with the same receivers (PagerDuty, Slack, etc.) you use for every other service.
 
+### Built-in Slack alerting (optional, no Alertmanager required)
+
+For teams that don't run a full PromQL/Alertmanager stack, SFMon can also post directly to a Slack incoming webhook. Set `SLACK_WEBHOOK_URL` and it's on; leave it unset and there's no behavior change at all (no cache reads/writes, no HTTP calls).
+
+Alerts are edge-triggered — a Slack message fires once when a breach opens and once when it resolves, not on every scheduler tick while it stays active — using an on-disk cache (`SLACK_ALERT_CACHE_DIR`) keyed per org so state survives both the long-lived daemon and `--once` CI-cron restarts.
+
+Currently wired into governor limits monitoring: any limit at/above `LIMIT_ALERT_THRESHOLD_PERCENT` (default `80`, `critical` at 95%+) posts to Slack. See **[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#optional--slack-alerting)**. The underlying `sync_alerts()` API is generic and other collectors can adopt it over time.
+
 ---
 
 ## One-shot mode — run from a CI cron job instead of a daemon
@@ -223,7 +231,7 @@ See **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/C
 |--|-------|----------------------------------------|---------------------------|
 | **Model** | Always-on container/process (Prometheus `/metrics`), or a scheduled CI job via `--once` | Salesforce TAM/CSM engagement + event log files | Scheduled CI jobs (GitHub Actions / GitLab CI) |
 | **Output** | Time-series metrics scraped by Prometheus | Salesforce-native reports and guided reviews | Git diffs, Slack/Teams notifications, pipeline artifacts |
-| **Alerting** | PromQL + Alertmanager — same as rest of infra | Salesforce notifications and Success Plan reviews | Slack/Teams webhooks from CI |
+| **Alerting** | PromQL + Alertmanager (same as rest of infra), or built-in Slack webhook alerting with no Alertmanager needed | Salesforce notifications and Success Plan reviews | Slack/Teams webhooks from CI |
 | **Data stays in your stack** | Yes | No (Salesforce-hosted) | Partially (metadata to Git; notifications to Slack/Teams) |
 | **Extra cost** | Compute to run the container | Salesforce edition / add-on fee | Free (open source) |
 | **Best for** | SRE/DevOps teams already on Prometheus who want Salesforce as just another scrape target | Teams buying Salesforce-managed oversight and guidance | Teams wanting metadata drift detection and CI-integrated checks |
