@@ -220,6 +220,11 @@ def get_salesforce_instance(sf):
 def get_salesforce_incidents(org, instancepod):
     """
     Get all open incidents against the org.
+
+    Active incidents on this pod are also passed to sync_alerts() for Slack
+    notification (no-op unless SLACK_WEBHOOK_URL is set) — one alert per
+    incident, opened when it first appears here and resolved once it drops
+    off the Trust API's active list.
     """
     try:
         response = requests.get(
@@ -230,6 +235,7 @@ def get_salesforce_incidents(org, instancepod):
         incidents = response.json()
         incident_gauge.clear()
         incident_cnt = 0
+        active_incidents = {}
 
         for element in incidents:
             try:
@@ -250,6 +256,18 @@ def get_salesforce_incidents(org, instancepod):
                         incident_id=incident_id,
                     ).set(1)
                     incident_cnt += 1
+                    active_incidents[incident_id] = {
+                        "title": f"Salesforce incident on pod {instancepod}",
+                        "message": (
+                            f"Active incident {incident_id} impacting pod "
+                            f"{instancepod}, severity: {severity}."
+                        ),
+                        "severity": (
+                            "critical"
+                            if str(severity).lower() in ("major", "critical")
+                            else "warning"
+                        ),
+                    }
             except (KeyError, IndexError) as e:
                 logger.warning("Error processing incident element: %s", e)
 
@@ -257,6 +275,8 @@ def get_salesforce_incidents(org, instancepod):
             incident_gauge.labels(
                 environment=org, pod=instancepod, severity="ok", incident_id=None
             ).set(0)
+
+        sync_alerts("salesforce_incidents", active_incidents)
 
     except requests.RequestException as e:
         logger.error("Error fetching incidents: %s", e)
