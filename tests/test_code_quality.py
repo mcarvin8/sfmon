@@ -170,3 +170,49 @@ class TestApexUsedLimitsMonitoring:
         from sfmon.tech_debt.code_quality import apex_used_limits_monitoring
         with patch("sfmon.tech_debt.code_quality.query_records_all", side_effect=RuntimeError("fail")):
             apex_used_limits_monitoring(mock_sf)  # Should not raise
+
+    def test_syncs_alert_when_above_threshold(self, mock_sf):
+        import sfmon.tech_debt.code_quality as code_quality
+        classes = [self._make_class()]  # 1000 chars
+        triggers = [self._make_trigger()]  # 500 chars -> 1500 total
+        with patch.object(code_quality, "APEX_CHARACTER_LIMIT", 2000), \
+             patch.object(code_quality, "APEX_CHARACTER_ALERT_THRESHOLD_PERCENT", 70), \
+             patch.object(code_quality, "query_records_all", side_effect=[classes, triggers]), \
+             patch.object(code_quality, "apex_class_length_without_comments_gauge"), \
+             patch.object(code_quality, "apex_trigger_length_without_comments_gauge"), \
+             patch.object(code_quality, "apex_character_limit_percentage_gauge"), \
+             patch.object(code_quality, "sync_alerts") as mock_sync:
+            code_quality.apex_used_limits_monitoring(mock_sf)
+        mock_sync.assert_called_once()
+        category, breached = mock_sync.call_args.args
+        assert category == "apex_character_limit"
+        assert set(breached) == {"apex_character_limit"}
+        assert breached["apex_character_limit"]["severity"] == "warning"
+
+    def test_syncs_critical_alert_at_95_percent(self, mock_sf):
+        import sfmon.tech_debt.code_quality as code_quality
+        classes = [self._make_class()]  # 1000 chars
+        triggers = []
+        with patch.object(code_quality, "APEX_CHARACTER_LIMIT", 1000), \
+             patch.object(code_quality, "APEX_CHARACTER_ALERT_THRESHOLD_PERCENT", 80), \
+             patch.object(code_quality, "query_records_all", side_effect=[classes, triggers]), \
+             patch.object(code_quality, "apex_class_length_without_comments_gauge"), \
+             patch.object(code_quality, "apex_trigger_length_without_comments_gauge"), \
+             patch.object(code_quality, "apex_character_limit_percentage_gauge"), \
+             patch.object(code_quality, "sync_alerts") as mock_sync:
+            code_quality.apex_used_limits_monitoring(mock_sf)
+        _, breached = mock_sync.call_args.args
+        assert breached["apex_character_limit"]["severity"] == "critical"
+
+    def test_syncs_empty_alerts_when_below_threshold(self, mock_sf):
+        import sfmon.tech_debt.code_quality as code_quality
+        classes = [self._make_class()]  # 1000 chars
+        triggers = []
+        with patch.object(code_quality, "APEX_CHARACTER_LIMIT", 6000000), \
+             patch.object(code_quality, "query_records_all", side_effect=[classes, triggers]), \
+             patch.object(code_quality, "apex_class_length_without_comments_gauge"), \
+             patch.object(code_quality, "apex_trigger_length_without_comments_gauge"), \
+             patch.object(code_quality, "apex_character_limit_percentage_gauge"), \
+             patch.object(code_quality, "sync_alerts") as mock_sync:
+            code_quality.apex_used_limits_monitoring(mock_sf)
+        mock_sync.assert_called_once_with("apex_character_limit", {})

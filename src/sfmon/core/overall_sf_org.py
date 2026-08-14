@@ -23,6 +23,9 @@ Environment Variables:
     - LIMIT_ALERT_THRESHOLD_PERCENT: Usage percentage at/above which a limit
                                       triggers a Slack alert, if SLACK_WEBHOOK_URL
                                       is set (default: 80)
+    - LICENSE_ALERT_THRESHOLD_PERCENT: Usage percentage at/above which a user,
+                                        permission set, or usage-based entitlement
+                                        license triggers a Slack alert (default: 90)
 """
 
 import os
@@ -53,6 +56,9 @@ SALESFORCE_STATUS_API_URL = os.getenv(
     "SALESFORCE_STATUS_API_URL", "https://api.status.salesforce.com"
 )
 LIMIT_ALERT_THRESHOLD_PERCENT = float(os.getenv("LIMIT_ALERT_THRESHOLD_PERCENT", 80))
+LICENSE_ALERT_THRESHOLD_PERCENT = float(
+    os.getenv("LICENSE_ALERT_THRESHOLD_PERCENT", 90)
+)
 
 
 def monitor_salesforce_limits(sf):
@@ -101,6 +107,10 @@ def monitor_salesforce_limits(sf):
 def get_salesforce_licenses(sf):
     """
     Get all license data.
+
+    User, permission set, and usage-based entitlement licenses at or above
+    LICENSE_ALERT_THRESHOLD_PERCENT usage are also passed to sync_alerts()
+    for Slack notification (no-op unless SLACK_WEBHOOK_URL is set).
     """
     logger.info("Getting Salesforce licenses...")
     total_user_licenses_gauge.clear()
@@ -112,6 +122,7 @@ def get_salesforce_licenses(sf):
     total_usage_based_entitlements_licenses_gauge.clear()
     used_usage_based_entitlements_licenses_gauge.clear()
     percent_usage_based_entitlements_used_gauge.clear()
+    breached_licenses = {}
 
     result_user_license = query_records_all(
         sf, "SELECT Name, Status, UsedLicenses, TotalLicenses FROM UserLicense"
@@ -137,6 +148,16 @@ def get_salesforce_licenses(sf):
                 used_licenses=used_licenses,
                 total_licenses=total_licenses,
             ).set(percent_used)
+
+            if percent_used >= LICENSE_ALERT_THRESHOLD_PERCENT:
+                breached_licenses[f"user_license:{license_name}"] = {
+                    "title": f"User license '{license_name}' at {percent_used:.1f}% used",
+                    "message": (
+                        f"Used {used_licenses}/{total_licenses} "
+                        f"({percent_used:.1f}%). Status: {status}."
+                    ),
+                    "severity": "critical" if percent_used >= 95 else "warning",
+                }
 
     result_perm_set_license = query_records_all(
         sf,
@@ -166,6 +187,20 @@ def get_salesforce_licenses(sf):
                 total_licenses=total_licenses,
             ).set(percent_used)
 
+            if percent_used >= LICENSE_ALERT_THRESHOLD_PERCENT:
+                breached_licenses[f"permset_license:{license_name}"] = {
+                    "title": (
+                        f"Permission set license '{license_name}' at "
+                        f"{percent_used:.1f}% used"
+                    ),
+                    "message": (
+                        f"Used {used_licenses}/{total_licenses} "
+                        f"({percent_used:.1f}%). Status: {status}, expires: "
+                        f"{expiration_date}."
+                    ),
+                    "severity": "critical" if percent_used >= 95 else "warning",
+                }
+
     result_usage_based_entitlements = query_records_all(
         sf,
         "SELECT MasterLabel, AmountUsed, CurrentAmountAllowed, EndDate FROM TenantUsageEntitlement",
@@ -192,6 +227,21 @@ def get_salesforce_licenses(sf):
                 used_licenses=used_licenses,
                 total_licenses=total_licenses,
             ).set(percent_used)
+
+            if percent_used >= LICENSE_ALERT_THRESHOLD_PERCENT:
+                breached_licenses[f"usage_entitlement:{license_name}"] = {
+                    "title": (
+                        f"Usage-based entitlement '{license_name}' at "
+                        f"{percent_used:.1f}% used"
+                    ),
+                    "message": (
+                        f"Used {used_licenses}/{total_licenses} "
+                        f"({percent_used:.1f}%). Expires: {expiration_date}."
+                    ),
+                    "severity": "critical" if percent_used >= 95 else "warning",
+                }
+
+    sync_alerts("salesforce_licenses", breached_licenses)
 
 
 def fetch_pod(instance):

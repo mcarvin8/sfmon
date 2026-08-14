@@ -139,6 +139,94 @@ class TestGetSalesforceLicenses:
 
         m_pct.labels.assert_not_called()
 
+    def test_syncs_alerts_across_all_three_license_types(self, mock_sf):
+        from sfmon.core.overall_sf_org import get_salesforce_licenses
+        user_lic = [
+            {"Name": "Salesforce", "Status": "Active", "TotalLicenses": 100, "UsedLicenses": 95}
+        ]
+        perm_lic = [
+            {
+                "MasterLabel": "Sales Cloud PSL",
+                "Status": "Active",
+                "ExpirationDate": None,
+                "TotalLicenses": 50,
+                "UsedLicenses": 46,  # 92% used
+            }
+        ]
+        usage_lic = [
+            {
+                "MasterLabel": "CDP Credits",
+                "AmountUsed": 999,
+                "CurrentAmountAllowed": 1000,
+                "EndDate": "2026-12-31",
+            }
+        ]
+        with patch("sfmon.core.overall_sf_org.query_records_all", side_effect=[user_lic, perm_lic, usage_lic]), \
+             patch("sfmon.core.overall_sf_org.total_user_licenses_gauge"), \
+             patch("sfmon.core.overall_sf_org.used_user_licenses_gauge"), \
+             patch("sfmon.core.overall_sf_org.percent_user_licenses_used_gauge"), \
+             patch("sfmon.core.overall_sf_org.total_permissionset_licenses_gauge"), \
+             patch("sfmon.core.overall_sf_org.used_permissionset_licenses_gauge"), \
+             patch("sfmon.core.overall_sf_org.percent_permissionset_used_gauge"), \
+             patch("sfmon.core.overall_sf_org.total_usage_based_entitlements_licenses_gauge"), \
+             patch("sfmon.core.overall_sf_org.used_usage_based_entitlements_licenses_gauge"), \
+             patch("sfmon.core.overall_sf_org.percent_usage_based_entitlements_used_gauge"), \
+             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+            get_salesforce_licenses(mock_sf)
+
+        mock_sync.assert_called_once()
+        category, breached = mock_sync.call_args.args
+        assert category == "salesforce_licenses"
+        assert set(breached) == {
+            "user_license:Salesforce",
+            "permset_license:Sales Cloud PSL",
+            "usage_entitlement:CDP Credits",
+        }
+        # 95% used -> critical; 80%/99.9% used -> below/at threshold checks below
+        assert breached["user_license:Salesforce"]["severity"] == "critical"
+        assert breached["permset_license:Sales Cloud PSL"]["severity"] == "warning"
+        assert breached["usage_entitlement:CDP Credits"]["severity"] == "critical"
+
+    def test_syncs_empty_alerts_when_nothing_breached(self, mock_sf):
+        from sfmon.core.overall_sf_org import get_salesforce_licenses
+        user_lic = [{"Name": "Salesforce", "Status": "Active", "TotalLicenses": 100, "UsedLicenses": 10}]
+
+        with patch("sfmon.core.overall_sf_org.query_records_all", side_effect=[user_lic, [], []]), \
+             patch("sfmon.core.overall_sf_org.total_user_licenses_gauge"), \
+             patch("sfmon.core.overall_sf_org.used_user_licenses_gauge"), \
+             patch("sfmon.core.overall_sf_org.percent_user_licenses_used_gauge"), \
+             patch("sfmon.core.overall_sf_org.total_permissionset_licenses_gauge"), \
+             patch("sfmon.core.overall_sf_org.used_permissionset_licenses_gauge"), \
+             patch("sfmon.core.overall_sf_org.percent_permissionset_used_gauge"), \
+             patch("sfmon.core.overall_sf_org.total_usage_based_entitlements_licenses_gauge"), \
+             patch("sfmon.core.overall_sf_org.used_usage_based_entitlements_licenses_gauge"), \
+             patch("sfmon.core.overall_sf_org.percent_usage_based_entitlements_used_gauge"), \
+             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+            get_salesforce_licenses(mock_sf)
+
+        mock_sync.assert_called_once_with("salesforce_licenses", {})
+
+    def test_custom_license_threshold_constant(self, mock_sf):
+        import sfmon.core.overall_sf_org as overall_sf_org
+        user_lic = [{"Name": "Salesforce", "Status": "Active", "TotalLicenses": 100, "UsedLicenses": 55}]
+
+        with patch("sfmon.core.overall_sf_org.query_records_all", side_effect=[user_lic, [], []]), \
+             patch.object(overall_sf_org, "LICENSE_ALERT_THRESHOLD_PERCENT", 50), \
+             patch.object(overall_sf_org, "total_user_licenses_gauge"), \
+             patch.object(overall_sf_org, "used_user_licenses_gauge"), \
+             patch.object(overall_sf_org, "percent_user_licenses_used_gauge"), \
+             patch.object(overall_sf_org, "total_permissionset_licenses_gauge"), \
+             patch.object(overall_sf_org, "used_permissionset_licenses_gauge"), \
+             patch.object(overall_sf_org, "percent_permissionset_used_gauge"), \
+             patch.object(overall_sf_org, "total_usage_based_entitlements_licenses_gauge"), \
+             patch.object(overall_sf_org, "used_usage_based_entitlements_licenses_gauge"), \
+             patch.object(overall_sf_org, "percent_usage_based_entitlements_used_gauge"), \
+             patch.object(overall_sf_org, "sync_alerts") as mock_sync:
+            overall_sf_org.get_salesforce_licenses(mock_sf)
+
+        _, breached = mock_sync.call_args.args
+        assert set(breached) == {"user_license:Salesforce"}
+
 
 class TestFetchPod:
     def test_returns_instance_name(self, mock_sf):

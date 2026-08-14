@@ -9,6 +9,9 @@ This module monitors code quality technical debt including:
 
 Environment Variables:
     - DEPRECATED_API_VERSION: API versions at or below this are considered deprecated (default: 50)
+    - APEX_CHARACTER_ALERT_THRESHOLD_PERCENT: Usage percentage of APEX_CHARACTER_LIMIT
+                                               at/above which a Slack alert triggers,
+                                               if SLACK_WEBHOOK_URL is set (default: 80)
 
 Data Sources:
     - ApexClass object (via standard API)
@@ -21,6 +24,7 @@ import os
 import re
 
 from ..logger import logger
+from ..slack_notify import sync_alerts
 from .gauges import (
     deprecated_apex_class_gauge,
     deprecated_apex_trigger_gauge,
@@ -33,9 +37,14 @@ from ..query import query_records_all, tooling_query_records_all
 
 # API versions at or below this threshold are considered deprecated
 DEPRECATED_API_VERSION = int(os.getenv("DEPRECATED_API_VERSION", 50))
-# Salesforce Apex character limit (6M for Enterprise, Performance, Unlimited, Developer)
+# Salesforce Apex character limit (6M for Enterprise, Performance, Unlimited, Developer).
+# This is a fixed platform constant, not something exposed via SOQL or the REST /limits
+# endpoint — Salesforce doesn't vary it by org, so there's no live value to query.
 # Custom classes/triggers only (NamespacePrefix=null); excludes comments and @isTest classes
 APEX_CHARACTER_LIMIT = int(os.getenv("APEX_CHARACTER_LIMIT", 6000000))
+APEX_CHARACTER_ALERT_THRESHOLD_PERCENT = float(
+    os.getenv("APEX_CHARACTER_ALERT_THRESHOLD_PERCENT", 80)
+)
 
 
 def apex_classes_api_version(sf):
@@ -158,6 +167,9 @@ def apex_used_limits_monitoring(sf):
     Monitor Apex Used Limits: per-class/trigger length gauges and overall limit percentage.
     Runs 2 queries (ApexClass, ApexTrigger), populates 3 gauges. Custom classes/triggers only.
     Excludes @isTest classes from the limit percentage. Runs once daily.
+
+    If usage is at/above APEX_CHARACTER_ALERT_THRESHOLD_PERCENT, also passed to
+    sync_alerts() for Slack notification (no-op unless SLACK_WEBHOOK_URL is set).
     """
     try:
         logger.info(
@@ -211,6 +223,18 @@ def apex_used_limits_monitoring(sf):
             len(classes),
             len(triggers),
         )
+
+        breached = {}
+        if percentage >= APEX_CHARACTER_ALERT_THRESHOLD_PERCENT:
+            breached["apex_character_limit"] = {
+                "title": f"Apex character limit at {percentage:.1f}% used",
+                "message": (
+                    f"Used {total_chars}/{APEX_CHARACTER_LIMIT} characters "
+                    f"({percentage:.1f}%) across custom classes and triggers."
+                ),
+                "severity": "critical" if percentage >= 95 else "warning",
+            }
+        sync_alerts("apex_character_limit", breached)
     # pylint: disable=broad-except
     except Exception as e:
         logger.error("Error monitoring Apex Used Limits: %s", e)
