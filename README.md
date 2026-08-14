@@ -39,7 +39,7 @@ One process, no database, no UI:
 
 1. On startup SFMon authenticates to your org (OAuth2 refresh token flow) and starts an internal **APScheduler** cron loop.
 2. Each collector job runs on its own schedule (every 5 minutes, hourly, or once daily off-peak — see [Presets](#presets--scope-down-without-a-full-config)), queries the org via SOQL/REST/Tooling API, and sets Prometheus gauges.
-3. Those gauges are served on **`:9001/metrics`**, forever, until Prometheus (or whatever scrapes you) pulls them.
+3. Those gauges are served on **`:9001/metrics`**, so Prometheus (or a compatible tool) scrapes them.
 
 There's no persistence and no historical storage inside SFMon itself — your Prometheus-compatible backend owns the time series. Restarting it just re-authenticates and resumes the schedule.
 
