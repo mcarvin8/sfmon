@@ -1,0 +1,41 @@
+name: Action Smoke Test
+
+# Manually-triggered check that the *published* action (mcarvin8/sfmon@v3, via
+# the Marketplace/floating major tag) actually runs against a real org - as
+# opposed to action-build.yml, which only builds action/Dockerfile locally
+# and checks the failure path with an invalid auth URL. Run this after cutting
+# a release to confirm the published tag works end to end.
+
+on:
+  workflow_dispatch:
+    inputs:
+      job-id:
+        description: "sfmon job id to run once via the published action"
+        required: false
+        default: "monitor_salesforce_limits"
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run published SFMon action
+        id: sfmon
+        uses: mcarvin8/sfmon@v3
+        with:
+          job-id: ${{ inputs.job-id }}
+          auth-url: ${{ secrets.SALESFORCE_AUTH_URL }}
+
+      - name: Verify it actually ran
+        run: |
+          echo "exit-code: ${{ steps.sfmon.outputs.exit-code }}"
+          if [ "${{ steps.sfmon.outputs.exit-code }}" != "0" ]; then
+            echo "Published action did not succeed"
+            exit 1
+          fi
+
+          metrics='${{ steps.sfmon.outputs.metrics-json }}'
+          echo "$metrics" | jq .
+          if [ "$(echo "$metrics" | jq 'length')" -eq 0 ]; then
+            echo "Action succeeded but produced no metrics"
+            exit 1
+          fi
