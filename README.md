@@ -6,6 +6,7 @@
 [![PyPI Version](https://img.shields.io/pypi/v/sfmon)](https://pypi.org/project/sfmon/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sfmon)](https://pypi.org/project/sfmon/)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/sfmon)](https://pypi.org/project/sfmon/)
+[![GitHub Marketplace](https://img.shields.io/badge/marketplace-Run%20Salesforce%20Monitoring-blue?logo=github)](https://github.com/marketplace/actions/run-salesforce-monitoring)
 ![Coverage](https://raw.githubusercontent.com/mcarvin8/sfmon/refs/heads/main/badges/coverage.svg)
 
 SFMon is a **long-running Python application** that connects to your Salesforce org(s) on a schedule and exposes a **standard `/metrics` endpoint** compatible with Prometheus — so you can monitor your orgs with the same tech stack as the rest of your infrastructure.
@@ -26,7 +27,8 @@ Metrics are instrumented with OpenTelemetry and structured logs are emitted as J
 - [Metrics and logs](#metrics-and-logs)
 - [Alerting in PromQL](#alerting-in-promql)
   - [Built-in Slack alerting (optional, no Alertmanager required)](#built-in-slack-alerting-optional-no-alertmanager-required)
-- [One-shot mode — run from a CI cron job instead of a daemon](#one-shot-mode--run-from-a-ci-cron-job-instead-of-a-daemon)
+- [One-shot mode — run from a CI cron job or GitHub Action instead of a daemon](#one-shot-mode--run-from-a-ci-cron-job-or-github-action-instead-of-a-daemon)
+  - [GitHub Action — run a single job as a CI step](#github-action--run-a-single-job-as-a-ci-step)
 - [Presets — scope down without a full config](#presets--scope-down-without-a-full-config)
 - [How it compares](#how-it-compares)
 - [PMD + minimal permission sets (optional, file-based)](#pmd--minimal-permission-sets-optional-file-based)
