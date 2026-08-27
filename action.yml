@@ -1,0 +1,38 @@
+name: 'SFMon Check'
+description: 'Run one SFMon Salesforce monitoring job once and expose its Prometheus metrics as action outputs.'
+author: 'Matt Carvin'
+branding:
+  icon: 'activity'
+  color: 'blue'
+
+inputs:
+  job-id:
+    description: >-
+      Job id to run once, e.g. monitor_salesforce_limits. Forces the job to
+      run regardless of config/opt-in state (see run_once() in
+      src/sfmon/salesforce_monitoring.py for the full job list).
+    required: true
+  auth-url:
+    description: 'Salesforce SFDX auth URL (single-org mode). Maps to SALESFORCE_AUTH_URL.'
+    required: true
+  org-name:
+    description: 'Org label applied to metrics in single-org mode. Maps to ORG_NAME.'
+    required: false
+    default: ''
+
+outputs:
+  exit-code:
+    description: 'sfmon exit code: 0 = success, 1 = job failed, 2 = unknown job id.'
+  metrics-raw:
+    description: 'Raw Prometheus exposition text produced by the run.'
+  metrics-json:
+    description: 'Metrics parsed into a flat JSON object: {"metric_name{labels}": value, ...}.'
+
+runs:
+  using: 'docker'
+  image: 'action/Dockerfile'
+  args:
+    - ${{ inputs.job-id }}
+  env:
+    SALESFORCE_AUTH_URL: ${{ inputs.auth-url }}
+    ORG_NAME: ${{ inputs.org-name }}
