@@ -1,0 +1,69 @@
+name: Action Build
+
+# Builds the SFMon GitHub Action image (action/Dockerfile) and smoke-tests
+# entrypoint.sh the same way docker-build.yml/package-build.yml smoke-test
+# their respective artifacts: run it with a deliberately invalid auth URL and
+# verify it fails the way sfmon --once does, and that it still writes the
+# exit-code/metrics-raw/metrics-json outputs on that failure path.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "action/**"
+      - "action.yml"
+      - ".github/workflows/action-build.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "action/**"
+      - "action.yml"
+      - ".github/workflows/action-build.yml"
+
+jobs:
+  action-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build action image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./action
+          file: ./action/Dockerfile
+          push: false
+          load: true
+          tags: sfmon-action:ci-test
+
+      - name: Run action against an invalid auth URL and inspect outputs
+        run: |
+          set +e
+          out_file="$(mktemp)"
+          docker run --rm \
+            -e SALESFORCE_AUTH_URL="force://invalid" \
+            -e GITHUB_OUTPUT=/github/output \
+            -v "$out_file:/github/output" \
+            sfmon-action:ci-test monitor_salesforce_limits > /tmp/action-run.log 2>&1
+          status=$?
+          set -e
+
+          cat /tmp/action-run.log
+          echo "--- GITHUB_OUTPUT ---"
+          cat "$out_file"
+
+          if [ "$status" -eq 0 ]; then
+            echo "Expected the action to exit non-zero on an invalid auth URL"
+            exit 1
+          fi
+
+          grep -q "Invalid SFDX auth URL format" /tmp/action-run.log
+          grep -q "^exit-code=1$" "$out_file"
+          grep -q "^metrics-raw<<SFMON_METRICS_EOF$" "$out_file"
+          grep -q "^metrics-json={" "$out_file"
