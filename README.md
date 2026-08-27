@@ -257,7 +257,7 @@ Same one-shot model, packaged as a reusable action so a workflow step can gate o
 ```yaml
 - name: Check Salesforce API limits
   id: limits
-  uses: mcarvin8/sfmon@v1
+  uses: mcarvin8/sfmon@v3
   with:
     job-id: monitor_salesforce_limits
     auth-url: ${{ secrets.SF_AUTH_URL }}
