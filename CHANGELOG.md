@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.0](https://github.com/mcarvin8/sfmon/compare/v3.15.0...v3.16.0) (2026-08-27)
+
+
+### Features
+
+* add GitHub Action wrapper for one-shot job runs ([#69](https://github.com/mcarvin8/sfmon/issues/69)) ([4dd7c4e](https://github.com/mcarvin8/sfmon/commit/4dd7c4ea2042ee16d6aca011cc5f52b4fcff96f4))
+
 ## [3.15.0](https://github.com/mcarvin8/sfmon/compare/v3.14.1...v3.15.0) (2026-08-14)
 
 
