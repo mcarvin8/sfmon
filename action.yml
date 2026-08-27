@@ -1,4 +1,4 @@
-name: 'SFMon Check'
+name: 'Run Salesforce Monitoring'
 description: 'Run one SFMon Salesforce monitoring job once and expose its Prometheus metrics as action outputs.'
 author: 'Matt Carvin'
 branding:
