@@ -6,6 +6,12 @@
 |----------|-------------|
 | `SALESFORCE_AUTH_URL` | SFDX auth URL (`sf org auth show-sfdx-auth-url --target-org my-org --json > authFile.json`). Format: `force://PlatformCLI::...`. Not used in fleet mode — see below. |
 
+### Salesforce authentication
+
+SFMon uses the OAuth refresh-token flow represented by `SALESFORCE_AUTH_URL`. The URL contains a refresh token, which SFMon exchanges for an access token when it connects. If a Salesforce session expires, SFMon reconnects using the configured auth URL; with AWS Secrets Manager enabled, it fetches the secret again on reconnect. This makes the flow suitable for unattended, long-running monitoring, provided the refresh token remains valid and its connected app and user are authorized.
+
+SFMon does not currently use the JWT bearer flow. JWT is also a valid option for unattended services, but it replaces the refresh-token credential with a private signing key, certificate, and additional client and user configuration. The application must still obtain fresh access tokens, and the key and certificate need secure storage, rotation, and monitoring. SFMon's existing refresh-token flow already supports its reconnect behavior and secret-management integration, so JWT would add operational and implementation work without a current need. Consider JWT if your organization's security policy prohibits refresh tokens or requires certificate-based authentication. See Salesforce's [JWT flow guide](https://developer.salesforce.com/docs/platform/sfdx-dev/guide/sfdx-dev-auth-jwt-flow.html) for its prerequisites and limitations.
+
 ## Optional — runtime
 
 | Variable | Default | Description |
