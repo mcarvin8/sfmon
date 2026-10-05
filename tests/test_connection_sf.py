@@ -35,6 +35,13 @@ class TestGetSalesforceConnectionUrl:
         with pytest.raises(ValueError, match="Invalid SFDX auth URL format"):
             connection_sf.get_salesforce_connection_url("not-a-valid-sfdx-url")
 
+    def test_http_url_is_upgraded_to_https(self):
+        from sfmon import connection_sf
+
+        assert connection_sf._https_url("http://login.salesforce.com") == (
+            "https://login.salesforce.com"
+        )
+
     def test_successful_connection(self):
         mock_token_response = MagicMock()
         mock_token_response.json.return_value = {
