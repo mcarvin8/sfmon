@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.2](https://github.com/mcarvin8/sfmon/compare/v3.16.1...v3.16.2) (2026-10-05)
+
+
+### Bug Fixes
+
+* normalize Salesforce instance URLs ([7f616e6](https://github.com/mcarvin8/sfmon/commit/7f616e6a4fce032bcd42e3452c593928b23ef4b6))
+
 ## [3.16.1](https://github.com/mcarvin8/sfmon/compare/v3.16.0...v3.16.1) (2026-10-05)
 
 
