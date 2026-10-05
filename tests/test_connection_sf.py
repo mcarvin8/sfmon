@@ -45,8 +45,8 @@ class TestGetSalesforceConnectionUrl:
         mock_sf_instance = MagicMock()
 
         with patch("requests.post", return_value=mock_token_response) as mock_post, \
-             patch("requests.get", return_value=_mock_versions_response()), \
-             patch("sfmon.connection_sf.Salesforce", return_value=mock_sf_instance) as mock_sf_cls:
+            patch("requests.get", return_value=_mock_versions_response()) as mock_get, \
+            patch("sfmon.connection_sf.Salesforce", return_value=mock_sf_instance) as mock_sf_cls:
 
             from sfmon import connection_sf
             result = connection_sf.get_salesforce_connection_url(
@@ -70,6 +70,11 @@ class TestGetSalesforceConnectionUrl:
                 domain="login",
                 version="60.0",
             )
+            mock_get.assert_called_once_with(
+                "https://myorg.my.salesforce.com/services/data/",
+                headers={"Authorization": "Bearer test_token_abc123"},
+                timeout=30,
+            )
 
     def test_platform_cli_url_with_empty_secret(self):
         mock_token_response = MagicMock()
@@ -84,10 +89,13 @@ class TestGetSalesforceConnectionUrl:
 
             from sfmon import connection_sf
             connection_sf.get_salesforce_connection_url(
-                "force://PlatformCLI::refreshtoken@https://login.salesforce.com"
+                "force://PlatformCLI::refreshtoken@login.salesforce.com"
             )
 
             _, kwargs = mock_post.call_args
+            assert mock_post.call_args.args[0] == (
+                "https://login.salesforce.com/services/oauth2/token"
+            )
             assert "client_secret" not in kwargs["data"]
             assert kwargs["data"]["client_id"] == "PlatformCLI"
 

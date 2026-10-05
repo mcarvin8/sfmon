@@ -26,6 +26,14 @@ from .logger import logger
 SFDX_URL_RE = re.compile(r"^force://([^:]+):([^:]*):([^@]+)@(.+)$")
 
 
+def _https_url(url):
+    if url.startswith("https://"):
+        return url
+    if url.startswith("http://"):
+        url = url[len("http://"):]
+    return f"https://{url}"
+
+
 def get_salesforce_connection_url(url):
     """
     Connect to Salesforce via the OAuth2 refresh token flow using an SFDX auth URL.
@@ -66,7 +74,7 @@ def get_salesforce_connection_url(url):
 
     try:
         response = requests.post(
-            f"https://{instance_url}/services/oauth2/token",
+            f"{_https_url(instance_url)}/services/oauth2/token",
             data=token_payload,
             timeout=30,
         )
@@ -103,7 +111,7 @@ def _get_latest_api_version(instance_url, access_token):
     """
     try:
         response = requests.get(
-            f"https://{instance_url}/services/data/",
+            f"{_https_url(instance_url)}/services/data/",
             headers={"Authorization": f"Bearer {access_token}"},
             timeout=30,
         )
