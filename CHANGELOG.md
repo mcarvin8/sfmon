@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.1](https://github.com/mcarvin8/sfmon/compare/v3.16.0...v3.16.1) (2026-10-05)
+
+
+### Bug Fixes
+
+* add https prefix to requests ([3294409](https://github.com/mcarvin8/sfmon/commit/3294409b4ef54bc8cd7bbfb895a62132cb3c741c))
+
 ## [3.16.0](https://github.com/mcarvin8/sfmon/compare/v3.15.0...v3.16.0) (2026-08-27)
 
 
