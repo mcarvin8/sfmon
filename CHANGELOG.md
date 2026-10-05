@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.3](https://github.com/mcarvin8/sfmon/compare/v3.16.2...v3.16.3) (2026-10-05)
+
+
+### Bug Fixes
+
+* use docker token for docker publish ([9a6b46c](https://github.com/mcarvin8/sfmon/commit/9a6b46cc0d8a89ddc630488e30ebf3dfe30e21a2))
+
 ## [3.16.2](https://github.com/mcarvin8/sfmon/compare/v3.16.1...v3.16.2) (2026-10-05)
 
 
