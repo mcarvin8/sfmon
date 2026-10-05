@@ -119,7 +119,9 @@ Prefer running on bare metal/VM instead of Docker, or want to import individual 
 
 ```bash
 pip install sfmon
-SALESFORCE_AUTH_URL="force://PlatformCLI::..." ORG_NAME="production" sfmon
+SALESFORCE_AUTH_URL="force://PlatformCLI::..." 
+ORG_NAME="production" 
+python3 sfmon.salesforce_monitoring
 ```
 
 2. **Verify:** `curl http://localhost:9001/metrics`
