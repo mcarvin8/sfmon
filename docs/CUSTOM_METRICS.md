@@ -49,7 +49,7 @@ sfmon_custom_cpq_primary_quotes_by_status{org="prod",status="Approved"} 12
 
 Custom metrics use the SOQL result directly; they do not run arbitrary code to transform the returned records. The query must return the metric value in a form sfmon supports: either a record count, or a numeric `value_field` for each returned row. Labels must also come from fields in those rows.
 
-For example, calculating the percentage of Apex code characters may require retrieving Apex class bodies, filtering or counting characters, and calculating a percentage. If the SOQL query does not return that final value, a custom metric cannot perform those additional steps by itself. That calculation needs to be implemented in code, or—in cases where the query can provide suitable input values—done with a Prometheus recording rule.
+For example, calculating the percentage of Apex code characters used avaiable in the tech debt monitoring subset requires retrieving Apex class bodies, filtering and counting characters, and calculating the percentage. This isn't achievable from the SOQL by itself. If the SOQL query does not return that final value, a custom metric cannot perform those additional steps by itself. That calculation needs to be implemented in custom code via a custom image, or—in cases where the query can provide suitable input values—done with a Prometheus recording rule.
 
 - **No `value_field`:** one series per org, set to `totalSize`. That's the count for `SELECT COUNT() ...` and the row count for any other query.
 - **With `value_field`:** one series per returned row. The value comes from `value_field` and each label from its field path.
