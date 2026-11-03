@@ -8,62 +8,62 @@ USED_LICENSES_PERCENTAGE = "Percentage of Salesforce licenses used"
 
 # API and Limits
 api_usage_percentage_gauge = OrgAwareGauge(
-    "salesforce_api_usage_percentage",
+    "sfmon_org_limit_usage_percent",
     "Salesforce API Usage Percentage",
     ["limit_name", "limit_description", "limit_utilized", "max_limit"],
 )
 
 # Licenses - User Licenses
 total_user_licenses_gauge = OrgAwareGauge(
-    "salesforce_total_user_licenses", TOTAL_LICENSES, ["license_name", "status"]
+    "sfmon_user_license_seats", TOTAL_LICENSES, ["license_name", "status"]
 )
 used_user_licenses_gauge = OrgAwareGauge(
-    "salesforce_used_user_licenses", USED_LICENSES, ["license_name", "status"]
+    "sfmon_user_license_seats_used", USED_LICENSES, ["license_name", "status"]
 )
 percent_user_licenses_used_gauge = OrgAwareGauge(
-    "salesforce_user_licenses_usage_percentage",
+    "sfmon_user_license_usage_percent",
     USED_LICENSES_PERCENTAGE,
     ["license_name", "status", "used_licenses", "total_licenses"],
 )
 
 # Licenses - Permission Set Licenses
 total_permissionset_licenses_gauge = OrgAwareGauge(
-    "salesforce_total_permissionset_licenses",
+    "sfmon_permission_set_license_seats",
     TOTAL_LICENSES,
     ["license_name", "status"],
 )
 used_permissionset_licenses_gauge = OrgAwareGauge(
-    "salesforce_used_permissionset_licenses", USED_LICENSES, ["license_name", "status"]
+    "sfmon_permission_set_license_seats_used", USED_LICENSES, ["license_name", "status"]
 )
 percent_permissionset_used_gauge = OrgAwareGauge(
-    "salesforce_permissionset_license_usage_percentage",
+    "sfmon_permission_set_license_usage_percent",
     USED_LICENSES_PERCENTAGE,
     ["license_name", "status", "used_licenses", "total_licenses", "expiration_date"],
 )
 
 # Licenses - Usage-Based Entitlements
 total_usage_based_entitlements_licenses_gauge = OrgAwareGauge(
-    "salesforce_total_licenses_usage_based_entitlements",
+    "sfmon_usage_based_entitlement_seats",
     TOTAL_LICENSES,
     ["license_name"],
 )
 used_usage_based_entitlements_licenses_gauge = OrgAwareGauge(
-    "salesforce_used_licenses_usage_based_entitlements", USED_LICENSES, ["license_name"]
+    "sfmon_usage_based_entitlement_seats_used", USED_LICENSES, ["license_name"]
 )
 percent_usage_based_entitlements_used_gauge = OrgAwareGauge(
-    "salesforce_percent_used_usage_based_entitlements",
+    "sfmon_usage_based_entitlement_usage_percent",
     USED_LICENSES_PERCENTAGE,
     ["license_name", "used_licenses", "total_licenses", "expiration_date"],
 )
 
 # Incidents & Maintenance
 incident_gauge = OrgAwareGauge(
-    "salesforce_incidents",
+    "sfmon_trust_incidents",
     "Number of active Salesforce incidents",
     ["environment", "pod", "severity", "incident_id"],
 )
 maintenance_gauge = OrgAwareGauge(
-    "salesforce_maintenance",
+    "sfmon_trust_maintenance",
     "Ongoing or Planned Salesforce Maintenance",
     [
         "environment",

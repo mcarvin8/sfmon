@@ -197,6 +197,8 @@ Prefer this when you want full process/resource isolation per org (independent r
 
 ## Metrics and logs
 
+Every metric name starts with `sfmon_` and every label is snake_case. **Upgrading from v3?** v4 renamed all metrics without changing their values — see **[docs/METRICS_MIGRATION.md](docs/METRICS_MIGRATION.md)** for the old → new table and optional Prometheus rules that keep v3 names working while you migrate.
+
 Two output shapes, matched to two different questions:
 
 - **Metrics** (`:9001/metrics`) answer *"is something wrong right now"* — governor limit %, license usage, active incidents, aggregate counts of suspicious activity by action/section/user group. Low-cardinality labels only.
@@ -214,13 +216,13 @@ Because metrics live in Prometheus, alerts are just PromQL rules — same toolch
 
 ```promql
 # Daily API limit over 80 % consumed
-salesforce_api_usage_percentage{limit_name="DailyApiRequests"} > 80
+sfmon_org_limit_usage_percent{limit_name="DailyApiRequests"} > 80
 
 # Active Trust incident on the pod an org runs on
-salesforce_incidents == 1
+sfmon_trust_incidents == 1
 
 # User license saturation
-salesforce_user_licenses_usage_percentage{license_name="Salesforce"} > 90
+sfmon_user_license_usage_percent{license_name="Salesforce"} > 90
 ```
 
 Route these through Alertmanager with the same receivers (PagerDuty, Slack, etc.) you use for every other service.

@@ -161,7 +161,7 @@ def report_apt_metrics(page_time_data):
     for page, data in page_time_data.items():
         if data["count"] > 0:
             avg_time = data["total_time"] / data["count"]
-            apt_metric.labels(Page_name=page).set(avg_time)
+            apt_metric.labels(page_name=page).set(avg_time)
 
 
 def report_ept_metrics(ept_rows):
@@ -178,15 +178,15 @@ def report_ept_metrics(ept_rows):
             else 0
         )
         ept_metric.labels(
-            EFFECTIVE_PAGE_TIME_DEVIATION_REASON=row.get(
+            effective_page_time_deviation_reason=row.get(
                 "EFFECTIVE_PAGE_TIME_DEVIATION_REASON", ""
             ),
-            EFFECTIVE_PAGE_TIME_DEVIATION_ERROR_TYPE=row.get(
+            effective_page_time_deviation_error_type=row.get(
                 "EFFECTIVE_PAGE_TIME_DEVIATION_ERROR_TYPE", ""
             ),
-            PREVPAGE_ENTITY_TYPE=row.get("PREVPAGE_ENTITY_TYPE", ""),
-            PREVPAGE_APP_NAME=row.get("PREVPAGE_APP_NAME", ""),
-            PAGE_ENTITY_TYPE=row.get("PAGE_ENTITY_TYPE", ""),
-            PAGE_APP_NAME=row.get("PAGE_APP_NAME", ""),
-            BROWSER_NAME=row.get("BROWSER_NAME", ""),
+            prevpage_entity_type=row.get("PREVPAGE_ENTITY_TYPE", ""),
+            prevpage_app_name=row.get("PREVPAGE_APP_NAME", ""),
+            page_entity_type=row.get("PAGE_ENTITY_TYPE", ""),
+            page_app_name=row.get("PAGE_APP_NAME", ""),
+            browser_name=row.get("BROWSER_NAME", ""),
         ).set(ept_value)

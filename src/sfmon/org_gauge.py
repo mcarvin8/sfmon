@@ -113,6 +113,7 @@ class OrgAwareGauge:
     """
 
     def __init__(self, name, documentation, labelnames=None):
+        self.name = name
         self._original_labelnames = list(labelnames or [])
         self._values = {}
         self._lock = threading.Lock()

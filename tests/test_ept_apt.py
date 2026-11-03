@@ -107,7 +107,7 @@ class TestReportAptMetrics:
         mock_apt = MagicMock()
         with patch("sfmon.ops.ept_apt.apt_metric", mock_apt):
             report_apt_metrics(page_time_data)
-        mock_apt.labels.assert_called_once_with(Page_name="Home")
+        mock_apt.labels.assert_called_once_with(page_name="Home")
         mock_apt.labels().set.assert_called_once_with(2.0)
 
     def test_skips_zero_count(self):

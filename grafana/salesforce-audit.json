@@ -147,7 +147,7 @@
             "uid": "cip-o11y-aws-prd-us-west-2-theta"
           },
           "editorMode": "code",
-          "expr": "max by (user_name, entity_name, method) (hourly_user_querying_large_records) > 0",
+          "expr": "max by (user_name, entity_name, method) (sfmon_hourly_large_queries) > 0",
           "format": "time_series",
           "legendFormat": "{{user_name}} - {{entity_name}} - {{method}}",
           "range": true,
@@ -240,7 +240,7 @@
             "uid": "cip-o11y-aws-prd-us-west-2-theta"
           },
           "editorMode": "code",
-          "expr": "suspicious_records",
+          "expr": "sfmon_audit_trail_suspicious_records",
           "format": "table",
           "instant": false,
           "range": true,
@@ -376,7 +376,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "org_wide_sharing_changes > 0",
+              "expr": "sfmon_audit_trail_sharing_changes > 0",
               "format": "table",
               "instant": false,
               "range": true,
@@ -503,7 +503,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "max by (user_id, user_name, username, profile_name) (forbidden_profile_users) > 0",
+              "expr": "max by (user_id, user_name, username, profile_name) (sfmon_forbidden_profile_users) > 0",
               "format": "table",
               "instant": false,
               "legendFormat": "__auto",
@@ -632,7 +632,7 @@
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum(salesforce_login_success_total)",
+              "expr": "sum(sfmon_login_success_count)",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -713,7 +713,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "user_location",
+              "expr": "sfmon_login_browser_count",
               "format": "table",
               "instant": true,
               "range": false,
@@ -809,7 +809,7 @@
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum(salesforce_login_failure_total)",
+              "expr": "sum(sfmon_login_failure_count)",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -885,7 +885,7 @@
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum(unique_login_count_total)",
+              "expr": "sum(sfmon_login_unique_count)",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1004,7 +1004,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "avg(avg_over_time(deployment_pending_time[30m]))",
+              "expr": "avg(avg_over_time(sfmon_deployment_pending_minutes[30m]))",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1021,7 +1021,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "avg(avg_over_time(deployment_time[30m]))",
+              "expr": "avg(avg_over_time(sfmon_deployment_duration_minutes[30m]))",
               "format": "time_series",
               "fullMetaSearch": false,
               "hide": false,
@@ -1038,7 +1038,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "avg(avg_over_time(deployment_time{status=\"Succeeded\"}[30m]))",
+              "expr": "avg(avg_over_time(sfmon_deployment_duration_minutes{status=\"Succeeded\"}[30m]))",
               "hide": false,
               "instant": false,
               "legendFormat": "Avg Successful Deployment Time",
@@ -1051,7 +1051,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "avg(avg_over_time(deployment_pending_time{status=\"Succeeded\"}[30m]))",
+              "expr": "avg(avg_over_time(sfmon_deployment_pending_minutes{status=\"Succeeded\"}[30m]))",
               "hide": false,
               "instant": false,
               "legendFormat": "Avg Successful Deployment Pending Time",
@@ -1064,7 +1064,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_pending_time[30m]))",
+              "expr": "avg(avg_over_time(sfmon_validation_pending_minutes[30m]))",
               "hide": false,
               "instant": false,
               "legendFormat": "Avg Validation Pending Time",
@@ -1077,7 +1077,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_time[30m]))",
+              "expr": "avg(avg_over_time(sfmon_validation_duration_minutes[30m]))",
               "hide": false,
               "instant": false,
               "legendFormat": "Avg Validation Time",
@@ -1090,7 +1090,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_time{status=\"Succeeded\"}[30m]))",
+              "expr": "avg(avg_over_time(sfmon_validation_duration_minutes{status=\"Succeeded\"}[30m]))",
               "hide": false,
               "instant": false,
               "legendFormat": "Avg Successful Validation Time",
@@ -1103,7 +1103,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_pending_time{status=\"Succeeded\"}[30m]))",
+              "expr": "avg(avg_over_time(sfmon_validation_pending_minutes{status=\"Succeeded\"}[30m]))",
               "hide": false,
               "instant": false,
               "legendFormat": "Avg Successful Validation Pending Time",
@@ -1210,7 +1210,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "count(deployment_details{status=\"Succeeded\"}) / count(deployment_details{}) * 100",
+              "expr": "count(sfmon_deployment_status{status=\"Succeeded\"}) / count(sfmon_deployment_status{}) * 100",
               "instant": false,
               "legendFormat": "Deployment Success Rate %",
               "range": true,
@@ -1222,7 +1222,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "count(validation_details{status=\"Succeeded\"}) / count(validation_details{}) * 100",
+              "expr": "count(sfmon_validation_status{status=\"Succeeded\"}) / count(sfmon_validation_status{}) * 100",
               "hide": false,
               "instant": false,
               "legendFormat": "Validation Success Rate %",
@@ -1298,7 +1298,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "count(deployment_details{status=\"Succeeded\"}) / count(deployment_details{}) * 100",
+              "expr": "count(sfmon_deployment_status{status=\"Succeeded\"}) / count(sfmon_deployment_status{}) * 100",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
@@ -1365,7 +1365,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "count(deployment_details)",
+              "expr": "count(sfmon_deployment_status)",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
@@ -1432,7 +1432,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "count(deployment_details{status=\"Succeeded\"})",
+              "expr": "count(sfmon_deployment_status{status=\"Succeeded\"})",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
@@ -1499,7 +1499,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "avg(avg_over_time(deployment_time[30m]))",
+              "expr": "avg(avg_over_time(sfmon_deployment_duration_minutes[30m]))",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
@@ -1566,7 +1566,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "avg(avg_over_time(deployment_time{status=\"Succeeded\"}[30m]))",
+              "expr": "avg(avg_over_time(sfmon_deployment_duration_minutes{status=\"Succeeded\"}[30m]))",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
@@ -1633,7 +1633,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "avg(avg_over_time(deployment_pending_time[30m]))",
+              "expr": "avg(avg_over_time(sfmon_deployment_pending_minutes[30m]))",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
@@ -1708,7 +1708,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "count(validation_details{status=\"Succeeded\"}) / count(validation_details{}) * 100",
+              "expr": "count(sfmon_validation_status{status=\"Succeeded\"}) / count(sfmon_validation_status{}) * 100",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
@@ -1775,7 +1775,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "count(validation_details)",
+              "expr": "count(sfmon_validation_status)",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
@@ -1842,7 +1842,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "count(validation_details{status=\"Succeeded\"})",
+              "expr": "count(sfmon_validation_status{status=\"Succeeded\"})",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
@@ -1909,7 +1909,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_time[30m]))",
+              "expr": "avg(avg_over_time(sfmon_validation_duration_minutes[30m]))",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
@@ -1976,7 +1976,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_time{status=\"Succeeded\"}[30m]))",
+              "expr": "avg(avg_over_time(sfmon_validation_duration_minutes{status=\"Succeeded\"}[30m]))",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
@@ -2043,7 +2043,7 @@
                 "uid": "cip-o11y-aws-prd-us-west-2-theta"
               },
               "editorMode": "code",
-              "expr": "avg(avg_over_time(validation_pending_time[30m]))",
+              "expr": "avg(avg_over_time(sfmon_validation_pending_minutes[30m]))",
               "instant": false,
               "legendFormat": "__auto",
               "range": true,
