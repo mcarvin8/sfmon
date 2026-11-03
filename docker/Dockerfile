@@ -3,6 +3,18 @@ FROM python:3.11-slim
 # Working directory is the parent of the sfmon/ package so it can be run as
 # `python3 -m sfmon.salesforce_monitoring` (package-relative imports require this).
 WORKDIR /app
+
+# Install Python dependencies from pyproject.toml so the image uses the same
+# version bounds as the PyPI package. Done before copying the source so this
+# layer is cached across code-only changes. boto3 (the "aws" extra) is only
+# used when SECRETS_BACKEND=aws is set (see src/sfmon/secrets_manager.py) but
+# is installed unconditionally so no rebuild is needed to opt in.
+COPY pyproject.toml /tmp/pyproject.toml
+RUN python3 -c "import tomllib; p = tomllib.load(open('/tmp/pyproject.toml', 'rb'))['project']; print('\n'.join(p['dependencies'] + p['optional-dependencies']['aws']))" > /tmp/requirements.txt && \
+    pip install --no-cache-dir -r /tmp/requirements.txt && \
+    rm /tmp/pyproject.toml /tmp/requirements.txt && \
+    pip list
+
 COPY src/sfmon/ /app/sfmon/
 
 # Copy documentation and license
@@ -15,14 +27,6 @@ LABEL org.opencontainers.image.title="sfmon" \
       org.opencontainers.image.authors="Matt Carvin <matthewjcarvin@gmail.com>" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.source="https://github.com/mcarvin8/sfmon"
-
-# Install required Python dependencies. boto3 is only used when
-# SECRETS_BACKEND=aws is set (see src/sfmon/secrets_manager.py) but is
-# installed unconditionally so no rebuild is needed to opt in.
-RUN pip install --no-cache-dir simple_salesforce prometheus_client requests apscheduler pandas \
-        opentelemetry-sdk opentelemetry-exporter-prometheus opentelemetry-exporter-otlp-proto-http \
-        opentelemetry-instrumentation-logging boto3 && \
-    pip list
 
 # Create non-root user
 ARG EXPORTER_UID=1001
