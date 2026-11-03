@@ -100,6 +100,7 @@ The usual cause is the monitoring user lacking access to an object or event log.
 | Alert in PromQL, alert on SFMon itself, or post to Slack without Alertmanager | [Alerting](https://github.com/mcarvin8/sfmon/blob/main/docs/ALERTING.md) |
 | Monitor several orgs from one container | [Multiple orgs](https://github.com/mcarvin8/sfmon/blob/main/docs/MULTI_ORG.md) |
 | Run once from a CI cron job or GitHub Action instead of a daemon | [One-shot mode](https://github.com/mcarvin8/sfmon/blob/main/docs/ONE_SHOT.md) |
+| Add your own SOQL metrics (CPQ, custom objects) without building an image | [Custom metrics](https://github.com/mcarvin8/sfmon/blob/main/docs/CUSTOM_METRICS.md) |
 | Run only some jobs (`ops`, `audit`, `tech-debt` presets) or change schedules | [Configuration](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md) |
 | Tune thresholds and timeouts, or read the auth URL from AWS Secrets Manager | [Environment variables](https://github.com/mcarvin8/sfmon/blob/main/docs/ENVIRONMENT.md) |
 | Add PMD and permission-set reports, or build your own image | [Advanced setup](https://github.com/mcarvin8/sfmon/blob/main/docs/ADVANCED.md) |

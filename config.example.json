@@ -51,6 +51,17 @@
     "expose_suspicious_records": "hour=7,minute=30",
     "_comment_file_metrics": "Opt-in: add monitor_minimal_perm_sets + monitor_pmd_code_smells only with mounted files / PMD_RULESET_PATH (see docs/ENVIRONMENT.md). Refresh reports via .github/workflows/update-local-reports.yml"
   },
+  "_comment_custom_metrics": "Optional - your own SOQL-backed gauges (sfmon_custom_<name>). Works for CPQ and other custom objects too. See docs/CUSTOM_METRICS.md.",
+  "custom_metrics": [
+    {
+      "name": "open_cases_by_priority",
+      "description": "Open cases by priority",
+      "query": "SELECT Priority priority, COUNT(Id) total FROM Case WHERE IsClosed = false GROUP BY Priority",
+      "schedule": "minute=5",
+      "value_field": "total",
+      "labels": { "priority": "priority" }
+    }
+  ],
   "integration_user_names": [
     "Integration User 1",
     "Integration User 2",

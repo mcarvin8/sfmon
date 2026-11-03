@@ -45,6 +45,10 @@ Fleet Mode (multiple orgs from one container):
     "schedules" block (explicit per-org entry wins). Omitting "orgs" keeps
     legacy single-org behavior, driven by SALESFORCE_AUTH_URL/ORG_NAME.
 
+Custom Metrics:
+    A "custom_metrics" array adds SOQL-backed gauges (sfmon_custom_<name>)
+    without code changes. See custom_metrics.py and docs/CUSTOM_METRICS.md.
+
 Preset Structure (alternative to a full schedules block):
     {
         "preset": "ops"
@@ -148,6 +152,7 @@ def load_config(force_reload=False):
         "preset": None,
         "orgs": [],
         "org_overrides": {},
+        "custom_metrics": [],
     }
 
     if not os.path.exists(config_file_path):
@@ -171,6 +176,8 @@ def load_config(force_reload=False):
         result["preset"] = None
         result["orgs"] = config.get("orgs", [])
         result["org_overrides"] = config.get("org_overrides", {})
+        # Validated by custom_metrics.load_custom_metrics(), not here.
+        result["custom_metrics"] = config.get("custom_metrics", [])
 
         # Expand preset if specified, merging with any explicit schedules (explicit wins)
         preset_name = config.get("preset", "").strip().lower()
