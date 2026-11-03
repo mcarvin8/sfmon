@@ -24,6 +24,7 @@ from . import orgs
 from .constants import QUERY_TIMEOUT_SECONDS, REQUESTS_TIMEOUT_SECONDS
 from .logger import logger
 from .org_gauge import get_current_org
+from .self_metrics import record_query_error
 from simple_salesforce.exceptions import (
     SalesforceExpiredSession,
     SalesforceMalformedRequest,
@@ -71,6 +72,8 @@ def get_event_log_file(sf, log_id):
         new_sf = _reconnect_current_org(sf)
         if new_sf:
             response = _get_log_file(new_sf, log_id)
+    if not response.ok:
+        record_query_error()
     return response
 
 
@@ -88,15 +91,19 @@ def query_records_all(sf, soql_query):
                 return result["records"] if "records" in result else []
         except Exception as retry_e:
             logger.error("Query failed after re-authentication: %s", retry_e)
+        record_query_error()
         return []
     except requests.exceptions.Timeout:
         logger.error("Query timed out after : %s seconds.", QUERY_TIMEOUT_SECONDS)
+        record_query_error()
         return []
     except SalesforceMalformedRequest as e:
         logger.error("Salesforce malformed request: %s", e)
+        record_query_error()
         return []
     except Exception as e:
         logger.error("Query failed due to general exception: %s", e)
+        record_query_error()
         return []
 
 
@@ -120,15 +127,19 @@ def tooling_query_records_all(sf, soql_query):
             logger.error(
                 "Tooling API query failed after re-authentication: %s", retry_e
             )
+        record_query_error()
         return []
     except requests.exceptions.Timeout:
         logger.error(
             "Tooling API query timed out after : %s seconds.", QUERY_TIMEOUT_SECONDS
         )
+        record_query_error()
         return []
     except SalesforceMalformedRequest as e:
         logger.error("Salesforce tooling API malformed request: %s", e)
+        record_query_error()
         return []
     except Exception as e:
         logger.error("Tooling API query failed due to general exception: %s", e)
+        record_query_error()
         return []
