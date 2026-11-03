@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.17.0](https://github.com/mcarvin8/sfmon/compare/v3.16.4...v3.17.0) (2026-11-03)
+
+
+### Features
+
+* add sfmon_job_* self-monitoring metrics ([#80](https://github.com/mcarvin8/sfmon/issues/80)) ([2024a80](https://github.com/mcarvin8/sfmon/commit/2024a80ccecd788add82f9765b20f1acc9f43356))
+
+
+### Bug Fixes
+
+* **deps:** bound dependency versions ([#79](https://github.com/mcarvin8/sfmon/issues/79)) ([809bfed](https://github.com/mcarvin8/sfmon/commit/809bfedb4aa83e0e80147741e3f2d095af793690))
+* **pyproject:** use SPDX license expression ([#76](https://github.com/mcarvin8/sfmon/issues/76)) ([8df7826](https://github.com/mcarvin8/sfmon/commit/8df782682cf9734933c98258899275a23634302f))
+* re-authenticate expired Salesforce sessions ([#78](https://github.com/mcarvin8/sfmon/issues/78)) ([62b86b6](https://github.com/mcarvin8/sfmon/commit/62b86b66927bf91d0a6001a37e8d1458de1e489b))
+
 ## [3.16.4](https://github.com/mcarvin8/sfmon/compare/v3.16.3...v3.16.4) (2026-11-03)
 
 
