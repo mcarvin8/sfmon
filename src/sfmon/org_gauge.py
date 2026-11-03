@@ -17,6 +17,15 @@ synchronous instrument, so an Observable instrument (pull-based, callback
 supplies only what's currently in the dict) is what makes .clear() semantics
 possible at all here.
 
+Atomic job runs: collectors clear() a gauge and then set() its new series.
+If a scrape landed between the two it would see the org with no series. So
+the scheduler wraps each job run in gauge_transaction(): inside it, clear(),
+set(), inc() and replace_org() write to a per-run staging area, and when the
+run ends each gauge applies its staged changes under the same lock _collect()
+reads with. A scrape sees the org's old series or its new ones, never a
+half-updated set. Outside a transaction (tests, direct calls) writes go
+straight to the gauge as before.
+
 The org value comes from a per-job contextvar (set by the scheduler via
 set_current_org() before each job runs), falling back to the ORG_NAME
 environment variable when no contextvar has been set (e.g. single-org mode,
@@ -30,6 +39,7 @@ Unset, behavior is identical to Prometheus-only. See docs/ENVIRONMENT.md.
 
 import os
 import threading
+from contextlib import contextmanager
 from contextvars import ContextVar
 
 from opentelemetry.exporter.prometheus import PrometheusMetricReader
@@ -38,6 +48,9 @@ from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 
 _current_org: ContextVar = ContextVar("current_org", default=None)
+
+# {gauge: _Staged} for the job run in this context; None outside a run.
+_transaction: ContextVar = ContextVar("gauge_transaction", default=None)
 
 
 def _build_metric_readers():
@@ -85,6 +98,42 @@ def get_current_org():
     return org if org is not None else os.getenv("ORG_NAME", "")
 
 
+class _Staged:
+    """One gauge's pending changes for one job run."""
+
+    __slots__ = ("cleared_orgs", "values")
+
+    def __init__(self):
+        self.cleared_orgs = set()
+        self.values = {}
+
+
+@contextmanager
+def gauge_transaction():
+    """Stage every gauge write made in this context, then apply each gauge's
+    changes atomically when the block exits.
+
+    Changes are applied even if the block raises, matching the behavior
+    without a transaction, where writes made before an exception stay.
+    Nested calls join the outer transaction.
+    """
+    if _transaction.get() is not None:
+        yield
+        return
+    staged = {}
+    token = _transaction.set(staged)
+    try:
+        yield
+    finally:
+        _transaction.reset(token)
+        for gauge, changes in staged.items():
+            gauge._apply(changes)
+
+
+def _org_of(key):
+    return dict(key).get("org")
+
+
 class _Child:
     """Bound label-values handle returned by OrgAwareGauge.labels(...)."""
 
@@ -95,10 +144,25 @@ class _Child:
         self._key = key
 
     def set(self, value):
+        staged = self._gauge._staged()
+        if staged is not None:
+            staged.values[self._key] = float(value)
+            return
         with self._gauge._lock:
             self._gauge._values[self._key] = float(value)
 
     def inc(self, amount=1):
+        staged = self._gauge._staged()
+        if staged is not None:
+            if self._key in staged.values:
+                current = staged.values[self._key]
+            elif _org_of(self._key) in staged.cleared_orgs:
+                current = 0.0
+            else:
+                with self._gauge._lock:
+                    current = self._gauge._values.get(self._key, 0.0)
+            staged.values[self._key] = current + amount
+            return
         with self._gauge._lock:
             current = self._gauge._values.get(self._key, 0.0)
             self._gauge._values[self._key] = current + amount
@@ -130,6 +194,24 @@ class OrgAwareGauge:
 
     def _org(self):
         return get_current_org()
+
+    def _staged(self):
+        """This gauge's staging area in the current transaction, or None."""
+        transaction = _transaction.get()
+        if transaction is None:
+            return None
+        if self not in transaction:
+            transaction[self] = _Staged()
+        return transaction[self]
+
+    def _apply(self, changes):
+        with self._lock:
+            if changes.cleared_orgs:
+                for key in [
+                    k for k in self._values if _org_of(k) in changes.cleared_orgs
+                ]:
+                    del self._values[key]
+            self._values.update(changes.values)
 
     def labels(self, *args, **kwargs):
         if args:
@@ -172,7 +254,15 @@ class OrgAwareGauge:
                 sorted((k, str(v)) for k, v in {**labels, "org": org}.items())
             )
             new[key] = float(value)
-        with self._lock:
-            for key in [k for k in self._values if ("org", org) in k]:
-                del self._values[key]
-            self._values.update(new)
+        staged = self._staged()
+        if staged is not None:
+            staged.cleared_orgs.add(org)
+            staged.values = {
+                k: v for k, v in staged.values.items() if _org_of(k) != org
+            }
+            staged.values.update(new)
+            return
+        changes = _Staged()
+        changes.cleared_orgs.add(org)
+        changes.values = new
+        self._apply(changes)

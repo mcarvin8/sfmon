@@ -85,7 +85,7 @@ from simple_salesforce.exceptions import SalesforceExpiredSession
 # Shared modules from root
 from .logger import logger
 from . import orgs
-from .org_gauge import set_current_org
+from .org_gauge import gauge_transaction, set_current_org
 from . import self_metrics
 from . import custom_metrics
 
@@ -456,9 +456,14 @@ def _run_job(org_name, sf, func, job_name, job_id):
 
 
 def _call_job(org_name, sf, func, job_name):
-    """Call the collector, logging instead of raising. Returns False if it raised."""
+    """Call the collector, logging instead of raising. Returns False if it raised.
+
+    The collector's gauge writes are staged and applied together when it
+    returns, so a scrape mid-run never sees its series half cleared.
+    """
     try:
-        func(sf)
+        with gauge_transaction():
+            func(sf)
         return True
     except SalesforceExpiredSession as e:
         # Raised by calls that bypass query.py's retry (e.g. sf.limits()).
