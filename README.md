@@ -9,98 +9,65 @@
 [![GitHub Marketplace](https://img.shields.io/badge/marketplace-Run%20Salesforce%20Monitoring-blue?logo=github)](https://github.com/marketplace/actions/run-salesforce-monitoring)
 ![Coverage](https://raw.githubusercontent.com/mcarvin8/sfmon/refs/heads/main/badges/coverage.svg)
 
-SFMon is a **long-running Python application** that connects to your Salesforce org(s) on a schedule and exposes a **standard `/metrics` endpoint** compatible with Prometheus — so you can monitor your orgs with the same tech stack as the rest of your infrastructure.
+SFMon watches your Salesforce orgs and exposes what it finds as Prometheus metrics on `:9001/metrics`, so Salesforce shows up in the same dashboards and alerts as the rest of your infrastructure. It's one process with no database and no UI: your Prometheus-compatible backend stores the history, and Grafana shows it.
 
-Metrics are instrumented with OpenTelemetry and structured logs are emitted as JSON; both can optionally **push** over OTLP instead of only being scraped/tailed — see [Metrics and logs](#metrics-and-logs).
+It's built for SRE and DevOps teams that already run Prometheus (or Victoria Metrics, Grafana Cloud, an OTel Collector) and look after one or more Salesforce orgs.
 
-- [How it works](#how-it-works)
-- [Who is this for](#who-is-this-for)
-- [What you get](#what-you-get)
-- [Quick start](#quick-start)
-  - [Prerequisites](#prerequisites)
-  - [Run via Docker](#run-via-docker)
-  - [Run via Python Pip](#run-via-python-pip)
-  - [Optional Tuning](#optional-tuning)
-- [Multiple orgs](#multiple-orgs)
-  - [Fleet mode (one container, several orgs)](#fleet-mode-one-container-several-orgs)
-  - [One container per org (alternate)](#one-container-per-org-alternate)
-- [Metrics and logs](#metrics-and-logs)
-- [Alerting in PromQL](#alerting-in-promql)
-  - [Built-in Slack alerting (optional, no Alertmanager required)](#built-in-slack-alerting-optional-no-alertmanager-required)
-- [One-shot mode — run from a CI cron job or GitHub Action instead of a daemon](#one-shot-mode--run-from-a-ci-cron-job-or-github-action-instead-of-a-daemon)
-  - [GitHub Action — run a single job as a CI step](#github-action--run-a-single-job-as-a-ci-step)
-- [Presets — scope down without a full config](#presets--scope-down-without-a-full-config)
-- [How it compares](#how-it-compares)
-- [PMD + minimal permission sets (optional, file-based)](#pmd--minimal-permission-sets-optional-file-based)
-- [When you need your own image](#when-you-need-your-own-image)
-- [Grafana](#grafana)
-- [Authors](#authors)
-
----
-
-## How it works
-
-One process, no database, no UI:
-
-1. On startup SFMon authenticates to your org (OAuth2 refresh token flow) and starts an internal **APScheduler** cron loop.
-2. Each collector job runs on its own schedule (every 5 minutes, hourly, or once daily off-peak — see [Presets](#presets--scope-down-without-a-full-config)), queries the org via SOQL/REST/Tooling API, and sets Prometheus gauges.
-3. Those gauges are served on **`:9001/metrics`**, so Prometheus (or a compatible tool) scrapes them.
-
-There's no persistence and no historical storage inside SFMon itself — your Prometheus-compatible backend owns the time series. Restarting it just re-authenticates and resumes the schedule.
-
----
-
-## Who is this for
-
-SFMon is aimed at **SRE and DevOps teams** who already operate a Prometheus-compatible observability stack (Prometheus, Victoria Metrics, Grafana Cloud, or an OTel Collector pipeline) and are also responsible for one or more Salesforce orgs — teams who define alerts in PromQL, route pages through Alertmanager, and want Salesforce signals to behave like any other scrape target. Don't run a scrape-based stack? Push metrics and logs over OTLP instead — see [Metrics and logs](#metrics-and-logs).
-
-It is **not** a Salesforce admin tool. It has no UI of its own; all visibility comes from your existing observability stack.
-
----
+> **Upgrading from v3?** v4 renamed every metric to start with `sfmon_`. Values are unchanged. See the [migration guide](https://github.com/mcarvin8/sfmon/blob/main/docs/METRICS_MIGRATION.md) for the old → new names and optional rules that keep v3 queries working.
 
 ## What you get
 
-| Category | What is measured |
-|----------|-----------------|
-| **Governor limits** | All org limits (API requests, bulk queries, data storage, etc.) — usage %, used, and max, every 5 minutes |
-| **Apex health** | Flex queue depth, long-running requests, concurrency errors, uncaught exceptions, async job status and summaries |
-| **Bulk API** | Daily summaries and hourly in-flight activity across Bulk API 1.0 and 2.0 |
-| **Licenses** | User licenses, permission set licenses, and usage-based entitlements — consumed vs. total, % used |
-| **Instance & trust** | Your org's pod, active incidents from trust.salesforce.com, and scheduled maintenance windows |
-| **Security & compliance** | Forbidden profile assignments, login volumes, geolocation anomalies, suspicious audit trail activity, report exports, large SOQL queries, org-wide sharing settings |
-| **Tech debt** | Dormant users (Salesforce + portal), deprecated Apex API versions, unassigned/minimal permission sets, workflow rules, empty queues/groups, PMD static analysis violations |
-| **Deployments** | In-flight metadata deployment status |
+| Area | What's measured |
+|------|-----------------|
+| **Governor limits** | Every org limit (API requests, bulk queries, data storage, ...) as used, max and % used, every 5 minutes |
+| **Apex health** | Flex queue depth, long-running requests, concurrency errors, uncaught exceptions, async job status |
+| **Bulk API** | Daily and hourly activity across Bulk API 1.0 and 2.0 |
+| **Licenses** | User licenses, permission set licenses and usage-based entitlements: used vs. total |
+| **Instance & Trust** | Your org's pod, active incidents from trust.salesforce.com, scheduled maintenance |
+| **Security & compliance** | Forbidden profile assignments, logins, suspicious audit trail activity, report exports, large SOQL queries, org-wide sharing changes |
+| **Tech debt** | Dormant users, deprecated Apex API versions, unused permission sets, workflow rules, empty queues and groups, PMD violations |
+| **Deployments** | Deployment and validation status and timing |
+| **SFMon itself** | Whether each job's last run succeeded, when it last succeeded, and how long it took |
 
-Everything runs on a default schedule with no config file required. See **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md)** to scope down to a preset or tune individual jobs.
-
----
+All of these run on default schedules with no config file. The exceptions are PMD and minimal permission set reports, which need files you generate ([Advanced setup](https://github.com/mcarvin8/sfmon/blob/main/docs/ADVANCED.md)).
 
 ## Quick start
 
-### Prerequisites
+### 1. Get an auth URL for the org
 
-On your local machine, you need to have the Salesforce CLI (`sf`) installed and logged in to the target org(s) via applicable monitoring users. The monitoring user in each Salesforce org must have API access enabled and have the appropriate permissions to monitor the various metrics. Preferably, the monitoring user should have the "Password Does Not Expire" and "Api Only User" system permissions granted either via a profile or permission set.
+Use a dedicated monitoring user with API access. Making it an **API Only User** whose password never expires stops it from being locked out. It needs read access to whatever you want monitored; step 5 shows how to spot anything it can't see.
 
-**Get your auth URL for each org (`force://PlatformCLI::...`):** `sf org auth show-sfdx-auth-url --target-org my-org --json > authFile.json`
-
-SFMon itself doesn't use the Salesforce CLI at runtime — it only needs the auth URL, provided via environment variable or AWS Secrets Manager.
-
-### Run via Docker
-
-
-1. **Run container:**
+Log in to the org as that user with the Salesforce CLI, then print its auth URL:
 
 ```bash
-docker run -d \
-  --name sfmon \
-  -p 9001:9001 \
-  -e SALESFORCE_AUTH_URL="force://PlatformCLI::..." \
+sf org login web --alias sfmon-prod
+sf org auth show-sfdx-auth-url --target-org sfmon-prod --no-prompt
+```
+
+The URL (`force://...`) is a long-lived credential: store it as a secret. The CLI is only needed for this step; SFMon doesn't use it at runtime. The URL is only available for orgs logged in with `sf org login web`.
+
+### 2. Run SFMon
+
+```bash
+docker run -d --name sfmon -p 9001:9001 \
+  -e SALESFORCE_AUTH_URL="force://..." \
   -e ORG_NAME="production" \
   mcarvin8/sfmon:latest
 ```
 
-2. **Verify:** `curl http://localhost:9001/metrics`
-3. **Scrape** — add to `prometheus.yml`:
+`ORG_NAME` becomes the `org` label on every metric. Prefer not to use Docker? `pip install sfmon`, then:
+
+```bash
+export SALESFORCE_AUTH_URL="force://..."
+export ORG_NAME="production"
+sfmon
+```
+
+Check it's up: `curl http://localhost:9001/metrics`
+
+### 3. Scrape it
+
+Add SFMon to `prometheus.yml`:
 
 ```yaml
 scrape_configs:
@@ -109,295 +76,48 @@ scrape_configs:
       - targets: ["<host>:9001"]
 ```
 
-No config file is required: all collectors run on **default schedules** out of the box.
+No Prometheus to scrape with? Set `OTEL_EXPORTER_OTLP_ENDPOINT` and SFMon pushes metrics and logs over OTLP instead ([details](https://github.com/mcarvin8/sfmon/blob/main/docs/ENVIRONMENT.md#optional--otlp-push)).
 
-### Run via Python pip
+### 4. Import the dashboards
 
-Prefer running on bare metal/VM instead of Docker, or want to import individual collectors in your own scripts? SFMon is also published to PyPI:
+Import the JSON files in [`grafana/`](https://github.com/mcarvin8/sfmon/tree/main/grafana) into Grafana and point them at your Prometheus data source. There are three: monitoring (limits, licenses, Apex, Bulk API, page times), audit, and tech debt.
 
-1. **Install and run:**
+### 5. Check every job can do its work
 
-```bash
-pip install sfmon
-SALESFORCE_AUTH_URL="force://PlatformCLI::..." 
-ORG_NAME="production" 
-python3 -m sfmon.salesforce_monitoring
-```
-
-2. **Verify:** `curl http://localhost:9001/metrics`
-3. **Scrape** — add to `prometheus.yml`:
-
-```yaml
-scrape_configs:
-  - job_name: sfmon
-    static_configs:
-      - targets: ["<host>:9001"]
-```
-
-The `sfmon` console script runs the same always-on daemon as the Docker image. `CONFIG_FILE_PATH` defaults to `/app/sfmon/config.json` (the Docker path) — set it explicitly for non-Docker installs. `sfmon` is also an importable library, e.g. `from sfmon.core.limits import salesforce_limits_descriptions`.
-
-### Optional Tuning
-
-- **Environment variables** (timeouts, org label, compliance lists, thresholds, log level) → **[docs/ENVIRONMENT.md](https://github.com/mcarvin8/sfmon/blob/main/docs/ENVIRONMENT.md)**
-- **Config file** (schedules, presets, disable jobs, `exclude_users`) → **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md)** · template **`config.example.json`**
-- **Secrets backend** — fetch `SALESFORCE_AUTH_URL`/`SALESFORCE_AUTH_URL_<NAME>` from AWS Secrets Manager instead of the environment (`SECRETS_BACKEND=aws`) → **[docs/ENVIRONMENT.md](https://github.com/mcarvin8/sfmon/blob/main/docs/ENVIRONMENT.md#optional--secrets-backend)**
-
----
-
-## Multiple orgs
-
-Two ways to monitor more than one org. Both label every metric with `org` so a single Prometheus-compatible backend can scrape and filter/aggregate across orgs in PromQL.
-
-### Fleet mode (one container, several orgs)
-
-Add an `orgs` array to `config.json` and the same container polls every org on its own schedule:
-
-```json
-{
-  "orgs": ["prod", "sandbox-uat"],
-  "schedules": { "monitor_salesforce_limits": "*/5" },
-  "org_overrides": {
-    "sandbox-uat": { "schedules": { "monitor_salesforce_limits": "*/15" } }
-  }
-}
-```
-
-Each name resolves to a `SALESFORCE_AUTH_URL_<NAME>` env var (uppercased, non-alphanumerics → `_`):
-
-```bash
-docker run -d \
-  --name sfmon \
-  -p 9001:9001 \
-  -v /host/path/config.json:/app/sfmon/config.json \
-  -e SALESFORCE_AUTH_URL_PROD="force://PlatformCLI::...@prod.my.salesforce.com" \
-  -e SALESFORCE_AUTH_URL_SANDBOX_UAT="force://PlatformCLI::...@sandbox-uat.my.salesforce.com" \
-  mcarvin8/sfmon:latest
-```
-
-`org_overrides` is optional and lets one org diverge from the fleet-wide `schedules`. An org whose credentials fail to authenticate is logged and skipped at startup — it doesn't block the rest of the fleet. `ORG_NAME` is ignored once `orgs` is set. See **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md#fleet-mode--multiple-orgs)** · template **`config.example.fleet.json`**.
-
-### One container per org (alternate)
-
-Run a separate container per org, each with a distinct `ORG_NAME` and `SALESFORCE_AUTH_URL`:
-
-```yaml
-# prometheus.yml
-scrape_configs:
-  - job_name: sfmon
-    static_configs:
-      - targets: ["sfmon-prod:9001"]
-        labels: { org: "production" }
-      - targets: ["sfmon-uat:9001"]
-        labels: { org: "uat" }
-```
-
-Prefer this when you want full process/resource isolation per org (independent restarts, separate resource limits) rather than a shared scheduler.
-
----
-
-## Metrics and logs
-
-Every metric name starts with `sfmon_` and every label is snake_case. **Upgrading from v3?** v4 renamed all metrics without changing their values — see **[docs/METRICS_MIGRATION.md](docs/METRICS_MIGRATION.md)** for the old → new table and optional Prometheus rules that keep v3 names working while you migrate.
-
-Two output shapes, matched to two different questions:
-
-- **Metrics** (`:9001/metrics`) answer *"is something wrong right now"* — governor limit %, license usage, active incidents, aggregate counts of suspicious activity by action/section/user group. Low-cardinality labels only.
-- **Logs** (stdout, JSON lines) answer *"who did it and what exactly happened"* — the per-record detail behind those aggregates: user, timestamp, display text, deployment IDs, login coordinates. Anything that would otherwise blow up metric cardinality goes here instead, under a structured `event` field. Pipe stdout to any log backend that reads JSON (Loki, Vector, Fluent Bit, CloudWatch Logs, Datadog Logs).
-
-Both default to pull/tail with no extra setup: metrics are scraped from `/metrics`, logs are read from container stdout. If you'd rather **push** — no Prometheus in your stack, or the container sits somewhere scraping is awkward — set `OTEL_EXPORTER_OTLP_ENDPOINT` and both metrics and logs also push to an OTLP collector or backend (Datadog, Honeycomb, Grafana Alloy, an OTel Collector, ...) in addition to `/metrics` and stdout. Unset, behavior is unchanged. See **[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#optional--otlp-push)**.
-
-No traces — there's no request-tracing use case here, so that OTel signal isn't used.
-
----
-
-## Alerting in PromQL
-
-Because metrics live in Prometheus, alerts are just PromQL rules — same toolchain as the rest of your stack:
+After the first run (a few minutes), any job that failed or couldn't run its queries reports `0` here:
 
 ```promql
-# Daily API limit over 80 % consumed
-sfmon_org_limit_usage_percent{limit_name="DailyApiRequests"} > 80
-
-# Active Trust incident on the pod an org runs on
-sfmon_trust_incidents == 1
-
-# User license saturation
-sfmon_user_license_usage_percent{license_name="Salesforce"} > 90
+sfmon_job_success == 0
 ```
 
-Route these through Alertmanager with the same receivers (PagerDuty, Slack, etc.) you use for every other service.
+The usual cause is the monitoring user lacking access to an object or event log. SFMon's logs show the job and the error Salesforce returned. Fix the permission and the next run reports `1`.
 
-### Alerting on SFMon itself
+## Next steps
 
-Every job run also records metrics about the run, labelled with `job` (the job id used in `config.json`) and `org`:
+| To... | See |
+|-------|-----|
+| Alert in PromQL, alert on SFMon itself, or post to Slack without Alertmanager | [Alerting](https://github.com/mcarvin8/sfmon/blob/main/docs/ALERTING.md) |
+| Monitor several orgs from one container | [Multiple orgs](https://github.com/mcarvin8/sfmon/blob/main/docs/MULTI_ORG.md) |
+| Run once from a CI cron job or GitHub Action instead of a daemon | [One-shot mode](https://github.com/mcarvin8/sfmon/blob/main/docs/ONE_SHOT.md) |
+| Run only some jobs (`ops`, `audit`, `tech-debt` presets) or change schedules | [Configuration](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md) |
+| Tune thresholds and timeouts, or read the auth URL from AWS Secrets Manager | [Environment variables](https://github.com/mcarvin8/sfmon/blob/main/docs/ENVIRONMENT.md) |
+| Add PMD and permission-set reports, or build your own image | [Advanced setup](https://github.com/mcarvin8/sfmon/blob/main/docs/ADVANCED.md) |
+| Move dashboards and alerts from v3 metric names | [Migration guide](https://github.com/mcarvin8/sfmon/blob/main/docs/METRICS_MIGRATION.md) |
 
-| Metric | Meaning |
-|--------|---------|
-| `sfmon_job_success` | `1` if the last run finished with no exception and no failed queries, else `0` |
-| `sfmon_job_last_success_timestamp_seconds` | Unix time of the last successful run (absent until the first one) |
-| `sfmon_job_last_run_timestamp_seconds` | Unix time the last run finished, successful or not |
-| `sfmon_job_duration_seconds` | How long the last run took |
-| `sfmon_job_query_errors` | Salesforce queries that failed during the last run |
-
-A failed query doesn't stop the job or the service: the collector carries on with the rest of its queries and the next run is scheduled as normal. The failure is counted in `sfmon_job_query_errors` and the run reports `sfmon_job_success 0`, so a job that quietly returns empty results is still visible.
-
-```promql
-# A job hasn't succeeded in 2 hours (catches expired credentials, missing permissions, API outages)
-time() - sfmon_job_last_success_timestamp_seconds > 7200
-
-# A job is running but has never succeeded since SFMon started
-sfmon_job_success == 0 unless sfmon_job_last_success_timestamp_seconds
-
-# SFMon stopped reporting entirely (pod down, scrape broken, org failed to connect at startup)
-absent(sfmon_job_success{job="monitor_salesforce_limits"})
-```
-
-With `--once`, a run with failed queries also exits `1`, so CI notices the same failures.
-
-### Built-in Slack alerting (optional, no Alertmanager required)
-
-For teams that don't run a full PromQL/Alertmanager stack, SFMon can also post directly to a Slack incoming webhook. Set `SLACK_WEBHOOK_URL` and it's on; leave it unset and there's no behavior change at all (no cache reads/writes, no HTTP calls).
-
-Alerts are edge-triggered — a Slack message fires once when a breach opens and once when it resolves, not on every scheduler tick while it stays active — using an on-disk cache (`SLACK_ALERT_CACHE_DIR`) keyed per org so state survives both the long-lived daemon and `--once` CI-cron restarts.
-
-Currently wired into governor limits (`LIMIT_ALERT_THRESHOLD_PERCENT`, default `80`), Salesforce Trust API incidents (an active incident on your org's pod posts on open and again on resolve), license seat usage (`LICENSE_ALERT_THRESHOLD_PERCENT`, default `90`), the org-wide Apex character limit (`APEX_CHARACTER_ALERT_THRESHOLD_PERCENT`, default `80`), and Apex Flex Queue depth (`FLEX_QUEUE_ALERT_THRESHOLD_PERCENT`, default `80`, `critical` once the queue actually hits its 100-job cap) — all `critical` at 95%+ except where noted. See **[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#optional--slack-alerting)**. 
-
-The underlying `sync_alerts()` API is generic and other collectors can adopt it over time. Please create a GitHub issue to request any new alerts.
-
----
-
-## One-shot mode — run from a CI cron job or GitHub Action instead of a daemon
-
-Don't want an always-on container? `sfmon --once` runs every enabled job a single time, prints the resulting Prometheus exposition text to stdout, and exits — the same model sfdx-hardis's org monitoring uses (a scheduled CI/CD pipeline instead of a long-running process). Works with either distribution:
-
-```bash
-# Docker
-docker run --rm -e SALESFORCE_AUTH_URL="force://PlatformCLI::..." mcarvin8/sfmon:latest --once
-
-# pip install
-SALESFORCE_AUTH_URL="force://PlatformCLI::..." sfmon --once
-```
-
-- Exit code is `0` if every job that ran succeeded, `1` if any job raised, had a failed Salesforce query, or the initial org connection failed — so a scheduled pipeline goes red on a real problem, the same way a failed CI step would.
-- Add `--job JOB_ID` to run exactly one job (its id from the tables in [docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md)) instead of everything currently enabled — `--job` forces that job to run regardless of its opt-in/disabled state in `config.json`, useful for ad-hoc checks. `--job` requires `--once`.
-- Without `--job`, `--once` respects the same config as the daemon (presets, opt-in `schedules`, `disabled` entries) — it runs whatever would run at container startup, just without then staying up to serve `/metrics` or wait for the next cron tick.
-- Pipe the output wherever it's useful: archive it as a pipeline artifact, `curl --data-binary` it to a Pushgateway, or `grep` it for a threshold check.
-
-### GitHub Action — run a single job as a CI step
-
-Same one-shot model, packaged as a reusable action so a workflow step can gate on the result without shelling out to `docker run` itself:
-
-```yaml
-- name: Check Salesforce API limits
-  id: limits
-  uses: mcarvin8/sfmon@v3
-  with:
-    job-id: monitor_salesforce_limits
-    auth-url: ${{ secrets.SF_AUTH_URL }}
-
-- name: Use the parsed metrics
-  run: echo '${{ steps.limits.outputs.metrics-json }}' | jq .
-```
-
-| Input | Required | Maps to |
-|-------|----------|---------|
-| `job-id` | yes | `sfmon --once --job <id>` |
-| `auth-url` | yes | `SALESFORCE_AUTH_URL` |
-| `org-name` | no | `ORG_NAME` (org label on the metrics) |
-
-| Output | Description |
-|--------|-------------|
-| `exit-code` | `0`/`1`/`2` from `sfmon --once` — the step also fails naturally on `1`/`2` |
-| `metrics-raw` | Full Prometheus exposition text for the run |
-| `metrics-json` | Same metrics parsed into a flat `{"metric_name{labels}": value}` object |
-
-Any other env var `sfmon` reads (thresholds, compliance lists, `SECRETS_BACKEND`, etc. — see [docs/ENVIRONMENT.md](https://github.com/mcarvin8/sfmon/blob/main/docs/ENVIRONMENT.md)) can be set directly on the step's own `env:` block; it's passed through to the container. Fleet mode (`SALESFORCE_AUTH_URL_<ORG>`) isn't wired into the action's inputs yet — single-org only.
-
----
-
-## Presets — scope down without a full config
-
-If you only want a focused slice of monitoring, set a preset in `config.json` instead of listing every job:
-
-```json
-{ "preset": "ops" }
-```
-
-| Preset | Focus |
-|--------|-------|
-| `ops` | Apex health, Bulk API, deployments, EPT/APT |
-| `audit` | Login events, geolocation, suspicious activity, report exports, sharing settings |
-| `tech-debt` | Dormant users, deprecated APIs, permission sets, workflow rules, queues, security health |
-
-Governor limits, instance/trust health, and license metrics are **always on** regardless of preset — they are the baseline signals you always want without having to ask.
-
-See **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md)** for the full scheduling reference.
-
----
+**Metrics vs. logs:** metrics answer "is something wrong right now" and keep labels low-cardinality. The per-record detail behind them (which user, which deployment, login coordinates) goes to stdout as JSON log lines under an `event` field, for Loki, CloudWatch Logs, Datadog or any JSON log pipeline.
 
 ## How it compares
 
 | | SFMon | Salesforce proactive monitoring (paid) | sfdx-hardis org monitoring |
 |--|-------|----------------------------------------|---------------------------|
-| **Model** | Always-on container/process (Prometheus `/metrics`), or a scheduled CI job via `--once` | Salesforce TAM/CSM engagement + event log files | Scheduled CI jobs (e.g. GitHub Actions) |
-| **Output** | Time-series metrics scraped by Prometheus | Salesforce-native reports and guided reviews | Git diffs, Slack/Teams notifications, pipeline artifacts |
-| **Alerting** | PromQL + Alertmanager (same as rest of infra), or built-in Slack webhook alerting with no Alertmanager needed | Salesforce notifications and Success Plan reviews | Slack/Teams webhooks from CI |
-| **Data stays in your stack** | Yes | No (Salesforce-hosted) | Partially (metadata to Git; notifications to Slack/Teams) |
-| **Extra cost** | Free (open source) — compute to run the container, or a CI cron job via `--once` | Salesforce edition / add-on fee | Free (open source) — compute for the CI cron job |
-| **Best for** | SRE/DevOps teams already on Prometheus who want Salesforce as just another scrape target | Teams buying Salesforce-managed oversight and guidance | Teams wanting metadata drift detection and CI-integrated checks |
+| **Model** | Always-on process serving `/metrics`, or a scheduled CI job via `--once` | Salesforce TAM/CSM engagement + event log files | Scheduled CI jobs |
+| **Output** | Time-series metrics | Salesforce reports and guided reviews | Git diffs, Slack/Teams notifications, pipeline artifacts |
+| **Alerting** | PromQL + Alertmanager, or built-in Slack | Salesforce notifications and reviews | Slack/Teams from CI |
+| **Data stays in your stack** | Yes | No | Partly |
+| **Cost** | Free; you run the container or CI job | Paid add-on | Free; you run the CI job |
+| **Best for** | Teams on Prometheus who want Salesforce as another scrape target | Teams buying Salesforce-managed oversight | Metadata backup and drift detection in CI |
 
-SFMon and sfdx-hardis are complementary, not competitors: Hardis handles metadata backup and change detection via CI; SFMon provides continuous time-series for the same signals your infrastructure monitoring already tracks.
-
----
-
-## PMD + minimal permission sets (optional, file-based)
-
-The **published** `mcarvin8/sfmon` image does **not** include an Apex ruleset, `pmd-report.xml`, or `minimal-perm-sets.json` (they stay in your repo/CI only; see **`.dockerignore`**). Collectors **`monitor_pmd_code_smells`** and **`monitor_minimal_perm_sets`** need those files **inside the container** at fixed paths:
-
-| File | In-container path |
-|------|-------------------|
-| PMD ruleset (XML) | Any path you choose; set **`PMD_RULESET_PATH`** to it |
-| PMD report | **`/app/sfmon/tech_debt/pmd-report.xml`** |
-| Minimal perm set report | **`/app/sfmon/tech_debt/minimal-perm-sets.json`** |
-
-**Typical flow:**
-
-1. **In your fork/clone** (with org access), refresh reports in CI so **`pmd-report.xml`** and **`minimal-perm-sets.json`** are produced under **`src/sfmon/tech_debt/`** and pushed to your default branch. Maintain **`manifest/package.xml`** and **`apexruleset.xml`** in that folder.
-   - **GitHub Actions:** Workflow **[`.github/workflows/update-local-reports.yml`](.github/workflows/update-local-reports.yml)** — repository secret **`SALESFORCE_AUTH_URL`** (SFDX URL). Optional `workflow_dispatch` input **`manifest_path`** (default **`manifest/package.xml`**).
-   - **Other CI systems (GitLab, etc.):** port the GitHub workflow's steps and push the report files with a repository write token. Details: **[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#refreshing-reports-in-ci)**.
-2. **Get those files into the runtime container** (pick one):
-   - **Mounts (no image rebuild):** copy or sync the committed files to the host/CI artifact store, then **bind-mount** or use a **ConfigMap** / volume (watch size limits for very large `pmd-report.xml`). Set **`PMD_RULESET_PATH`** and redeploy the **same** public image tag when you refresh reports.
-   - **Private image:** **`docker build -f docker/Dockerfile`** from a branch that contains the refreshed files and **remove or trim the `src/sfmon/tech_debt/*` lines in `.dockerignore`** so `COPY src/sfmon/` bakes them in; push to your registry and redeploy when reports change.
-
-3. **Opt in via `config.json`:** These collectors have **no default schedule**. Add **`monitor_pmd_code_smells`** and **`monitor_minimal_perm_sets`** under **`schedules`** with a cron string (see **[docs/CONFIGURATION.md](docs/CONFIGURATION.md#opt-in-only--file-based-reports-no-default-schedule)**). If your file uses a **non-empty** `schedules` block, list every other job you still want as well.
-
-If **`PMD_RULESET_PATH`** is unset or the ruleset file is missing, PMD metrics are skipped (quiet at INFO). If **`minimal-perm-sets.json`** is missing, that collector logs a warning and exits. More detail: **[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#pmd-and-minimal-permission-sets-optional)**.
-
----
-
-## When you need your own image
-
-The default image covers **standard** monitoring: env vars + optional JSON config. It excludes org-specific PMD/perm-set files by default (see **`.dockerignore`**) — for baking those in, see [PMD + minimal permission sets](#pmd--minimal-permission-sets-optional-file-based) above.
-
-**Build and run your own image** if you need to change **application code** — new checks, different logic, pinned dependencies, private registry policy, or anything not covered by env/config.
-
-```bash
-docker build \
-  -f docker/Dockerfile \
-  -t your-registry/sfmon:latest .
-
-docker push your-registry/sfmon:latest   # if using a registry
-```
-
-Then run `your-registry/sfmon:latest` the same way as above (`-e SALESFORCE_AUTH_URL=...`, ports, volumes).
-
----
-
-## Grafana
-
-Import the JSON dashboards under **`grafana/`** and point them at your Prometheus data source.
-
----
+SFMon and sfdx-hardis work well together: Hardis handles metadata backup and change detection, SFMon provides continuous time series.
 
 ## Authors
 
