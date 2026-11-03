@@ -33,7 +33,7 @@ class TestDownloadLogFile:
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.text = "FIELD1,FIELD2\nval1,val2"
-        with patch("sfmon.ops.ept_apt.requests.get", return_value=mock_resp):
+        with patch("sfmon.query.requests.get", return_value=mock_resp):
             result = download_log_file(self._make_sf(), "logId")
         assert result == "FIELD1,FIELD2\nval1,val2"
 
@@ -41,7 +41,7 @@ class TestDownloadLogFile:
         from sfmon.ops.ept_apt import download_log_file
         mock_resp = MagicMock()
         mock_resp.status_code = 404
-        with patch("sfmon.ops.ept_apt.requests.get", return_value=mock_resp):
+        with patch("sfmon.query.requests.get", return_value=mock_resp):
             result = download_log_file(self._make_sf(), "logId")
         assert result is None
 

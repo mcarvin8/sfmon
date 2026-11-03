@@ -37,18 +37,16 @@ import csv
 from datetime import datetime, timedelta, timezone
 from io import StringIO
 import os
-import requests
 import pandas as pd
 
 from ..logger import logger
-from ..constants import REQUESTS_TIMEOUT_SECONDS
 from .gauges import (
     login_failure_gauge,
     login_success_gauge,
     geolocation_gauge,
     unique_login_attempts_gauge,
 )
-from ..query import query_records_all
+from ..query import get_event_log_file, query_records_all
 
 # Geolocation configuration
 GEOLOCATION_CHUNK_SIZE = int(os.getenv("GEOLOCATION_CHUNK_SIZE", 100))
@@ -91,12 +89,7 @@ def fetch_latest_login_log(sf):
 
     log_id = event_log_file[0]["Id"]
 
-    log_data_url = sf.base_url + f"/sobjects/EventLogFile/{log_id}/LogFile"
-    response = requests.get(
-        log_data_url,
-        headers={"Authorization": f"Bearer {sf.session_id}"},
-        timeout=REQUESTS_TIMEOUT_SECONDS,
-    )
+    response = get_event_log_file(sf, log_id)
     response.raise_for_status()
     return response.text if response.text else None
 

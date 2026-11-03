@@ -40,12 +40,10 @@ from collections import defaultdict
 import csv
 import io
 
-import requests
 
 from ..logger import logger
-from ..constants import REQUESTS_TIMEOUT_SECONDS
 from .gauges import ept_metric, apt_metric
-from ..query import query_records_all
+from ..query import get_event_log_file, query_records_all
 
 
 def get_salesforce_ept_and_apt(sf):
@@ -109,12 +107,7 @@ def download_log_file(sf, log_id):
     Returns:
         str: The raw CSV log data as a string, or None if the request failed.
     """
-    url = sf.base_url + f"/sobjects/EventLogFile/{log_id}/LogFile"
-    response = requests.get(
-        url,
-        headers={"Authorization": f"Bearer {sf.session_id}"},
-        timeout=REQUESTS_TIMEOUT_SECONDS,
-    )
+    response = get_event_log_file(sf, log_id)
     if response.status_code == 200:
         return response.text
     return None

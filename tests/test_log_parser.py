@@ -19,7 +19,7 @@ class TestFetchEventLogCsvReader:
         csv_content = "FIELD1,FIELD2\nval1,val2\n"
         mock_resp = MagicMock()
         mock_resp.text = csv_content
-        with patch("sfmon.log_parser.requests.get", return_value=mock_resp):
+        with patch("sfmon.query.requests.get", return_value=mock_resp):
             result = fetch_event_log_csv_reader(self._make_sf(), "logId123")
         assert result is not None
         assert "FIELD1" in result.fieldnames
@@ -28,7 +28,7 @@ class TestFetchEventLogCsvReader:
         from sfmon.log_parser import fetch_event_log_csv_reader
         mock_resp = MagicMock()
         mock_resp.text = ""
-        with patch("sfmon.log_parser.requests.get", return_value=mock_resp):
+        with patch("sfmon.query.requests.get", return_value=mock_resp):
             result = fetch_event_log_csv_reader(self._make_sf(), "logId123")
         assert result is None
 
@@ -37,7 +37,7 @@ class TestFetchEventLogCsvReader:
         csv_content = "﻿FIELD1,FIELD2\nval1,val2\n"
         mock_resp = MagicMock()
         mock_resp.text = csv_content
-        with patch("sfmon.log_parser.requests.get", return_value=mock_resp):
+        with patch("sfmon.query.requests.get", return_value=mock_resp):
             result = fetch_event_log_csv_reader(self._make_sf(), "logId123")
         assert "FIELD1" in result.fieldnames
         assert "﻿FIELD1" not in result.fieldnames
@@ -46,7 +46,7 @@ class TestFetchEventLogCsvReader:
         from sfmon.log_parser import fetch_event_log_csv_reader
         mock_resp = MagicMock()
         mock_resp.raise_for_status.side_effect = requests.HTTPError("404")
-        with patch("sfmon.log_parser.requests.get", return_value=mock_resp):
+        with patch("sfmon.query.requests.get", return_value=mock_resp):
             with pytest.raises(requests.HTTPError):
                 fetch_event_log_csv_reader(self._make_sf(), "logId123")
 

@@ -80,12 +80,12 @@ from prometheus_client import generate_latest, start_http_server
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.executors.pool import ThreadPoolExecutor
+from simple_salesforce.exceptions import SalesforceExpiredSession
 
 # Shared modules from root
 from .logger import logger
 from . import orgs
 from .org_gauge import set_current_org
-from .connection_sf import get_salesforce_connection_url
 
 # Always-on baseline functions (core package)
 from .core import (
@@ -145,8 +145,9 @@ from .tech_debt import (
 )
 
 
-# Global connection store - one Salesforce connection per org name, allows
-# re-authentication to update connections in place.
+# Orgs connected at startup. The live connection objects are kept in
+# orgs.py's registry (see orgs.get_connection / orgs.reconnect), which
+# scheduled jobs read on every run so a re-authenticated session is used.
 sf_connections = {}
 
 # Always-on jobs: run regardless of preset/opt-in mode; can only be disabled
@@ -407,25 +408,6 @@ SCHEDULED_JOBS = [
 ]
 
 
-def reauthenticate_connections():
-    """
-    Re-authenticate to every configured Salesforce org.
-    Refreshes each org's authentication token independently; a failure on one
-    org is logged and does not prevent the others from refreshing.
-    """
-    global sf_connections
-    logger.info("Starting re-authentication to Salesforce orgs...")
-    for org_name in orgs.get_org_names():
-        try:
-            sf_connections[org_name] = get_salesforce_connection_url(
-                url=orgs.resolve_auth_url(org_name)
-            )
-            logger.info("Successfully re-authenticated to org '%s'.", org_name)
-        except Exception as e:
-            logger.error("Failed to re-authenticate to org '%s': %s", org_name, e)
-    logger.info("Re-authentication complete")
-
-
 def get_schedule_config(job_id, default_schedule, org_name=None):
     """
     Get schedule for an opt-in job. Returns None if job is not listed when opt-in mode is active.
@@ -453,6 +435,19 @@ def _run_job(org_name, sf, func, job_name):
     try:
         func(sf)
         return True
+    except SalesforceExpiredSession as e:
+        # Raised by calls that bypass query.py's retry (e.g. sf.limits()).
+        # Refresh the session so the next run of every job for this org works.
+        logger.error(
+            "Job '%s' failed for org '%s': session expired: %s", job_name, org_name, e
+        )
+        try:
+            orgs.reconnect(org_name, stale=sf)
+        except Exception as reconnect_e:
+            logger.error(
+                "Failed to re-authenticate to org '%s': %s", org_name, reconnect_e
+            )
+        return False
     except Exception as e:
         logger.error(
             "Job '%s' failed for org '%s': %s", job_name, org_name, e
@@ -460,10 +455,14 @@ def _run_job(org_name, sf, func, job_name):
         return False
 
 
-def _add_job_with_schedule(scheduler, org_name, sf, job_id, schedule, func, job_name):
-    """Add a job to the scheduler with the given schedule, scoped to one org."""
+def _add_job_with_schedule(scheduler, org_name, job_id, schedule, func, job_name):
+    """Add a job to the scheduler with the given schedule, scoped to one org.
+
+    The org's connection is looked up when the job fires, not captured here,
+    so runs after a re-authentication use the refreshed session.
+    """
     scheduler.add_job(
-        func=lambda: _run_job(org_name, sf, func, job_name),
+        func=lambda: _run_job(org_name, orgs.get_connection(org_name), func, job_name),
         trigger=CronTrigger(**schedule),
         id=f"{job_id}::{org_name}",
         name=f"{job_name} [{org_name}]",
@@ -545,7 +544,7 @@ def schedule_tasks(scheduler):
             if schedule:
                 _run_job(org_name, sf, func, job_name)
                 _add_job_with_schedule(
-                    scheduler, org_name, sf, job_id, schedule, func, job_name
+                    scheduler, org_name, job_id, schedule, func, job_name
                 )
 
     logger.info("Executing enabled tasks at startup (respecting config)...")
@@ -555,7 +554,7 @@ def schedule_tasks(scheduler):
             if schedule:
                 _run_job(org_name, sf, func, job_name)  # initial run only for jobs enabled by config
                 _add_job_with_schedule(
-                    scheduler, org_name, sf, job_id, schedule, func, job_name
+                    scheduler, org_name, job_id, schedule, func, job_name
                 )
     logger.info("Initial execution completed, all jobs scheduled with APScheduler")
 
