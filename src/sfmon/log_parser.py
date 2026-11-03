@@ -41,21 +41,15 @@ import csv
 from io import StringIO
 import requests
 
-from .constants import REQUESTS_TIMEOUT_SECONDS
 from .logger import logger
-from .query import query_records_all
+from .query import get_event_log_file, query_records_all
 
 
 def fetch_event_log_csv_reader(sf, log_file_id):
     """
     Download the CSV for a given EventLogFile Id and return a csv.DictReader.
     """
-    log_file_url = f"{sf.base_url}/sobjects/EventLogFile/{log_file_id}/LogFile"
-    log_file_response = requests.get(
-        log_file_url,
-        headers={"Authorization": f"Bearer {sf.session_id}"},
-        timeout=REQUESTS_TIMEOUT_SECONDS,
-    )
+    log_file_response = get_event_log_file(sf, log_file_id)
     log_file_response.raise_for_status()
 
     log_content = log_file_response.text

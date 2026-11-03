@@ -40,7 +40,7 @@ class TestFetchLatestLoginLog:
         mock_resp = MagicMock()
         mock_resp.text = "LOGIN_STATUS,USER_ID\nLOGIN_NO_ERROR,u01"
         with patch("sfmon.audit.user_login.query_records_all", return_value=records), \
-             patch("sfmon.audit.user_login.requests.get", return_value=mock_resp):
+             patch("sfmon.query.requests.get", return_value=mock_resp):
             result = fetch_latest_login_log(sf)
         assert result == mock_resp.text
 
@@ -51,7 +51,7 @@ class TestFetchLatestLoginLog:
         mock_resp = MagicMock()
         mock_resp.text = ""
         with patch("sfmon.audit.user_login.query_records_all", return_value=records), \
-             patch("sfmon.audit.user_login.requests.get", return_value=mock_resp):
+             patch("sfmon.query.requests.get", return_value=mock_resp):
             result = fetch_latest_login_log(sf)
         assert result is None
 
