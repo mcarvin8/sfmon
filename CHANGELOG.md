@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.1.0](https://github.com/mcarvin8/sfmon/compare/v4.0.0...v4.1.0) (2026-11-03)
+
+
+### Features
+
+* add config-defined custom SOQL metrics ([#84](https://github.com/mcarvin8/sfmon/issues/84)) ([38456c2](https://github.com/mcarvin8/sfmon/commit/38456c2f2c1bddb6c985681e0f1217df5de6100d))
+
+
+### Bug Fixes
+
+* apply each job's gauge updates atomically ([#86](https://github.com/mcarvin8/sfmon/issues/86)) ([86e4c09](https://github.com/mcarvin8/sfmon/commit/86e4c0940f25fd84ae03986f6bd8de4847a1aa12))
+
 ## [4.0.0](https://github.com/mcarvin8/sfmon/compare/v3.17.0...v4.0.0) (2026-11-03)
 
 
