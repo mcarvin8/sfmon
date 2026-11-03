@@ -53,11 +53,11 @@ def monitor_apex_flex_queue(sf):
         if results:
             for record in results:
                 apex_flex_queue.labels(
-                    id=record["Id"], ApexClassId=record["ApexClassId"]
+                    id=record["Id"], apex_class_id=record["ApexClassId"]
                 ).set(1)
         else:
             # Emit a 0-valued series when no records are found
-            apex_flex_queue.labels(id="none", ApexClassId="none").set(0)
+            apex_flex_queue.labels(id="none", apex_class_id="none").set(0)
 
         queue_depth = len(results)
         percentage = (queue_depth / FLEX_QUEUE_LIMIT) * 100

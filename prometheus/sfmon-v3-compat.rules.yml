@@ -1,0 +1,171 @@
+# Optional: recreates SFMon v3 metric names from the v4 sfmon_* names so
+# existing dashboards and alerts keep working while you migrate. Values are
+# identical; renamed labels are restored to their v3 names. Remove this file
+# once nothing queries the old names. See docs/METRICS_MIGRATION.md.
+groups:
+  - name: sfmon-v3-compat
+    rules:
+      - record: salesforce_api_usage_percentage
+        expr: 'sfmon_org_limit_usage_percent'
+      - record: salesforce_total_user_licenses
+        expr: 'sfmon_user_license_seats'
+      - record: salesforce_used_user_licenses
+        expr: 'sfmon_user_license_seats_used'
+      - record: salesforce_user_licenses_usage_percentage
+        expr: 'sfmon_user_license_usage_percent'
+      - record: salesforce_total_permissionset_licenses
+        expr: 'sfmon_permission_set_license_seats'
+      - record: salesforce_used_permissionset_licenses
+        expr: 'sfmon_permission_set_license_seats_used'
+      - record: salesforce_permissionset_license_usage_percentage
+        expr: 'sfmon_permission_set_license_usage_percent'
+      - record: salesforce_total_licenses_usage_based_entitlements
+        expr: 'sfmon_usage_based_entitlement_seats'
+      - record: salesforce_used_licenses_usage_based_entitlements
+        expr: 'sfmon_usage_based_entitlement_seats_used'
+      - record: salesforce_percent_used_usage_based_entitlements
+        expr: 'sfmon_usage_based_entitlement_usage_percent'
+      - record: salesforce_incidents
+        expr: 'sfmon_trust_incidents'
+      - record: salesforce_maintenance
+        expr: 'sfmon_trust_maintenance'
+      - record: deployment_details
+        expr: 'sfmon_deployment_status'
+      - record: deployment_pending_time
+        expr: 'sfmon_deployment_pending_minutes'
+      - record: deployment_time
+        expr: 'sfmon_deployment_duration_minutes'
+      - record: validation_details
+        expr: 'sfmon_validation_status'
+      - record: validation_pending_time
+        expr: 'sfmon_validation_pending_minutes'
+      - record: validation_time
+        expr: 'sfmon_validation_duration_minutes'
+      - record: salesforce_login_success_total
+        expr: 'sfmon_login_success_count'
+      - record: salesforce_login_failure_total
+        expr: 'sfmon_login_failure_count'
+      - record: unique_login_count_total
+        expr: 'sfmon_login_unique_count'
+      - record: user_location
+        expr: 'sfmon_login_browser_count'
+      - record: hourly_user_querying_large_records
+        expr: 'sfmon_hourly_large_queries'
+      - record: suspicious_records
+        expr: 'sfmon_audit_trail_suspicious_records'
+      - record: org_wide_sharing_changes
+        expr: 'sfmon_audit_trail_sharing_changes'
+      - record: forbidden_profile_users
+        expr: 'sfmon_forbidden_profile_users'
+      - record: hourly_report_export
+        expr: 'sfmon_hourly_report_exports'
+      - record: daily_bulk_api_batch_count
+        expr: 'sfmon_bulk_api_daily_batches'
+      - record: daily_entity_type_count
+        expr: 'sfmon_bulk_api_daily_entity_operations'
+      - record: hourly_bulk_api_batch_count
+        expr: 'sfmon_bulk_api_hourly_batches'
+      - record: hourly_entity_type_count
+        expr: 'sfmon_bulk_api_hourly_entity_operations'
+      - record: daily_bulk_api2_batch_count
+        expr: 'sfmon_bulk_api2_daily_batches'
+      - record: daily_bulk_api2_entity_type_count
+        expr: 'sfmon_bulk_api2_daily_entity_operations'
+      - record: hourly_bulk_api2_batch_count
+        expr: 'sfmon_bulk_api2_hourly_batches'
+      - record: hourly_bulk_api2_entity_type_count
+        expr: 'sfmon_bulk_api2_hourly_entity_operations'
+      - record: salesforce_experienced_page_time
+        expr: 'sum without (effective_page_time_deviation_reason, effective_page_time_deviation_error_type, prevpage_entity_type, prevpage_app_name, page_entity_type, page_app_name, browser_name) (label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(sfmon_experienced_page_time_seconds, "EFFECTIVE_PAGE_TIME_DEVIATION_REASON", "$1", "effective_page_time_deviation_reason", "(.*)"), "EFFECTIVE_PAGE_TIME_DEVIATION_ERROR_TYPE", "$1", "effective_page_time_deviation_error_type", "(.*)"), "PREVPAGE_ENTITY_TYPE", "$1", "prevpage_entity_type", "(.*)"), "PREVPAGE_APP_NAME", "$1", "prevpage_app_name", "(.*)"), "PAGE_ENTITY_TYPE", "$1", "page_entity_type", "(.*)"), "PAGE_APP_NAME", "$1", "page_app_name", "(.*)"), "BROWSER_NAME", "$1", "browser_name", "(.*)"))'
+      - record: salesforce_average_page_time
+        expr: 'sum without (page_name) (label_replace(sfmon_average_page_time_seconds, "Page_name", "$1", "page_name", "(.*)"))'
+      - record: salesforce_async_job_status_count
+        expr: 'sfmon_async_apex_jobs'
+      - record: salesforce_apex_run_time_seconds
+        expr: 'sfmon_apex_run_time_milliseconds'
+      - record: salesforce_apex_cpu_time_seconds
+        expr: 'sfmon_apex_cpu_time_milliseconds'
+      - record: salesforce_apex_execution_time_seconds
+        expr: 'sfmon_apex_exec_time_milliseconds'
+      - record: salesforce_apex_db_total_time_seconds
+        expr: 'sfmon_apex_db_total_time'
+      - record: salesforce_apex_callout_time_seconds
+        expr: 'sfmon_apex_callout_time_milliseconds'
+      - record: apex_entry_point_count
+        expr: 'sfmon_apex_executions'
+      - record: apex_avg_runtime
+        expr: 'sfmon_apex_avg_run_time_milliseconds'
+      - record: apex_max_runtime
+        expr: 'sfmon_apex_max_run_time_milliseconds'
+      - record: apex_total_runtime
+        expr: 'sfmon_apex_total_run_time_milliseconds'
+      - record: apex_avg_cputime
+        expr: 'sfmon_apex_avg_cpu_time_milliseconds'
+      - record: apex_max_cputime
+        expr: 'sfmon_apex_max_cpu_time_milliseconds'
+      - record: apex_runtime_gt_5s_count
+        expr: 'sfmon_apex_long_running_executions'
+      - record: apex_runtime_gt_10s_count
+        expr: 'sfmon_apex_very_long_running_executions'
+      - record: apex_runtime_gt_5s_percentage
+        expr: 'sfmon_apex_long_running_executions_percent'
+      - record: most_apex_concurrent_errors_sorted_by_runtime
+        expr: 'sfmon_apex_top_long_running_by_avg_run_time'
+      - record: most_apex_concurrent_errors_sorted_by_count
+        expr: 'sfmon_apex_top_long_running_by_count'
+      - record: concurrent_request_error_count
+        expr: 'sfmon_apex_concurrent_long_running_errors'
+      - record: apex_exception_details
+        expr: 'sfmon_apex_exception_details'
+      - record: apex_exception_category_count
+        expr: 'sfmon_apex_exceptions_by_category'
+      - record: apex_flex_queue
+        expr: 'sum without (apex_class_id) (label_replace(sfmon_apex_flex_queue_jobs, "ApexClassId", "$1", "apex_class_id", "(.*)"))'
+      - record: unused_permissionsets
+        expr: 'sfmon_unassigned_permission_sets'
+      - record: limited_permissionsets
+        expr: 'sfmon_limited_user_permission_sets'
+      - record: five_or_less_profile_assignees
+        expr: 'sum without (profile_id, profile_name) (label_replace(label_replace(sfmon_profiles_with_few_users, "profileId", "$1", "profile_id", "(.*)"), "profileName", "$1", "profile_name", "(.*)"))'
+      - record: unassigned_profiles
+        expr: 'sum without (profile_id, profile_name) (label_replace(label_replace(sfmon_profiles_with_no_active_users, "profileId", "$1", "profile_id", "(.*)"), "profileName", "$1", "profile_name", "(.*)"))'
+      - record: deprecated_apex_classes
+        expr: 'sfmon_deprecated_api_apex_classes'
+      - record: deprecated_apex_triggers
+        expr: 'sfmon_deprecated_api_apex_triggers'
+      - record: apex_class_length_without_comments
+        expr: 'sfmon_apex_class_characters'
+      - record: apex_trigger_length_without_comments
+        expr: 'sfmon_apex_trigger_characters'
+      - record: apex_character_limit_percentage
+        expr: 'sfmon_apex_character_limit_usage_percent'
+      - record: workflow_rules
+        expr: 'sfmon_workflow_rules'
+      - record: security_health_check_score
+        expr: 'sfmon_security_health_check_score'
+      - record: salesforce_health_risks
+        expr: 'sfmon_security_health_check_risks'
+      - record: dormant_salesforce_users
+        expr: 'sfmon_dormant_users'
+      - record: dormant_portal_users
+        expr: 'sfmon_dormant_portal_users'
+      - record: total_queues_per_object
+        expr: 'sfmon_queues_per_object'
+      - record: queues_with_no_members
+        expr: 'sfmon_queues_with_no_members'
+      - record: queues_with_zero_open_cases
+        expr: 'sfmon_queues_with_zero_open_cases'
+      - record: public_groups_with_no_members
+        expr: 'sfmon_public_groups_with_no_members'
+      - record: dashboards_with_inactive_users
+        expr: 'sfmon_dashboards_with_inactive_running_users'
+      - record: scheduled_apex_jobs
+        expr: 'sfmon_scheduled_apex_jobs'
+      - record: pmd_code_smells
+        expr: 'sfmon_pmd_code_smells'
+      - record: pmd_apex_violations
+        expr: 'sfmon_pmd_apex_violations'
+      - record: minimal_permission_sets
+        expr: 'sfmon_minimal_permission_sets'
+      - record: minimal_permission_sets_percentage
+        expr: 'sfmon_minimal_permission_sets_percent'

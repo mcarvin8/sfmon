@@ -24,7 +24,7 @@ class TestMonitorApexFlexQueue:
         with patch("sfmon.ops.apex_flex_queue.query_records_all", return_value=[]), \
              patch("sfmon.ops.apex_flex_queue.apex_flex_queue", mock_gauge):
             monitor_apex_flex_queue(mock_sf)
-        mock_gauge.labels.assert_called_once_with(id="none", ApexClassId="none")
+        mock_gauge.labels.assert_called_once_with(id="none", apex_class_id="none")
         mock_gauge.labels().set.assert_called_once_with(0)
 
     def test_handles_exception(self, mock_sf):

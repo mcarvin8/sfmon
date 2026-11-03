@@ -8,45 +8,45 @@ from ..org_gauge import OrgAwareGauge
 # structured event by audit/deployments.py instead. Labels here stay bounded
 # by (deployer, status).
 deployment_details_gauge = OrgAwareGauge(
-    "deployment_details",
+    "sfmon_deployment_status",
     "Salesforce Deployment details",
     ["deployed_by", "status"],
 )
 pending_time_gauge = OrgAwareGauge(
-    "deployment_pending_time",
-    "Pending time before starting the deployment",
+    "sfmon_deployment_pending_minutes",
+    "Minutes a deployment waited before starting",
     ["deployed_by", "status"],
 )
 deployment_time_gauge = OrgAwareGauge(
-    "deployment_time",
-    "Time taken for the deployment",
+    "sfmon_deployment_duration_minutes",
+    "Deployment duration in minutes",
     ["deployed_by", "status"],
 )
 validation_details_gauge = OrgAwareGauge(
-    "validation_details",
+    "sfmon_validation_status",
     "Salesforce Validation Deployment details",
     ["deployed_by", "status"],
 )
 validation_pending_time_gauge = OrgAwareGauge(
-    "validation_pending_time",
-    "Pending time before starting the validation",
+    "sfmon_validation_pending_minutes",
+    "Minutes a validation waited before starting",
     ["deployed_by", "status"],
 )
 validation_time_gauge = OrgAwareGauge(
-    "validation_time",
-    "Time taken for the validation",
+    "sfmon_validation_duration_minutes",
+    "Validation duration in minutes",
     ["deployed_by", "status"],
 )
 
 # User Activity - Login Metrics
 login_success_gauge = OrgAwareGauge(
-    "salesforce_login_success_total", "Total number of successful Salesforce logins"
+    "sfmon_login_success_count", "Total number of successful Salesforce logins"
 )
 login_failure_gauge = OrgAwareGauge(
-    "salesforce_login_failure_total", "Total number of failed Salesforce logins"
+    "sfmon_login_failure_count", "Total number of failed Salesforce logins"
 )
 unique_login_attempts_gauge = OrgAwareGauge(
-    "unique_login_count_total", "Total number of Unique Salesforce logins"
+    "sfmon_login_unique_count", "Total number of Unique Salesforce logins"
 )
 
 # User Activity - Geolocation
@@ -54,14 +54,14 @@ unique_login_attempts_gauge = OrgAwareGauge(
 # it's logged as a structured event by audit/user_login.py. Labels here count
 # logins by (browser, status) within the lookback window instead.
 geolocation_gauge = OrgAwareGauge(
-    "user_location",
+    "sfmon_login_browser_count",
     "Count of user logins by browser and status in the lookback window",
     ["browser", "status"],
 )
 
 # Compliance - Large Queries
 hourly_large_query_metric = OrgAwareGauge(
-    "hourly_user_querying_large_records",
+    "sfmon_hourly_large_queries",
     "Number of large queries by user (threshold configurable via LARGE_QUERY_THRESHOLD)",
     ["user_id", "user_name", "method", "entity_name"],
 )
@@ -71,7 +71,7 @@ hourly_large_query_metric = OrgAwareGauge(
 # over time; it's logged as a structured event by audit/audit_trail.py. Labels
 # here stay bounded by (action, section, user_group).
 suspicious_records_gauge = OrgAwareGauge(
-    "suspicious_records",
+    "sfmon_audit_trail_suspicious_records",
     "Suspicious records from Audit Trail logs",
     ["action", "section", "user_group"],
 )
@@ -80,14 +80,14 @@ suspicious_records_gauge = OrgAwareGauge(
 # Per-change detail (date, user, display) is unbounded over time; it's logged
 # as a structured event by audit/sharing_settings.py.
 org_wide_sharing__setting_changes = OrgAwareGauge(
-    "org_wide_sharing_changes",
+    "sfmon_audit_trail_sharing_changes",
     "Track changes in Org-Wide Sharing Settings",
     ["action", "user_group"],
 )
 
 # Compliance - Forbidden Profiles
 forbidden_profile_users_gauge = OrgAwareGauge(
-    "forbidden_profile_users",
+    "sfmon_forbidden_profile_users",
     "Active users with forbidden profile assignments",
     ["user_id", "user_name", "username", "profile_name"],
 )
@@ -97,7 +97,7 @@ forbidden_profile_users_gauge = OrgAwareGauge(
 # it's logged as a structured event by audit/report_export.py. Labels here
 # count exports by report type within the hour.
 hourly_report_export_metric = OrgAwareGauge(
-    "hourly_report_export",
+    "sfmon_hourly_report_exports",
     "Count of report exports by report type in the hour",
     ["report_type_api_name"],
 )

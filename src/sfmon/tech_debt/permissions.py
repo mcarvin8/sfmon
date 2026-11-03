@@ -129,7 +129,7 @@ def profile_assignment_under5(sf):
 
         for record in results:
             five_or_less_profile_assignees.labels(
-                profileId=record["ProfileId"], profileName=record["Name"]
+                profile_id=record["ProfileId"], profile_name=record["Name"]
             ).set(int(record["userCount"]))
     # pylint: disable=broad-except
     except Exception as e:
@@ -155,7 +155,7 @@ def profile_no_active_users(sf):
 
         for record in results:
             unassigned_profiles.labels(
-                profileId=record["Id"], profileName=record["Name"]
+                profile_id=record["Id"], profile_name=record["Name"]
             ).set(0)
     # pylint: disable=broad-except
     except Exception as e:

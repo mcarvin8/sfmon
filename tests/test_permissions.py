@@ -76,7 +76,7 @@ class TestProfileNoActiveUsers:
         with patch("sfmon.tech_debt.permissions.query_records_all", return_value=records), \
              patch("sfmon.tech_debt.permissions.unassigned_profiles", mock_gauge):
             profile_no_active_users(mock_sf)
-        mock_gauge.labels.assert_called_once_with(profileId="p01", profileName="Empty Profile")
+        mock_gauge.labels.assert_called_once_with(profile_id="p01", profile_name="Empty Profile")
         mock_gauge.labels().set.assert_called_once_with(0)
 
     def test_handles_exception(self, mock_sf):

@@ -4,66 +4,66 @@ from ..org_gauge import OrgAwareGauge
 
 # Permission Sets
 unused_permissionsets = OrgAwareGauge(
-    "unused_permissionsets",
+    "sfmon_unassigned_permission_sets",
     "Permission sets not assigned to any users or groups",
     ["name", "id"],
 )
 limited_permissionsets = OrgAwareGauge(
-    "limited_permissionsets",
+    "sfmon_limited_user_permission_sets",
     "Permission sets assigned to limited active users (threshold configurable via PERMSET_LIMITED_USERS_THRESHOLD)",
     ["name", "id"],
 )
 
 # Profiles
 five_or_less_profile_assignees = OrgAwareGauge(
-    "five_or_less_profile_assignees",
+    "sfmon_profiles_with_few_users",
     "Profiles with limited assignees (threshold configurable via PROFILE_UNDER_USERS_THRESHOLD)",
-    ["profileId", "profileName"],
+    ["profile_id", "profile_name"],
 )
 unassigned_profiles = OrgAwareGauge(
-    "unassigned_profiles", "Profiles with no active users", ["profileId", "profileName"]
+    "sfmon_profiles_with_no_active_users", "Profiles with no active users", ["profile_id", "profile_name"]
 )
 
 # Code Quality - API Versions and Apex
 deprecated_apex_class_gauge = OrgAwareGauge(
-    "deprecated_apex_classes",
+    "sfmon_deprecated_api_apex_classes",
     "Apex classes running on deprecated API versions (threshold configurable via DEPRECATED_API_VERSION)",
     ["id", "name"],
 )
 deprecated_apex_trigger_gauge = OrgAwareGauge(
-    "deprecated_apex_triggers",
+    "sfmon_deprecated_api_apex_triggers",
     "Apex triggers running on deprecated API versions (threshold configurable via DEPRECATED_API_VERSION)",
     ["id", "name"],
 )
 apex_class_length_without_comments_gauge = OrgAwareGauge(
-    "apex_class_length_without_comments",
+    "sfmon_apex_class_characters",
     "Apex class character count excluding comments (Apex Used Limits). Non-test custom classes only.",
     ["id", "name"],
 )
 apex_trigger_length_without_comments_gauge = OrgAwareGauge(
-    "apex_trigger_length_without_comments",
+    "sfmon_apex_trigger_characters",
     "Apex trigger character count excluding comments (Apex Used Limits). Custom triggers only.",
     ["id", "name"],
 )
 apex_character_limit_percentage_gauge = OrgAwareGauge(
-    "apex_character_limit_percentage",
+    "sfmon_apex_character_limit_usage_percent",
     "Percentage of Apex character limit (6M) used. Custom classes/triggers only, excludes @isTest classes.",
     [],
 )
 
 # Code Quality - Workflow Rules
 workflow_rules_gauge = OrgAwareGauge(
-    "workflow_rules",
+    "sfmon_workflow_rules",
     "Workflow rules in the org",
     ["id", "created_date", "namespace_prefix"],
 )
 
 # Security
 security_health_check_gauge = OrgAwareGauge(
-    "security_health_check_score", "Salesforce Security Health Check Score", ["grade"]
+    "sfmon_security_health_check_score", "Salesforce Security Health Check Score", ["grade"]
 )
 salesforce_health_risks_gauge = OrgAwareGauge(
-    "salesforce_health_risks",
+    "sfmon_security_health_check_risks",
     "Salesforce Security Health Check Risks",
     [
         "org_value",
@@ -78,39 +78,39 @@ salesforce_health_risks_gauge = OrgAwareGauge(
 
 # Users
 dormant_salesforce_users_gauge = OrgAwareGauge(
-    "dormant_salesforce_users",
+    "sfmon_dormant_users",
     "Dormant Salesforce users (threshold configurable via DORMANT_USER_DAYS)",
     ["user_id", "username", "email", "profile_name", "created_date", "last_login_date"],
 )
 dormant_portal_users_gauge = OrgAwareGauge(
-    "dormant_portal_users",
+    "sfmon_dormant_portal_users",
     "Dormant Portal users (threshold configurable via DORMANT_USER_DAYS)",
     ["user_id", "username", "email", "profile_name", "created_date", "last_login_date"],
 )
 
 # Queues
 total_queues_per_object_gauge = OrgAwareGauge(
-    "total_queues_per_object", "Total queues per Salesforce object", ["sobject_type"]
+    "sfmon_queues_per_object", "Total queues per Salesforce object", ["sobject_type"]
 )
 queues_with_no_members_gauge = OrgAwareGauge(
-    "queues_with_no_members", "Queues with no members", ["queue_id", "queue_name"]
+    "sfmon_queues_with_no_members", "Queues with no members", ["queue_id", "queue_name"]
 )
 queues_with_zero_open_cases_gauge = OrgAwareGauge(
-    "queues_with_zero_open_cases",
+    "sfmon_queues_with_zero_open_cases",
     "Queues that can own Cases but have zero open Cases",
     ["queue_id", "queue_name"],
 )
 
 # Public Groups
 public_groups_with_no_members_gauge = OrgAwareGauge(
-    "public_groups_with_no_members",
+    "sfmon_public_groups_with_no_members",
     "Public Groups with no members",
     ["group_id", "group_name"],
 )
 
 # Dashboards
 dashboards_with_inactive_users_gauge = OrgAwareGauge(
-    "dashboards_with_inactive_users",
+    "sfmon_dashboards_with_inactive_running_users",
     "Dashboards with inactive running users",
     [
         "dashboard_id",
@@ -123,7 +123,7 @@ dashboards_with_inactive_users_gauge = OrgAwareGauge(
 
 # Scheduled Jobs
 scheduled_apex_jobs_gauge = OrgAwareGauge(
-    "scheduled_apex_jobs",
+    "sfmon_scheduled_apex_jobs",
     "Scheduled Apex jobs in the org",
     [
         "job_id",
@@ -139,22 +139,22 @@ scheduled_apex_jobs_gauge = OrgAwareGauge(
 
 # PMD and Minimal Permission Sets
 pmd_code_smells_gauge = OrgAwareGauge(
-    "pmd_code_smells",
+    "sfmon_pmd_code_smells",
     "PMD code smells in the org",
     ["rule_name"],
 )
 pmd_apex_violations_gauge = OrgAwareGauge(
-    "pmd_apex_violations",
+    "sfmon_pmd_apex_violations",
     "PMD violations per Apex class/trigger broken down by rule, with comma-separated start lines",
     ["apex_name", "rule_name", "start_lines"],
 )
 minimal_permission_sets_gauge = OrgAwareGauge(
-    "minimal_permission_sets",
+    "sfmon_minimal_permission_sets",
     "Permission sets with 5 or fewer permissions",
     ["permission_set_name", "file_path", "permission_count"],
 )
 minimal_permission_sets_percentage_gauge = OrgAwareGauge(
-    "minimal_permission_sets_percentage",
+    "sfmon_minimal_permission_sets_percent",
     "Percentage of minimal permission sets over total custom permission sets",
     [],
 )
