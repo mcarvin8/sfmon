@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.4](https://github.com/mcarvin8/sfmon/compare/v3.16.3...v3.16.4) (2026-11-03)
+
+
+### Bug Fixes
+
+* **pyproject:** add more python classifiers ([2cbbbe6](https://github.com/mcarvin8/sfmon/commit/2cbbbe61dcdbc465c51fdd3749ca895bbd90c331))
+
 ## [3.16.3](https://github.com/mcarvin8/sfmon/compare/v3.16.2...v3.16.3) (2026-10-05)
 
 
