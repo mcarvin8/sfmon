@@ -23,7 +23,7 @@ def _clear_gauges():
         self_metrics.job_duration_gauge,
         self_metrics.job_query_errors_gauge,
     ):
-        gauge.clear()
+        gauge.clear_all()
     yield
 
 
