@@ -56,14 +56,11 @@ class TestQueryRecordsAll:
             "https://example.com", 401, "Expired", "EXPIRED"
         )
 
-        mock_module = MagicMock()
-        mock_module.reauthenticate_connections = MagicMock()
-        mock_module.sf_connection = recovered_sf
-
-        with patch("sfmon.salesforce_monitoring", mock_module, create=True):
+        with patch("sfmon.query.get_current_org", return_value="prod"),              patch("sfmon.orgs.reconnect", return_value=recovered_sf) as mock_reconnect:
             result = query_records_all(mock_sf, "SELECT Id FROM Account")
 
         assert result == records
+        mock_reconnect.assert_called_once_with("prod", stale=mock_sf)
 
     def test_expired_session_retry_also_fails(self, mock_sf):
         from sfmon.query import query_records_all
@@ -71,11 +68,20 @@ class TestQueryRecordsAll:
             "https://example.com", 401, "Expired", "EXPIRED"
         )
 
-        mock_module = MagicMock()
-        mock_module.reauthenticate_connections.side_effect = RuntimeError("reauth failed")
-        mock_module.sf_connection = None
+        with patch("sfmon.orgs.reconnect", side_effect=RuntimeError("reauth failed")):
+            result = query_records_all(mock_sf, "SELECT Id FROM Account")
 
-        with patch("sfmon.salesforce_monitoring", mock_module, create=True):
+        assert result == []
+
+    def test_expired_session_query_fails_after_reconnect(self, mock_sf):
+        from sfmon.query import query_records_all
+        recovered_sf = MagicMock()
+        recovered_sf.query_all.side_effect = RuntimeError("still broken")
+        mock_sf.query_all.side_effect = SalesforceExpiredSession(
+            "https://example.com", 401, "Expired", "EXPIRED"
+        )
+
+        with patch("sfmon.orgs.reconnect", return_value=recovered_sf):
             result = query_records_all(mock_sf, "SELECT Id FROM Account")
 
         assert result == []
@@ -126,14 +132,11 @@ class TestToolingQueryRecordsAll:
             "https://example.com", 401, "Expired", "EXPIRED"
         )
 
-        mock_module = MagicMock()
-        mock_module.reauthenticate_connections = MagicMock()
-        mock_module.sf_connection = recovered_sf
-
-        with patch("sfmon.salesforce_monitoring", mock_module, create=True):
+        with patch("sfmon.query.get_current_org", return_value="prod"),              patch("sfmon.orgs.reconnect", return_value=recovered_sf) as mock_reconnect:
             result = tooling_query_records_all(mock_sf, "SELECT Id FROM ApexClass")
 
         assert result == records
+        mock_reconnect.assert_called_once_with("prod", stale=mock_sf)
 
     def test_expired_session_retry_also_fails(self, mock_sf):
         from sfmon.query import tooling_query_records_all
@@ -141,11 +144,20 @@ class TestToolingQueryRecordsAll:
             "https://example.com", 401, "Expired", "EXPIRED"
         )
 
-        mock_module = MagicMock()
-        mock_module.reauthenticate_connections.side_effect = RuntimeError("reauth failed")
-        mock_module.sf_connection = None
+        with patch("sfmon.orgs.reconnect", side_effect=RuntimeError("reauth failed")):
+            result = tooling_query_records_all(mock_sf, "SELECT Id FROM ApexClass")
 
-        with patch("sfmon.salesforce_monitoring", mock_module, create=True):
+        assert result == []
+
+    def test_expired_session_query_fails_after_reconnect(self, mock_sf):
+        from sfmon.query import tooling_query_records_all
+        recovered_sf = MagicMock()
+        recovered_sf.toolingexecute.side_effect = RuntimeError("still broken")
+        mock_sf.toolingexecute.side_effect = SalesforceExpiredSession(
+            "https://example.com", 401, "Expired", "EXPIRED"
+        )
+
+        with patch("sfmon.orgs.reconnect", return_value=recovered_sf):
             result = tooling_query_records_all(mock_sf, "SELECT Id FROM ApexClass")
 
         assert result == []

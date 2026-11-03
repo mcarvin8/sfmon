@@ -19,12 +19,28 @@ Features:
 
 import requests
 
+from . import orgs
 from .constants import QUERY_TIMEOUT_SECONDS
 from .logger import logger
+from .org_gauge import get_current_org
 from simple_salesforce.exceptions import (
     SalesforceExpiredSession,
     SalesforceMalformedRequest,
 )
+
+
+def _reconnect_current_org(sf):
+    """Re-authenticate the org the current job is running against.
+
+    Returns the new connection, or None if no connection could be made.
+    Only this org is refreshed; other orgs in a fleet keep their sessions.
+    """
+    org_name = get_current_org()
+    try:
+        return orgs.reconnect(org_name, stale=sf)
+    except Exception as e:
+        logger.error("Failed to re-authenticate to org '%s': %s", org_name, e)
+        return None
 
 
 def query_records_all(sf, soql_query):
@@ -35,10 +51,7 @@ def query_records_all(sf, soql_query):
     except SalesforceExpiredSession as e:
         logger.warning("Salesforce session expired, re-authenticating: %s", e)
         try:
-            from . import salesforce_monitoring
-
-            salesforce_monitoring.reauthenticate_connections()
-            sf = salesforce_monitoring.sf_connection
+            sf = _reconnect_current_org(sf)
             if sf:
                 result = sf.query_all(soql_query, timeout=QUERY_TIMEOUT_SECONDS)
                 return result["records"] if "records" in result else []
@@ -66,10 +79,7 @@ def tooling_query_records_all(sf, soql_query):
     except SalesforceExpiredSession as e:
         logger.warning("Salesforce session expired, re-authenticating: %s", e)
         try:
-            from . import salesforce_monitoring
-
-            salesforce_monitoring.reauthenticate_connections()
-            sf = salesforce_monitoring.sf_connection
+            sf = _reconnect_current_org(sf)
             if sf:
                 result = sf.toolingexecute(
                     f"query/?q={soql_query}", timeout=QUERY_TIMEOUT_SECONDS

@@ -16,11 +16,22 @@ as the secret name. See docs/ENVIRONMENT.md.
 
 import os
 import re
+import threading
 
 from .logger import logger
 from .connection_sf import get_salesforce_connection_url
 
 SUPPORTED_SECRETS_BACKENDS = {"aws"}
+
+# Live connection registry: org_name -> Salesforce connection. Lives here
+# rather than in salesforce_monitoring.py because that module runs as
+# __main__ under `python -m`, so importing it from elsewhere would load a
+# second copy with an empty registry.
+_connections = {}
+_connections_lock = threading.Lock()
+# Serializes logins in reconnect() without holding _connections_lock during
+# the network call, so other orgs' jobs can still look up their connection.
+_reconnect_lock = threading.Lock()
 
 
 def _sanitize_env_suffix(org_name):
@@ -90,7 +101,8 @@ def build_connections():
 
     Returns a dict of org_name -> Salesforce connection. An org whose
     credentials are missing or invalid is logged and skipped rather than
-    aborting the whole fleet.
+    aborting the whole fleet. The result also becomes the live connection
+    registry read by get_connection() and refreshed by reconnect().
     """
     connections = {}
     for org_name in get_org_names():
@@ -107,4 +119,39 @@ def build_connections():
                 env_var,
                 e,
             )
+    with _connections_lock:
+        _connections.clear()
+        _connections.update(connections)
     return connections
+
+
+def get_connection(org_name):
+    """Return org_name's current Salesforce connection, or None if not connected.
+
+    Scheduled jobs call this on every run instead of holding on to the
+    connection they were scheduled with, so a reconnect() is picked up by
+    every later run.
+    """
+    with _connections_lock:
+        return _connections.get(org_name)
+
+
+def reconnect(org_name, stale=None):
+    """Re-authenticate org_name and store the new connection in the registry.
+
+    If stale is given and the registry already holds a different connection
+    (another job refreshed this org first), that connection is returned
+    without logging in again — so jobs that hit the same expired session at
+    the same time trigger one token refresh, not one each.
+
+    Raises whatever get_salesforce_connection_url raises if login fails.
+    """
+    with _reconnect_lock:
+        current = get_connection(org_name)
+        if stale is not None and current is not None and current is not stale:
+            return current
+        connection = get_salesforce_connection_url(url=resolve_auth_url(org_name))
+        with _connections_lock:
+            _connections[org_name] = connection
+        logger.info("Re-authenticated to org '%s'.", org_name)
+        return connection

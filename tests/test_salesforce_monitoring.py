@@ -15,6 +15,7 @@ The correct seam to control success/failure per test is _run_job itself.
 
 import pytest
 from unittest.mock import MagicMock, patch
+from simple_salesforce.exceptions import SalesforceExpiredSession
 
 from sfmon import salesforce_monitoring as sm
 
@@ -45,6 +46,22 @@ class TestRunJob:
     def test_returns_false_on_exception(self):
         func = MagicMock(side_effect=RuntimeError("boom"))
         assert sm._run_job("default", MagicMock(), func, "Test Job") is False
+
+    def test_expired_session_reconnects_org_for_next_run(self):
+        stale_sf = MagicMock()
+        func = MagicMock(side_effect=SalesforceExpiredSession(
+            "https://example.com", 401, "Expired", "EXPIRED"
+        ))
+        with patch("sfmon.orgs.reconnect") as mock_reconnect:
+            assert sm._run_job("prod", stale_sf, func, "Test Job") is False
+        mock_reconnect.assert_called_once_with("prod", stale=stale_sf)
+
+    def test_expired_session_reconnect_failure_is_logged_not_raised(self):
+        func = MagicMock(side_effect=SalesforceExpiredSession(
+            "https://example.com", 401, "Expired", "EXPIRED"
+        ))
+        with patch("sfmon.orgs.reconnect", side_effect=RuntimeError("bad token")):
+            assert sm._run_job("prod", MagicMock(), func, "Test Job") is False
 
 
 class TestRunOnce:
@@ -138,3 +155,22 @@ class TestMainCliDispatch:
 
         mock_run_once.assert_called_once_with(job_filter=None)
         assert exc_info.value.code == 0
+
+
+class TestScheduledJobConnectionLookup:
+    def test_scheduled_job_uses_connection_current_at_run_time(self):
+        """A job scheduled before a reconnect must run with the new session."""
+        old_sf, new_sf = MagicMock(), MagicMock()
+        func = MagicMock()
+        scheduler = MagicMock()
+
+        with patch("sfmon.orgs.get_connection", return_value=old_sf):
+            sm._add_job_with_schedule(
+                scheduler, "prod", "test_job", {"minute": "*/5"}, func, "Test Job"
+            )
+        scheduled = scheduler.add_job.call_args.kwargs["func"]
+
+        with patch("sfmon.orgs.get_connection", return_value=new_sf):
+            scheduled()
+
+        func.assert_called_once_with(new_sf)

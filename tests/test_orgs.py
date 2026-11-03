@@ -181,3 +181,61 @@ class TestResolveAuthUrl:
         connections = orgs.build_connections()
 
         assert connections == {}
+
+
+class TestConnectionRegistry:
+    @pytest.fixture
+    def legacy_org(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
+        monkeypatch.setenv("ORG_NAME", "prod")
+        monkeypatch.setenv("SALESFORCE_AUTH_URL", "force://id:secret:token@my.salesforce.com")
+        monkeypatch.delenv("SECRETS_BACKEND", raising=False)
+        from sfmon import config, orgs
+        config.load_config(force_reload=True)
+        return orgs
+
+    def test_build_connections_populates_registry(self, legacy_org):
+        orgs = legacy_org
+        fake_conn = object()
+        with patch("sfmon.orgs.get_salesforce_connection_url", return_value=fake_conn):
+            orgs.build_connections()
+
+        assert orgs.get_connection("prod") is fake_conn
+        assert orgs.get_connection("missing") is None
+
+    def test_reconnect_replaces_registry_entry(self, legacy_org):
+        orgs = legacy_org
+        old_conn, new_conn = object(), object()
+        with patch("sfmon.orgs.get_salesforce_connection_url", return_value=old_conn):
+            orgs.build_connections()
+
+        with patch("sfmon.orgs.get_salesforce_connection_url", return_value=new_conn) as mock_connect:
+            result = orgs.reconnect("prod", stale=old_conn)
+
+        assert result is new_conn
+        assert orgs.get_connection("prod") is new_conn
+        mock_connect.assert_called_once_with(url="force://id:secret:token@my.salesforce.com")
+
+    def test_reconnect_skips_login_when_already_refreshed(self, legacy_org):
+        orgs = legacy_org
+        old_conn, refreshed_conn = object(), object()
+        with patch("sfmon.orgs.get_salesforce_connection_url", return_value=refreshed_conn):
+            orgs.build_connections()
+
+        with patch("sfmon.orgs.get_salesforce_connection_url") as mock_connect:
+            result = orgs.reconnect("prod", stale=old_conn)
+
+        assert result is refreshed_conn
+        mock_connect.assert_not_called()
+
+    def test_reconnect_failure_keeps_existing_connection(self, legacy_org):
+        orgs = legacy_org
+        old_conn = object()
+        with patch("sfmon.orgs.get_salesforce_connection_url", return_value=old_conn):
+            orgs.build_connections()
+
+        with patch("sfmon.orgs.get_salesforce_connection_url", side_effect=RuntimeError("bad token")):
+            with pytest.raises(RuntimeError):
+                orgs.reconnect("prod", stale=old_conn)
+
+        assert orgs.get_connection("prod") is old_conn
