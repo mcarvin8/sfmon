@@ -13,6 +13,7 @@ SFMon watches your Salesforce orgs and exposes what it finds as Prometheus metri
 
 It's built for SRE and DevOps teams that already run Prometheus (or Victoria Metrics, Grafana Cloud, an OTel Collector) and look after one or more Salesforce orgs.
 
+> [!WARNING]
 > **Upgrading from v3?** v4 renamed every metric to start with `sfmon_`. Values are unchanged. See the [migration guide](https://github.com/mcarvin8/sfmon/blob/main/docs/METRICS_MIGRATION.md) for the old → new names and optional rules that keep v3 queries working.
 
 ## What you get
