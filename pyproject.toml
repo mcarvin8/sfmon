@@ -22,20 +22,24 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: System :: Monitoring",
 ]
+# Lower bounds are tested in CI (unit-tests.yml "minimum" job); upper bounds
+# stop the next major release from breaking a fresh install. The OTel
+# exporter-prometheus and instrumentation packages are pre-1.0 betas
+# released in lockstep with opentelemetry-sdk (0.51b0 pairs with 1.30).
 dependencies = [
-    "simple_salesforce",
-    "prometheus_client",
-    "requests",
-    "apscheduler",
-    "pandas",
-    "opentelemetry-sdk",
-    "opentelemetry-exporter-prometheus",
-    "opentelemetry-exporter-otlp-proto-http",
-    "opentelemetry-instrumentation-logging",
+    "simple_salesforce>=1.12,<2",
+    "prometheus_client>=0.20,<1",
+    "requests>=2.28,<3",
+    "apscheduler>=3.10,<4",
+    "pandas>=2.2.2,<4",
+    "opentelemetry-sdk>=1.30,<2",
+    "opentelemetry-exporter-prometheus>=0.51b0,<1",
+    "opentelemetry-exporter-otlp-proto-http>=1.30,<2",
+    "opentelemetry-instrumentation-logging>=0.51b0,<1",
 ]
 
 [project.optional-dependencies]
-aws = ["boto3"]
+aws = ["boto3>=1.28,<2"]
 
 [project.urls]
 Homepage = "https://github.com/mcarvin8/sfmon"

@@ -14,6 +14,14 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # latest: newest versions allowed by pyproject.toml's bounds.
+        # minimum: every dependency pinned to its lower bound, so the floors
+        # in pyproject.toml stay accurate.
+        deps: [latest, minimum]
+    name: test (${{ matrix.deps }} deps)
 
     steps:
       - name: Checkout code
@@ -24,35 +32,43 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Pin dependencies to their lower bounds
+        if: matrix.deps == 'minimum'
+        run: |
+          python - <<'EOF' > constraints-min.txt
+          import re, tomllib
+          project = tomllib.load(open("pyproject.toml", "rb"))["project"]
+          for req in project["dependencies"] + project["optional-dependencies"]["aws"]:
+              name, floor = re.match(r"^([A-Za-z0-9_.-]+)\s*>=\s*([^,;\s]+)", req).groups()
+              print(f"{name}=={floor}")
+          EOF
+          cat constraints-min.txt
+
       - name: Install dependencies
         run: |
-          pip install \
+          constraints=""
+          if [ -f constraints-min.txt ]; then constraints="-c constraints-min.txt"; fi
+          pip install $constraints \
+            ".[aws]" \
             pytest \
             pytest-cov \
             pytest-mock \
             responses \
-            simple_salesforce \
-            prometheus_client \
-            apscheduler \
-            pandas \
             cffi \
-            opentelemetry-sdk \
-            opentelemetry-exporter-prometheus \
-            opentelemetry-exporter-otlp-proto-http \
-            opentelemetry-instrumentation-logging \
-            boto3 \
             "genbadge[coverage]"
+          pip list
 
       - name: Run unit tests with coverage
         run: python -m pytest tests/ -v --cov=src/sfmon --cov-report=xml --cov-report=term-missing
 
       - name: Generate coverage badge
+        if: matrix.deps == 'latest'
         run: |
           mkdir -p badges
           genbadge coverage -i coverage.xml -o badges/coverage.svg
 
       - name: Commit coverage badge
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: matrix.deps == 'latest' && github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
