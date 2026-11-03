@@ -214,13 +214,13 @@ Because metrics live in Prometheus, alerts are just PromQL rules — same toolch
 
 ```promql
 # Daily API limit over 80 % consumed
-sfmon_api_usage_percentage{limit_name="DailyApiRequests"} > 80
+salesforce_api_usage_percentage{limit_name="DailyApiRequests"} > 80
 
-# Active incident on this org's pod
-sfmon_incident_gauge{environment="production"} == 1
+# Active Trust incident on the pod an org runs on
+salesforce_incidents == 1
 
 # User license saturation
-sfmon_percent_user_licenses_used{license_name="Salesforce"} > 90
+salesforce_user_licenses_usage_percentage{license_name="Salesforce"} > 90
 ```
 
 Route these through Alertmanager with the same receivers (PagerDuty, Slack, etc.) you use for every other service.
