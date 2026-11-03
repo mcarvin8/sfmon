@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.0.0](https://github.com/mcarvin8/sfmon/compare/v3.17.0...v4.0.0) (2026-11-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* every metric name changes, and labels ApexClassId, profileId, profileName, Page_name and the EPT labels are renamed. Update dashboards and alerts using docs/METRICS_MIGRATION.md, or load prometheus/sfmon-v3-compat.rules.yml to keep v3 queries working.
+
+### Features
+
+* rename all metrics to an sfmon_ prefix with snake_case labels ([#81](https://github.com/mcarvin8/sfmon/issues/81)) ([9038fd8](https://github.com/mcarvin8/sfmon/commit/9038fd8382314866d2725e10a71185345d027741))
+
 ## [3.17.0](https://github.com/mcarvin8/sfmon/compare/v3.16.4...v3.17.0) (2026-11-03)
 
 
