@@ -87,6 +87,7 @@ from .logger import logger
 from . import orgs
 from .org_gauge import set_current_org
 from . import self_metrics
+from . import custom_metrics
 
 # Always-on baseline functions (core package)
 from .core import (
@@ -561,6 +562,9 @@ def schedule_tasks(scheduler):
     Opt-in only (list under config.json schedules + mounted files; see docs/CONFIGURATION.md):
         - monitor_minimal_perm_sets — minimal-perm-sets.json
         - monitor_pmd_code_smells — pmd-report.xml and PMD_RULESET_PATH
+
+    Custom metrics (config.json "custom_metrics"; see docs/CUSTOM_METRICS.md):
+        - custom_<name> — each entry runs on its own schedule
     """
     # Job lists live at module level (ALWAYS_ON_JOBS / SCHEDULED_JOBS) so
     # run_once() (the --once CLI path) can share them without duplication.
@@ -582,6 +586,14 @@ def schedule_tasks(scheduler):
                 _add_job_with_schedule(
                     scheduler, org_name, job_id, schedule, func, job_name
                 )
+        for metric in custom_metrics.load_custom_metrics():
+            schedule = metric.schedule_for(org_name)
+            if schedule:
+                _run_job(org_name, sf, metric.collect, metric.job_name, metric.job_id)
+                _add_job_with_schedule(
+                    scheduler, org_name, metric.job_id, schedule,
+                    metric.collect, metric.job_name,
+                )
     logger.info("Initial execution completed, all jobs scheduled with APScheduler")
 
 
@@ -599,11 +611,17 @@ def run_once(job_filter=None):
 
     Returns:
         0 if every run job succeeded, 1 if any job (or the initial org
-        connection step) failed, 2 if job_filter names an unknown job id.
+        connection step) failed, 2 if job_filter names an unknown job id
+        or the custom_metrics config is invalid.
     """
+    try:
+        custom = custom_metrics.load_custom_metrics()
+    except custom_metrics.CustomMetricConfigError as e:
+        logger.error("%s", e)
+        return 2
     all_jobs = ALWAYS_ON_JOBS + SCHEDULED_JOBS
     always_on_ids = {job_id for job_id, *_ in ALWAYS_ON_JOBS}
-    known_ids = {job_id for job_id, *_ in all_jobs}
+    known_ids = {job_id for job_id, *_ in all_jobs} | {m.job_id for m in custom}
 
     if job_filter and job_filter not in known_ids:
         logger.error(
@@ -633,6 +651,16 @@ def run_once(job_filter=None):
                 if not get_config(job_id, default_schedule, org_name=org_name):
                     continue
             if not _run_job(org_name, sf, func, job_name, job_id):
+                had_failure = True
+        for metric in custom:
+            if job_filter:
+                # --job forces a run regardless of schedule, but a metric
+                # limited to other orgs is skipped (its objects may not exist).
+                if metric.job_id != job_filter or not metric.applies_to(org_name):
+                    continue
+            elif not metric.schedule_for(org_name):
+                continue
+            if not _run_job(org_name, sf, metric.collect, metric.job_name, metric.job_id):
                 had_failure = True
 
     sys.stdout.write(generate_latest().decode("utf-8"))
@@ -679,6 +707,13 @@ def main():
 
     if args.once:
         sys.exit(run_once(job_filter=args.job))
+
+    # Validate custom metrics before connecting so a config typo fails fast
+    try:
+        custom_metrics.load_custom_metrics()
+    except custom_metrics.CustomMetricConfigError as e:
+        logger.error("%s", e)
+        sys.exit(2)
 
     # Start Prometheus metrics server
     metrics_port = int(os.getenv("METRICS_PORT", 9001))

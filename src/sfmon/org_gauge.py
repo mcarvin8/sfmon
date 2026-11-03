@@ -10,7 +10,8 @@ across core/ops/audit/tech_debt that call .labels()/.set()/.inc()/.clear().
 
 Each OrgAwareGauge registers one OTel ObservableGauge whose callback reads
 from an in-process dict of {label-key: value}. That dict is exactly what
-.labels(...).set()/.inc() write into and what .clear() empties — OTel has no
+.labels(...).set()/.inc() write into and what .clear() empties (for the
+current org only) — OTel has no
 built-in way to "unset" a previously-reported label combination for a
 synchronous instrument, so an Observable instrument (pull-based, callback
 supplies only what's currently in the dict) is what makes .clear() semantics
@@ -142,6 +143,36 @@ class OrgAwareGauge:
         """Forward .set() to the org-labelled child for previously-unlabeled gauges."""
         return self.labels().set(value)
 
-    def clear(self):
+    def clear(self, org=None):
+        """Remove the current org's series (or the given org's).
+
+        Collectors call clear() at the start of a run to drop series that no
+        longer exist. Scoping it to one org means that in fleet mode, one
+        org's run never wipes the series every other org last reported.
+        """
+        self.replace_org([], org=org)
+
+    def clear_all(self):
+        """Remove every org's series. For tests and resets, not collectors."""
         with self._lock:
             self._values.clear()
+
+    def replace_org(self, values, org=None):
+        """Atomically replace one org's series, leaving other orgs' untouched.
+
+        values: iterable of (labels_dict, value). The 'org' label is injected.
+        Unlike clear() followed by set(), a scrape never sees the org's series
+        missing mid-update, and in fleet mode one org's run never wipes
+        another org's series.
+        """
+        org = self._org() if org is None else org
+        new = {}
+        for labels, value in values:
+            key = tuple(
+                sorted((k, str(v)) for k, v in {**labels, "org": org}.items())
+            )
+            new[key] = float(value)
+        with self._lock:
+            for key in [k for k in self._values if ("org", org) in k]:
+                del self._values[key]
+            self._values.update(new)

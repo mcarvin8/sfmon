@@ -128,12 +128,37 @@ class TestOrgAwareGaugeInc:
 
 
 class TestOrgAwareGaugeClear:
-    def test_clear_removes_all_values(self):
+    def test_clear_removes_current_orgs_values(self):
         gauge = make_gauge("g_clr_1", "doc", ["foo"])
         with patch.dict(os.environ, {"ORG_NAME": "org1"}):
             gauge.labels(foo="x").set(1)
             gauge.labels(foo="y").set(2)
+            gauge.clear()
+        assert gauge._values == {}
+
+    def test_clear_leaves_other_orgs_values(self):
+        from sfmon.org_gauge import set_current_org
+
+        gauge = make_gauge("g_clr_2", "doc", ["foo"])
+        set_current_org("prod")
+        gauge.labels(foo="x").set(1)
+        set_current_org("uat")
+        gauge.labels(foo="x").set(2)
         gauge.clear()
+        assert [dict(k)["org"] for k in gauge._values] == ["prod"]
+
+    def test_clear_with_explicit_org(self):
+        gauge = make_gauge("g_clr_3", "doc", ["foo"])
+        gauge.labels(foo="x", org="prod").set(1)
+        gauge.labels(foo="x", org="uat").set(2)
+        gauge.clear(org="uat")
+        assert [dict(k)["org"] for k in gauge._values] == ["prod"]
+
+    def test_clear_all_removes_every_org(self):
+        gauge = make_gauge("g_clr_4", "doc", ["foo"])
+        gauge.labels(foo="x", org="prod").set(1)
+        gauge.labels(foo="x", org="uat").set(2)
+        gauge.clear_all()
         assert gauge._values == {}
 
 
@@ -220,6 +245,29 @@ class TestOrgAwareGaugePrometheusExport:
         gauge = make_gauge("g_export_2", "A test gauge", ["foo"])
         with patch.dict(os.environ, {"ORG_NAME": "export-org"}):
             gauge.labels(foo="bar").set(1)
-        gauge.clear()
+            gauge.clear()
         output = prometheus_client.generate_latest(prometheus_client.REGISTRY).decode()
         assert "g_export_2" not in output
+
+
+class TestReplaceOrg:
+    def test_replaces_only_that_orgs_series(self):
+        gauge = make_gauge("g_replace_1", "doc", ["foo"])
+        gauge.labels(foo="a", org="prod").set(1)
+        gauge.labels(foo="b", org="prod").set(2)
+        gauge.labels(foo="a", org="uat").set(3)
+        gauge.replace_org([({"foo": "c"}, 4)], org="prod")
+        values = {tuple(sorted(dict(k).items())): v for k, v in gauge._values.items()}
+        assert values == {
+            (("foo", "c"), ("org", "prod")): 4.0,
+            (("foo", "a"), ("org", "uat")): 3.0,
+        }
+
+    def test_defaults_to_current_org_and_empty_clears(self):
+        from sfmon.org_gauge import set_current_org
+
+        gauge = make_gauge("g_replace_2", "doc")
+        set_current_org("prod")
+        gauge.set(5)
+        gauge.replace_org([])
+        assert gauge._values == {}

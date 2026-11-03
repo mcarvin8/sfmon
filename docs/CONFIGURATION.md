@@ -49,6 +49,7 @@ CONFIG_FILE_PATH=/etc/sfmon/config.json sfmon
 | `integration_user_names` | array (optional) | Parsed from config but **not used** by current collectors—set **`INTEGRATION_USER_NAMES`** (env) for integration-user labeling; see [ENVIRONMENT.md](ENVIRONMENT.md). |
 | `orgs` | array (optional) | Fleet mode: list of org names to monitor from this one container. See [Fleet mode](#fleet-mode--multiple-orgs) below. Omit for single-org mode. |
 | `org_overrides` | object (optional) | Fleet mode: per-org `{"schedules": {...}}` merged over the fleet-wide `schedules` block. |
+| `custom_metrics` | array (optional) | Your own SOQL-backed gauges, each with its own schedule. See [CUSTOM_METRICS.md](CUSTOM_METRICS.md). |
 
 ---
 

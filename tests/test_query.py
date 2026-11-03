@@ -223,3 +223,17 @@ class TestGetEventLogFile:
 
         assert result is not_found
         mock_reconnect.assert_not_called()
+
+
+class TestQueryResult:
+    def test_returns_full_response_with_total_size(self, mock_sf):
+        from sfmon.query import query_result
+
+        mock_sf.query_all.return_value = {"records": [], "totalSize": 9}
+        assert query_result(mock_sf, "SELECT COUNT() FROM Account")["totalSize"] == 9
+
+    def test_tooling_and_failure_returns_none(self, mock_sf):
+        from sfmon.query import query_result
+
+        mock_sf.toolingexecute.side_effect = RuntimeError("boom")
+        assert query_result(mock_sf, "SELECT Id FROM ApexClass", tooling=True) is None

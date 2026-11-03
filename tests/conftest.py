@@ -16,6 +16,16 @@ def reset_config_cache():
 
 
 @pytest.fixture(autouse=True)
+def reset_custom_metrics_cache():
+    """Reset the loaded custom_metrics list between tests. Gauges stay
+    cached: OTel can't unregister an instrument, so tests use unique names."""
+    from sfmon import custom_metrics
+    custom_metrics._metrics = None
+    yield
+    custom_metrics._metrics = None
+
+
+@pytest.fixture(autouse=True)
 def reset_current_org():
     """Reset the org_gauge contextvar between tests so set_current_org() calls
     in one test don't leak into the next (same interpreter thread in pytest)."""

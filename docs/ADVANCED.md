@@ -29,6 +29,8 @@ If **`PMD_RULESET_PATH`** is unset or the ruleset file is missing, PMD metrics a
 
 The default image covers **standard** monitoring: env vars + optional JSON config. It excludes org-specific PMD/perm-set files by default (see **[`.dockerignore`](../.dockerignore)**) — for baking those in, see [PMD + minimal permission sets](#pmd--minimal-permission-sets-file-based) above.
 
+To add metrics for CPQ or other custom objects, you probably don't need your own image: [custom SOQL metrics](CUSTOM_METRICS.md) cover anything that's a query result stored in a gauge.
+
 **Build and run your own image** if you need to change **application code** — new checks, different logic, pinned dependencies, private registry policy, or anything not covered by env/config.
 
 ```bash
