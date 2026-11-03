@@ -169,6 +169,21 @@ class TestCollect:
             (("status", ""),): 1.0,
         }
 
+    def test_boolean_labels_are_lowercase(self, mock_sf):
+        set_current_org("default")
+        mock_sf.query_all.return_value = {
+            "records": [
+                {"active": True, "n": 3},
+                {"active": False, "n": 1},
+            ]
+        }
+        metric = parse_one("c_bool_label", value_field="n", labels={"active": "active"})
+        metric.collect(mock_sf)
+        assert series(metric) == {
+            (("active", "true"),): 3.0,
+            (("active", "false"),): 1.0,
+        }
+
     def test_non_numeric_and_null_values_are_skipped(self, mock_sf):
         set_current_org("default")
         mock_sf.query_all.return_value = {
