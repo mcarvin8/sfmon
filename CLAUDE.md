@@ -74,5 +74,5 @@ All tests live in `tests/`. `conftest.py` provides mock Salesforce connection fi
 ### CI
 
 - `unit-tests.yml` — runs pytest + generates `badges/coverage.svg` on push/PR to main
-- `update-local-reports.yml` — manually or on schedule, retrieves PMD and minimal perm set reports from a live Salesforce org and commits them to `src/sfmon/tech_debt/` (GitHub and GitLab variants)
+- `update-local-reports.yml` — manually or on schedule, retrieves PMD and minimal perm set reports from a live Salesforce org and commits them to `src/sfmon/tech_debt/`
 - `claude.yml` — Claude Code integration triggered by `@claude` mentions in issues/PRs

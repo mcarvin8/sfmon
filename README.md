@@ -310,7 +310,7 @@ See **[docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/C
 
 | | SFMon | Salesforce proactive monitoring (paid) | sfdx-hardis org monitoring |
 |--|-------|----------------------------------------|---------------------------|
-| **Model** | Always-on container/process (Prometheus `/metrics`), or a scheduled CI job via `--once` | Salesforce TAM/CSM engagement + event log files | Scheduled CI jobs (GitHub Actions / GitLab CI) |
+| **Model** | Always-on container/process (Prometheus `/metrics`), or a scheduled CI job via `--once` | Salesforce TAM/CSM engagement + event log files | Scheduled CI jobs (e.g. GitHub Actions) |
 | **Output** | Time-series metrics scraped by Prometheus | Salesforce-native reports and guided reviews | Git diffs, Slack/Teams notifications, pipeline artifacts |
 | **Alerting** | PromQL + Alertmanager (same as rest of infra), or built-in Slack webhook alerting with no Alertmanager needed | Salesforce notifications and Success Plan reviews | Slack/Teams webhooks from CI |
 | **Data stays in your stack** | Yes | No (Salesforce-hosted) | Partially (metadata to Git; notifications to Slack/Teams) |
@@ -335,7 +335,7 @@ The **published** `mcarvin8/sfmon` image does **not** include an Apex ruleset, `
 
 1. **In your fork/clone** (with org access), refresh reports in CI so **`pmd-report.xml`** and **`minimal-perm-sets.json`** are produced under **`src/sfmon/tech_debt/`** and pushed to your default branch. Maintain **`manifest/package.xml`** and **`apexruleset.xml`** in that folder.
    - **GitHub Actions:** Workflow **[`.github/workflows/update-local-reports.yml`](.github/workflows/update-local-reports.yml)** — repository secret **`SALESFORCE_AUTH_URL`** (SFDX URL). Optional `workflow_dispatch` input **`manifest_path`** (default **`manifest/package.xml`**).
-   - **GitLab CI:** Example job **[`.gitlab/workflows/update-local-reports.yml`](.gitlab/workflows/update-local-reports.yml)** — include it from **`.gitlab-ci.yml`** (define a **`query`** stage). Create a **project access token** with at least **Developer** role (and repository write scope), then set **`SALESFORCE_AUTH_URL`**, **`GITLAB_PUSH_USERNAME`**, **`GITLAB_PUSH_EMAIL`**, and **`GITLAB_PUSH_TOKEN`**. The sample **`rules`** run only for a **scheduled** pipeline on the default branch when **`JOB_NAME`** is **`codeSmells`** (add that variable on the schedule in GitLab, or change **`rules`**). Adjust **`tags`** for your runners. Details: **[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#refreshing-reports-in-ci-github-or-gitlab)** and **GitLab — project access token** in the same section.
+   - **Other CI systems (GitLab, etc.):** port the GitHub workflow's steps and push the report files with a repository write token. Details: **[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#refreshing-reports-in-ci)**.
 2. **Get those files into the runtime container** (pick one):
    - **Mounts (no image rebuild):** copy or sync the committed files to the host/CI artifact store, then **bind-mount** or use a **ConfigMap** / volume (watch size limits for very large `pmd-report.xml`). Set **`PMD_RULESET_PATH`** and redeploy the **same** public image tag when you refresh reports.
    - **Private image:** **`docker build -f docker/Dockerfile`** from a branch that contains the refreshed files and **remove or trim the `src/sfmon/tech_debt/*` lines in `.dockerignore`** so `COPY src/sfmon/` bakes them in; push to your registry and redeploy when reports change.

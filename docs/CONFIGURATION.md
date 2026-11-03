@@ -192,7 +192,7 @@ Add these under `schedules` only after you mount or bake in the files from **[EN
 
 | Job ID | Suggested time | Summary |
 |--------|----------------|---------|
-| `monitor_minimal_perm_sets` | `hour=2,minute=20` | Minimal permission sets from `minimal-perm-sets.json` (refresh via CI: [GitHub](../.github/workflows/update-local-reports.yml) or [GitLab](../.gitlab/workflows/update-local-reports.yml); see [ENVIRONMENT.md](ENVIRONMENT.md#refreshing-reports-in-ci-github-or-gitlab)). |
+| `monitor_minimal_perm_sets` | `hour=2,minute=20` | Minimal permission sets from `minimal-perm-sets.json` (refresh via CI: [GitHub workflow](../.github/workflows/update-local-reports.yml); see [ENVIRONMENT.md](ENVIRONMENT.md#refreshing-reports-in-ci)). |
 | `monitor_pmd_code_smells` | `hour=3,minute=10` | PMD violations from `pmd-report.xml` and `PMD_RULESET_PATH`. |
 
 These jobs are **off** until you add them under `schedules`. That requires a **non-empty** `schedules` object (for example the full opt-in list from **`config.example.json`**, plus these entries). If you already use non-empty `schedules` for other reasons, append these two lines with your chosen cron strings.
@@ -318,4 +318,4 @@ See **`config.example.json`** in the repository for a large single-org opt-in ex
 
 For environment-based tuning (timeouts, thresholds, compliance env vars), see **[ENVIRONMENT.md](ENVIRONMENT.md)**.
 
-To refresh **PMD** and **minimal permission set** report files in CI, see **[ENVIRONMENT.md — Refreshing reports in CI](ENVIRONMENT.md#refreshing-reports-in-ci-github-or-gitlab)** (GitHub Actions and GitLab templates).
+To refresh **PMD** and **minimal permission set** report files in CI, see **[ENVIRONMENT.md — Refreshing reports in CI](ENVIRONMENT.md#refreshing-reports-in-ci)** (GitHub Actions template).

@@ -9,8 +9,6 @@
 #   manifest/package.xml — retrieve manifest (Apex + permission sets, etc.)
 #   src/sfmon/tech_debt/apexruleset.xml — PMD ruleset (commit yours; starter included)
 #
-# GitLab equivalent: .gitlab/workflows/update-local-reports.yml (include from .gitlab-ci.yml)
-#
 # If the default branch is protected, allow GitHub Actions to bypass or use a PAT with
 # push rights in a checkout action token (not covered here).
 
@@ -101,6 +99,17 @@ jobs:
           fi
           echo "${SALESFORCE_AUTH_URL}" | sf org login sfdx-url --set-default --sfdx-url-stdin
 
+      # sf project retrieve must run inside an SFDX project; generate a minimal one
+      # here instead of committing sfdx-project.json to this Python repo.
+      - name: Create SFDX project file
+        run: |
+          cat > sfdx-project.json <<'EOF'
+          {
+            "packageDirectories": [{ "path": "force-app", "default": true }],
+            "sfdcLoginUrl": "https://login.salesforce.com"
+          }
+          EOF
+
       - name: Retrieve metadata
         run: |
           sf project retrieve start -x "${MANIFEST_PATH}" -w 60
@@ -136,7 +145,10 @@ jobs:
             --output "${MINIMAL_PERM_REPORT}"
 
       - name: Commit and push updated reports
-        env:
-          GIT_COMMITTER_NAME: github-actions[bot]
-          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
-        run: bash scripts/push_updated_reports.sh
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: refresh PMD and minimal permission set reports"
+          file_pattern: ${{ env.PMD_REPORT }} ${{ env.MINIMAL_PERM_REPORT }}
+          commit_user_name: github-actions[bot]
+          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          commit_author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
