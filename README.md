@@ -225,6 +225,33 @@ sfmon_percent_user_licenses_used{license_name="Salesforce"} > 90
 
 Route these through Alertmanager with the same receivers (PagerDuty, Slack, etc.) you use for every other service.
 
+### Alerting on SFMon itself
+
+Every job run also records metrics about the run, labelled with `job` (the job id used in `config.json`) and `org`:
+
+| Metric | Meaning |
+|--------|---------|
+| `sfmon_job_success` | `1` if the last run finished with no exception and no failed queries, else `0` |
+| `sfmon_job_last_success_timestamp_seconds` | Unix time of the last successful run (absent until the first one) |
+| `sfmon_job_last_run_timestamp_seconds` | Unix time the last run finished, successful or not |
+| `sfmon_job_duration_seconds` | How long the last run took |
+| `sfmon_job_query_errors` | Salesforce queries that failed during the last run |
+
+A failed query doesn't stop the job or the service: the collector carries on with the rest of its queries and the next run is scheduled as normal. The failure is counted in `sfmon_job_query_errors` and the run reports `sfmon_job_success 0`, so a job that quietly returns empty results is still visible.
+
+```promql
+# A job hasn't succeeded in 2 hours (catches expired credentials, missing permissions, API outages)
+time() - sfmon_job_last_success_timestamp_seconds > 7200
+
+# A job is running but has never succeeded since SFMon started
+sfmon_job_success == 0 unless sfmon_job_last_success_timestamp_seconds
+
+# SFMon stopped reporting entirely (pod down, scrape broken, org failed to connect at startup)
+absent(sfmon_job_success{job="monitor_salesforce_limits"})
+```
+
+With `--once`, a run with failed queries also exits `1`, so CI notices the same failures.
+
 ### Built-in Slack alerting (optional, no Alertmanager required)
 
 For teams that don't run a full PromQL/Alertmanager stack, SFMon can also post directly to a Slack incoming webhook. Set `SLACK_WEBHOOK_URL` and it's on; leave it unset and there's no behavior change at all (no cache reads/writes, no HTTP calls).
@@ -249,7 +276,7 @@ docker run --rm -e SALESFORCE_AUTH_URL="force://PlatformCLI::..." mcarvin8/sfmon
 SALESFORCE_AUTH_URL="force://PlatformCLI::..." sfmon --once
 ```
 
-- Exit code is `0` if every job that ran succeeded, `1` if any job (or the initial org connection) failed — so a scheduled pipeline goes red on a real problem, the same way a failed CI step would.
+- Exit code is `0` if every job that ran succeeded, `1` if any job raised, had a failed Salesforce query, or the initial org connection failed — so a scheduled pipeline goes red on a real problem, the same way a failed CI step would.
 - Add `--job JOB_ID` to run exactly one job (its id from the tables in [docs/CONFIGURATION.md](https://github.com/mcarvin8/sfmon/blob/main/docs/CONFIGURATION.md)) instead of everything currently enabled — `--job` forces that job to run regardless of its opt-in/disabled state in `config.json`, useful for ad-hoc checks. `--job` requires `--once`.
 - Without `--job`, `--once` respects the same config as the daemon (presets, opt-in `schedules`, `disabled` entries) — it runs whatever would run at container startup, just without then staying up to serve `/metrics` or wait for the next cron tick.
 - Pipe the output wherever it's useful: archive it as a pipeline artifact, `curl --data-binary` it to a Pushgateway, or `grep` it for a threshold check.

@@ -40,12 +40,12 @@ class TestParseArgs:
 class TestRunJob:
     def test_returns_true_on_success(self):
         func = MagicMock()
-        assert sm._run_job("default", MagicMock(), func, "Test Job") is True
+        assert sm._run_job("default", MagicMock(), func, "Test Job", "test_job") is True
         func.assert_called_once()
 
     def test_returns_false_on_exception(self):
         func = MagicMock(side_effect=RuntimeError("boom"))
-        assert sm._run_job("default", MagicMock(), func, "Test Job") is False
+        assert sm._run_job("default", MagicMock(), func, "Test Job", "test_job") is False
 
     def test_expired_session_reconnects_org_for_next_run(self):
         stale_sf = MagicMock()
@@ -53,7 +53,7 @@ class TestRunJob:
             "https://example.com", 401, "Expired", "EXPIRED"
         ))
         with patch("sfmon.orgs.reconnect") as mock_reconnect:
-            assert sm._run_job("prod", stale_sf, func, "Test Job") is False
+            assert sm._run_job("prod", stale_sf, func, "Test Job", "test_job") is False
         mock_reconnect.assert_called_once_with("prod", stale=stale_sf)
 
     def test_expired_session_reconnect_failure_is_logged_not_raised(self):
@@ -61,7 +61,7 @@ class TestRunJob:
             "https://example.com", 401, "Expired", "EXPIRED"
         ))
         with patch("sfmon.orgs.reconnect", side_effect=RuntimeError("bad token")):
-            assert sm._run_job("prod", MagicMock(), func, "Test Job") is False
+            assert sm._run_job("prod", MagicMock(), func, "Test Job", "test_job") is False
 
 
 class TestRunOnce:
@@ -86,8 +86,9 @@ class TestRunOnce:
 
         assert code == 0
         mock_run.assert_called_once()
-        _, _, func, job_name = mock_run.call_args[0]
+        _, _, func, job_name, job_id = mock_run.call_args[0]
         assert job_name == "Monitor Salesforce Limits"
+        assert job_id == "monitor_salesforce_limits"
 
     def test_no_filter_runs_only_enabled_jobs(self):
         fake_sf = MagicMock()

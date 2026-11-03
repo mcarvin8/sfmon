@@ -86,6 +86,7 @@ from simple_salesforce.exceptions import SalesforceExpiredSession
 from .logger import logger
 from . import orgs
 from .org_gauge import set_current_org
+from . import self_metrics
 
 # Always-on baseline functions (core package)
 from .core import (
@@ -426,12 +427,35 @@ def get_always_on_config(job_id, default_schedule, org_name=None):
     return get_always_on_schedule(job_id, default_schedule, org_name=org_name)
 
 
-def _run_job(org_name, sf, func, job_name):
+def _run_job(org_name, sf, func, job_name, job_id):
     """Run a single org's job, isolating failures so one org never blocks others.
 
-    Returns True on success, False if the job raised (already logged).
+    Records the run in the sfmon_job_* self-monitoring metrics. Returns True
+    on success, False if the job raised or any of its queries failed (both
+    already logged).
     """
     set_current_org(org_name)
+    started = self_metrics.start_job_run()
+    success = _call_job(org_name, sf, func, job_name)
+    query_errors = self_metrics.query_error_count()
+    if success and query_errors:
+        logger.error(
+            "Job '%s' for org '%s' finished with %d failed queries",
+            job_name,
+            org_name,
+            query_errors,
+        )
+        success = False
+    try:
+        self_metrics.record_job_result(job_id, started, success)
+    except Exception as e:
+        # Self-monitoring must never take down a job or the scheduler.
+        logger.error("Failed to record metrics for job '%s': %s", job_name, e)
+    return success
+
+
+def _call_job(org_name, sf, func, job_name):
+    """Call the collector, logging instead of raising. Returns False if it raised."""
     try:
         func(sf)
         return True
@@ -462,7 +486,9 @@ def _add_job_with_schedule(scheduler, org_name, job_id, schedule, func, job_name
     so runs after a re-authentication use the refreshed session.
     """
     scheduler.add_job(
-        func=lambda: _run_job(org_name, orgs.get_connection(org_name), func, job_name),
+        func=lambda: _run_job(
+            org_name, orgs.get_connection(org_name), func, job_name, job_id
+        ),
         trigger=CronTrigger(**schedule),
         id=f"{job_id}::{org_name}",
         name=f"{job_name} [{org_name}]",
@@ -542,7 +568,7 @@ def schedule_tasks(scheduler):
         for job_id, default_schedule, func, job_name in ALWAYS_ON_JOBS:
             schedule = get_always_on_config(job_id, default_schedule, org_name=org_name)
             if schedule:
-                _run_job(org_name, sf, func, job_name)
+                _run_job(org_name, sf, func, job_name, job_id)
                 _add_job_with_schedule(
                     scheduler, org_name, job_id, schedule, func, job_name
                 )
@@ -552,7 +578,7 @@ def schedule_tasks(scheduler):
         for job_id, default_schedule, func, job_name in SCHEDULED_JOBS:
             schedule = get_schedule_config(job_id, default_schedule, org_name=org_name)
             if schedule:
-                _run_job(org_name, sf, func, job_name)  # initial run only for jobs enabled by config
+                _run_job(org_name, sf, func, job_name, job_id)  # initial run only for jobs enabled by config
                 _add_job_with_schedule(
                     scheduler, org_name, job_id, schedule, func, job_name
                 )
@@ -606,7 +632,7 @@ def run_once(job_filter=None):
                 )
                 if not get_config(job_id, default_schedule, org_name=org_name):
                     continue
-            if not _run_job(org_name, sf, func, job_name):
+            if not _run_job(org_name, sf, func, job_name, job_id):
                 had_failure = True
 
     sys.stdout.write(generate_latest().decode("utf-8"))
