@@ -175,3 +175,21 @@ class TestScheduledJobConnectionLookup:
             scheduled()
 
         func.assert_called_once_with(new_sf)
+
+
+class TestRunJobIsAtomic:
+    def test_collector_writes_apply_only_after_it_returns(self):
+        from sfmon.org_gauge import OrgAwareGauge
+
+        gauge = OrgAwareGauge("g_run_job_atomic", "doc", ["foo"])
+        gauge.labels(foo="old", org="prod").set(1)
+        seen_mid_run = []
+
+        def collector(_sf):
+            gauge.clear()
+            gauge.labels(foo="new").set(2)
+            seen_mid_run.append(dict(gauge._values))
+
+        assert sm._run_job("prod", MagicMock(), collector, "Test Job", "test_job")
+        assert [dict(k)["foo"] for k in seen_mid_run[0]] == ["old"]
+        assert [dict(k)["foo"] for k in gauge._values] == ["new"]

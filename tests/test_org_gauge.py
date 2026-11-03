@@ -271,3 +271,91 @@ class TestReplaceOrg:
         gauge.set(5)
         gauge.replace_org([])
         assert gauge._values == {}
+
+
+def _series(gauge):
+    """{(org, foo): value} from what a scrape would see right now."""
+    return {
+        (o.attributes["org"], o.attributes.get("foo")): o.value
+        for o in gauge._collect(None)
+    }
+
+
+class TestGaugeTransaction:
+    def test_scrape_sees_old_series_until_run_ends(self):
+        from sfmon.org_gauge import gauge_transaction
+
+        gauge = make_gauge("g_tx_1", "doc", ["foo"])
+        gauge.labels(foo="old", org="prod").set(1)
+        with gauge_transaction():
+            gauge.clear(org="prod")
+            assert _series(gauge) == {("prod", "old"): 1.0}
+            gauge.labels(foo="new", org="prod").set(2)
+            assert _series(gauge) == {("prod", "old"): 1.0}
+        assert _series(gauge) == {("prod", "new"): 2.0}
+
+    def test_other_orgs_untouched(self):
+        from sfmon.org_gauge import gauge_transaction
+
+        gauge = make_gauge("g_tx_2", "doc", ["foo"])
+        gauge.labels(foo="a", org="uat").set(5)
+        with gauge_transaction():
+            gauge.clear(org="prod")
+            gauge.labels(foo="a", org="prod").set(1)
+        assert _series(gauge) == {("prod", "a"): 1.0, ("uat", "a"): 5.0}
+
+    def test_inc_reads_live_value_unless_cleared(self):
+        from sfmon.org_gauge import gauge_transaction
+
+        kept = make_gauge("g_tx_3", "doc", ["foo"])
+        cleared = make_gauge("g_tx_4", "doc", ["foo"])
+        for gauge in (kept, cleared):
+            gauge.labels(foo="a", org="prod").set(10)
+        with gauge_transaction():
+            kept.labels(foo="a", org="prod").inc()
+            kept.labels(foo="a", org="prod").inc(2)
+            cleared.clear(org="prod")
+            cleared.labels(foo="a", org="prod").inc()
+        assert _series(kept) == {("prod", "a"): 13.0}
+        assert _series(cleared) == {("prod", "a"): 1.0}
+
+    def test_clear_after_set_in_same_run_drops_staged_values(self):
+        from sfmon.org_gauge import gauge_transaction
+
+        gauge = make_gauge("g_tx_5", "doc", ["foo"])
+        with gauge_transaction():
+            gauge.labels(foo="a", org="prod").set(1)
+            gauge.labels(foo="a", org="uat").set(2)
+            gauge.clear(org="prod")
+        assert _series(gauge) == {("uat", "a"): 2.0}
+
+    def test_replace_org_is_staged(self):
+        from sfmon.org_gauge import gauge_transaction
+
+        gauge = make_gauge("g_tx_6", "doc", ["foo"])
+        gauge.labels(foo="old", org="prod").set(1)
+        with gauge_transaction():
+            gauge.replace_org([({"foo": "new"}, 2)], org="prod")
+            assert _series(gauge) == {("prod", "old"): 1.0}
+        assert _series(gauge) == {("prod", "new"): 2.0}
+
+    def test_changes_applied_when_run_raises(self):
+        import pytest
+        from sfmon.org_gauge import gauge_transaction
+
+        gauge = make_gauge("g_tx_7", "doc", ["foo"])
+        with pytest.raises(RuntimeError):
+            with gauge_transaction():
+                gauge.labels(foo="a", org="prod").set(1)
+                raise RuntimeError("boom")
+        assert _series(gauge) == {("prod", "a"): 1.0}
+
+    def test_nested_transaction_joins_outer(self):
+        from sfmon.org_gauge import gauge_transaction
+
+        gauge = make_gauge("g_tx_8", "doc", ["foo"])
+        with gauge_transaction():
+            with gauge_transaction():
+                gauge.labels(foo="a", org="prod").set(1)
+            assert _series(gauge) == {}
+        assert _series(gauge) == {("prod", "a"): 1.0}
