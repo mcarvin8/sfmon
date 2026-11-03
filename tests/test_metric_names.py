@@ -1,5 +1,5 @@
 """Guards for metric naming: one sfmon_ prefix, snake_case labels, and no
-dashboard, README example or compat rule pointing at a metric that doesn't exist."""
+dashboard, docs PromQL example or compat rule pointing at a metric that doesn't exist."""
 
 import importlib
 import json
@@ -84,12 +84,20 @@ def test_dashboard_queries_use_defined_metrics(dashboard):
     assert referenced <= DEFINED, sorted(referenced - DEFINED)
 
 
-def test_readme_promql_examples_use_defined_metrics():
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    blocks = re.findall(r"```promql(.*?)```", readme, re.S)
-    referenced = set().union(*(_referenced(b) for b in blocks))
-    assert referenced, "no PromQL examples found"
+@pytest.mark.parametrize(
+    "doc",
+    [ROOT / "README.md", *sorted((ROOT / "docs").glob("*.md"))],
+    ids=lambda p: p.name,
+)
+def test_promql_examples_use_defined_metrics(doc):
+    blocks = re.findall(r"```promql(.*?)```", doc.read_text(encoding="utf-8"), re.S)
+    referenced = set().union(set(), *(_referenced(b) for b in blocks))
     assert referenced <= DEFINED, sorted(referenced - DEFINED)
+
+
+def test_docs_have_promql_examples():
+    docs = [ROOT / "README.md", *(ROOT / "docs").glob("*.md")]
+    assert any("```promql" in d.read_text(encoding="utf-8") for d in docs)
 
 
 def test_compat_rules_record_from_defined_metrics():
