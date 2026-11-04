@@ -1,5 +1,2 @@
-# ruff format (initial pass)
 70b5dce4c99c6ec7666c992846203ee2e351f700
-
-# ruff lint auto-fixes (import sorting, unused imports, whitespace)
 8993ad89161ad9e85b6b17cbb54118f3375c363d
