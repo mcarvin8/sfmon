@@ -84,9 +84,7 @@ def process_deployment_record(record, status_mapping, is_validation=False):
     deployment_time = calculate_minutes_difference(start_date, completed_date)
     pending_time = calculate_minutes_difference(created_date, start_date)
 
-    report_deployment_metrics(
-        record, deployment_time, pending_time, status_mapping, is_validation
-    )
+    report_deployment_metrics(record, deployment_time, pending_time, status_mapping, is_validation)
 
 
 def parse_datetime(date_str):
@@ -120,9 +118,7 @@ def calculate_minutes_difference(start, end):
     return 0.0
 
 
-def report_deployment_metrics(
-    record, deployment_time, pending_time, status_mapping, is_validation
-):
+def report_deployment_metrics(record, deployment_time, pending_time, status_mapping, is_validation):
     """
     Log the full deployment record as a structured event and send its
     low-cardinality (deployer, status) fields to Prometheus gauges.
@@ -156,22 +152,16 @@ def report_deployment_metrics(
     )
 
     if is_validation:
-        validation_details_gauge.labels(
-            deployed_by=deployed_by, status=status
-        ).set(status_mapping.get(status, -1))
-        validation_pending_time_gauge.labels(
-            deployed_by=deployed_by, status=status
-        ).set(pending_time)
-        validation_time_gauge.labels(
-            deployed_by=deployed_by, status=status
-        ).set(deployment_time)
+        validation_details_gauge.labels(deployed_by=deployed_by, status=status).set(
+            status_mapping.get(status, -1)
+        )
+        validation_pending_time_gauge.labels(deployed_by=deployed_by, status=status).set(
+            pending_time
+        )
+        validation_time_gauge.labels(deployed_by=deployed_by, status=status).set(deployment_time)
     else:
-        deployment_details_gauge.labels(
-            deployed_by=deployed_by, status=status
-        ).set(status_mapping.get(status, -1))
-        pending_time_gauge.labels(
-            deployed_by=deployed_by, status=status
-        ).set(pending_time)
-        deployment_time_gauge.labels(
-            deployed_by=deployed_by, status=status
-        ).set(deployment_time)
+        deployment_details_gauge.labels(deployed_by=deployed_by, status=status).set(
+            status_mapping.get(status, -1)
+        )
+        pending_time_gauge.labels(deployed_by=deployed_by, status=status).set(pending_time)
+        deployment_time_gauge.labels(deployed_by=deployed_by, status=status).set(deployment_time)

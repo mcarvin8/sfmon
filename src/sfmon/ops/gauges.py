@@ -129,19 +129,29 @@ apex_entry_point_count = OrgAwareGauge(
     ["entry_point", "quiddity"],
 )
 apex_avg_runtime = OrgAwareGauge(
-    "sfmon_apex_avg_run_time_milliseconds", "Average runtime by entry point", ["entry_point", "quiddity"]
+    "sfmon_apex_avg_run_time_milliseconds",
+    "Average runtime by entry point",
+    ["entry_point", "quiddity"],
 )
 apex_max_runtime = OrgAwareGauge(
-    "sfmon_apex_max_run_time_milliseconds", "Maximum runtime by entry point", ["entry_point", "quiddity"]
+    "sfmon_apex_max_run_time_milliseconds",
+    "Maximum runtime by entry point",
+    ["entry_point", "quiddity"],
 )
 apex_total_runtime = OrgAwareGauge(
-    "sfmon_apex_total_run_time_milliseconds", "Total runtime by entry point", ["entry_point", "quiddity"]
+    "sfmon_apex_total_run_time_milliseconds",
+    "Total runtime by entry point",
+    ["entry_point", "quiddity"],
 )
 apex_avg_cputime = OrgAwareGauge(
-    "sfmon_apex_avg_cpu_time_milliseconds", "Average CPU time by entry point", ["entry_point", "quiddity"]
+    "sfmon_apex_avg_cpu_time_milliseconds",
+    "Average CPU time by entry point",
+    ["entry_point", "quiddity"],
 )
 apex_max_cputime = OrgAwareGauge(
-    "sfmon_apex_max_cpu_time_milliseconds", "Maximum CPU time by entry point", ["entry_point", "quiddity"]
+    "sfmon_apex_max_cpu_time_milliseconds",
+    "Maximum CPU time by entry point",
+    ["entry_point", "quiddity"],
 )
 apex_runtime_gt_5s_count = OrgAwareGauge(
     "sfmon_apex_long_running_executions",

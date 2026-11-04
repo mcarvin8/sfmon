@@ -468,20 +468,14 @@ def _call_job(org_name, sf, func, job_name):
     except SalesforceExpiredSession as e:
         # Raised by calls that bypass query.py's retry (e.g. sf.limits()).
         # Refresh the session so the next run of every job for this org works.
-        logger.error(
-            "Job '%s' failed for org '%s': session expired: %s", job_name, org_name, e
-        )
+        logger.error("Job '%s' failed for org '%s': session expired: %s", job_name, org_name, e)
         try:
             orgs.reconnect(org_name, stale=sf)
         except Exception as reconnect_e:
-            logger.error(
-                "Failed to re-authenticate to org '%s': %s", org_name, reconnect_e
-            )
+            logger.error("Failed to re-authenticate to org '%s': %s", org_name, reconnect_e)
         return False
     except Exception as e:
-        logger.error(
-            "Job '%s' failed for org '%s': %s", job_name, org_name, e
-        )
+        logger.error("Job '%s' failed for org '%s': %s", job_name, org_name, e)
         return False
 
 
@@ -492,9 +486,7 @@ def _add_job_with_schedule(scheduler, org_name, job_id, schedule, func, job_name
     so runs after a re-authentication use the refreshed session.
     """
     scheduler.add_job(
-        func=lambda: _run_job(
-            org_name, orgs.get_connection(org_name), func, job_name, job_id
-        ),
+        func=lambda: _run_job(org_name, orgs.get_connection(org_name), func, job_name, job_id),
         trigger=CronTrigger(**schedule),
         id=f"{job_id}::{org_name}",
         name=f"{job_name} [{org_name}]",
@@ -578,26 +570,28 @@ def schedule_tasks(scheduler):
             schedule = get_always_on_config(job_id, default_schedule, org_name=org_name)
             if schedule:
                 _run_job(org_name, sf, func, job_name, job_id)
-                _add_job_with_schedule(
-                    scheduler, org_name, job_id, schedule, func, job_name
-                )
+                _add_job_with_schedule(scheduler, org_name, job_id, schedule, func, job_name)
 
     logger.info("Executing enabled tasks at startup (respecting config)...")
     for org_name, sf in sf_connections.items():
         for job_id, default_schedule, func, job_name in SCHEDULED_JOBS:
             schedule = get_schedule_config(job_id, default_schedule, org_name=org_name)
             if schedule:
-                _run_job(org_name, sf, func, job_name, job_id)  # initial run only for jobs enabled by config
-                _add_job_with_schedule(
-                    scheduler, org_name, job_id, schedule, func, job_name
-                )
+                _run_job(
+                    org_name, sf, func, job_name, job_id
+                )  # initial run only for jobs enabled by config
+                _add_job_with_schedule(scheduler, org_name, job_id, schedule, func, job_name)
         for metric in custom_metrics.load_custom_metrics():
             schedule = metric.schedule_for(org_name)
             if schedule:
                 _run_job(org_name, sf, metric.collect, metric.job_name, metric.job_id)
                 _add_job_with_schedule(
-                    scheduler, org_name, metric.job_id, schedule,
-                    metric.collect, metric.job_name,
+                    scheduler,
+                    org_name,
+                    metric.job_id,
+                    schedule,
+                    metric.collect,
+                    metric.job_name,
                 )
     logger.info("Initial execution completed, all jobs scheduled with APScheduler")
 
@@ -629,9 +623,7 @@ def run_once(job_filter=None):
     known_ids = {job_id for job_id, *_ in all_jobs} | {m.job_id for m in custom}
 
     if job_filter and job_filter not in known_ids:
-        logger.error(
-            "Unknown job '%s'. Known jobs: %s", job_filter, ", ".join(sorted(known_ids))
-        )
+        logger.error("Unknown job '%s'. Known jobs: %s", job_filter, ", ".join(sorted(known_ids)))
         return 2
 
     connections = orgs.build_connections()
@@ -732,12 +724,8 @@ def main():
         )
     # Initialize APScheduler, sizing the worker pool to the fleet so every
     # org's jobs firing at the same cron tick don't queue up behind each other
-    max_workers = int(
-        os.getenv("SCHEDULER_MAX_WORKERS", min(len(sf_connections) * 2, 20))
-    )
-    scheduler = BlockingScheduler(
-        executors={"default": ThreadPoolExecutor(max_workers)}
-    )
+    max_workers = int(os.getenv("SCHEDULER_MAX_WORKERS", min(len(sf_connections) * 2, 20)))
+    scheduler = BlockingScheduler(executors={"default": ThreadPoolExecutor(max_workers)})
     # Schedule all tasks
     schedule_tasks(scheduler)
     try:

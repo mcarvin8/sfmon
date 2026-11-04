@@ -21,7 +21,9 @@ five_or_less_profile_assignees = OrgAwareGauge(
     ["profile_id", "profile_name"],
 )
 unassigned_profiles = OrgAwareGauge(
-    "sfmon_profiles_with_no_active_users", "Profiles with no active users", ["profile_id", "profile_name"]
+    "sfmon_profiles_with_no_active_users",
+    "Profiles with no active users",
+    ["profile_id", "profile_name"],
 )
 
 # Code Quality - API Versions and Apex

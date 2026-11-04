@@ -11,6 +11,7 @@ TRUST_API = "https://api.status.salesforce.com"
 class TestMonitorSalesforceLimits:
     def test_sets_gauge_for_each_limit(self, mock_sf):
         from sfmon.core.overall_sf_org import monitor_salesforce_limits
+
         mock_sf.limits.return_value = {
             "DailyApiRequests": {"Max": 15000, "Remaining": 14000},
             "DataStorageMB": {"Max": 5120, "Remaining": 4096},
@@ -22,6 +23,7 @@ class TestMonitorSalesforceLimits:
 
     def test_skips_zero_max_limit(self, mock_sf):
         from sfmon.core.overall_sf_org import monitor_salesforce_limits
+
         mock_sf.limits.return_value = {
             "ZeroLimit": {"Max": 0, "Remaining": 0},
         }
@@ -32,6 +34,7 @@ class TestMonitorSalesforceLimits:
 
     def test_handles_exception_gracefully(self, mock_sf):
         from sfmon.core.overall_sf_org import monitor_salesforce_limits
+
         mock_sf.limits.side_effect = RuntimeError("API down")
         mock_gauge = MagicMock()
         with patch("sfmon.core.overall_sf_org.api_usage_percentage_gauge", mock_gauge):
@@ -39,6 +42,7 @@ class TestMonitorSalesforceLimits:
 
     def test_usage_percentage_calculation(self, mock_sf):
         from sfmon.core.overall_sf_org import monitor_salesforce_limits
+
         mock_sf.limits.return_value = {
             "DailyApiRequests": {"Max": 1000, "Remaining": 750},
         }
@@ -51,12 +55,15 @@ class TestMonitorSalesforceLimits:
 
     def test_syncs_alerts_with_breached_limits_above_threshold(self, mock_sf):
         from sfmon.core.overall_sf_org import monitor_salesforce_limits
+
         mock_sf.limits.return_value = {
             "DailyApiRequests": {"Max": 1000, "Remaining": 100},  # 90% used
             "DataStorageMB": {"Max": 1000, "Remaining": 900},  # 10% used
         }
-        with patch("sfmon.core.overall_sf_org.api_usage_percentage_gauge"), \
-             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+        with (
+            patch("sfmon.core.overall_sf_org.api_usage_percentage_gauge"),
+            patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync,
+        ):
             monitor_salesforce_limits(mock_sf)
         mock_sync.assert_called_once()
         category, breached = mock_sync.call_args.args
@@ -66,22 +73,28 @@ class TestMonitorSalesforceLimits:
 
     def test_marks_critical_severity_at_95_percent(self, mock_sf):
         from sfmon.core.overall_sf_org import monitor_salesforce_limits
+
         mock_sf.limits.return_value = {
             "DailyApiRequests": {"Max": 1000, "Remaining": 40},  # 96% used
         }
-        with patch("sfmon.core.overall_sf_org.api_usage_percentage_gauge"), \
-             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+        with (
+            patch("sfmon.core.overall_sf_org.api_usage_percentage_gauge"),
+            patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync,
+        ):
             monitor_salesforce_limits(mock_sf)
         _, breached = mock_sync.call_args.args
         assert breached["DailyApiRequests"]["severity"] == "critical"
 
     def test_syncs_empty_alerts_when_nothing_breached(self, mock_sf):
         from sfmon.core.overall_sf_org import monitor_salesforce_limits
+
         mock_sf.limits.return_value = {
             "DailyApiRequests": {"Max": 1000, "Remaining": 900},  # 10% used
         }
-        with patch("sfmon.core.overall_sf_org.api_usage_percentage_gauge"), \
-             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+        with (
+            patch("sfmon.core.overall_sf_org.api_usage_percentage_gauge"),
+            patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync,
+        ):
             monitor_salesforce_limits(mock_sf)
         mock_sync.assert_called_once_with("salesforce_limits", {})
 
@@ -91,9 +104,11 @@ class TestMonitorSalesforceLimits:
         mock_sf.limits.return_value = {
             "DailyApiRequests": {"Max": 1000, "Remaining": 550},  # 45% used
         }
-        with patch.object(overall_sf_org, "LIMIT_ALERT_THRESHOLD_PERCENT", 50), \
-             patch.object(overall_sf_org, "api_usage_percentage_gauge"), \
-             patch.object(overall_sf_org, "sync_alerts") as mock_sync:
+        with (
+            patch.object(overall_sf_org, "LIMIT_ALERT_THRESHOLD_PERCENT", 50),
+            patch.object(overall_sf_org, "api_usage_percentage_gauge"),
+            patch.object(overall_sf_org, "sync_alerts") as mock_sync,
+        ):
             overall_sf_org.monitor_salesforce_limits(mock_sf)
         mock_sync.assert_called_once_with("salesforce_limits", {})
 
@@ -101,20 +116,28 @@ class TestMonitorSalesforceLimits:
 class TestGetSalesforceLicenses:
     def test_user_licenses_processed(self, mock_sf):
         from sfmon.core.overall_sf_org import get_salesforce_licenses
-        user_lic = [{"Name": "Salesforce", "Status": "Active", "TotalLicenses": 100, "UsedLicenses": 40}]
+
+        user_lic = [
+            {"Name": "Salesforce", "Status": "Active", "TotalLicenses": 100, "UsedLicenses": 40}
+        ]
         perm_lic = []
         usage_lic = []
 
-        with patch("sfmon.core.overall_sf_org.query_records_all", side_effect=[user_lic, perm_lic, usage_lic]), \
-             patch("sfmon.core.overall_sf_org.total_user_licenses_gauge") as m_total, \
-             patch("sfmon.core.overall_sf_org.used_user_licenses_gauge") as m_used, \
-             patch("sfmon.core.overall_sf_org.percent_user_licenses_used_gauge") as m_pct, \
-             patch("sfmon.core.overall_sf_org.total_permissionset_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_permissionset_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_permissionset_used_gauge"), \
-             patch("sfmon.core.overall_sf_org.total_usage_based_entitlements_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_usage_based_entitlements_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_usage_based_entitlements_used_gauge"):
+        with (
+            patch(
+                "sfmon.core.overall_sf_org.query_records_all",
+                side_effect=[user_lic, perm_lic, usage_lic],
+            ),
+            patch("sfmon.core.overall_sf_org.total_user_licenses_gauge") as m_total,
+            patch("sfmon.core.overall_sf_org.used_user_licenses_gauge") as m_used,
+            patch("sfmon.core.overall_sf_org.percent_user_licenses_used_gauge") as m_pct,
+            patch("sfmon.core.overall_sf_org.total_permissionset_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_permissionset_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.percent_permissionset_used_gauge"),
+            patch("sfmon.core.overall_sf_org.total_usage_based_entitlements_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_usage_based_entitlements_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.percent_usage_based_entitlements_used_gauge"),
+        ):
             get_salesforce_licenses(mock_sf)
 
         m_total.labels.assert_called_once()
@@ -123,24 +146,28 @@ class TestGetSalesforceLicenses:
 
     def test_zero_total_licenses_skips_percent(self, mock_sf):
         from sfmon.core.overall_sf_org import get_salesforce_licenses
+
         user_lic = [{"Name": "Chatter", "Status": "Active", "TotalLicenses": 0, "UsedLicenses": 0}]
 
-        with patch("sfmon.core.overall_sf_org.query_records_all", side_effect=[user_lic, [], []]), \
-             patch("sfmon.core.overall_sf_org.total_user_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_user_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_user_licenses_used_gauge") as m_pct, \
-             patch("sfmon.core.overall_sf_org.total_permissionset_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_permissionset_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_permissionset_used_gauge"), \
-             patch("sfmon.core.overall_sf_org.total_usage_based_entitlements_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_usage_based_entitlements_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_usage_based_entitlements_used_gauge"):
+        with (
+            patch("sfmon.core.overall_sf_org.query_records_all", side_effect=[user_lic, [], []]),
+            patch("sfmon.core.overall_sf_org.total_user_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_user_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.percent_user_licenses_used_gauge") as m_pct,
+            patch("sfmon.core.overall_sf_org.total_permissionset_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_permissionset_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.percent_permissionset_used_gauge"),
+            patch("sfmon.core.overall_sf_org.total_usage_based_entitlements_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_usage_based_entitlements_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.percent_usage_based_entitlements_used_gauge"),
+        ):
             get_salesforce_licenses(mock_sf)
 
         m_pct.labels.assert_not_called()
 
     def test_syncs_alerts_across_all_three_license_types(self, mock_sf):
         from sfmon.core.overall_sf_org import get_salesforce_licenses
+
         user_lic = [
             {"Name": "Salesforce", "Status": "Active", "TotalLicenses": 100, "UsedLicenses": 95}
         ]
@@ -161,17 +188,22 @@ class TestGetSalesforceLicenses:
                 "EndDate": "2026-12-31",
             }
         ]
-        with patch("sfmon.core.overall_sf_org.query_records_all", side_effect=[user_lic, perm_lic, usage_lic]), \
-             patch("sfmon.core.overall_sf_org.total_user_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_user_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_user_licenses_used_gauge"), \
-             patch("sfmon.core.overall_sf_org.total_permissionset_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_permissionset_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_permissionset_used_gauge"), \
-             patch("sfmon.core.overall_sf_org.total_usage_based_entitlements_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_usage_based_entitlements_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_usage_based_entitlements_used_gauge"), \
-             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+        with (
+            patch(
+                "sfmon.core.overall_sf_org.query_records_all",
+                side_effect=[user_lic, perm_lic, usage_lic],
+            ),
+            patch("sfmon.core.overall_sf_org.total_user_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_user_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.percent_user_licenses_used_gauge"),
+            patch("sfmon.core.overall_sf_org.total_permissionset_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_permissionset_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.percent_permissionset_used_gauge"),
+            patch("sfmon.core.overall_sf_org.total_usage_based_entitlements_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_usage_based_entitlements_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.percent_usage_based_entitlements_used_gauge"),
+            patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync,
+        ):
             get_salesforce_licenses(mock_sf)
 
         mock_sync.assert_called_once()
@@ -189,39 +221,49 @@ class TestGetSalesforceLicenses:
 
     def test_syncs_empty_alerts_when_nothing_breached(self, mock_sf):
         from sfmon.core.overall_sf_org import get_salesforce_licenses
-        user_lic = [{"Name": "Salesforce", "Status": "Active", "TotalLicenses": 100, "UsedLicenses": 10}]
 
-        with patch("sfmon.core.overall_sf_org.query_records_all", side_effect=[user_lic, [], []]), \
-             patch("sfmon.core.overall_sf_org.total_user_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_user_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_user_licenses_used_gauge"), \
-             patch("sfmon.core.overall_sf_org.total_permissionset_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_permissionset_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_permissionset_used_gauge"), \
-             patch("sfmon.core.overall_sf_org.total_usage_based_entitlements_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_usage_based_entitlements_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_usage_based_entitlements_used_gauge"), \
-             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+        user_lic = [
+            {"Name": "Salesforce", "Status": "Active", "TotalLicenses": 100, "UsedLicenses": 10}
+        ]
+
+        with (
+            patch("sfmon.core.overall_sf_org.query_records_all", side_effect=[user_lic, [], []]),
+            patch("sfmon.core.overall_sf_org.total_user_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_user_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.percent_user_licenses_used_gauge"),
+            patch("sfmon.core.overall_sf_org.total_permissionset_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_permissionset_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.percent_permissionset_used_gauge"),
+            patch("sfmon.core.overall_sf_org.total_usage_based_entitlements_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_usage_based_entitlements_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.percent_usage_based_entitlements_used_gauge"),
+            patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync,
+        ):
             get_salesforce_licenses(mock_sf)
 
         mock_sync.assert_called_once_with("salesforce_licenses", {})
 
     def test_custom_license_threshold_constant(self, mock_sf):
         import sfmon.core.overall_sf_org as overall_sf_org
-        user_lic = [{"Name": "Salesforce", "Status": "Active", "TotalLicenses": 100, "UsedLicenses": 55}]
 
-        with patch("sfmon.core.overall_sf_org.query_records_all", side_effect=[user_lic, [], []]), \
-             patch.object(overall_sf_org, "LICENSE_ALERT_THRESHOLD_PERCENT", 50), \
-             patch.object(overall_sf_org, "total_user_licenses_gauge"), \
-             patch.object(overall_sf_org, "used_user_licenses_gauge"), \
-             patch.object(overall_sf_org, "percent_user_licenses_used_gauge"), \
-             patch.object(overall_sf_org, "total_permissionset_licenses_gauge"), \
-             patch.object(overall_sf_org, "used_permissionset_licenses_gauge"), \
-             patch.object(overall_sf_org, "percent_permissionset_used_gauge"), \
-             patch.object(overall_sf_org, "total_usage_based_entitlements_licenses_gauge"), \
-             patch.object(overall_sf_org, "used_usage_based_entitlements_licenses_gauge"), \
-             patch.object(overall_sf_org, "percent_usage_based_entitlements_used_gauge"), \
-             patch.object(overall_sf_org, "sync_alerts") as mock_sync:
+        user_lic = [
+            {"Name": "Salesforce", "Status": "Active", "TotalLicenses": 100, "UsedLicenses": 55}
+        ]
+
+        with (
+            patch("sfmon.core.overall_sf_org.query_records_all", side_effect=[user_lic, [], []]),
+            patch.object(overall_sf_org, "LICENSE_ALERT_THRESHOLD_PERCENT", 50),
+            patch.object(overall_sf_org, "total_user_licenses_gauge"),
+            patch.object(overall_sf_org, "used_user_licenses_gauge"),
+            patch.object(overall_sf_org, "percent_user_licenses_used_gauge"),
+            patch.object(overall_sf_org, "total_permissionset_licenses_gauge"),
+            patch.object(overall_sf_org, "used_permissionset_licenses_gauge"),
+            patch.object(overall_sf_org, "percent_permissionset_used_gauge"),
+            patch.object(overall_sf_org, "total_usage_based_entitlements_licenses_gauge"),
+            patch.object(overall_sf_org, "used_usage_based_entitlements_licenses_gauge"),
+            patch.object(overall_sf_org, "percent_usage_based_entitlements_used_gauge"),
+            patch.object(overall_sf_org, "sync_alerts") as mock_sync,
+        ):
             overall_sf_org.get_salesforce_licenses(mock_sf)
 
         _, breached = mock_sync.call_args.args
@@ -231,6 +273,7 @@ class TestGetSalesforceLicenses:
 class TestFetchPod:
     def test_returns_instance_name(self, mock_sf):
         from sfmon.core.overall_sf_org import fetch_pod
+
         records = [{"InstanceName": "NA1"}]
         with patch("sfmon.core.overall_sf_org.query_records_all", return_value=records):
             result = fetch_pod(mock_sf)
@@ -241,6 +284,7 @@ class TestGetSalesforceIncidents:
     @responses_lib.activate
     def test_no_incidents_sets_ok_gauge(self):
         from sfmon.core.overall_sf_org import get_salesforce_incidents
+
         responses_lib.add(
             responses_lib.GET,
             f"{TRUST_API}/v1/incidents/active",
@@ -258,6 +302,7 @@ class TestGetSalesforceIncidents:
     @responses_lib.activate
     def test_matching_incident_sets_gauge_to_one(self):
         from sfmon.core.overall_sf_org import get_salesforce_incidents
+
         incidents = [
             {
                 "id": "INC-001",
@@ -282,6 +327,7 @@ class TestGetSalesforceIncidents:
     @responses_lib.activate
     def test_non_matching_pod_sets_ok(self):
         from sfmon.core.overall_sf_org import get_salesforce_incidents
+
         incidents = [
             {
                 "id": "INC-002",
@@ -306,6 +352,7 @@ class TestGetSalesforceIncidents:
     def test_handles_request_error(self):
         from sfmon.core.overall_sf_org import get_salesforce_incidents
         import requests as req_lib
+
         responses_lib.add(
             responses_lib.GET,
             f"{TRUST_API}/v1/incidents/active",
@@ -318,6 +365,7 @@ class TestGetSalesforceIncidents:
     @responses_lib.activate
     def test_matching_incident_syncs_alert(self):
         from sfmon.core.overall_sf_org import get_salesforce_incidents
+
         incidents = [
             {
                 "id": "INC-001",
@@ -331,8 +379,10 @@ class TestGetSalesforceIncidents:
             json=incidents,
             status=200,
         )
-        with patch("sfmon.core.overall_sf_org.incident_gauge"), \
-             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+        with (
+            patch("sfmon.core.overall_sf_org.incident_gauge"),
+            patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync,
+        ):
             get_salesforce_incidents("Production", "NA1")
         mock_sync.assert_called_once()
         category, active = mock_sync.call_args.args
@@ -344,6 +394,7 @@ class TestGetSalesforceIncidents:
     @responses_lib.activate
     def test_minor_severity_maps_to_warning(self):
         from sfmon.core.overall_sf_org import get_salesforce_incidents
+
         incidents = [
             {
                 "id": "INC-003",
@@ -357,8 +408,10 @@ class TestGetSalesforceIncidents:
             json=incidents,
             status=200,
         )
-        with patch("sfmon.core.overall_sf_org.incident_gauge"), \
-             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+        with (
+            patch("sfmon.core.overall_sf_org.incident_gauge"),
+            patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync,
+        ):
             get_salesforce_incidents("Production", "NA1")
         _, active = mock_sync.call_args.args
         assert active["INC-003"]["severity"] == "warning"
@@ -366,6 +419,7 @@ class TestGetSalesforceIncidents:
     @responses_lib.activate
     def test_no_matching_incidents_syncs_empty_alerts(self):
         from sfmon.core.overall_sf_org import get_salesforce_incidents
+
         incidents = [
             {
                 "id": "INC-002",
@@ -379,8 +433,10 @@ class TestGetSalesforceIncidents:
             json=incidents,
             status=200,
         )
-        with patch("sfmon.core.overall_sf_org.incident_gauge"), \
-             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+        with (
+            patch("sfmon.core.overall_sf_org.incident_gauge"),
+            patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync,
+        ):
             get_salesforce_incidents("Production", "NA1")
         mock_sync.assert_called_once_with("salesforce_incidents", {})
 
@@ -388,13 +444,16 @@ class TestGetSalesforceIncidents:
     def test_request_error_does_not_sync_alerts(self):
         from sfmon.core.overall_sf_org import get_salesforce_incidents
         import requests as req_lib
+
         responses_lib.add(
             responses_lib.GET,
             f"{TRUST_API}/v1/incidents/active",
             body=req_lib.exceptions.ConnectionError("network error"),
         )
-        with patch("sfmon.core.overall_sf_org.incident_gauge"), \
-             patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync:
+        with (
+            patch("sfmon.core.overall_sf_org.incident_gauge"),
+            patch("sfmon.core.overall_sf_org.sync_alerts") as mock_sync,
+        ):
             get_salesforce_incidents("Production", "NA1")
         mock_sync.assert_not_called()
 
@@ -403,6 +462,7 @@ class TestGetSalesforceMaintenances:
     @responses_lib.activate
     def test_scheduled_maintenance_sets_gauge(self):
         from sfmon.core.overall_sf_org import get_salesforce_maintenances
+
         maintenance_data = [
             {
                 "id": "MAINT-001",
@@ -427,6 +487,7 @@ class TestGetSalesforceMaintenances:
     @responses_lib.activate
     def test_completed_maintenance_skipped(self):
         from sfmon.core.overall_sf_org import get_salesforce_maintenances
+
         maintenance_data = [
             {
                 "id": "MAINT-002",
@@ -450,6 +511,7 @@ class TestGetSalesforceMaintenances:
     @responses_lib.activate
     def test_non_matching_pod_skipped(self):
         from sfmon.core.overall_sf_org import get_salesforce_maintenances
+
         maintenance_data = [
             {
                 "id": "MAINT-003",
@@ -472,20 +534,33 @@ class TestGetSalesforceMaintenances:
 class TestGetSalesforcePermSetAndUsageEntitlements:
     def test_perm_set_licenses_processed(self, mock_sf):
         from sfmon.core.overall_sf_org import get_salesforce_licenses
+
         user_lic = []
-        perm_lic = [{"MasterLabel": "Sales Cloud", "Status": "Active",
-                     "TotalLicenses": 50, "UsedLicenses": 20, "ExpirationDate": "2025-01-01"}]
+        perm_lic = [
+            {
+                "MasterLabel": "Sales Cloud",
+                "Status": "Active",
+                "TotalLicenses": 50,
+                "UsedLicenses": 20,
+                "ExpirationDate": "2025-01-01",
+            }
+        ]
         usage_lic = []
-        with patch("sfmon.core.overall_sf_org.query_records_all", side_effect=[user_lic, perm_lic, usage_lic]), \
-             patch("sfmon.core.overall_sf_org.total_user_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_user_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_user_licenses_used_gauge"), \
-             patch("sfmon.core.overall_sf_org.total_permissionset_licenses_gauge") as m_total_ps, \
-             patch("sfmon.core.overall_sf_org.used_permissionset_licenses_gauge") as m_used_ps, \
-             patch("sfmon.core.overall_sf_org.percent_permissionset_used_gauge") as m_pct_ps, \
-             patch("sfmon.core.overall_sf_org.total_usage_based_entitlements_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_usage_based_entitlements_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_usage_based_entitlements_used_gauge"):
+        with (
+            patch(
+                "sfmon.core.overall_sf_org.query_records_all",
+                side_effect=[user_lic, perm_lic, usage_lic],
+            ),
+            patch("sfmon.core.overall_sf_org.total_user_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_user_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.percent_user_licenses_used_gauge"),
+            patch("sfmon.core.overall_sf_org.total_permissionset_licenses_gauge") as m_total_ps,
+            patch("sfmon.core.overall_sf_org.used_permissionset_licenses_gauge") as m_used_ps,
+            patch("sfmon.core.overall_sf_org.percent_permissionset_used_gauge") as m_pct_ps,
+            patch("sfmon.core.overall_sf_org.total_usage_based_entitlements_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_usage_based_entitlements_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.percent_usage_based_entitlements_used_gauge"),
+        ):
             get_salesforce_licenses(mock_sf)
         m_total_ps.labels.assert_called_once()
         m_used_ps.labels.assert_called_once()
@@ -493,18 +568,33 @@ class TestGetSalesforcePermSetAndUsageEntitlements:
 
     def test_usage_based_entitlements_processed(self, mock_sf):
         from sfmon.core.overall_sf_org import get_salesforce_licenses
-        usage_lic = [{"MasterLabel": "API Calls", "CurrentAmountAllowed": 1000,
-                      "AmountUsed": 300, "EndDate": "2025-12-31"}]
-        with patch("sfmon.core.overall_sf_org.query_records_all", side_effect=[[], [], usage_lic]), \
-             patch("sfmon.core.overall_sf_org.total_user_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_user_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_user_licenses_used_gauge"), \
-             patch("sfmon.core.overall_sf_org.total_permissionset_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_permissionset_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_permissionset_used_gauge"), \
-             patch("sfmon.core.overall_sf_org.total_usage_based_entitlements_licenses_gauge") as m_total_ube, \
-             patch("sfmon.core.overall_sf_org.used_usage_based_entitlements_licenses_gauge") as m_used_ube, \
-             patch("sfmon.core.overall_sf_org.percent_usage_based_entitlements_used_gauge") as m_pct_ube:
+
+        usage_lic = [
+            {
+                "MasterLabel": "API Calls",
+                "CurrentAmountAllowed": 1000,
+                "AmountUsed": 300,
+                "EndDate": "2025-12-31",
+            }
+        ]
+        with (
+            patch("sfmon.core.overall_sf_org.query_records_all", side_effect=[[], [], usage_lic]),
+            patch("sfmon.core.overall_sf_org.total_user_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_user_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.percent_user_licenses_used_gauge"),
+            patch("sfmon.core.overall_sf_org.total_permissionset_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_permissionset_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.percent_permissionset_used_gauge"),
+            patch(
+                "sfmon.core.overall_sf_org.total_usage_based_entitlements_licenses_gauge"
+            ) as m_total_ube,
+            patch(
+                "sfmon.core.overall_sf_org.used_usage_based_entitlements_licenses_gauge"
+            ) as m_used_ube,
+            patch(
+                "sfmon.core.overall_sf_org.percent_usage_based_entitlements_used_gauge"
+            ) as m_pct_ube,
+        ):
             get_salesforce_licenses(mock_sf)
         m_total_ube.labels.assert_called_once()
         m_used_ube.labels.assert_called_once()
@@ -512,18 +602,29 @@ class TestGetSalesforcePermSetAndUsageEntitlements:
 
     def test_zero_usage_entitlement_skips_percent(self, mock_sf):
         from sfmon.core.overall_sf_org import get_salesforce_licenses
-        usage_lic = [{"MasterLabel": "API Calls", "CurrentAmountAllowed": 0,
-                      "AmountUsed": None, "EndDate": "2025-12-31"}]
-        with patch("sfmon.core.overall_sf_org.query_records_all", side_effect=[[], [], usage_lic]), \
-             patch("sfmon.core.overall_sf_org.total_user_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_user_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_user_licenses_used_gauge"), \
-             patch("sfmon.core.overall_sf_org.total_permissionset_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_permissionset_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_permissionset_used_gauge"), \
-             patch("sfmon.core.overall_sf_org.total_usage_based_entitlements_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.used_usage_based_entitlements_licenses_gauge"), \
-             patch("sfmon.core.overall_sf_org.percent_usage_based_entitlements_used_gauge") as m_pct_ube:
+
+        usage_lic = [
+            {
+                "MasterLabel": "API Calls",
+                "CurrentAmountAllowed": 0,
+                "AmountUsed": None,
+                "EndDate": "2025-12-31",
+            }
+        ]
+        with (
+            patch("sfmon.core.overall_sf_org.query_records_all", side_effect=[[], [], usage_lic]),
+            patch("sfmon.core.overall_sf_org.total_user_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_user_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.percent_user_licenses_used_gauge"),
+            patch("sfmon.core.overall_sf_org.total_permissionset_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_permissionset_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.percent_permissionset_used_gauge"),
+            patch("sfmon.core.overall_sf_org.total_usage_based_entitlements_licenses_gauge"),
+            patch("sfmon.core.overall_sf_org.used_usage_based_entitlements_licenses_gauge"),
+            patch(
+                "sfmon.core.overall_sf_org.percent_usage_based_entitlements_used_gauge"
+            ) as m_pct_ube,
+        ):
             get_salesforce_licenses(mock_sf)
         m_pct_ube.labels.assert_not_called()
 
@@ -531,9 +632,12 @@ class TestGetSalesforcePermSetAndUsageEntitlements:
 class TestGetSalesforceInstance:
     def test_successful_instance_fetch(self, mock_sf):
         from sfmon.core.overall_sf_org import get_salesforce_instance
-        with patch("sfmon.core.overall_sf_org.fetch_pod", return_value="NA1") as m_pod, \
-             patch("sfmon.core.overall_sf_org.get_salesforce_incidents") as m_inc, \
-             patch("sfmon.core.overall_sf_org.get_salesforce_maintenances") as m_maint:
+
+        with (
+            patch("sfmon.core.overall_sf_org.fetch_pod", return_value="NA1") as m_pod,
+            patch("sfmon.core.overall_sf_org.get_salesforce_incidents") as m_inc,
+            patch("sfmon.core.overall_sf_org.get_salesforce_maintenances") as m_maint,
+        ):
             get_salesforce_instance(mock_sf)
         m_pod.assert_called_once_with(mock_sf)
         m_inc.assert_called_once_with("Production", "NA1")
@@ -541,13 +645,18 @@ class TestGetSalesforceInstance:
 
     def test_handles_exception(self, mock_sf):
         from sfmon.core.overall_sf_org import get_salesforce_instance
+
         with patch("sfmon.core.overall_sf_org.fetch_pod", side_effect=RuntimeError("fail")):
             get_salesforce_instance(mock_sf)  # Should not raise
 
     def test_handles_requests_exception(self, mock_sf):
         import requests
         from sfmon.core.overall_sf_org import get_salesforce_instance
-        with patch("sfmon.core.overall_sf_org.fetch_pod", side_effect=requests.RequestException("conn error")):
+
+        with patch(
+            "sfmon.core.overall_sf_org.fetch_pod",
+            side_effect=requests.RequestException("conn error"),
+        ):
             get_salesforce_instance(mock_sf)  # Should not raise
 
 
@@ -555,6 +664,7 @@ class TestGetSalesforceIncidentsEdgeCases:
     @responses_lib.activate
     def test_malformed_incident_element_skipped(self):
         from sfmon.core.overall_sf_org import get_salesforce_incidents
+
         # Element missing IncidentImpacts → KeyError → logged and skipped
         incidents = [{"id": "INC-BAD", "instanceKeys": ["NA1"]}]
         responses_lib.add(
@@ -577,6 +687,7 @@ class TestGetSalesforceMaintenancesRequestError:
     def test_handles_request_error(self):
         from sfmon.core.overall_sf_org import get_salesforce_maintenances
         import requests as req_lib
+
         responses_lib.add(
             responses_lib.GET,
             f"{TRUST_API}/v1/maintenances",

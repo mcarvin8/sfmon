@@ -134,9 +134,7 @@ def hourly_analyse_bulk_api(sf):
     )
 
 
-def _run_bulk_log_analysis(
-    sf, event_type, interval, batch_metric, entity_metric, log_label
-):
+def _run_bulk_log_analysis(sf, event_type, interval, batch_metric, entity_metric, log_label):
     """
     Fetch the latest EventLogFile for an event type and interval, then emit metrics.
     """
@@ -238,23 +236,15 @@ def process_bulk_api_logs(
         )
         if materialized:
             pre_processed = (
-                sum(safe_int(r.get(processed_col)) for r in materialized)
-                if processed_col
-                else 0
+                sum(safe_int(r.get(processed_col)) for r in materialized) if processed_col else 0
             )
             if pre_processed == 0:
-                inferred = _infer_numeric_count_column(
-                    materialized, fieldnames, failures=False
-                )
+                inferred = _infer_numeric_count_column(materialized, fieldnames, failures=False)
                 if inferred:
                     processed_col = inferred
-            pre_failed = (
-                sum(safe_int(r.get(failed_col)) for r in materialized) if failed_col else 0
-            )
+            pre_failed = sum(safe_int(r.get(failed_col)) for r in materialized) if failed_col else 0
             if pre_failed == 0:
-                inferred_f = _infer_numeric_count_column(
-                    materialized, fieldnames, failures=True
-                )
+                inferred_f = _infer_numeric_count_column(materialized, fieldnames, failures=True)
                 if inferred_f:
                     failed_col = inferred_f
         row_iter = materialized
@@ -297,9 +287,7 @@ def process_bulk_api_logs(
             declared_log_field_names,
         )
 
-    report_batch_counts(
-        batch_counts, total_records_failed, total_records_processed, batch_metric
-    )
+    report_batch_counts(batch_counts, total_records_failed, total_records_processed, batch_metric)
     report_entity_counts(entity_type_counts, entity_metric)
 
 
@@ -494,6 +482,6 @@ def report_entity_counts(entity_type_counts, metric):
         metric: Prometheus gauge metric to update.
     """
     for (user_id, operation_type, entity_type), count in entity_type_counts.items():
-        metric.labels(
-            user_id=user_id, operation_type=operation_type, entity_type=entity_type
-        ).set(count)
+        metric.labels(user_id=user_id, operation_type=operation_type, entity_type=entity_type).set(
+            count
+        )

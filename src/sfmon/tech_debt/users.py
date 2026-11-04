@@ -79,9 +79,7 @@ def dormant_portal_users(sf):
     The threshold is configurable via DORMANT_USER_DAYS environment variable.
     """
     try:
-        logger.info(
-            "Querying dormant Portal users (inactive %d+ days)...", DORMANT_USER_DAYS
-        )
+        logger.info("Querying dormant Portal users (inactive %d+ days)...", DORMANT_USER_DAYS)
         # SOQL; DORMANT_USER_DAYS is int from env (B608)
         query = f"""
         SELECT Id, Name, CreatedDate, Username, Email, IsActive, LastLoginDate, Profile.Name

@@ -78,13 +78,13 @@ def hourly_report_export_records(sf):
                 continue
 
             # SOQL; modified_id validated as Salesforce Id format (B608)
-            report_detail_query = f"SELECT Id, Name, ReportTypeApiName FROM Report WHERE Id = '{modified_id}'"  # nosec B608
+            report_detail_query = (
+                f"SELECT Id, Name, ReportTypeApiName FROM Report WHERE Id = '{modified_id}'"  # nosec B608
+            )
             result = query_records_all(sf, report_detail_query)
             report_name = result[0].get("Name") if result and len(result) > 0 else None
             report_type_api_name = (
-                result[0].get("ReportTypeApiName")
-                if result and len(result) > 0
-                else None
+                result[0].get("ReportTypeApiName") if result and len(result) > 0 else None
             )
 
             logger.info(

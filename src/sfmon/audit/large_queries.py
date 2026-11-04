@@ -44,9 +44,7 @@ def hourly_observe_user_querying_large_records(sf):
         report_large_queries(large_queries)
     # pylint: disable=broad-except
     except Exception as e:
-        logger.error(
-            "An error occurred in hourly_observe_user_querying_large_records: %s", e
-        )
+        logger.error("An error occurred in hourly_observe_user_querying_large_records: %s", e)
 
 
 def collect_large_queries(sf):

@@ -7,9 +7,7 @@ from unittest.mock import MagicMock, patch
 
 def write_ruleset(path, rules, namespace=None):
     """Write a minimal PMD ruleset XML."""
-    rules_xml = "\n".join(
-        f'  <rule ref="category/apex/{r}.xml/{r}"/>' for r in rules
-    )
+    rules_xml = "\n".join(f'  <rule ref="category/apex/{r}.xml/{r}"/>' for r in rules)
     if namespace:
         ns_attr = f' xmlns="{namespace}"'
         tag = f"ruleset{ns_attr}"
@@ -23,8 +21,7 @@ def write_pmd_report_ns(path, file_violations, namespace="http://pmd.sf.net/rule
     if file_violations and not isinstance(next(iter(file_violations.values())), dict):
         file_violations = {
             "test.cls": {
-                rule: [str(i + 1) for i in range(count)]
-                for rule, count in file_violations.items()
+                rule: [str(i + 1) for i in range(count)] for rule, count in file_violations.items()
             }
         }
     files_xml = ""
@@ -35,13 +32,11 @@ def write_pmd_report_ns(path, file_violations, namespace="http://pmd.sf.net/rule
                 violations_xml += (
                     f'    <violation rule="{rule}" beginline="{line}" '
                     f'endline="{line}" begincolumn="1" endcolumn="1" priority="3">'
-                    f'</violation>\n'
+                    f"</violation>\n"
                 )
         files_xml += f'  <file name="{file_name}">\n{violations_xml}  </file>\n'
     ns_decl = f' xmlns="{namespace}"'
-    path.write_text(
-        f'<?xml version="1.0"?>\n<pmd{ns_decl} version="6.0">\n{files_xml}</pmd>'
-    )
+    path.write_text(f'<?xml version="1.0"?>\n<pmd{ns_decl} version="6.0">\n{files_xml}</pmd>')
 
 
 def write_pmd_report(path, file_violations):
@@ -57,8 +52,7 @@ def write_pmd_report(path, file_violations):
     if file_violations and not isinstance(next(iter(file_violations.values())), dict):
         file_violations = {
             "test.cls": {
-                rule: [str(i + 1) for i in range(count)]
-                for rule, count in file_violations.items()
+                rule: [str(i + 1) for i in range(count)] for rule, count in file_violations.items()
             }
         }
 
@@ -70,7 +64,7 @@ def write_pmd_report(path, file_violations):
                 violations_xml += (
                     f'    <violation rule="{rule}" beginline="{line}" '
                     f'endline="{line}" begincolumn="1" endcolumn="1" priority="3">'
-                    f'</violation>\n'
+                    f"</violation>\n"
                 )
         files_xml += f'  <file name="{file_name}">\n{violations_xml}  </file>\n'
     path.write_text(f'<?xml version="1.0"?>\n<pmd version="6.0">\n{files_xml}</pmd>')
@@ -79,16 +73,19 @@ def write_pmd_report(path, file_violations):
 class TestMonitorPmdCodeSmells:
     def test_no_ruleset_path_exits_quietly(self, mock_sf, tmp_path):
         from sfmon.tech_debt.pmd import monitor_pmd_code_smells
+
         with patch.dict(os.environ, {"PMD_RULESET_PATH": ""}):
             monitor_pmd_code_smells(mock_sf)  # Should not raise
 
     def test_missing_ruleset_file_exits_quietly(self, mock_sf, tmp_path):
         from sfmon.tech_debt.pmd import monitor_pmd_code_smells
+
         with patch.dict(os.environ, {"PMD_RULESET_PATH": str(tmp_path / "nonexistent.xml")}):
             monitor_pmd_code_smells(mock_sf)  # Should not raise
 
     def test_counts_violations_from_report(self, mock_sf, tmp_path):
         from sfmon.tech_debt.pmd import monitor_pmd_code_smells
+
         ruleset = tmp_path / "ruleset.xml"
         write_ruleset(ruleset, ["AvoidDebugStatements", "NoPrint"])
 
@@ -97,10 +94,12 @@ class TestMonitorPmdCodeSmells:
 
         mock_smells = MagicMock()
         mock_apex = MagicMock()
-        with patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}), \
-             patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)), \
-             patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells), \
-             patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex):
+        with (
+            patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}),
+            patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)),
+            patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells),
+            patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex),
+        ):
             monitor_pmd_code_smells(mock_sf)
 
         # Expect labels called for each rule + TOTAL
@@ -108,6 +107,7 @@ class TestMonitorPmdCodeSmells:
 
     def test_no_report_file_sets_rules_to_zero(self, mock_sf, tmp_path):
         from sfmon.tech_debt.pmd import monitor_pmd_code_smells
+
         ruleset = tmp_path / "ruleset.xml"
         write_ruleset(ruleset, ["RuleA", "RuleB"])
 
@@ -115,10 +115,12 @@ class TestMonitorPmdCodeSmells:
 
         mock_smells = MagicMock()
         mock_apex = MagicMock()
-        with patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}), \
-             patch("sfmon.tech_debt.pmd.os.path.join", return_value=fake_report), \
-             patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells), \
-             patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex):
+        with (
+            patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}),
+            patch("sfmon.tech_debt.pmd.os.path.join", return_value=fake_report),
+            patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells),
+            patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex),
+        ):
             monitor_pmd_code_smells(mock_sf)
 
         assert mock_smells.labels.call_count == 2
@@ -126,6 +128,7 @@ class TestMonitorPmdCodeSmells:
 
     def test_handles_parse_error(self, mock_sf, tmp_path):
         from sfmon.tech_debt.pmd import monitor_pmd_code_smells
+
         ruleset = tmp_path / "ruleset.xml"
         ruleset.write_text("NOT VALID XML")
         with patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}):
@@ -137,21 +140,27 @@ class TestPmdApexViolationsGauge:
 
     def test_emits_gauge_per_apex_and_rule(self, mock_sf, tmp_path):
         from sfmon.tech_debt.pmd import monitor_pmd_code_smells
+
         ruleset = tmp_path / "ruleset.xml"
         write_ruleset(ruleset, ["AvoidDebugStatements"])
 
         report_path = tmp_path / "pmd-report.xml"
-        write_pmd_report(report_path, {
-            "/path/to/AccountService.cls": {"AvoidDebugStatements": ["10", "42", "87"]},
-            "/path/to/ContactService.cls": {"AvoidDebugStatements": ["5"]},
-        })
+        write_pmd_report(
+            report_path,
+            {
+                "/path/to/AccountService.cls": {"AvoidDebugStatements": ["10", "42", "87"]},
+                "/path/to/ContactService.cls": {"AvoidDebugStatements": ["5"]},
+            },
+        )
 
         mock_smells = MagicMock()
         mock_apex = MagicMock()
-        with patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}), \
-             patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)), \
-             patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells), \
-             patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex):
+        with (
+            patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}),
+            patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)),
+            patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells),
+            patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex),
+        ):
             monitor_pmd_code_smells(mock_sf)
 
         # One label call per (apex, rule) combo → 2 combos
@@ -159,46 +168,58 @@ class TestPmdApexViolationsGauge:
 
     def test_gauge_value_equals_violation_count(self, mock_sf, tmp_path):
         from sfmon.tech_debt.pmd import monitor_pmd_code_smells
+
         ruleset = tmp_path / "ruleset.xml"
         write_ruleset(ruleset, ["AvoidDebugStatements"])
 
         report_path = tmp_path / "pmd-report.xml"
-        write_pmd_report(report_path, {
-            "/src/AccountService.cls": {"AvoidDebugStatements": ["10", "42", "87"]},
-        })
+        write_pmd_report(
+            report_path,
+            {
+                "/src/AccountService.cls": {"AvoidDebugStatements": ["10", "42", "87"]},
+            },
+        )
 
         captured_set = {}
         mock_smells = MagicMock()
         mock_apex = MagicMock()
         mock_apex.labels.return_value.set.side_effect = lambda v: captured_set.update({"count": v})
 
-        with patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}), \
-             patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)), \
-             patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells), \
-             patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex):
+        with (
+            patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}),
+            patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)),
+            patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells),
+            patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex),
+        ):
             monitor_pmd_code_smells(mock_sf)
 
         assert captured_set["count"] == 3
 
     def test_start_lines_are_comma_separated(self, mock_sf, tmp_path):
         from sfmon.tech_debt.pmd import monitor_pmd_code_smells
+
         ruleset = tmp_path / "ruleset.xml"
         write_ruleset(ruleset, ["AvoidDebugStatements"])
 
         report_path = tmp_path / "pmd-report.xml"
-        write_pmd_report(report_path, {
-            "/src/MyClass.cls": {"AvoidDebugStatements": ["10", "42", "87"]},
-        })
+        write_pmd_report(
+            report_path,
+            {
+                "/src/MyClass.cls": {"AvoidDebugStatements": ["10", "42", "87"]},
+            },
+        )
 
         captured_labels = {}
         mock_smells = MagicMock()
         mock_apex = MagicMock()
         mock_apex.labels.side_effect = lambda **kw: captured_labels.update(kw) or MagicMock()
 
-        with patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}), \
-             patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)), \
-             patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells), \
-             patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex):
+        with (
+            patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}),
+            patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)),
+            patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells),
+            patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex),
+        ):
             monitor_pmd_code_smells(mock_sf)
 
         assert captured_labels["apex_name"] == "MyClass"
@@ -207,46 +228,58 @@ class TestPmdApexViolationsGauge:
 
     def test_apex_name_strips_extension_and_path(self, mock_sf, tmp_path):
         from sfmon.tech_debt.pmd import monitor_pmd_code_smells
+
         ruleset = tmp_path / "ruleset.xml"
         write_ruleset(ruleset, ["NoPrint"])
 
         report_path = tmp_path / "pmd-report.xml"
-        write_pmd_report(report_path, {
-            "/very/deep/path/MyTrigger.trigger": {"NoPrint": ["7"]},
-        })
+        write_pmd_report(
+            report_path,
+            {
+                "/very/deep/path/MyTrigger.trigger": {"NoPrint": ["7"]},
+            },
+        )
 
         captured_labels = {}
         mock_smells = MagicMock()
         mock_apex = MagicMock()
         mock_apex.labels.side_effect = lambda **kw: captured_labels.update(kw) or MagicMock()
 
-        with patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}), \
-             patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)), \
-             patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells), \
-             patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex):
+        with (
+            patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}),
+            patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)),
+            patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells),
+            patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex),
+        ):
             monitor_pmd_code_smells(mock_sf)
 
         assert captured_labels["apex_name"] == "MyTrigger"
 
     def test_multiple_rules_per_apex_emit_separate_labels(self, mock_sf, tmp_path):
         from sfmon.tech_debt.pmd import monitor_pmd_code_smells
+
         ruleset = tmp_path / "ruleset.xml"
         write_ruleset(ruleset, ["AvoidDebugStatements", "NoPrint"])
 
         report_path = tmp_path / "pmd-report.xml"
-        write_pmd_report(report_path, {
-            "/src/AccountService.cls": {
-                "AvoidDebugStatements": ["10", "42"],
-                "NoPrint": ["5"],
+        write_pmd_report(
+            report_path,
+            {
+                "/src/AccountService.cls": {
+                    "AvoidDebugStatements": ["10", "42"],
+                    "NoPrint": ["5"],
+                },
             },
-        })
+        )
 
         mock_smells = MagicMock()
         mock_apex = MagicMock()
-        with patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}), \
-             patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)), \
-             patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells), \
-             patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex):
+        with (
+            patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}),
+            patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)),
+            patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells),
+            patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex),
+        ):
             monitor_pmd_code_smells(mock_sf)
 
         # AccountService has 2 rules → 2 label calls
@@ -254,6 +287,7 @@ class TestPmdApexViolationsGauge:
 
     def test_cleared_before_each_run(self, mock_sf, tmp_path):
         from sfmon.tech_debt.pmd import monitor_pmd_code_smells
+
         ruleset = tmp_path / "ruleset.xml"
         write_ruleset(ruleset, ["AvoidDebugStatements"])
 
@@ -262,10 +296,12 @@ class TestPmdApexViolationsGauge:
 
         mock_smells = MagicMock()
         mock_apex = MagicMock()
-        with patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}), \
-             patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)), \
-             patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells), \
-             patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex):
+        with (
+            patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}),
+            patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)),
+            patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells),
+            patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex),
+        ):
             monitor_pmd_code_smells(mock_sf)
 
         mock_apex.clear.assert_called_once()
@@ -276,24 +312,30 @@ class TestPmdNamespacedXml:
 
     def test_namespaced_ruleset_still_finds_rules(self, mock_sf, tmp_path):
         from sfmon.tech_debt.pmd import monitor_pmd_code_smells
+
         ruleset = tmp_path / "ruleset.xml"
-        write_ruleset(ruleset, ["AvoidDebugStatements"], namespace="http://pmd.sf.net/ruleset/2.0.0")
+        write_ruleset(
+            ruleset, ["AvoidDebugStatements"], namespace="http://pmd.sf.net/ruleset/2.0.0"
+        )
 
         report_path = tmp_path / "pmd-report.xml"
         write_pmd_report(report_path, {"AvoidDebugStatements": 2})
 
         mock_smells = MagicMock()
         mock_apex = MagicMock()
-        with patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}), \
-             patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)), \
-             patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells), \
-             patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex):
+        with (
+            patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}),
+            patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)),
+            patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells),
+            patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex),
+        ):
             monitor_pmd_code_smells(mock_sf)
 
         mock_smells.labels.assert_any_call(rule_name="AvoidDebugStatements")
 
     def test_namespaced_pmd_report_still_counts_violations(self, mock_sf, tmp_path):
         from sfmon.tech_debt.pmd import monitor_pmd_code_smells
+
         ruleset = tmp_path / "ruleset.xml"
         write_ruleset(ruleset, ["AvoidDebugStatements"])
 
@@ -302,10 +344,12 @@ class TestPmdNamespacedXml:
 
         mock_smells = MagicMock()
         mock_apex = MagicMock()
-        with patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}), \
-             patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)), \
-             patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells), \
-             patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex):
+        with (
+            patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}),
+            patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)),
+            patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells),
+            patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex),
+        ):
             monitor_pmd_code_smells(mock_sf)
 
         mock_smells.labels.assert_any_call(rule_name="AvoidDebugStatements")
@@ -314,6 +358,7 @@ class TestPmdNamespacedXml:
 class TestPmdZeroViolationsForMissingRule:
     def test_rule_in_ruleset_not_in_report_set_to_zero(self, mock_sf, tmp_path):
         from sfmon.tech_debt.pmd import monitor_pmd_code_smells
+
         ruleset = tmp_path / "ruleset.xml"
         write_ruleset(ruleset, ["RuleA", "RuleB"])
 
@@ -325,10 +370,12 @@ class TestPmdZeroViolationsForMissingRule:
         mock_smells = MagicMock()
         mock_smells.labels.side_effect = lambda **kw: captured_calls.append(kw) or MagicMock()
         mock_apex = MagicMock()
-        with patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}), \
-             patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)), \
-             patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells), \
-             patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex):
+        with (
+            patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}),
+            patch("sfmon.tech_debt.pmd.os.path.join", return_value=str(report_path)),
+            patch("sfmon.tech_debt.pmd.pmd_code_smells_gauge", mock_smells),
+            patch("sfmon.tech_debt.pmd.pmd_apex_violations_gauge", mock_apex),
+        ):
             monitor_pmd_code_smells(mock_sf)
 
         rule_names_called = [c["rule_name"] for c in captured_calls]
@@ -339,12 +386,14 @@ class TestPmdExceptionBranches:
     def test_handles_file_not_found_during_report_parse(self, mock_sf, tmp_path):
         from sfmon.tech_debt.pmd import monitor_pmd_code_smells
         import xml.etree.ElementTree as ET
+
         ruleset = tmp_path / "ruleset.xml"
         write_ruleset(ruleset, ["AvoidDebugStatements"])
 
         # Patch ET.parse to raise FileNotFoundError on second call (report parse)
         original_parse = ET.parse
         call_count = [0]
+
         def mock_parse(path, *args, **kwargs):
             call_count[0] += 1
             if call_count[0] == 2:
@@ -352,17 +401,22 @@ class TestPmdExceptionBranches:
             return original_parse(path, *args, **kwargs)
 
         report_path = str(tmp_path / "pmd-report.xml")
-        with patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}), \
-             patch("sfmon.tech_debt.pmd.os.path.join", return_value=report_path), \
-             patch("sfmon.tech_debt.pmd.os.path.exists", return_value=True), \
-             patch("sfmon.tech_debt.pmd.ET.parse", side_effect=mock_parse):
+        with (
+            patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}),
+            patch("sfmon.tech_debt.pmd.os.path.join", return_value=report_path),
+            patch("sfmon.tech_debt.pmd.os.path.exists", return_value=True),
+            patch("sfmon.tech_debt.pmd.ET.parse", side_effect=mock_parse),
+        ):
             monitor_pmd_code_smells(mock_sf)  # Should not raise
 
     def test_handles_generic_exception_during_parse(self, mock_sf, tmp_path):
         from sfmon.tech_debt.pmd import monitor_pmd_code_smells
+
         ruleset = tmp_path / "ruleset.xml"
         write_ruleset(ruleset, ["AvoidDebugStatements"])
 
-        with patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}), \
-             patch("sfmon.tech_debt.pmd.ET.parse", side_effect=RuntimeError("parse error")):
+        with (
+            patch.dict(os.environ, {"PMD_RULESET_PATH": str(ruleset)}),
+            patch("sfmon.tech_debt.pmd.ET.parse", side_effect=RuntimeError("parse error")),
+        ):
             monitor_pmd_code_smells(mock_sf)  # Should not raise

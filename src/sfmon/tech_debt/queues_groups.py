@@ -42,9 +42,9 @@ def total_queues_per_object(sf):
         total_queues_per_object_gauge.clear()
 
         for record in results:
-            total_queues_per_object_gauge.labels(
-                sobject_type=record["SobjectType"]
-            ).set(int(record["expr0"]))
+            total_queues_per_object_gauge.labels(sobject_type=record["SobjectType"]).set(
+                int(record["expr0"])
+            )
 
         logger.info("Found queues for %d different object types", len(results))
     # pylint: disable=broad-except

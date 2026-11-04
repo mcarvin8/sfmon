@@ -65,9 +65,7 @@ def expose_record_metric(gauge, record_data):
         section=record_data["section"],
         user_group=record_data["user_group"],
     ).set(1)
-    logger.info(
-        "Suspicious audit trail record detected", extra={"event": record_data}
-    )
+    logger.info("Suspicious audit trail record detected", extra={"event": record_data})
 
 
 def process_suspicious_records(records):
@@ -119,9 +117,7 @@ def expose_suspicious_records(sf):
         process_suspicious_records(result)
     # pylint: disable=broad-except
     except Exception as e:
-        logger.error(
-            "An unexpected error occurred during monitoring suspicious records: %s", e
-        )
+        logger.error("An unexpected error occurred during monitoring suspicious records: %s", e)
 
 
 def query_setup_audit_trail(sf):

@@ -58,9 +58,7 @@ def fetch_event_log_csv_reader(sf, log_file_id):
 
     reader = csv.DictReader(StringIO(log_content))
     if reader.fieldnames:
-        reader.fieldnames = [
-            (name or "").lstrip("\ufeff").strip() for name in reader.fieldnames
-        ]
+        reader.fieldnames = [(name or "").lstrip("\ufeff").strip() for name in reader.fieldnames]
     return reader
 
 

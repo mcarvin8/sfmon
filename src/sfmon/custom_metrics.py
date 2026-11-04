@@ -289,7 +289,7 @@ def _check_entry(index, entry, seen, errors):
 
     api = entry.get("api", "rest")
     if api not in ("rest", "tooling"):
-        errors.append(f"{where}: 'api' must be \"rest\" or \"tooling\"")
+        errors.append(f'{where}: \'api\' must be "rest" or "tooling"')
 
     value_field = entry.get("value_field")
     if value_field is not None and (not isinstance(value_field, str) or not value_field.strip()):

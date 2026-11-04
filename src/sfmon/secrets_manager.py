@@ -45,8 +45,7 @@ def get_secret_aws(secret_name):
     secret = response.get("SecretString")
     if not secret:
         raise RuntimeError(
-            f"Secret '{secret_name}' has no SecretString value "
-            "(binary secrets are not supported)."
+            f"Secret '{secret_name}' has no SecretString value (binary secrets are not supported)."
         )
     logger.info("Fetched secret '%s' from AWS Secrets Manager", secret_name)
     return secret

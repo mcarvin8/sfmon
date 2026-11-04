@@ -173,9 +173,7 @@ def report_ept_metrics(ept_rows):
     """
     for row in ept_rows:
         ept_value = (
-            float(row["EFFECTIVE_PAGE_TIME"]) / 1000
-            if row.get("EFFECTIVE_PAGE_TIME")
-            else 0
+            float(row["EFFECTIVE_PAGE_TIME"]) / 1000 if row.get("EFFECTIVE_PAGE_TIME") else 0
         )
         ept_metric.labels(
             effective_page_time_deviation_reason=row.get(

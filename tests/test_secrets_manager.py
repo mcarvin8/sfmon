@@ -10,6 +10,7 @@ from botocore.exceptions import ClientError
 def reset_client_cache():
     """Reset the module-level cached boto3 client between tests."""
     from sfmon import secrets_manager
+
     secrets_manager._client = None
     yield
     secrets_manager._client = None
@@ -18,11 +19,14 @@ def reset_client_cache():
 class TestGetSecretAws:
     def test_returns_secret_string(self):
         from sfmon import secrets_manager
+
         mock_client = MagicMock()
         mock_client.get_secret_value.return_value = {
             "SecretString": "force://id:secret:token@my.salesforce.com"
         }
-        with patch("sfmon.secrets_manager.boto3.client", return_value=mock_client) as mock_boto_client:
+        with patch(
+            "sfmon.secrets_manager.boto3.client", return_value=mock_client
+        ) as mock_boto_client:
             result = secrets_manager.get_secret_aws("SALESFORCE_AUTH_URL_PROD")
 
         assert result == "force://id:secret:token@my.salesforce.com"
@@ -31,9 +35,14 @@ class TestGetSecretAws:
 
     def test_reuses_cached_client_across_calls(self):
         from sfmon import secrets_manager
+
         mock_client = MagicMock()
-        mock_client.get_secret_value.return_value = {"SecretString": "force://a:b:c@x.salesforce.com"}
-        with patch("sfmon.secrets_manager.boto3.client", return_value=mock_client) as mock_boto_client:
+        mock_client.get_secret_value.return_value = {
+            "SecretString": "force://a:b:c@x.salesforce.com"
+        }
+        with patch(
+            "sfmon.secrets_manager.boto3.client", return_value=mock_client
+        ) as mock_boto_client:
             secrets_manager.get_secret_aws("SECRET_ONE")
             secrets_manager.get_secret_aws("SECRET_TWO")
 
@@ -42,9 +51,15 @@ class TestGetSecretAws:
 
     def test_raises_runtime_error_on_client_error(self):
         from sfmon import secrets_manager
+
         mock_client = MagicMock()
         mock_client.get_secret_value.side_effect = ClientError(
-            {"Error": {"Code": "ResourceNotFoundException", "Message": "Secrets Manager can't find the specified secret."}},
+            {
+                "Error": {
+                    "Code": "ResourceNotFoundException",
+                    "Message": "Secrets Manager can't find the specified secret.",
+                }
+            },
             "GetSecretValue",
         )
         with patch("sfmon.secrets_manager.boto3.client", return_value=mock_client):
@@ -53,6 +68,7 @@ class TestGetSecretAws:
 
     def test_raises_runtime_error_on_empty_secret_string(self):
         from sfmon import secrets_manager
+
         mock_client = MagicMock()
         mock_client.get_secret_value.return_value = {"SecretBinary": b"not-supported"}
         with patch("sfmon.secrets_manager.boto3.client", return_value=mock_client):

@@ -10,6 +10,7 @@ class TestLogger:
         monkeypatch.setenv("LOG_LEVEL", "NOTAVALIDLEVEL")
         import importlib
         from sfmon import logger
+
         importlib.reload(logger)
         assert logger.LOG_LEVEL == "INFO"
 
@@ -17,6 +18,7 @@ class TestLogger:
         monkeypatch.setenv("LOG_LEVEL", "DEBUG")
         import importlib
         from sfmon import logger
+
         importlib.reload(logger)
         assert logger.LOG_LEVEL == "DEBUG"
 
@@ -34,7 +36,9 @@ class TestBuildHandlers:
     def test_adds_otlp_handler_when_endpoint_set(self):
         from sfmon import logger
 
-        with patch.dict(os.environ, {"OTEL_EXPORTER_OTLP_ENDPOINT": "http://collector:4318"}), \
-             patch("opentelemetry.exporter.otlp.proto.http._log_exporter.OTLPLogExporter"):
+        with (
+            patch.dict(os.environ, {"OTEL_EXPORTER_OTLP_ENDPOINT": "http://collector:4318"}),
+            patch("opentelemetry.exporter.otlp.proto.http._log_exporter.OTLPLogExporter"),
+        ):
             handlers = logger._build_handlers()
         assert len(handlers) == 2

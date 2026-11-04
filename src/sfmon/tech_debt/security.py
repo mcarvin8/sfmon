@@ -70,9 +70,7 @@ def salesforce_health_risks(sf):
             standard_value = record.get("StandardValue", "")
 
             # Compare OrgValue and StandardValue to determine compliance status
-            compliance_status = (
-                "match" if str(org_value) == str(standard_value) else "mismatch"
-            )
+            compliance_status = "match" if str(org_value) == str(standard_value) else "mismatch"
 
             salesforce_health_risks_gauge.labels(
                 org_value=org_value,
