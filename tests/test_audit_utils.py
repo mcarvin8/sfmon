@@ -1,7 +1,6 @@
 """Unit tests for audit/utils.py – Salesforce calls are mocked."""
 
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 
 class TestGetUserName:
@@ -50,6 +49,7 @@ class TestCategorizeUserGroup:
     def test_integration_user_categorized(self, monkeypatch):
         monkeypatch.setenv("INTEGRATION_USER_NAMES", "Bot User,Service Account")
         import importlib
+
         from sfmon import audit
 
         importlib.reload(audit.utils)
@@ -60,6 +60,7 @@ class TestCategorizeUserGroup:
     def test_other_user_categorized(self, monkeypatch):
         monkeypatch.setenv("INTEGRATION_USER_NAMES", "Bot User")
         import importlib
+
         from sfmon import audit
 
         importlib.reload(audit.utils)
@@ -70,6 +71,7 @@ class TestCategorizeUserGroup:
     def test_empty_integration_users_all_other(self, monkeypatch):
         monkeypatch.delenv("INTEGRATION_USER_NAMES", raising=False)
         import importlib
+
         from sfmon import audit
 
         importlib.reload(audit.utils)
@@ -80,6 +82,7 @@ class TestCategorizeUserGroup:
     def test_multiple_integration_users(self, monkeypatch):
         monkeypatch.setenv("INTEGRATION_USER_NAMES", "Bot1, Bot2 , Bot3")
         import importlib
+
         from sfmon import audit
 
         importlib.reload(audit.utils)

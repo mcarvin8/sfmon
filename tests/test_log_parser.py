@@ -1,10 +1,10 @@
 """Unit tests for log_parser.py"""
 
 import csv
-import io
+from unittest.mock import MagicMock, patch
+
 import pytest
 import requests
-from unittest.mock import MagicMock, patch
 
 
 class TestFetchEventLogCsvReader:

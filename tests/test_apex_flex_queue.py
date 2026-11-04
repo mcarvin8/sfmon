@@ -1,6 +1,5 @@
 """Unit tests for ops/apex_flex_queue.py"""
 
-import pytest
 from unittest.mock import MagicMock, patch
 
 

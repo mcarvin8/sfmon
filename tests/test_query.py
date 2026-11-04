@@ -1,9 +1,10 @@
 """Unit tests for query.py – all Salesforce calls are mocked."""
 
-import pytest
 from unittest.mock import MagicMock, patch
-from simple_salesforce.exceptions import SalesforceExpiredSession, SalesforceMalformedRequest
+
+import pytest
 import requests as requests_lib
+from simple_salesforce.exceptions import SalesforceExpiredSession, SalesforceMalformedRequest
 
 
 @pytest.fixture(autouse=True)

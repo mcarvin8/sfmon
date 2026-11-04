@@ -24,16 +24,16 @@ import os
 import re
 
 from ..logger import logger
+from ..query import query_records_all, tooling_query_records_all
 from ..slack_notify import sync_alerts
 from .gauges import (
-    deprecated_apex_class_gauge,
-    deprecated_apex_trigger_gauge,
-    workflow_rules_gauge,
     apex_character_limit_percentage_gauge,
     apex_class_length_without_comments_gauge,
     apex_trigger_length_without_comments_gauge,
+    deprecated_apex_class_gauge,
+    deprecated_apex_trigger_gauge,
+    workflow_rules_gauge,
 )
-from ..query import query_records_all, tooling_query_records_all
 
 # API versions at or below this threshold are considered deprecated
 DEPRECATED_API_VERSION = int(os.getenv("DEPRECATED_API_VERSION", 50))
@@ -89,7 +89,7 @@ def apex_triggers_api_version(sf):
         # SOQL; DEPRECATED_API_VERSION is int from env (B608)
         query = f"""
         SELECT Id,Name,ApiVersion
-        FROM ApexTrigger 
+        FROM ApexTrigger
         WHERE NamespacePrefix = null AND ApiVersion <= {DEPRECATED_API_VERSION}
         """  # nosec B608
         results = query_records_all(sf, query)

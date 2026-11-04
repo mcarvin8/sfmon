@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests as requests_lib
 
-from sfmon import self_metrics
 from sfmon import salesforce_monitoring as sm
+from sfmon import self_metrics
 from sfmon.query import query_records_all
 
 

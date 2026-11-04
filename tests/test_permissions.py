@@ -1,9 +1,9 @@
 """Unit tests for tech_debt/permissions.py"""
 
 import json
-import os
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 class TestUnassignedPermissionSets:
@@ -134,7 +134,7 @@ class TestMonitorMinimalPermSets:
     def test_sets_gauge_per_perm_set(self, mock_sf, tmp_path):
         from sfmon.tech_debt.permissions import monitor_minimal_perm_sets
 
-        report = self._make_report(
+        self._make_report(
             tmp_path,
             minimal_sets=[
                 {"name": "MinPS1", "file_path": "MinPS1.permissionset", "permission_count": 2},
@@ -159,7 +159,7 @@ class TestMonitorMinimalPermSets:
     def test_percentage_calculated_correctly(self, mock_sf, tmp_path):
         from sfmon.tech_debt.permissions import monitor_minimal_perm_sets
 
-        report = self._make_report(
+        self._make_report(
             tmp_path,
             minimal_sets=[
                 {"name": "PS1", "file_path": "p.xml", "permission_count": 1},

@@ -1,7 +1,6 @@
 """Unit tests for audit/__init__.py (run_hourly_audit, run_daily_audit)"""
 
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 
 class TestRunHourlyAudit:

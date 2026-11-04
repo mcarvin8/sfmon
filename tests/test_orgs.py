@@ -1,10 +1,10 @@
 """Unit tests for orgs.py - org registry and multi-org connection building."""
 
 import json
-import os
 import sys
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 
 class TestGetOrgNames:
@@ -265,10 +265,12 @@ class TestConnectionRegistry:
         with patch("sfmon.orgs.get_salesforce_connection_url", return_value=old_conn):
             orgs.build_connections()
 
-        with patch(
-            "sfmon.orgs.get_salesforce_connection_url", side_effect=RuntimeError("bad token")
+        with (
+            patch(
+                "sfmon.orgs.get_salesforce_connection_url", side_effect=RuntimeError("bad token")
+            ),
+            pytest.raises(RuntimeError),
         ):
-            with pytest.raises(RuntimeError):
-                orgs.reconnect("prod", stale=old_conn)
+            orgs.reconnect("prod", stale=old_conn)
 
         assert orgs.get_connection("prod") is old_conn

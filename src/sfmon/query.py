@@ -20,16 +20,16 @@ Features:
 """
 
 import requests
+from simple_salesforce.exceptions import (
+    SalesforceExpiredSession,
+    SalesforceMalformedRequest,
+)
 
 from . import orgs
 from .constants import QUERY_TIMEOUT_SECONDS, REQUESTS_TIMEOUT_SECONDS
 from .logger import logger
 from .org_gauge import get_current_org
 from .self_metrics import record_query_error
-from simple_salesforce.exceptions import (
-    SalesforceExpiredSession,
-    SalesforceMalformedRequest,
-)
 
 
 def _reconnect_current_org(sf):

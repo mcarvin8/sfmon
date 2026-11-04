@@ -5,8 +5,6 @@ import io
 from collections import defaultdict
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 
 def make_csv_reader(headers, rows):
     """Build a csv.DictReader from lists."""

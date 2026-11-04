@@ -1,11 +1,10 @@
 """Unit tests for slack_notify.py"""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 import requests
 import responses as responses_lib
-
 
 WEBHOOK_URL = "https://hooks.slack.com/services/T000/B000/XXXX"
 
@@ -157,8 +156,8 @@ class TestNotifyOpenedResolved:
 
 class TestSyncAlerts:
     def test_noop_and_no_cache_writes_when_disabled(self, monkeypatch):
-        from sfmon.slack_notify import sync_alerts
         from sfmon import alert_cache
+        from sfmon.slack_notify import sync_alerts
 
         monkeypatch.delenv("SLACK_WEBHOOK_URL", raising=False)
         sync_alerts("salesforce_limits", {"DailyApiRequests": {"title": "x"}})

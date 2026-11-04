@@ -1,7 +1,6 @@
 """Unit tests for audit/audit_trail.py – Salesforce calls are mocked."""
 
-import pytest
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 
 
 class TestBuildAuditTrailQuery:

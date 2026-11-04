@@ -14,9 +14,10 @@ Functions:
 """
 
 import os
+
 from ..logger import logger
-from .gauges import forbidden_profile_users_gauge
 from ..query import query_records_all
+from .gauges import forbidden_profile_users_gauge
 
 
 def _get_forbidden_profiles():
@@ -67,9 +68,9 @@ def monitor_forbidden_profile_assignments(sf):
         # Escape single quotes for SOQL; values from admin-configured env (B608).
         profile_list = "', '".join(p.replace("'", "''") for p in FORBIDDEN_PROD_PROFILES)
         query = f"""
-            SELECT Id, Name, Username, Profile.Name 
-            FROM User 
-            WHERE IsActive = true 
+            SELECT Id, Name, Username, Profile.Name
+            FROM User
+            WHERE IsActive = true
             AND Profile.Name IN ('{profile_list}')
         """  # nosec B608
 

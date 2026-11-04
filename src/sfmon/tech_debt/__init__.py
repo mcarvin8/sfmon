@@ -18,27 +18,27 @@ Main monitoring functions are re-exported for clean imports.
 from .code_quality import (
     apex_classes_api_version,
     apex_triggers_api_version,
-    workflow_rules_monitoring,
     apex_used_limits_monitoring,
+    workflow_rules_monitoring,
 )
+from .dashboards import dashboards_with_inactive_users
 from .permissions import (
-    unassigned_permission_sets,
+    monitor_minimal_perm_sets,
     perm_sets_limited_users,
     profile_assignment_under5,
     profile_no_active_users,
-    monitor_minimal_perm_sets,
+    unassigned_permission_sets,
 )
-from .security import security_health_check, salesforce_health_risks
-from .users import dormant_salesforce_users, dormant_portal_users
+from .pmd import monitor_pmd_code_smells
 from .queues_groups import (
-    total_queues_per_object,
+    public_groups_with_no_members,
     queues_with_no_members,
     queues_with_zero_open_cases,
-    public_groups_with_no_members,
+    total_queues_per_object,
 )
-from .dashboards import dashboards_with_inactive_users
 from .scheduled_jobs import scheduled_apex_jobs_monitoring
-from .pmd import monitor_pmd_code_smells
+from .security import salesforce_health_risks, security_health_check
+from .users import dormant_portal_users, dormant_salesforce_users
 
 __all__ = [
     # Code quality

@@ -1,9 +1,9 @@
 """Unit tests for core/overall_sf_org.py – SF and requests are mocked."""
 
-import pytest
-import responses as responses_lib
 from unittest.mock import MagicMock, patch
 
+import pytest
+import responses as responses_lib
 
 TRUST_API = "https://api.status.salesforce.com"
 
@@ -350,8 +350,9 @@ class TestGetSalesforceIncidents:
 
     @responses_lib.activate
     def test_handles_request_error(self):
-        from sfmon.core.overall_sf_org import get_salesforce_incidents
         import requests as req_lib
+
+        from sfmon.core.overall_sf_org import get_salesforce_incidents
 
         responses_lib.add(
             responses_lib.GET,
@@ -442,8 +443,9 @@ class TestGetSalesforceIncidents:
 
     @responses_lib.activate
     def test_request_error_does_not_sync_alerts(self):
-        from sfmon.core.overall_sf_org import get_salesforce_incidents
         import requests as req_lib
+
+        from sfmon.core.overall_sf_org import get_salesforce_incidents
 
         responses_lib.add(
             responses_lib.GET,
@@ -651,6 +653,7 @@ class TestGetSalesforceInstance:
 
     def test_handles_requests_exception(self, mock_sf):
         import requests
+
         from sfmon.core.overall_sf_org import get_salesforce_instance
 
         with patch(
@@ -685,8 +688,9 @@ class TestGetSalesforceIncidentsEdgeCases:
 class TestGetSalesforceMaintenancesRequestError:
     @responses_lib.activate
     def test_handles_request_error(self):
-        from sfmon.core.overall_sf_org import get_salesforce_maintenances
         import requests as req_lib
+
+        from sfmon.core.overall_sf_org import get_salesforce_maintenances
 
         responses_lib.add(
             responses_lib.GET,

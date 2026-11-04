@@ -1,7 +1,5 @@
 """Unit tests for audit/user_login.py"""
 
-import pytest
-import requests
 from unittest.mock import MagicMock, patch
 
 

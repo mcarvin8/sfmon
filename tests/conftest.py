@@ -1,7 +1,8 @@
 """Shared fixtures for sfmon unit tests."""
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 
 @pytest.fixture(autouse=True)

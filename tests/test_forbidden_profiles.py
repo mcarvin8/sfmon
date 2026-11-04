@@ -1,7 +1,6 @@
 """Unit tests for audit/forbidden_profiles.py"""
 
 import os
-import pytest
 from unittest.mock import MagicMock, patch
 
 
@@ -10,6 +9,7 @@ class TestGetForbiddenProfiles:
         with patch.dict(os.environ, {"FORBIDDEN_PROD_PROFILES": ""}):
             # reload to pick up env var at module level
             import importlib
+
             import sfmon.audit.forbidden_profiles as fp
 
             importlib.reload(fp)
@@ -18,7 +18,6 @@ class TestGetForbiddenProfiles:
 
     def test_parses_comma_separated_values(self):
         with patch.dict(os.environ, {"FORBIDDEN_PROD_PROFILES": "AdminProfile, DevProfile"}):
-            import importlib
             import sfmon.audit.forbidden_profiles as fp
 
             result = fp._get_forbidden_profiles()

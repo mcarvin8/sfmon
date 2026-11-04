@@ -1,6 +1,5 @@
 """Unit tests for tech_debt/scheduled_jobs.py"""
 
-import pytest
 from unittest.mock import MagicMock, patch
 
 

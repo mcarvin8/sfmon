@@ -22,9 +22,9 @@ Functions:
 import os
 
 from ..logger import logger
+from ..query import query_records_all
 from ..slack_notify import sync_alerts
 from .gauges import apex_flex_queue
-from ..query import query_records_all
 
 FLEX_QUEUE_LIMIT = int(os.getenv("FLEX_QUEUE_LIMIT", 100))
 FLEX_QUEUE_ALERT_THRESHOLD_PERCENT = float(os.getenv("FLEX_QUEUE_ALERT_THRESHOLD_PERCENT", 80))

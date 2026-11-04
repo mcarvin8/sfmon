@@ -1,7 +1,6 @@
 """Unit tests for tech_debt/pmd.py"""
 
 import os
-import pytest
 from unittest.mock import MagicMock, patch
 
 
@@ -384,8 +383,9 @@ class TestPmdZeroViolationsForMissingRule:
 
 class TestPmdExceptionBranches:
     def test_handles_file_not_found_during_report_parse(self, mock_sf, tmp_path):
-        from sfmon.tech_debt.pmd import monitor_pmd_code_smells
         import xml.etree.ElementTree as ET
+
+        from sfmon.tech_debt.pmd import monitor_pmd_code_smells
 
         ruleset = tmp_path / "ruleset.xml"
         write_ruleset(ruleset, ["AvoidDebugStatements"])

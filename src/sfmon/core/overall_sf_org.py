@@ -29,27 +29,28 @@ Environment Variables:
 """
 
 import os
+
 import requests
 
-from ..logger import logger
 from ..constants import REQUESTS_TIMEOUT_SECONDS
+from ..logger import logger
+from ..query import query_records_all
 from ..slack_notify import sync_alerts
 from .gauges import (
     api_usage_percentage_gauge,
     incident_gauge,
+    maintenance_gauge,
+    percent_permissionset_used_gauge,
+    percent_usage_based_entitlements_used_gauge,
+    percent_user_licenses_used_gauge,
     total_permissionset_licenses_gauge,
     total_usage_based_entitlements_licenses_gauge,
     total_user_licenses_gauge,
     used_permissionset_licenses_gauge,
     used_usage_based_entitlements_licenses_gauge,
     used_user_licenses_gauge,
-    percent_permissionset_used_gauge,
-    percent_usage_based_entitlements_used_gauge,
-    percent_user_licenses_used_gauge,
-    maintenance_gauge,
 )
 from .limits import salesforce_limits_descriptions
-from ..query import query_records_all
 
 # Salesforce Trust Status API base URL
 SALESFORCE_STATUS_API_URL = os.getenv(

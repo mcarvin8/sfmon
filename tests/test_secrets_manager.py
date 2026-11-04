@@ -1,8 +1,8 @@
 """Unit tests for secrets_manager.py – boto3 client is mocked, no live AWS call."""
 
-import pytest
 from unittest.mock import MagicMock, patch
 
+import pytest
 from botocore.exceptions import ClientError
 
 

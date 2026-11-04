@@ -1,6 +1,5 @@
 """Unit tests for audit/large_queries.py"""
 
-import pytest
 from unittest.mock import MagicMock, patch
 
 

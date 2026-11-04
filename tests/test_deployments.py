@@ -1,8 +1,9 @@
 """Unit tests for audit/deployments.py"""
 
-import pytest
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 class TestParseDatetime:
@@ -27,21 +28,21 @@ class TestCalculateMinutesDifference:
     def test_calculates_minutes(self):
         from sfmon.audit.deployments import calculate_minutes_difference
 
-        start = datetime(2024, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
-        end = datetime(2024, 1, 1, 10, 30, 0, tzinfo=timezone.utc)
+        start = datetime(2024, 1, 1, 10, 0, 0, tzinfo=UTC)
+        end = datetime(2024, 1, 1, 10, 30, 0, tzinfo=UTC)
         result = calculate_minutes_difference(start, end)
         assert result == pytest.approx(30.0)
 
     def test_returns_zero_when_start_is_none(self):
         from sfmon.audit.deployments import calculate_minutes_difference
 
-        end = datetime(2024, 1, 1, 10, 30, 0, tzinfo=timezone.utc)
+        end = datetime(2024, 1, 1, 10, 30, 0, tzinfo=UTC)
         assert calculate_minutes_difference(None, end) == 0.0
 
     def test_returns_zero_when_end_is_none(self):
         from sfmon.audit.deployments import calculate_minutes_difference
 
-        start = datetime(2024, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
+        start = datetime(2024, 1, 1, 10, 0, 0, tzinfo=UTC)
         assert calculate_minutes_difference(start, None) == 0.0
 
     def test_returns_zero_when_both_none(self):

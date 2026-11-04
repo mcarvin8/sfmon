@@ -1,8 +1,8 @@
 """Unit tests for ops/apex_jobs.py – parse_logs and Salesforce calls are mocked."""
 
-import pytest
-import pandas as pd
 from unittest.mock import MagicMock, patch
+
+import pandas as pd
 
 
 class TestAsyncApexJobStatus:
@@ -469,6 +469,7 @@ class TestExposeConcurrentErrorsExceptions:
 
     def test_avg_runtime_handles_key_error(self):
         import pandas as pd
+
         from sfmon.ops.apex_jobs import expose_concurrent_errors_metrics_sorted_by_average_runtime
 
         # Pass DataFrame missing required column
@@ -481,6 +482,7 @@ class TestExposeConcurrentErrorsExceptions:
 
     def test_request_count_handles_key_error(self):
         import pandas as pd
+
         from sfmon.ops.apex_jobs import expose_concurrent_errors_metrics_sorted_by_request_count
 
         df = pd.DataFrame({"ENTRY_POINT": ["EP1"], "MISSING": [1.0]})
@@ -490,6 +492,7 @@ class TestExposeConcurrentErrorsExceptions:
 
     def test_avg_runtime_handles_exception(self):
         import pandas as pd
+
         from sfmon.ops.apex_jobs import expose_concurrent_errors_metrics_sorted_by_average_runtime
 
         df = pd.DataFrame(
@@ -504,6 +507,7 @@ class TestExposeConcurrentErrorsExceptions:
 
     def test_request_count_handles_exception(self):
         import pandas as pd
+
         from sfmon.ops.apex_jobs import expose_concurrent_errors_metrics_sorted_by_request_count
 
         df = pd.DataFrame(

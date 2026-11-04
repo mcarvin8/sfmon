@@ -207,8 +207,9 @@ class TestOrgAwareGaugeContextVar:
 
 class TestBuildMetricReaders:
     def test_only_prometheus_reader_when_otlp_unset(self):
-        from sfmon.org_gauge import _build_metric_readers
         from opentelemetry.exporter.prometheus import PrometheusMetricReader
+
+        from sfmon.org_gauge import _build_metric_readers
 
         env = {k: v for k, v in os.environ.items() if k != "OTEL_EXPORTER_OTLP_ENDPOINT"}
         with patch.dict(os.environ, env, clear=True):
@@ -342,13 +343,13 @@ class TestGaugeTransaction:
 
     def test_changes_applied_when_run_raises(self):
         import pytest
+
         from sfmon.org_gauge import gauge_transaction
 
         gauge = make_gauge("g_tx_7", "doc", ["foo"])
-        with pytest.raises(RuntimeError):
-            with gauge_transaction():
-                gauge.labels(foo="a", org="prod").set(1)
-                raise RuntimeError("boom")
+        with pytest.raises(RuntimeError), gauge_transaction():
+            gauge.labels(foo="a", org="prod").set(1)
+            raise RuntimeError("boom")
         assert _series(gauge) == {("prod", "a"): 1.0}
 
     def test_nested_transaction_joins_outer(self):

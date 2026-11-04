@@ -11,7 +11,6 @@ from botocore.exceptions import ClientError
 
 from .logger import logger
 
-
 _client = None
 
 

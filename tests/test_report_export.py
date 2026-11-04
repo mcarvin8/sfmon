@@ -1,6 +1,5 @@
 """Unit tests for audit/report_export.py"""
 
-import pytest
 from unittest.mock import MagicMock, patch
 
 

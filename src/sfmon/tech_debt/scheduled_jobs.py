@@ -11,8 +11,8 @@ Data Sources:
 """
 
 from ..logger import logger
-from .gauges import scheduled_apex_jobs_gauge
 from ..query import query_records_all
+from .gauges import scheduled_apex_jobs_gauge
 
 
 def scheduled_apex_jobs_monitoring(sf):

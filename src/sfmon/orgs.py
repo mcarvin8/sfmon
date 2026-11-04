@@ -18,8 +18,8 @@ import os
 import re
 import threading
 
-from .logger import logger
 from .connection_sf import get_salesforce_connection_url
+from .logger import logger
 
 SUPPORTED_SECRETS_BACKENDS = {"aws"}
 

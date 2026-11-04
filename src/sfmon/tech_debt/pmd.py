@@ -4,8 +4,8 @@ from collections import defaultdict
 
 from ..logger import logger
 from .gauges import (
-    pmd_code_smells_gauge,
     pmd_apex_violations_gauge,
+    pmd_code_smells_gauge,
 )
 
 

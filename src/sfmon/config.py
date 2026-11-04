@@ -68,6 +68,7 @@ Preset Structure (alternative to a full schedules block):
 import json
 import os
 import re
+
 from .logger import logger
 
 # Default config file path
@@ -165,7 +166,7 @@ def load_config(force_reload=False):
         return _cached_config
 
     try:
-        with open(config_file_path, "r", encoding="utf-8") as f:
+        with open(config_file_path, encoding="utf-8") as f:
             config = json.load(f)
 
         # Validate and merge with defaults
@@ -280,7 +281,7 @@ def _parse_five_part_cron(schedule_str):
         return None
     result = {}
     keys = ("minute", "hour", "day", "month", "day_of_week")
-    for key, value in zip(keys, parts):
+    for key, value in zip(keys, parts, strict=False):
         if value != "*":
             result[key] = value
     return result if result else None

@@ -56,11 +56,11 @@ Exit Codes:
     1: Metadata directory not found or other error
 """
 
-import os
-import json
 import argparse
+import json
+import os
 import xml.etree.ElementTree as ET
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -150,7 +150,7 @@ def analyze_permission_sets(metadata_dir, threshold=5):
     minimal_permission_sets.sort(key=lambda x: x["name"].lower())
 
     return {
-        "scan_date": datetime.now(timezone.utc).isoformat(),
+        "scan_date": datetime.now(UTC).isoformat(),
         "total_permission_sets": total_count,
         "threshold": threshold,
         "minimal_permission_sets": minimal_permission_sets,
@@ -184,7 +184,7 @@ def main():
 
     # Validate threshold
     if args.threshold < 0:
-        print(f"Error: Threshold must be a non-negative number")
+        print("Error: Threshold must be a non-negative number")
         return 1
 
     # Check if metadata directory exists
@@ -212,7 +212,7 @@ def main():
     error_count = results["error_count"]
     threshold = results["threshold"]
 
-    print(f"\n=== ANALYSIS COMPLETE ===")
+    print("\n=== ANALYSIS COMPLETE ===")
     print(f"Total permission sets: {total_count}")
     print(f"Minimal permission sets (<= {threshold} permissions): {minimal_cnt}")
     print(
@@ -223,7 +223,7 @@ def main():
 
     # Show breakdown by permission count
     if minimal_cnt > 0:
-        print(f"\n=== BREAKDOWN BY PERMISSION COUNT ===")
+        print("\n=== BREAKDOWN BY PERMISSION COUNT ===")
         count_breakdown = {}
         for perm_set in results["minimal_permission_sets"]:
             count = perm_set["permission_count"]

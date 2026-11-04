@@ -39,8 +39,8 @@ from ..logger import logger
 from ..query import tooling_query_records_all
 from .gauges import (
     deployment_details_gauge,
-    pending_time_gauge,
     deployment_time_gauge,
+    pending_time_gauge,
     validation_details_gauge,
     validation_pending_time_gauge,
     validation_time_gauge,

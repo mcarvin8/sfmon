@@ -211,7 +211,7 @@ class OrgAwareGauge:
 
     def labels(self, *args, **kwargs):
         if args:
-            for label_name, value in zip(self._original_labelnames, args):
+            for label_name, value in zip(self._original_labelnames, args, strict=False):
                 kwargs[label_name] = value
         kwargs.setdefault("org", self._org())
         key = tuple(sorted((k, str(v)) for k, v in kwargs.items()))

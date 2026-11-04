@@ -1,6 +1,5 @@
 """Unit tests for tech_debt/users.py – Salesforce calls are mocked."""
 
-import pytest
 from unittest.mock import MagicMock, patch
 
 

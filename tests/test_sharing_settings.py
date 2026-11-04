@@ -1,6 +1,5 @@
 """Unit tests for audit/sharing_settings.py"""
 
-import pytest
 from unittest.mock import MagicMock, patch
 
 

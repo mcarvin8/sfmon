@@ -16,10 +16,10 @@ Functions:
 """
 
 from ..constants import ALLOWED_SECTIONS_ACTIONS
-from .utils import categorize_user_group
 from ..logger import logger
-from .gauges import suspicious_records_gauge
 from ..query import query_records_all
+from .gauges import suspicious_records_gauge
+from .utils import categorize_user_group
 
 
 def build_audit_trail_query():
@@ -29,9 +29,9 @@ def build_audit_trail_query():
     by user_group in Grafana dashboards.
     """
     return """
-        SELECT Action, Section, CreatedById, CreatedBy.Name, 
-               CreatedDate, Display, DelegateUser 
-        FROM SetupAuditTrail 
+        SELECT Action, Section, CreatedById, CreatedBy.Name,
+               CreatedDate, Display, DelegateUser
+        FROM SetupAuditTrail
         WHERE CreatedDate=YESTERDAY
         AND CreatedBy.Username != NULL
         ORDER BY CreatedDate DESC

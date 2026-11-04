@@ -38,7 +38,6 @@ startup so a typo stops the container instead of silently dropping a metric.
 
 import re
 from dataclasses import dataclass, field
-from typing import Optional
 
 from apscheduler.triggers.cron import CronTrigger
 
@@ -82,12 +81,12 @@ class CustomMetric:
 
     name: str
     query: str
-    schedule: Optional[dict]  # None means disabled
+    schedule: dict | None  # None means disabled
     description: str = ""
-    value_field: Optional[str] = None
+    value_field: str | None = None
     labels: dict = field(default_factory=dict)
     api: str = "rest"
-    orgs: Optional[tuple] = None
+    orgs: tuple | None = None
     max_series: int = DEFAULT_MAX_SERIES
 
     @property

@@ -22,15 +22,15 @@ import json
 import os
 
 from ..logger import logger
+from ..query import query_records_all
 from .gauges import (
-    unused_permissionsets,
-    limited_permissionsets,
     five_or_less_profile_assignees,
-    unassigned_profiles,
+    limited_permissionsets,
     minimal_permission_sets_gauge,
     minimal_permission_sets_percentage_gauge,
+    unassigned_profiles,
+    unused_permissionsets,
 )
-from ..query import query_records_all
 
 # Thresholds for flagging permission sets and profiles
 PERMSET_LIMITED_USERS_THRESHOLD = int(os.getenv("PERMSET_LIMITED_USERS_THRESHOLD", 10))
@@ -87,7 +87,7 @@ def perm_sets_limited_users(sf):
             SELECT PermissionSetId
             FROM PermissionSetGroupComponent
         )
-        AND PermissionSet.NamespacePrefix = NULL  
+        AND PermissionSet.NamespacePrefix = NULL
         GROUP BY PermissionSet.Id, PermissionSet.Name
         HAVING COUNT(Id) <= {PERMSET_LIMITED_USERS_THRESHOLD}
         """  # nosec B608
@@ -193,7 +193,7 @@ def monitor_minimal_perm_sets(_sf):
         # Note: percentage gauge has no labels, so we don't clear it - we just set it
 
         # Read and parse the JSON report
-        with open(report_file_path, "r", encoding="utf-8") as f:
+        with open(report_file_path, encoding="utf-8") as f:
             report_data = json.load(f)
 
         # Expected JSON structure:

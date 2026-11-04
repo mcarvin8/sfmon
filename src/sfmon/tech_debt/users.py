@@ -15,11 +15,11 @@ Data Sources:
 import os
 
 from ..logger import logger
-from .gauges import (
-    dormant_salesforce_users_gauge,
-    dormant_portal_users_gauge,
-)
 from ..query import query_records_all
+from .gauges import (
+    dormant_portal_users_gauge,
+    dormant_salesforce_users_gauge,
+)
 
 # Number of days of inactivity to consider a user dormant
 DORMANT_USER_DAYS = int(os.getenv("DORMANT_USER_DAYS", 90))

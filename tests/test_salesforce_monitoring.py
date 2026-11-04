@@ -13,8 +13,9 @@ monitor_salesforce_limits does NOT reach the copy stored in those tuples.
 The correct seam to control success/failure per test is _run_job itself.
 """
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from simple_salesforce.exceptions import SalesforceExpiredSession
 
 from sfmon import salesforce_monitoring as sm

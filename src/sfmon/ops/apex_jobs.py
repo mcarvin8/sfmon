@@ -34,32 +34,33 @@ Performance Thresholds:
 
 import os
 
+import pandas as pd
+
+from ..log_parser import parse_logs
 from ..logger import logger
+from ..query import query_records_all
 from .gauges import (
-    async_job_status_gauge,
-    run_time_metric,
-    cpu_time_metric,
-    exec_time_metric,
-    db_total_time_metric,
-    callout_time_metric,
-    apex_exception_details_gauge,
+    apex_avg_cputime,
+    apex_avg_runtime,
+    apex_entry_point_count,
     apex_exception_category_count_gauge,
+    apex_exception_details_gauge,
+    apex_max_cputime,
+    apex_max_runtime,
+    apex_runtime_gt_5s_count,
+    apex_runtime_gt_5s_percentage,
+    apex_runtime_gt_10s_count,
+    apex_total_runtime,
+    async_job_status_gauge,
+    callout_time_metric,
+    concurrent_errors_count_gauge,
+    cpu_time_metric,
+    db_total_time_metric,
+    exec_time_metric,
+    run_time_metric,
     top_apex_concurrent_errors_sorted_by_avg_runtime,
     top_apex_concurrent_errors_sorted_by_count,
-    concurrent_errors_count_gauge,
-    apex_entry_point_count,
-    apex_avg_runtime,
-    apex_max_runtime,
-    apex_total_runtime,
-    apex_avg_cputime,
-    apex_max_cputime,
-    apex_runtime_gt_5s_count,
-    apex_runtime_gt_10s_count,
-    apex_runtime_gt_5s_percentage,
 )
-from ..log_parser import parse_logs
-import pandas as pd
-from ..query import query_records_all
 
 # Thresholds for long-running Apex requests (in milliseconds)
 LONG_RUNNING_APEX_MS = int(os.getenv("LONG_RUNNING_APEX_MS", 5000))
@@ -67,7 +68,7 @@ VERY_LONG_RUNNING_APEX_MS = int(os.getenv("VERY_LONG_RUNNING_APEX_MS", 10000))
 
 
 APEX_EXECUTION_EVENT_QUERY = """
-    SELECT Id FROM EventLogFile WHERE EventType = 'ApexExecution' and Interval = 'Hourly' 
+    SELECT Id FROM EventLogFile WHERE EventType = 'ApexExecution' and Interval = 'Hourly'
     ORDER BY LogDate DESC LIMIT 1
 """
 
@@ -78,7 +79,7 @@ def async_apex_job_status(sf):
     """
     logger.info("Getting Async Job status...")
     query = """
-        SELECT Id, Status, JobType, ApexClassId, MethodName, NumberOfErrors FROM AsyncApexJob 
+        SELECT Id, Status, JobType, ApexClassId, MethodName, NumberOfErrors FROM AsyncApexJob
         WHERE CreatedDate = TODAY
     """
     result = query_records_all(sf, query)
@@ -152,7 +153,7 @@ def expose_apex_exception_metrics(sf):
     apex_exception_category_count_gauge.clear()
 
     apex_unexpected_exception_query = """
-        SELECT Id FROM EventLogFile WHERE EventType = 'ApexUnexpectedException' and Interval = 'Hourly' 
+        SELECT Id FROM EventLogFile WHERE EventType = 'ApexUnexpectedException' and Interval = 'Hourly'
         ORDER BY LogDate DESC LIMIT 1
     """
     apex_unexpected_exception_records = list(parse_logs(sf, apex_unexpected_exception_query))
@@ -320,7 +321,7 @@ def expose_concurrent_long_running_apex_errors(sf):
     try:
         concurrent_errors_count_gauge.clear()
         log_query = """
-            SELECT Id FROM EventLogFile WHERE EventType = 'ConcurrentLongRunningApexLimit' AND Interval = 'Daily' 
+            SELECT Id FROM EventLogFile WHERE EventType = 'ConcurrentLongRunningApexLimit' AND Interval = 'Daily'
             AND LogDate = TODAY ORDER BY LogDate DESC LIMIT 1
         """
 

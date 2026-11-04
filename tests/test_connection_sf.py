@@ -1,8 +1,8 @@
 """Unit tests for connection_sf.py – requests is mocked, no sf CLI involved."""
 
-import pytest
 from unittest.mock import MagicMock, patch
 
+import pytest
 import requests
 
 VERSIONS_RESPONSE = [

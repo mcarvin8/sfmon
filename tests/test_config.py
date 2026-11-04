@@ -1,9 +1,8 @@
 """Unit tests for config.py."""
 
 import json
-import os
-import pytest
 
+import pytest
 
 # ---------------------------------------------------------------------------
 # load_config
@@ -249,8 +248,9 @@ class TestLoadConfigExceptions:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text('{"schedules": {}}')
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        from sfmon import config
         from unittest.mock import patch as _patch
+
+        from sfmon import config
 
         with _patch("builtins.open", side_effect=PermissionError("no access")):
             result = config.load_config(force_reload=True)
