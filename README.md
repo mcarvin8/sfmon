@@ -49,6 +49,8 @@ The URL (`force://...`) is a long-lived credential: store it as a secret. The CL
 
 ### 2. Run SFMon
 
+Run the Docker image with the environment variables:
+
 ```bash
 docker run -d --name sfmon -p 9001:9001 \
   -e SALESFORCE_AUTH_URL="force://..." \
@@ -56,12 +58,15 @@ docker run -d --name sfmon -p 9001:9001 \
   mcarvin8/sfmon:latest
 ```
 
-`ORG_NAME` becomes the `org` label on every metric. Prefer not to use Docker? `pip install sfmon`, then:
+`ORG_NAME` becomes the `org` label on every metric.
+
+Prefer not to use Docker? Install the package, set environment variables, and run the Python module:
 
 ```bash
-export SALESFORCE_AUTH_URL="force://..."
-export ORG_NAME="production"
-sfmon
+pip install sfmon
+SALESFORCE_AUTH_URL="force://PlatformCLI::..." 
+ORG_NAME="production" 
+python3 -m sfmon.salesforce_monitoring
 ```
 
 Check it's up: `curl http://localhost:9001/metrics`
