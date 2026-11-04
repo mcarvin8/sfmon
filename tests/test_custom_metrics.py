@@ -114,9 +114,7 @@ class TestParse:
 
     def test_reports_every_error_at_once(self):
         with pytest.raises(cm.CustomMetricConfigError) as exc:
-            cm.parse_custom_metrics(
-                [entry("p_err_a", api="x"), entry("p_err_b", schedule=None)]
-            )
+            cm.parse_custom_metrics([entry("p_err_a", api="x"), entry("p_err_b", schedule=None)])
         assert "p_err_a" in str(exc.value) and "p_err_b" in str(exc.value)
 
 
@@ -159,9 +157,7 @@ class TestCollect:
                 {"attributes": {}, "status": None, "total": 1},
             ],
         }
-        metric = parse_one(
-            "c_grouped", value_field="total", labels={"status": "status"}
-        )
+        metric = parse_one("c_grouped", value_field="total", labels={"status": "status"})
         metric.collect(mock_sf)
         assert series(metric) == {
             (("status", "Draft"),): 4.0,
@@ -206,9 +202,7 @@ class TestCollect:
 
     def test_max_series_truncates(self, mock_sf):
         set_current_org("default")
-        mock_sf.query_all.return_value = {
-            "records": [{"s": str(i), "n": i} for i in range(5)]
-        }
+        mock_sf.query_all.return_value = {"records": [{"s": str(i), "n": i} for i in range(5)]}
         metric = parse_one("c_cap", value_field="n", labels={"s": "s"}, max_series=2)
         metric.collect(mock_sf)
         assert len(series(metric)) == 2
@@ -301,13 +295,17 @@ class TestRunOnceIntegration:
         write_config(
             tmp_path,
             monkeypatch,
-            {"schedules": {"get_salesforce_instance": "disabled"},
-             "custom_metrics": [entry("r_sched")]},
+            {
+                "schedules": {"get_salesforce_instance": "disabled"},
+                "custom_metrics": [entry("r_sched")],
+            },
         )
-        with patch("sfmon.orgs.build_connections", return_value={"default": MagicMock()}), \
-             patch.object(sm, "get_always_on_config", return_value=None), \
-             patch.object(sm, "get_schedule_config", return_value=None), \
-             patch.object(sm, "_run_job", return_value=True) as mock_run:
+        with (
+            patch("sfmon.orgs.build_connections", return_value={"default": MagicMock()}),
+            patch.object(sm, "get_always_on_config", return_value=None),
+            patch.object(sm, "get_schedule_config", return_value=None),
+            patch.object(sm, "_run_job", return_value=True) as mock_run,
+        ):
             assert sm.run_once() == 0
         assert [c[0][4] for c in mock_run.call_args_list] == ["custom_r_sched"]
 
@@ -318,8 +316,10 @@ class TestRunOnceIntegration:
             {"custom_metrics": [entry("r_filter", schedule="disabled", orgs=["prod"])]},
         )
         conns = {"prod": MagicMock(), "uat": MagicMock()}
-        with patch("sfmon.orgs.build_connections", return_value=conns), \
-             patch.object(sm, "_run_job", return_value=True) as mock_run:
+        with (
+            patch("sfmon.orgs.build_connections", return_value=conns),
+            patch.object(sm, "_run_job", return_value=True) as mock_run,
+        ):
             assert sm.run_once(job_filter="custom_r_filter") == 0
         assert [c[0][0] for c in mock_run.call_args_list] == ["prod"]
 
@@ -331,8 +331,10 @@ class TestRunOnceIntegration:
 
     def test_failed_custom_job_returns_1(self, tmp_path, monkeypatch):
         write_config(tmp_path, monkeypatch, {"custom_metrics": [entry("r_failed")]})
-        with patch("sfmon.orgs.build_connections", return_value={"default": MagicMock()}), \
-             patch.object(sm, "get_always_on_config", return_value=None), \
-             patch.object(sm, "get_schedule_config", return_value=None), \
-             patch.object(sm, "_run_job", return_value=False):
+        with (
+            patch("sfmon.orgs.build_connections", return_value={"default": MagicMock()}),
+            patch.object(sm, "get_always_on_config", return_value=None),
+            patch.object(sm, "get_schedule_config", return_value=None),
+            patch.object(sm, "_run_job", return_value=False),
+        ):
             assert sm.run_once() == 1

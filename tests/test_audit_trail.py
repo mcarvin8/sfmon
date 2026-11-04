@@ -1,12 +1,12 @@
 """Unit tests for audit/audit_trail.py – Salesforce calls are mocked."""
 
-import pytest
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 
 
 class TestBuildAuditTrailQuery:
     def test_query_contains_setup_audit_trail(self):
         from sfmon.audit.audit_trail import build_audit_trail_query
+
         query = build_audit_trail_query()
         assert "SetupAuditTrail" in query
         assert "YESTERDAY" in query
@@ -16,6 +16,7 @@ class TestBuildAuditTrailQuery:
 class TestExtractRecordData:
     def test_extracts_all_fields(self):
         from sfmon.audit.audit_trail import extract_record_data
+
         record = {
             "Action": "activateduser",
             "Section": "Manage Users",
@@ -34,6 +35,7 @@ class TestExtractRecordData:
 
     def test_handles_missing_created_by(self):
         from sfmon.audit.audit_trail import extract_record_data
+
         record = {
             "Action": "someAction",
             "Section": "Unknown",
@@ -44,6 +46,7 @@ class TestExtractRecordData:
 
     def test_handles_non_dict_created_by(self):
         from sfmon.audit.audit_trail import extract_record_data
+
         record = {
             "Action": "someAction",
             "Section": "Unknown",
@@ -54,6 +57,7 @@ class TestExtractRecordData:
 
     def test_missing_optional_fields_use_defaults(self):
         from sfmon.audit.audit_trail import extract_record_data
+
         result = extract_record_data({})
         assert result["action"] == "Unknown"
         assert result["section"] == "Unknown"
@@ -64,36 +68,43 @@ class TestExtractRecordData:
 class TestIsAllowedAction:
     def test_allowed_action_returns_true(self):
         from sfmon.audit.audit_trail import is_allowed_action
+
         record = {"Action": "activateduser", "Section": "Manage Users"}
         assert is_allowed_action(record) is True
 
     def test_allowed_action_case_insensitive(self):
         from sfmon.audit.audit_trail import is_allowed_action
+
         record = {"Action": "ACTIVATEDUSER", "Section": "Manage Users"}
         assert is_allowed_action(record) is True
 
     def test_unknown_action_returns_false(self):
         from sfmon.audit.audit_trail import is_allowed_action
+
         record = {"Action": "deletedEverything", "Section": "Manage Users"}
         assert is_allowed_action(record) is False
 
     def test_unknown_section_returns_false(self):
         from sfmon.audit.audit_trail import is_allowed_action
+
         record = {"Action": "anyAction", "Section": "UnknownSection"}
         assert is_allowed_action(record) is False
 
     def test_empty_section_allowed_action(self):
         from sfmon.audit.audit_trail import is_allowed_action
+
         record = {"Action": "createScratchOrg", "Section": ""}
         assert is_allowed_action(record) is True
 
     def test_empty_section_disallowed_action(self):
         from sfmon.audit.audit_trail import is_allowed_action
+
         record = {"Action": "maliciousAction", "Section": ""}
         assert is_allowed_action(record) is False
 
     def test_perm_set_assign_is_allowed(self):
         from sfmon.audit.audit_trail import is_allowed_action
+
         record = {"Action": "PermSetAssign", "Section": "Manage Users"}
         assert is_allowed_action(record) is True
 
@@ -101,6 +112,7 @@ class TestIsAllowedAction:
 class TestProcessSuspiciousRecords:
     def test_no_records_sets_zero_metric(self):
         from sfmon.audit.audit_trail import process_suspicious_records
+
         mock_gauge = MagicMock()
         with patch("sfmon.audit.audit_trail.suspicious_records_gauge", mock_gauge):
             process_suspicious_records([])
@@ -109,6 +121,7 @@ class TestProcessSuspiciousRecords:
 
     def test_allowed_record_does_not_trigger_metric(self):
         from sfmon.audit.audit_trail import process_suspicious_records
+
         records = [{"Action": "activateduser", "Section": "Manage Users"}]
         mock_gauge = MagicMock()
         with patch("sfmon.audit.audit_trail.suspicious_records_gauge", mock_gauge):
@@ -119,6 +132,7 @@ class TestProcessSuspiciousRecords:
 
     def test_suspicious_record_sets_metric_to_one(self):
         from sfmon.audit.audit_trail import process_suspicious_records
+
         records = [
             {
                 "Action": "dangerousChange",
@@ -139,8 +153,16 @@ class TestProcessSuspiciousRecords:
 class TestQuerySetupAuditTrail:
     def test_returns_records_from_sf(self, mock_sf):
         from sfmon.audit.audit_trail import query_setup_audit_trail
-        records = [{"Action": "test", "CreatedById": "001", "CreatedDate": "2024-01-01",
-                    "Display": "did something", "Section": "Manage Users"}]
+
+        records = [
+            {
+                "Action": "test",
+                "CreatedById": "001",
+                "CreatedDate": "2024-01-01",
+                "Display": "did something",
+                "Section": "Manage Users",
+            }
+        ]
         with patch("sfmon.audit.audit_trail.query_records_all", return_value=records):
             result = query_setup_audit_trail(mock_sf)
         assert result == records
@@ -149,20 +171,26 @@ class TestQuerySetupAuditTrail:
 class TestExposeSuspiciousRecords:
     def test_calls_query_and_processes(self, mock_sf):
         from sfmon.audit.audit_trail import expose_suspicious_records
+
         mock_records = [{"Action": "activateduser", "Section": "Manage Users"}]
         mock_gauge = MagicMock()
 
-        with patch("sfmon.audit.audit_trail.query_records_all", return_value=mock_records), \
-             patch("sfmon.audit.audit_trail.suspicious_records_gauge", mock_gauge):
+        with (
+            patch("sfmon.audit.audit_trail.query_records_all", return_value=mock_records),
+            patch("sfmon.audit.audit_trail.suspicious_records_gauge", mock_gauge),
+        ):
             expose_suspicious_records(mock_sf)
 
         mock_gauge.clear.assert_called_once()
 
     def test_handles_exception_gracefully(self, mock_sf):
         from sfmon.audit.audit_trail import expose_suspicious_records
+
         mock_gauge = MagicMock()
 
-        with patch("sfmon.audit.audit_trail.query_records_all", side_effect=RuntimeError("fail")), \
-             patch("sfmon.audit.audit_trail.suspicious_records_gauge", mock_gauge):
+        with (
+            patch("sfmon.audit.audit_trail.query_records_all", side_effect=RuntimeError("fail")),
+            patch("sfmon.audit.audit_trail.suspicious_records_gauge", mock_gauge),
+        ):
             # Should not raise
             expose_suspicious_records(mock_sf)

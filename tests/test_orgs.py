@@ -1,10 +1,10 @@
 """Unit tests for orgs.py - org registry and multi-org connection building."""
 
 import json
-import os
 import sys
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 
 class TestGetOrgNames:
@@ -12,6 +12,7 @@ class TestGetOrgNames:
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
         monkeypatch.setenv("ORG_NAME", "my-org")
         from sfmon import config, orgs
+
         config.load_config(force_reload=True)
         assert orgs.get_org_names() == ["my-org"]
 
@@ -19,6 +20,7 @@ class TestGetOrgNames:
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
         monkeypatch.delenv("ORG_NAME", raising=False)
         from sfmon import config, orgs
+
         config.load_config(force_reload=True)
         assert orgs.get_org_names() == ["default"]
 
@@ -28,6 +30,7 @@ class TestGetOrgNames:
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
         from sfmon import config, orgs
+
         config.load_config(force_reload=True)
         assert orgs.get_org_names() == ["prod", "sandbox-uat"]
 
@@ -36,6 +39,7 @@ class TestIsFleetMode:
     def test_false_without_orgs(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
         from sfmon import config, orgs
+
         config.load_config(force_reload=True)
         assert orgs.is_fleet_mode() is False
 
@@ -45,6 +49,7 @@ class TestIsFleetMode:
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
         from sfmon import config, orgs
+
         config.load_config(force_reload=True)
         assert orgs.is_fleet_mode() is True
 
@@ -53,6 +58,7 @@ class TestAuthUrlEnvVar:
     def test_legacy_mode_uses_plain_var(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CONFIG_FILE_PATH", str(tmp_path / "missing.json"))
         from sfmon import config, orgs
+
         config.load_config(force_reload=True)
         assert orgs.auth_url_env_var("default") == "SALESFORCE_AUTH_URL"
 
@@ -62,6 +68,7 @@ class TestAuthUrlEnvVar:
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
         from sfmon import config, orgs
+
         config.load_config(force_reload=True)
         assert orgs.auth_url_env_var("prod") == "SALESFORCE_AUTH_URL_PROD"
         assert orgs.auth_url_env_var("sandbox-uat") == "SALESFORCE_AUTH_URL_SANDBOX_UAT"
@@ -73,13 +80,20 @@ class TestBuildConnections:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        monkeypatch.setenv("SALESFORCE_AUTH_URL_PROD", "force://id:secret:token@prod.my.salesforce.com")
-        monkeypatch.setenv("SALESFORCE_AUTH_URL_SANDBOX", "force://id:secret:token@sandbox.my.salesforce.com")
+        monkeypatch.setenv(
+            "SALESFORCE_AUTH_URL_PROD", "force://id:secret:token@prod.my.salesforce.com"
+        )
+        monkeypatch.setenv(
+            "SALESFORCE_AUTH_URL_SANDBOX", "force://id:secret:token@sandbox.my.salesforce.com"
+        )
         from sfmon import config, orgs
+
         config.load_config(force_reload=True)
 
         fake_conn = object()
-        with patch("sfmon.orgs.get_salesforce_connection_url", return_value=fake_conn) as mock_connect:
+        with patch(
+            "sfmon.orgs.get_salesforce_connection_url", return_value=fake_conn
+        ) as mock_connect:
             connections = orgs.build_connections()
 
         assert connections == {"prod": fake_conn, "sandbox": fake_conn}
@@ -90,9 +104,12 @@ class TestBuildConnections:
         cfg_file = tmp_path / "config.json"
         cfg_file.write_text(json.dumps(cfg))
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
-        monkeypatch.setenv("SALESFORCE_AUTH_URL_PROD", "force://id:secret:token@prod.my.salesforce.com")
+        monkeypatch.setenv(
+            "SALESFORCE_AUTH_URL_PROD", "force://id:secret:token@prod.my.salesforce.com"
+        )
         monkeypatch.delenv("SALESFORCE_AUTH_URL_BROKEN", raising=False)
         from sfmon import config, orgs
+
         config.load_config(force_reload=True)
 
         fake_conn = object()
@@ -112,16 +129,17 @@ class TestBuildConnections:
         monkeypatch.setenv("ORG_NAME", "prod")
         monkeypatch.setenv("SALESFORCE_AUTH_URL", "force://id:secret:token@my.salesforce.com")
         from sfmon import config, orgs
+
         config.load_config(force_reload=True)
 
         fake_conn = object()
-        with patch("sfmon.orgs.get_salesforce_connection_url", return_value=fake_conn) as mock_connect:
+        with patch(
+            "sfmon.orgs.get_salesforce_connection_url", return_value=fake_conn
+        ) as mock_connect:
             connections = orgs.build_connections()
 
         assert connections == {"prod": fake_conn}
-        mock_connect.assert_called_once_with(
-            url="force://id:secret:token@my.salesforce.com"
-        )
+        mock_connect.assert_called_once_with(url="force://id:secret:token@my.salesforce.com")
 
 
 class TestResolveAuthUrl:
@@ -129,11 +147,13 @@ class TestResolveAuthUrl:
         monkeypatch.delenv("SECRETS_BACKEND", raising=False)
         monkeypatch.setenv("SALESFORCE_AUTH_URL", "force://id:secret:token@my.salesforce.com")
         from sfmon import orgs
+
         assert orgs.resolve_auth_url("default") == "force://id:secret:token@my.salesforce.com"
 
     def test_unsupported_backend_raises(self, monkeypatch):
         monkeypatch.setenv("SECRETS_BACKEND", "vault")
         from sfmon import orgs
+
         with pytest.raises(ValueError, match="Unsupported SECRETS_BACKEND 'vault'"):
             orgs.resolve_auth_url("default")
 
@@ -142,7 +162,10 @@ class TestResolveAuthUrl:
         monkeypatch.delenv("AWS_SECRETS_PREFIX", raising=False)
         monkeypatch.setenv("ORG_NAME", "prod")
         from sfmon import orgs
-        with patch("sfmon.secrets_manager.get_secret_aws", return_value="force://a:b:c@x.salesforce.com") as mock_get:
+
+        with patch(
+            "sfmon.secrets_manager.get_secret_aws", return_value="force://a:b:c@x.salesforce.com"
+        ) as mock_get:
             result = orgs.resolve_auth_url("prod")
 
         assert result == "force://a:b:c@x.salesforce.com"
@@ -156,8 +179,11 @@ class TestResolveAuthUrl:
         monkeypatch.setenv("SECRETS_BACKEND", "aws")
         monkeypatch.setenv("AWS_SECRETS_PREFIX", "sfmon/")
         from sfmon import config, orgs
+
         config.load_config(force_reload=True)
-        with patch("sfmon.secrets_manager.get_secret_aws", return_value="force://a:b:c@x.salesforce.com") as mock_get:
+        with patch(
+            "sfmon.secrets_manager.get_secret_aws", return_value="force://a:b:c@x.salesforce.com"
+        ) as mock_get:
             orgs.resolve_auth_url("prod")
 
         mock_get.assert_called_once_with("sfmon/SALESFORCE_AUTH_URL_PROD")
@@ -165,6 +191,7 @@ class TestResolveAuthUrl:
     def test_aws_backend_missing_boto3_raises_clear_error(self, monkeypatch):
         monkeypatch.setenv("SECRETS_BACKEND", "aws")
         from sfmon import orgs
+
         with patch.dict(sys.modules, {"sfmon.secrets_manager": None}):
             with pytest.raises(RuntimeError, match="requires the boto3 package"):
                 orgs.resolve_auth_url("default")
@@ -176,6 +203,7 @@ class TestResolveAuthUrl:
         monkeypatch.setenv("CONFIG_FILE_PATH", str(cfg_file))
         monkeypatch.setenv("SECRETS_BACKEND", "azure")
         from sfmon import config, orgs
+
         config.load_config(force_reload=True)
 
         connections = orgs.build_connections()
@@ -191,6 +219,7 @@ class TestConnectionRegistry:
         monkeypatch.setenv("SALESFORCE_AUTH_URL", "force://id:secret:token@my.salesforce.com")
         monkeypatch.delenv("SECRETS_BACKEND", raising=False)
         from sfmon import config, orgs
+
         config.load_config(force_reload=True)
         return orgs
 
@@ -209,7 +238,9 @@ class TestConnectionRegistry:
         with patch("sfmon.orgs.get_salesforce_connection_url", return_value=old_conn):
             orgs.build_connections()
 
-        with patch("sfmon.orgs.get_salesforce_connection_url", return_value=new_conn) as mock_connect:
+        with patch(
+            "sfmon.orgs.get_salesforce_connection_url", return_value=new_conn
+        ) as mock_connect:
             result = orgs.reconnect("prod", stale=old_conn)
 
         assert result is new_conn
@@ -234,8 +265,12 @@ class TestConnectionRegistry:
         with patch("sfmon.orgs.get_salesforce_connection_url", return_value=old_conn):
             orgs.build_connections()
 
-        with patch("sfmon.orgs.get_salesforce_connection_url", side_effect=RuntimeError("bad token")):
-            with pytest.raises(RuntimeError):
-                orgs.reconnect("prod", stale=old_conn)
+        with (
+            patch(
+                "sfmon.orgs.get_salesforce_connection_url", side_effect=RuntimeError("bad token")
+            ),
+            pytest.raises(RuntimeError),
+        ):
+            orgs.reconnect("prod", stale=old_conn)
 
         assert orgs.get_connection("prod") is old_conn

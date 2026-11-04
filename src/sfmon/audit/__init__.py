@@ -17,15 +17,15 @@ Optional grouped functions (for convenience):
 """
 
 # Re-export main functions for clean imports
-from .audit import run_hourly_audit, run_daily_audit
-from .large_queries import hourly_observe_user_querying_large_records
+from .audit import run_daily_audit, run_hourly_audit
 from .audit_trail import expose_suspicious_records
-from .sharing_settings import monitor_org_wide_sharing_settings
-from .forbidden_profiles import monitor_forbidden_profile_assignments
 from .deployments import get_deployment_status
-from .user_login import monitor_login_events, geolocation
-from .utils import get_user_name, categorize_user_group
+from .forbidden_profiles import monitor_forbidden_profile_assignments
+from .large_queries import hourly_observe_user_querying_large_records
 from .report_export import hourly_report_export_records
+from .sharing_settings import monitor_org_wide_sharing_settings
+from .user_login import geolocation, monitor_login_events
+from .utils import categorize_user_group, get_user_name
 
 __all__ = [
     # Main entry points

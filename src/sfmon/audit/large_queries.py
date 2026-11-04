@@ -17,10 +17,10 @@ Functions:
 
 import os
 
-from .utils import get_user_name
-from ..logger import logger
 from ..log_parser import parse_logs
+from ..logger import logger
 from .gauges import hourly_large_query_metric
+from .utils import get_user_name
 
 # Number of rows that constitutes a "large query"
 LARGE_QUERY_THRESHOLD = int(os.getenv("LARGE_QUERY_THRESHOLD", 10000))
@@ -44,9 +44,7 @@ def hourly_observe_user_querying_large_records(sf):
         report_large_queries(large_queries)
     # pylint: disable=broad-except
     except Exception as e:
-        logger.error(
-            "An error occurred in hourly_observe_user_querying_large_records: %s", e
-        )
+        logger.error("An error occurred in hourly_observe_user_querying_large_records: %s", e)
 
 
 def collect_large_queries(sf):

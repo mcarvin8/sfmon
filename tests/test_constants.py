@@ -1,6 +1,5 @@
 """Unit tests for constants.py."""
 
-import os
 import pytest
 
 
@@ -8,28 +7,36 @@ class TestTimeoutConstants:
     def test_default_requests_timeout(self, monkeypatch):
         monkeypatch.delenv("REQUESTS_TIMEOUT_SECONDS", raising=False)
         import importlib
+
         from sfmon import constants
+
         importlib.reload(constants)
         assert constants.REQUESTS_TIMEOUT_SECONDS == 300
 
     def test_custom_requests_timeout(self, monkeypatch):
         monkeypatch.setenv("REQUESTS_TIMEOUT_SECONDS", "60")
         import importlib
+
         from sfmon import constants
+
         importlib.reload(constants)
         assert constants.REQUESTS_TIMEOUT_SECONDS == 60
 
     def test_default_query_timeout(self, monkeypatch):
         monkeypatch.delenv("QUERY_TIMEOUT_SECONDS", raising=False)
         import importlib
+
         from sfmon import constants
+
         importlib.reload(constants)
         assert constants.QUERY_TIMEOUT_SECONDS == 30
 
     def test_custom_query_timeout(self, monkeypatch):
         monkeypatch.setenv("QUERY_TIMEOUT_SECONDS", "45")
         import importlib
+
         from sfmon import constants
+
         importlib.reload(constants)
         assert constants.QUERY_TIMEOUT_SECONDS == 45
 
@@ -37,7 +44,9 @@ class TestTimeoutConstants:
 class TestLoadExcludeUsers:
     def test_returns_empty_list_on_exception(self):
         from unittest.mock import patch
+
         from sfmon import constants
+
         with patch("sfmon.config.get_exclude_users", side_effect=RuntimeError("config error")):
             result = constants._load_exclude_users()
         assert result == []
@@ -47,6 +56,7 @@ class TestAllowedSectionsActions:
     @pytest.fixture(autouse=True)
     def _import(self):
         from sfmon import constants as c
+
         self.c = c
 
     def test_is_dict(self):

@@ -24,16 +24,16 @@ import os
 import re
 
 from ..logger import logger
+from ..query import query_records_all, tooling_query_records_all
 from ..slack_notify import sync_alerts
 from .gauges import (
-    deprecated_apex_class_gauge,
-    deprecated_apex_trigger_gauge,
-    workflow_rules_gauge,
     apex_character_limit_percentage_gauge,
     apex_class_length_without_comments_gauge,
     apex_trigger_length_without_comments_gauge,
+    deprecated_apex_class_gauge,
+    deprecated_apex_trigger_gauge,
+    workflow_rules_gauge,
 )
-from ..query import query_records_all, tooling_query_records_all
 
 # API versions at or below this threshold are considered deprecated
 DEPRECATED_API_VERSION = int(os.getenv("DEPRECATED_API_VERSION", 50))
@@ -68,14 +68,12 @@ def apex_classes_api_version(sf):
         deprecated_apex_class_gauge.clear()
 
         for record in results:
-            deprecated_apex_class_gauge.labels(
-                id=record["Id"], name=record["Name"]
-            ).set(int(record["ApiVersion"]))
+            deprecated_apex_class_gauge.labels(id=record["Id"], name=record["Name"]).set(
+                int(record["ApiVersion"])
+            )
     # pylint: disable=broad-except
     except Exception as e:
-        logger.error(
-            "Error fetching local apex classes running on outdated API versions: %s", e
-        )
+        logger.error("Error fetching local apex classes running on outdated API versions: %s", e)
 
 
 def apex_triggers_api_version(sf):
@@ -91,7 +89,7 @@ def apex_triggers_api_version(sf):
         # SOQL; DEPRECATED_API_VERSION is int from env (B608)
         query = f"""
         SELECT Id,Name,ApiVersion
-        FROM ApexTrigger 
+        FROM ApexTrigger
         WHERE NamespacePrefix = null AND ApiVersion <= {DEPRECATED_API_VERSION}
         """  # nosec B608
         results = query_records_all(sf, query)
@@ -99,14 +97,12 @@ def apex_triggers_api_version(sf):
         deprecated_apex_trigger_gauge.clear()
 
         for record in results:
-            deprecated_apex_trigger_gauge.labels(
-                id=record["Id"], name=record["Name"]
-            ).set(int(record["ApiVersion"]))
+            deprecated_apex_trigger_gauge.labels(id=record["Id"], name=record["Name"]).set(
+                int(record["ApiVersion"])
+            )
     # pylint: disable=broad-except
     except Exception as e:
-        logger.error(
-            "Error fetching local apex triggers running on outdated API versions: %s", e
-        )
+        logger.error("Error fetching local apex triggers running on outdated API versions: %s", e)
 
 
 def workflow_rules_monitoring(sf):
@@ -172,9 +168,7 @@ def apex_used_limits_monitoring(sf):
     sync_alerts() for Slack notification (no-op unless SLACK_WEBHOOK_URL is set).
     """
     try:
-        logger.info(
-            "Querying custom Apex classes and triggers for Used Limits monitoring..."
-        )
+        logger.info("Querying custom Apex classes and triggers for Used Limits monitoring...")
         classes_query = """
         SELECT Id, Name, LengthWithoutComments, Body
         FROM ApexClass

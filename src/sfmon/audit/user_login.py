@@ -34,19 +34,20 @@ Use Cases:
 """
 
 import csv
-from datetime import datetime, timedelta, timezone
-from io import StringIO
 import os
+from datetime import UTC, datetime, timedelta
+from io import StringIO
+
 import pandas as pd
 
 from ..logger import logger
+from ..query import get_event_log_file, query_records_all
 from .gauges import (
+    geolocation_gauge,
     login_failure_gauge,
     login_success_gauge,
-    geolocation_gauge,
     unique_login_attempts_gauge,
 )
-from ..query import get_event_log_file, query_records_all
 
 # Geolocation configuration
 GEOLOCATION_CHUNK_SIZE = int(os.getenv("GEOLOCATION_CHUNK_SIZE", 100))
@@ -139,10 +140,10 @@ def geolocation(sf, chunk_size=None):
     )
     try:
         geolocation_gauge.clear()
-        end_time = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        start_time = (
-            datetime.now(timezone.utc) - timedelta(hours=GEOLOCATION_LOOKBACK_HOURS)
-        ).strftime("%Y-%m-%dT%H:%M:%SZ")
+        end_time = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+        start_time = (datetime.now(UTC) - timedelta(hours=GEOLOCATION_LOOKBACK_HOURS)).strftime(
+            "%Y-%m-%dT%H:%M:%SZ"
+        )
 
         query = f"SELECT UserId, LoginGeo.Latitude, LoginGeo.Longitude, Status, Browser FROM LoginHistory WHERE LoginTime >= {start_time} AND LoginTime <= {end_time}"
         user_location = query_records_all(sf, query)

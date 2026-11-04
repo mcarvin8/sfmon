@@ -36,14 +36,13 @@ Use Cases:
     - Monitoring EPT deviation trends
 """
 
-from collections import defaultdict
 import csv
 import io
-
+from collections import defaultdict
 
 from ..logger import logger
-from .gauges import ept_metric, apt_metric
 from ..query import get_event_log_file, query_records_all
+from .gauges import apt_metric, ept_metric
 
 
 def get_salesforce_ept_and_apt(sf):
@@ -85,11 +84,11 @@ def fetch_latest_lightning_pageview_log(sf):
         dict: A single EventLogFile record, or None if not found.
     """
     query = """
-        SELECT EventType, LogDate, Id 
-        FROM EventLogFile 
-        WHERE Interval='Hourly' 
-          AND EventType = 'LightningPageView' 
-        ORDER BY LogDate DESC 
+        SELECT EventType, LogDate, Id
+        FROM EventLogFile
+        WHERE Interval='Hourly'
+          AND EventType = 'LightningPageView'
+        ORDER BY LogDate DESC
         LIMIT 1
     """
     result = query_records_all(sf, query)
@@ -173,9 +172,7 @@ def report_ept_metrics(ept_rows):
     """
     for row in ept_rows:
         ept_value = (
-            float(row["EFFECTIVE_PAGE_TIME"]) / 1000
-            if row.get("EFFECTIVE_PAGE_TIME")
-            else 0
+            float(row["EFFECTIVE_PAGE_TIME"]) / 1000 if row.get("EFFECTIVE_PAGE_TIME") else 0
         )
         ept_metric.labels(
             effective_page_time_deviation_reason=row.get(

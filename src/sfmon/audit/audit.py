@@ -19,13 +19,13 @@ Functions:
     - run_daily_audit: Executes all daily compliance checks
 """
 
-from .large_queries import hourly_observe_user_querying_large_records
-from .audit_trail import expose_suspicious_records
-from .sharing_settings import monitor_org_wide_sharing_settings
-from .forbidden_profiles import monitor_forbidden_profile_assignments
-from .deployments import get_deployment_status
-from .user_login import monitor_login_events, geolocation
 from ..logger import logger
+from .audit_trail import expose_suspicious_records
+from .deployments import get_deployment_status
+from .forbidden_profiles import monitor_forbidden_profile_assignments
+from .large_queries import hourly_observe_user_querying_large_records
+from .sharing_settings import monitor_org_wide_sharing_settings
+from .user_login import geolocation, monitor_login_events
 
 
 def run_hourly_audit(sf):

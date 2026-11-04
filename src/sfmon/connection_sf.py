@@ -30,7 +30,7 @@ def _https_url(url):
     if url.startswith("https://"):
         return url
     if url.startswith("http://"):
-        url = url[len("http://"):]
+        url = url[len("http://") :]
     return f"https://{url}"
 
 

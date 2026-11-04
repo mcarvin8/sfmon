@@ -1,11 +1,10 @@
 """Unit tests for slack_notify.py"""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 import requests
 import responses as responses_lib
-
 
 WEBHOOK_URL = "https://hooks.slack.com/services/T000/B000/XXXX"
 
@@ -58,9 +57,7 @@ class TestSendWebhook:
         from sfmon.slack_notify import _send_webhook
 
         monkeypatch.setenv("SLACK_WEBHOOK_URL", WEBHOOK_URL)
-        responses_lib.add(
-            responses_lib.POST, WEBHOOK_URL, body="invalid_payload", status=400
-        )
+        responses_lib.add(responses_lib.POST, WEBHOOK_URL, body="invalid_payload", status=400)
         _send_webhook({"blocks": []})  # should not raise
 
     @responses_lib.activate
@@ -159,8 +156,8 @@ class TestNotifyOpenedResolved:
 
 class TestSyncAlerts:
     def test_noop_and_no_cache_writes_when_disabled(self, monkeypatch):
-        from sfmon.slack_notify import sync_alerts
         from sfmon import alert_cache
+        from sfmon.slack_notify import sync_alerts
 
         monkeypatch.delenv("SLACK_WEBHOOK_URL", raising=False)
         sync_alerts("salesforce_limits", {"DailyApiRequests": {"title": "x"}})
@@ -171,8 +168,10 @@ class TestSyncAlerts:
 
         monkeypatch.setenv("SLACK_WEBHOOK_URL", WEBHOOK_URL)
         monkeypatch.setattr(slack_notify, "get_current_org", lambda: "prod")
-        with patch("sfmon.slack_notify.notify_alert_opened") as mock_opened, \
-             patch("sfmon.slack_notify.notify_alert_resolved") as mock_resolved:
+        with (
+            patch("sfmon.slack_notify.notify_alert_opened") as mock_opened,
+            patch("sfmon.slack_notify.notify_alert_resolved") as mock_resolved,
+        ):
             slack_notify.sync_alerts(
                 "salesforce_limits", {"DailyApiRequests": {"title": "over limit"}}
             )
@@ -191,8 +190,10 @@ class TestSyncAlerts:
             slack_notify.sync_alerts("salesforce_limits", item)
         mock_opened.reset_mock()
 
-        with patch("sfmon.slack_notify.notify_alert_opened") as mock_opened2, \
-             patch("sfmon.slack_notify.notify_alert_resolved") as mock_resolved2:
+        with (
+            patch("sfmon.slack_notify.notify_alert_opened") as mock_opened2,
+            patch("sfmon.slack_notify.notify_alert_resolved") as mock_resolved2,
+        ):
             slack_notify.sync_alerts("salesforce_limits", item)
         mock_opened2.assert_not_called()
         mock_resolved2.assert_not_called()
@@ -207,8 +208,10 @@ class TestSyncAlerts:
                 "salesforce_limits", {"DailyApiRequests": {"title": "over limit"}}
             )
 
-        with patch("sfmon.slack_notify.notify_alert_opened") as mock_opened, \
-             patch("sfmon.slack_notify.notify_alert_resolved") as mock_resolved:
+        with (
+            patch("sfmon.slack_notify.notify_alert_opened") as mock_opened,
+            patch("sfmon.slack_notify.notify_alert_resolved") as mock_resolved,
+        ):
             slack_notify.sync_alerts("salesforce_limits", {})
         mock_opened.assert_not_called()
         mock_resolved.assert_called_once_with(

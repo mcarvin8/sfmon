@@ -29,36 +29,35 @@ Environment Variables:
 """
 
 import os
+
 import requests
 
-from ..logger import logger
 from ..constants import REQUESTS_TIMEOUT_SECONDS
+from ..logger import logger
+from ..query import query_records_all
 from ..slack_notify import sync_alerts
 from .gauges import (
     api_usage_percentage_gauge,
     incident_gauge,
+    maintenance_gauge,
+    percent_permissionset_used_gauge,
+    percent_usage_based_entitlements_used_gauge,
+    percent_user_licenses_used_gauge,
     total_permissionset_licenses_gauge,
     total_usage_based_entitlements_licenses_gauge,
     total_user_licenses_gauge,
     used_permissionset_licenses_gauge,
     used_usage_based_entitlements_licenses_gauge,
     used_user_licenses_gauge,
-    percent_permissionset_used_gauge,
-    percent_usage_based_entitlements_used_gauge,
-    percent_user_licenses_used_gauge,
-    maintenance_gauge,
 )
 from .limits import salesforce_limits_descriptions
-from ..query import query_records_all
 
 # Salesforce Trust Status API base URL
 SALESFORCE_STATUS_API_URL = os.getenv(
     "SALESFORCE_STATUS_API_URL", "https://api.status.salesforce.com"
 )
 LIMIT_ALERT_THRESHOLD_PERCENT = float(os.getenv("LIMIT_ALERT_THRESHOLD_PERCENT", 80))
-LICENSE_ALERT_THRESHOLD_PERCENT = float(
-    os.getenv("LICENSE_ALERT_THRESHOLD_PERCENT", 90)
-)
+LICENSE_ALERT_THRESHOLD_PERCENT = float(os.getenv("LICENSE_ALERT_THRESHOLD_PERCENT", 90))
 
 
 def monitor_salesforce_limits(sf):
@@ -94,8 +93,7 @@ def monitor_salesforce_limits(sf):
                     breached_limits[limit_name] = {
                         "title": f"{limit_name} at {usage_percentage:.1f}% of limit",
                         "message": (
-                            f"{description} Used {used}/{max_limit} "
-                            f"({usage_percentage:.1f}%)."
+                            f"{description} Used {used}/{max_limit} ({usage_percentage:.1f}%)."
                         ),
                         "severity": "critical" if usage_percentage >= 95 else "warning",
                     }
@@ -136,9 +134,7 @@ def get_salesforce_licenses(sf):
         total_user_licenses_gauge.labels(license_name=license_name, status=status).set(
             total_licenses
         )
-        used_user_licenses_gauge.labels(license_name=license_name, status=status).set(
-            used_licenses
-        )
+        used_user_licenses_gauge.labels(license_name=license_name, status=status).set(used_licenses)
 
         if total_licenses != 0:
             percent_used = (used_licenses / total_licenses) * 100
@@ -170,12 +166,12 @@ def get_salesforce_licenses(sf):
         used_licenses = dict(entry)["UsedLicenses"]
         expiration_date = dict(entry)["ExpirationDate"]
 
-        total_permissionset_licenses_gauge.labels(
-            license_name=license_name, status=status
-        ).set(total_licenses)
-        used_permissionset_licenses_gauge.labels(
-            license_name=license_name, status=status
-        ).set(used_licenses)
+        total_permissionset_licenses_gauge.labels(license_name=license_name, status=status).set(
+            total_licenses
+        )
+        used_permissionset_licenses_gauge.labels(license_name=license_name, status=status).set(
+            used_licenses
+        )
 
         if total_licenses != 0:
             percent_used = (used_licenses / total_licenses) * 100
@@ -190,8 +186,7 @@ def get_salesforce_licenses(sf):
             if percent_used >= LICENSE_ALERT_THRESHOLD_PERCENT:
                 breached_licenses[f"permset_license:{license_name}"] = {
                     "title": (
-                        f"Permission set license '{license_name}' at "
-                        f"{percent_used:.1f}% used"
+                        f"Permission set license '{license_name}' at {percent_used:.1f}% used"
                     ),
                     "message": (
                         f"Used {used_licenses}/{total_licenses} "
@@ -211,13 +206,13 @@ def get_salesforce_licenses(sf):
         used_licenses = dict(entry)["AmountUsed"]
         expiration_date = dict(entry)["EndDate"]
 
-        total_usage_based_entitlements_licenses_gauge.labels(
-            license_name=license_name
-        ).set(total_licenses)
+        total_usage_based_entitlements_licenses_gauge.labels(license_name=license_name).set(
+            total_licenses
+        )
         if used_licenses:
-            used_usage_based_entitlements_licenses_gauge.labels(
-                license_name=license_name
-            ).set(used_licenses)
+            used_usage_based_entitlements_licenses_gauge.labels(license_name=license_name).set(
+                used_licenses
+            )
 
         if total_licenses != 0 and used_licenses is not None:
             percent_used = (used_licenses / total_licenses) * 100
@@ -231,8 +226,7 @@ def get_salesforce_licenses(sf):
             if percent_used >= LICENSE_ALERT_THRESHOLD_PERCENT:
                 breached_licenses[f"usage_entitlement:{license_name}"] = {
                     "title": (
-                        f"Usage-based entitlement '{license_name}' at "
-                        f"{percent_used:.1f}% used"
+                        f"Usage-based entitlement '{license_name}' at {percent_used:.1f}% used"
                     ),
                     "message": (
                         f"Used {used_licenses}/{total_licenses} "
@@ -292,10 +286,7 @@ def get_salesforce_incidents(org, instancepod):
                 incident_id = element.get("id", "unknown")
                 severity = element["IncidentImpacts"][0].get("severity", "unknown")
                 pods = (
-                    str(element["instanceKeys"])
-                    .replace("'", "")
-                    .replace("[", "")
-                    .replace("]", "")
+                    str(element["instanceKeys"]).replace("'", "").replace("[", "").replace("]", "")
                 )
 
                 if instancepod in pods:
@@ -356,9 +347,7 @@ def get_salesforce_maintenances(pod_map):
                     if str(status).lower() in ("scheduled", "in progress"):
                         pod_name = pod_map_reversed[pod]
                         maintenance_id = maintenance["id"]
-                        planned_start_time = maintenance.get(
-                            "plannedStartTime", "unknown"
-                        )
+                        planned_start_time = maintenance.get("plannedStartTime", "unknown")
                         planned_end_time = maintenance.get("plannedEndTime", "unknown")
                         maintenance_gauge.labels(
                             environment=pod_name,

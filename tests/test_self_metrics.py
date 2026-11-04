@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests as requests_lib
 
-from sfmon import self_metrics
 from sfmon import salesforce_monitoring as sm
+from sfmon import self_metrics
 from sfmon.query import query_records_all
 
 
@@ -78,6 +78,7 @@ class TestQueryErrorCounting:
 
     def test_failed_event_log_download_is_counted(self, mock_sf):
         from sfmon.query import get_event_log_file
+
         not_found = MagicMock(status_code=404, ok=False)
         self_metrics.start_job_run()
         with patch("sfmon.query.requests.get", return_value=not_found):
@@ -127,8 +128,10 @@ class TestRunJobSelfMetrics:
         func.assert_called_once()
 
     def test_run_once_exposes_self_metrics(self, capsys):
-        with patch("sfmon.orgs.build_connections", return_value={"prod": MagicMock()}), \
-             patch("sfmon.core.overall_sf_org.query_records_all", return_value=[]):
+        with (
+            patch("sfmon.orgs.build_connections", return_value={"prod": MagicMock()}),
+            patch("sfmon.core.overall_sf_org.query_records_all", return_value=[]),
+        ):
             sm.run_once(job_filter="monitor_salesforce_limits")
 
         out = capsys.readouterr().out

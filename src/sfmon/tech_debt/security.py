@@ -11,11 +11,11 @@ Data Sources:
 """
 
 from ..logger import logger
-from .gauges import (
-    security_health_check_gauge,
-    salesforce_health_risks_gauge,
-)
 from ..query import tooling_query_records_all
+from .gauges import (
+    salesforce_health_risks_gauge,
+    security_health_check_gauge,
+)
 
 
 def security_health_check(sf):
@@ -57,8 +57,8 @@ def salesforce_health_risks(sf):
     """
     try:
         logger.info("Querying Salesforce Security Health Check Risks...")
-        query = """Select Id, OrgValue, RiskType, Setting, SettingGroup, 
-                   SettingRiskCategory, StandardValue, StandardValueRaw 
+        query = """Select Id, OrgValue, RiskType, Setting, SettingGroup,
+                   SettingRiskCategory, StandardValue, StandardValueRaw
                    from SecurityHealthCheckRisks"""
         results = tooling_query_records_all(sf, query)
 
@@ -70,9 +70,7 @@ def salesforce_health_risks(sf):
             standard_value = record.get("StandardValue", "")
 
             # Compare OrgValue and StandardValue to determine compliance status
-            compliance_status = (
-                "match" if str(org_value) == str(standard_value) else "mismatch"
-            )
+            compliance_status = "match" if str(org_value) == str(standard_value) else "mismatch"
 
             salesforce_health_risks_gauge.labels(
                 org_value=org_value,

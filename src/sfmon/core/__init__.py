@@ -6,9 +6,9 @@ explicitly disabled by setting the job id to "disabled" in the config schedules 
 """
 
 from .overall_sf_org import (
-    monitor_salesforce_limits,
-    get_salesforce_licenses,
     get_salesforce_instance,
+    get_salesforce_licenses,
+    monitor_salesforce_limits,
 )
 
 __all__ = [

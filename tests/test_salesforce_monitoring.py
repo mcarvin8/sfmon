@@ -13,8 +13,9 @@ monitor_salesforce_limits does NOT reach the copy stored in those tuples.
 The correct seam to control success/failure per test is _run_job itself.
 """
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from simple_salesforce.exceptions import SalesforceExpiredSession
 
 from sfmon import salesforce_monitoring as sm
@@ -49,17 +50,17 @@ class TestRunJob:
 
     def test_expired_session_reconnects_org_for_next_run(self):
         stale_sf = MagicMock()
-        func = MagicMock(side_effect=SalesforceExpiredSession(
-            "https://example.com", 401, "Expired", "EXPIRED"
-        ))
+        func = MagicMock(
+            side_effect=SalesforceExpiredSession("https://example.com", 401, "Expired", "EXPIRED")
+        )
         with patch("sfmon.orgs.reconnect") as mock_reconnect:
             assert sm._run_job("prod", stale_sf, func, "Test Job", "test_job") is False
         mock_reconnect.assert_called_once_with("prod", stale=stale_sf)
 
     def test_expired_session_reconnect_failure_is_logged_not_raised(self):
-        func = MagicMock(side_effect=SalesforceExpiredSession(
-            "https://example.com", 401, "Expired", "EXPIRED"
-        ))
+        func = MagicMock(
+            side_effect=SalesforceExpiredSession("https://example.com", 401, "Expired", "EXPIRED")
+        )
         with patch("sfmon.orgs.reconnect", side_effect=RuntimeError("bad token")):
             assert sm._run_job("prod", MagicMock(), func, "Test Job", "test_job") is False
 
@@ -78,10 +79,12 @@ class TestRunOnce:
 
     def test_job_filter_forces_run_regardless_of_config(self):
         fake_sf = MagicMock()
-        with patch("sfmon.orgs.build_connections", return_value={"default": fake_sf}), \
-             patch.object(sm, "get_always_on_config", return_value=None), \
-             patch.object(sm, "get_schedule_config", return_value=None), \
-             patch.object(sm, "_run_job", return_value=True) as mock_run:
+        with (
+            patch("sfmon.orgs.build_connections", return_value={"default": fake_sf}),
+            patch.object(sm, "get_always_on_config", return_value=None),
+            patch.object(sm, "get_schedule_config", return_value=None),
+            patch.object(sm, "_run_job", return_value=True) as mock_run,
+        ):
             code = sm.run_once(job_filter="monitor_salesforce_limits")
 
         assert code == 0
@@ -99,10 +102,12 @@ class TestRunOnce:
         def scheduled_side_effect(job_id, default_schedule, org_name=None):
             return default_schedule if job_id == "monitor_apex_flex_queue" else None
 
-        with patch("sfmon.orgs.build_connections", return_value={"default": fake_sf}), \
-             patch.object(sm, "get_always_on_config", side_effect=always_on_side_effect), \
-             patch.object(sm, "get_schedule_config", side_effect=scheduled_side_effect), \
-             patch.object(sm, "_run_job", return_value=True) as mock_run:
+        with (
+            patch("sfmon.orgs.build_connections", return_value={"default": fake_sf}),
+            patch.object(sm, "get_always_on_config", side_effect=always_on_side_effect),
+            patch.object(sm, "get_schedule_config", side_effect=scheduled_side_effect),
+            patch.object(sm, "_run_job", return_value=True) as mock_run,
+        ):
             code = sm.run_once()
 
         assert code == 0
@@ -111,8 +116,10 @@ class TestRunOnce:
 
     def test_runs_once_per_org_in_fleet_mode(self):
         connections = {"prod": MagicMock(), "sandbox": MagicMock()}
-        with patch("sfmon.orgs.build_connections", return_value=connections), \
-             patch.object(sm, "_run_job", return_value=True) as mock_run:
+        with (
+            patch("sfmon.orgs.build_connections", return_value=connections),
+            patch.object(sm, "_run_job", return_value=True) as mock_run,
+        ):
             sm.run_once(job_filter="monitor_salesforce_limits")
 
         org_names = {call.args[0] for call in mock_run.call_args_list}
@@ -120,15 +127,19 @@ class TestRunOnce:
 
     def test_any_failure_returns_exit_code_1(self):
         fake_sf = MagicMock()
-        with patch("sfmon.orgs.build_connections", return_value={"default": fake_sf}), \
-             patch.object(sm, "_run_job", return_value=False):
+        with (
+            patch("sfmon.orgs.build_connections", return_value={"default": fake_sf}),
+            patch.object(sm, "_run_job", return_value=False),
+        ):
             code = sm.run_once(job_filter="monitor_salesforce_limits")
         assert code == 1
 
     def test_prints_prometheus_exposition_text_to_stdout(self, capsys):
         fake_sf = MagicMock()
-        with patch("sfmon.orgs.build_connections", return_value={"default": fake_sf}), \
-             patch.object(sm, "_run_job", return_value=True):
+        with (
+            patch("sfmon.orgs.build_connections", return_value={"default": fake_sf}),
+            patch.object(sm, "_run_job", return_value=True),
+        ):
             sm.run_once(job_filter="monitor_salesforce_limits")
 
         captured = capsys.readouterr()
@@ -139,8 +150,10 @@ class TestRunOnce:
 class TestMainCliDispatch:
     def test_job_without_once_exits_2_without_running(self, monkeypatch):
         monkeypatch.setattr("sys.argv", ["sfmon", "--job", "monitor_salesforce_limits"])
-        with patch.object(sm, "run_once") as mock_run_once, \
-             patch("sfmon.orgs.build_connections") as mock_build:
+        with (
+            patch.object(sm, "run_once") as mock_run_once,
+            patch("sfmon.orgs.build_connections") as mock_build,
+        ):
             with pytest.raises(SystemExit) as exc_info:
                 sm.main()
 

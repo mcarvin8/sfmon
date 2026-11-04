@@ -22,14 +22,12 @@ Functions:
 import os
 
 from ..logger import logger
+from ..query import query_records_all
 from ..slack_notify import sync_alerts
 from .gauges import apex_flex_queue
-from ..query import query_records_all
 
 FLEX_QUEUE_LIMIT = int(os.getenv("FLEX_QUEUE_LIMIT", 100))
-FLEX_QUEUE_ALERT_THRESHOLD_PERCENT = float(
-    os.getenv("FLEX_QUEUE_ALERT_THRESHOLD_PERCENT", 80)
-)
+FLEX_QUEUE_ALERT_THRESHOLD_PERCENT = float(os.getenv("FLEX_QUEUE_ALERT_THRESHOLD_PERCENT", 80))
 
 
 def monitor_apex_flex_queue(sf):
@@ -52,9 +50,7 @@ def monitor_apex_flex_queue(sf):
 
         if results:
             for record in results:
-                apex_flex_queue.labels(
-                    id=record["Id"], apex_class_id=record["ApexClassId"]
-                ).set(1)
+                apex_flex_queue.labels(id=record["Id"], apex_class_id=record["ApexClassId"]).set(1)
         else:
             # Emit a 0-valued series when no records are found
             apex_flex_queue.labels(id="none", apex_class_id="none").set(0)

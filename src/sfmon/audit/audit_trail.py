@@ -16,10 +16,10 @@ Functions:
 """
 
 from ..constants import ALLOWED_SECTIONS_ACTIONS
-from .utils import categorize_user_group
 from ..logger import logger
-from .gauges import suspicious_records_gauge
 from ..query import query_records_all
+from .gauges import suspicious_records_gauge
+from .utils import categorize_user_group
 
 
 def build_audit_trail_query():
@@ -29,9 +29,9 @@ def build_audit_trail_query():
     by user_group in Grafana dashboards.
     """
     return """
-        SELECT Action, Section, CreatedById, CreatedBy.Name, 
-               CreatedDate, Display, DelegateUser 
-        FROM SetupAuditTrail 
+        SELECT Action, Section, CreatedById, CreatedBy.Name,
+               CreatedDate, Display, DelegateUser
+        FROM SetupAuditTrail
         WHERE CreatedDate=YESTERDAY
         AND CreatedBy.Username != NULL
         ORDER BY CreatedDate DESC
@@ -65,9 +65,7 @@ def expose_record_metric(gauge, record_data):
         section=record_data["section"],
         user_group=record_data["user_group"],
     ).set(1)
-    logger.info(
-        "Suspicious audit trail record detected", extra={"event": record_data}
-    )
+    logger.info("Suspicious audit trail record detected", extra={"event": record_data})
 
 
 def process_suspicious_records(records):
@@ -119,9 +117,7 @@ def expose_suspicious_records(sf):
         process_suspicious_records(result)
     # pylint: disable=broad-except
     except Exception as e:
-        logger.error(
-            "An unexpected error occurred during monitoring suspicious records: %s", e
-        )
+        logger.error("An unexpected error occurred during monitoring suspicious records: %s", e)
 
 
 def query_setup_audit_trail(sf):

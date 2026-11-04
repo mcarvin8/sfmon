@@ -69,7 +69,7 @@ def load_active_items(org: str, category: str) -> dict:
     if not cache_file.exists():
         return {}
     try:
-        with open(cache_file, "r", encoding="utf-8") as f:
+        with open(cache_file, encoding="utf-8") as f:
             data = json.load(f)
         if not isinstance(data, dict):
             logger.warning("Alert cache %s did not contain a JSON object", cache_file)

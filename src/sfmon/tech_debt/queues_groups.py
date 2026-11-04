@@ -15,13 +15,13 @@ Data Sources:
 """
 
 from ..logger import logger
+from ..query import query_records_all
 from .gauges import (
-    total_queues_per_object_gauge,
+    public_groups_with_no_members_gauge,
     queues_with_no_members_gauge,
     queues_with_zero_open_cases_gauge,
-    public_groups_with_no_members_gauge,
+    total_queues_per_object_gauge,
 )
-from ..query import query_records_all
 
 
 def total_queues_per_object(sf):
@@ -42,9 +42,9 @@ def total_queues_per_object(sf):
         total_queues_per_object_gauge.clear()
 
         for record in results:
-            total_queues_per_object_gauge.labels(
-                sobject_type=record["SobjectType"]
-            ).set(int(record["expr0"]))
+            total_queues_per_object_gauge.labels(sobject_type=record["SobjectType"]).set(
+                int(record["expr0"])
+            )
 
         logger.info("Found queues for %d different object types", len(results))
     # pylint: disable=broad-except

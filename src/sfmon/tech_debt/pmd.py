@@ -4,9 +4,10 @@ from collections import defaultdict
 
 from ..logger import logger
 from .gauges import (
-    pmd_code_smells_gauge,
     pmd_apex_violations_gauge,
+    pmd_code_smells_gauge,
 )
+
 
 def monitor_pmd_code_smells(_sf):
     """
@@ -23,9 +24,7 @@ def monitor_pmd_code_smells(_sf):
     try:
         ruleset_file_path = (os.getenv("PMD_RULESET_PATH") or "").strip()
         if not ruleset_file_path or not os.path.isfile(ruleset_file_path):
-            logger.debug(
-                "Skipping PMD monitoring: PMD_RULESET_PATH missing or file not found"
-            )
+            logger.debug("Skipping PMD monitoring: PMD_RULESET_PATH missing or file not found")
             return
 
         logger.info("Monitoring PMD rule violations from XML report...")
@@ -95,7 +94,9 @@ def monitor_pmd_code_smells(_sf):
                 begin_line = violation.get("beginline", "")
                 rule_names[rule_name] += 1
                 apex_rule_lines[(apex_name, rule_name)].append(begin_line)
-                logger.debug("Found rule violation: %s in %s at line %s", rule_name, apex_name, begin_line)
+                logger.debug(
+                    "Found rule violation: %s in %s at line %s", rule_name, apex_name, begin_line
+                )
 
         # Set gauge values for each code smell type from the report
         total_violations = 0
@@ -108,9 +109,7 @@ def monitor_pmd_code_smells(_sf):
         for rule_name in expected_rules:
             if rule_name not in rule_names:
                 pmd_code_smells_gauge.labels(rule_name=rule_name).set(0)
-                logger.debug(
-                    "PMD Rule Violation - %s: 0 violations (from ruleset)", rule_name
-                )
+                logger.debug("PMD Rule Violation - %s: 0 violations (from ruleset)", rule_name)
 
         # Also set a total count gauge
         if total_violations > 0:

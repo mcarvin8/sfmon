@@ -1,13 +1,15 @@
 """Shared fixtures for sfmon unit tests."""
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 
 @pytest.fixture(autouse=True)
 def reset_config_cache():
     """Reset config module cache between tests."""
     from sfmon import config
+
     config._cached_config = None
     config._config_file_has_schedules = None
     yield
@@ -20,6 +22,7 @@ def reset_custom_metrics_cache():
     """Reset the loaded custom_metrics list between tests. Gauges stay
     cached: OTel can't unregister an instrument, so tests use unique names."""
     from sfmon import custom_metrics
+
     custom_metrics._metrics = None
     yield
     custom_metrics._metrics = None
@@ -30,6 +33,7 @@ def reset_current_org():
     """Reset the org_gauge contextvar between tests so set_current_org() calls
     in one test don't leak into the next (same interpreter thread in pytest)."""
     from sfmon import org_gauge
+
     token = org_gauge._current_org.set(None)
     yield
     org_gauge._current_org.reset(token)
@@ -48,6 +52,8 @@ def mock_sf():
 @pytest.fixture
 def sample_sf_records():
     """Factory for building mock SOQL records."""
+
     def _make(fields):
         return [dict(attributes={"type": "SObject"}, **fields)]
+
     return _make

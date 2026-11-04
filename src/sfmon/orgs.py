@@ -18,8 +18,8 @@ import os
 import re
 import threading
 
-from .logger import logger
 from .connection_sf import get_salesforce_connection_url
+from .logger import logger
 
 SUPPORTED_SECRETS_BACKENDS = {"aws"}
 
@@ -88,8 +88,7 @@ def resolve_auth_url(org_name):
         from .secrets_manager import get_secret_aws
     except ImportError as e:
         raise RuntimeError(
-            "SECRETS_BACKEND=aws requires the boto3 package. "
-            'Install with: pip install "sfmon[aws]"'
+            'SECRETS_BACKEND=aws requires the boto3 package. Install with: pip install "sfmon[aws]"'
         ) from e
 
     secret_name = os.getenv("AWS_SECRETS_PREFIX", "") + env_var
@@ -108,9 +107,7 @@ def build_connections():
     for org_name in get_org_names():
         env_var = auth_url_env_var(org_name)
         try:
-            connections[org_name] = get_salesforce_connection_url(
-                url=resolve_auth_url(org_name)
-            )
+            connections[org_name] = get_salesforce_connection_url(url=resolve_auth_url(org_name))
             logger.info("Connected to org '%s' (%s)", org_name, env_var)
         except Exception as e:
             logger.error(

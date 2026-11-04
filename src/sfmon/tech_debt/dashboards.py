@@ -9,8 +9,8 @@ Data Sources:
 """
 
 from ..logger import logger
-from .gauges import dashboards_with_inactive_users_gauge
 from ..query import query_records_all
+from .gauges import dashboards_with_inactive_users_gauge
 
 
 def dashboards_with_inactive_users(sf):
@@ -21,8 +21,8 @@ def dashboards_with_inactive_users(sf):
     try:
         logger.info("Querying dashboards with inactive running users...")
         query = """
-        SELECT Id, Title, RunningUser.Name, LastReferencedDate, RunningUser.IsActive, CreatedDate 
-        FROM Dashboard 
+        SELECT Id, Title, RunningUser.Name, LastReferencedDate, RunningUser.IsActive, CreatedDate
+        FROM Dashboard
         WHERE RunningUser.IsActive = false
         """
         results = query_records_all(sf, query)
@@ -49,9 +49,7 @@ def dashboards_with_inactive_users(sf):
                 dashboard_title=dashboard_title,
                 running_user_name=running_user_name,
                 created_date=created_date,
-                last_referenced_date=(
-                    last_referenced_date if last_referenced_date else "Never"
-                ),
+                last_referenced_date=(last_referenced_date if last_referenced_date else "Never"),
             ).set(1)
 
         logger.info(

@@ -65,9 +65,7 @@ def _send_webhook(payload: dict) -> None:
             timeout=10,
         )
         if r.status_code != 200:
-            logger.warning(
-                "Slack webhook returned %s: %s", r.status_code, (r.text or "")[:500]
-            )
+            logger.warning("Slack webhook returned %s: %s", r.status_code, (r.text or "")[:500])
     except requests.RequestException as e:
         logger.warning("Slack webhook request failed: %s", e)
 
@@ -106,9 +104,7 @@ def notify_alert_resolved(org: str, category: str, item_id: str, detail: dict) -
     """Post Slack message when a previously-active alert item disappears."""
     if not slack_webhook_enabled():
         return
-    payload = _build_payload(
-        "\U0001f7e2", "Alert resolved", org, category, item_id, detail
-    )
+    payload = _build_payload("\U0001f7e2", "Alert resolved", org, category, item_id, detail)
     _post_webhook_async(payload)
     logger.info("Slack: queued alert resolved for %s/%s (org=%s)", category, item_id, org)
 

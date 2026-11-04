@@ -104,6 +104,10 @@ def test_compat_rules_record_from_defined_metrics():
     rules = (ROOT / "prometheus" / "sfmon-v3-compat.rules.yml").read_text(encoding="utf-8")
     records = re.findall(r"- record: (\S+)", rules)
     exprs = re.findall(r"expr: '(.*)'", rules)
-    assert len(records) == len(exprs) == len(DEFINED - {g.name for g in GAUGES if g.name.startswith("sfmon_job_")})
+    assert (
+        len(records)
+        == len(exprs)
+        == len(DEFINED - {g.name for g in GAUGES if g.name.startswith("sfmon_job_")})
+    )
     assert set().union(*(_referenced(e) for e in exprs)) <= DEFINED
     assert not set(records) & DEFINED

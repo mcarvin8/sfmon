@@ -42,11 +42,11 @@ Alert Triggers:
     - Unusual export patterns
 """
 
-from ..logger import logger
 from ..log_parser import parse_logs
+from ..logger import logger
+from ..query import query_records_all
 from .gauges import hourly_report_export_metric
 from .utils import get_user_name
-from ..query import query_records_all
 
 
 def hourly_report_export_records(sf):
@@ -78,13 +78,13 @@ def hourly_report_export_records(sf):
                 continue
 
             # SOQL; modified_id validated as Salesforce Id format (B608)
-            report_detail_query = f"SELECT Id, Name, ReportTypeApiName FROM Report WHERE Id = '{modified_id}'"  # nosec B608
+            report_detail_query = (
+                f"SELECT Id, Name, ReportTypeApiName FROM Report WHERE Id = '{modified_id}'"  # nosec B608
+            )
             result = query_records_all(sf, report_detail_query)
             report_name = result[0].get("Name") if result and len(result) > 0 else None
             report_type_api_name = (
-                result[0].get("ReportTypeApiName")
-                if result and len(result) > 0
-                else None
+                result[0].get("ReportTypeApiName") if result and len(result) > 0 else None
             )
 
             logger.info(

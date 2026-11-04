@@ -81,9 +81,7 @@ def _build_handlers():
         from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 
         otlp_provider = LoggerProvider()
-        otlp_provider.add_log_record_processor(
-            BatchLogRecordProcessor(OTLPLogExporter())
-        )
+        otlp_provider.add_log_record_processor(BatchLogRecordProcessor(OTLPLogExporter()))
         handlers.append(LoggingHandler(logger_provider=otlp_provider))
 
     return handlers

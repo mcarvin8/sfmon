@@ -182,9 +182,7 @@ class OrgAwareGauge:
         self._original_labelnames = list(labelnames or [])
         self._values = {}
         self._lock = threading.Lock()
-        _meter.create_observable_gauge(
-            name, callbacks=[self._collect], description=documentation
-        )
+        _meter.create_observable_gauge(name, callbacks=[self._collect], description=documentation)
 
     def _collect(self, options):
         with self._lock:
@@ -207,15 +205,13 @@ class OrgAwareGauge:
     def _apply(self, changes):
         with self._lock:
             if changes.cleared_orgs:
-                for key in [
-                    k for k in self._values if _org_of(k) in changes.cleared_orgs
-                ]:
+                for key in [k for k in self._values if _org_of(k) in changes.cleared_orgs]:
                     del self._values[key]
             self._values.update(changes.values)
 
     def labels(self, *args, **kwargs):
         if args:
-            for label_name, value in zip(self._original_labelnames, args):
+            for label_name, value in zip(self._original_labelnames, args, strict=False):
                 kwargs[label_name] = value
         kwargs.setdefault("org", self._org())
         key = tuple(sorted((k, str(v)) for k, v in kwargs.items()))
@@ -250,16 +246,12 @@ class OrgAwareGauge:
         org = self._org() if org is None else org
         new = {}
         for labels, value in values:
-            key = tuple(
-                sorted((k, str(v)) for k, v in {**labels, "org": org}.items())
-            )
+            key = tuple(sorted((k, str(v)) for k, v in {**labels, "org": org}.items()))
             new[key] = float(value)
         staged = self._staged()
         if staged is not None:
             staged.cleared_orgs.add(org)
-            staged.values = {
-                k: v for k, v in staged.values.items() if _org_of(k) != org
-            }
+            staged.values = {k: v for k, v in staged.values.items() if _org_of(k) != org}
             staged.values.update(new)
             return
         changes = _Staged()

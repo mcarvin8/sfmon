@@ -76,76 +76,74 @@ import argparse
 import os
 import sys
 
-from prometheus_client import generate_latest, start_http_server
+from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
-from apscheduler.executors.pool import ThreadPoolExecutor
+from prometheus_client import generate_latest, start_http_server
 from simple_salesforce.exceptions import SalesforceExpiredSession
 
-# Shared modules from root
-from .logger import logger
-from . import orgs
-from .org_gauge import gauge_transaction, set_current_org
-from . import self_metrics
-from . import custom_metrics
-
-# Always-on baseline functions (core package)
-from .core import (
-    monitor_salesforce_limits,
-    get_salesforce_licenses,
-    get_salesforce_instance,
-)
-
-# Operations monitoring functions (ops package)
-from .ops import (
-    monitor_apex_flex_queue,
-    async_apex_job_status,
-    monitor_apex_execution_time,
-    expose_apex_exception_metrics,
-    concurrent_apex_errors,
-    expose_concurrent_long_running_apex_errors,
-    async_apex_execution_summary,
-    daily_analyse_bulk_api,
-    hourly_analyse_bulk_api,
-    get_salesforce_ept_and_apt,
-)
+from . import custom_metrics, orgs, self_metrics
 
 # Audit and compliance functions (audit package)
 from .audit import (
-    hourly_observe_user_querying_large_records,
     expose_suspicious_records,
-    monitor_org_wide_sharing_settings,
-    monitor_forbidden_profile_assignments,
-    get_deployment_status,
-    monitor_login_events,
     geolocation,
+    get_deployment_status,
+    hourly_observe_user_querying_large_records,
     hourly_report_export_records,
+    monitor_forbidden_profile_assignments,
+    monitor_login_events,
+    monitor_org_wide_sharing_settings,
 )
+
+# Always-on baseline functions (core package)
+from .core import (
+    get_salesforce_instance,
+    get_salesforce_licenses,
+    monitor_salesforce_limits,
+)
+
+# Shared modules from root
+from .logger import logger
+
+# Operations monitoring functions (ops package)
+from .ops import (
+    async_apex_execution_summary,
+    async_apex_job_status,
+    concurrent_apex_errors,
+    daily_analyse_bulk_api,
+    expose_apex_exception_metrics,
+    expose_concurrent_long_running_apex_errors,
+    get_salesforce_ept_and_apt,
+    hourly_analyse_bulk_api,
+    monitor_apex_execution_time,
+    monitor_apex_flex_queue,
+)
+from .org_gauge import gauge_transaction, set_current_org
 
 # Tech debt monitoring functions (tech_debt package)
 from .tech_debt import (
     apex_classes_api_version,
     apex_triggers_api_version,
-    workflow_rules_monitoring,
     apex_used_limits_monitoring,
-    unassigned_permission_sets,
-    perm_sets_limited_users,
+    dashboards_with_inactive_users,
+    dormant_portal_users,
+    dormant_salesforce_users,
     monitor_minimal_perm_sets,
+    monitor_pmd_code_smells,
+    perm_sets_limited_users,
     profile_assignment_under5,
     profile_no_active_users,
-    security_health_check,
-    salesforce_health_risks,
-    dormant_salesforce_users,
-    dormant_portal_users,
-    total_queues_per_object,
+    public_groups_with_no_members,
     queues_with_no_members,
     queues_with_zero_open_cases,
-    public_groups_with_no_members,
-    dashboards_with_inactive_users,
+    salesforce_health_risks,
     scheduled_apex_jobs_monitoring,
-    monitor_pmd_code_smells,
+    security_health_check,
+    total_queues_per_object,
+    unassigned_permission_sets,
+    workflow_rules_monitoring,
 )
-
 
 # Orgs connected at startup. The live connection objects are kept in
 # orgs.py's registry (see orgs.get_connection / orgs.reconnect), which
@@ -468,20 +466,14 @@ def _call_job(org_name, sf, func, job_name):
     except SalesforceExpiredSession as e:
         # Raised by calls that bypass query.py's retry (e.g. sf.limits()).
         # Refresh the session so the next run of every job for this org works.
-        logger.error(
-            "Job '%s' failed for org '%s': session expired: %s", job_name, org_name, e
-        )
+        logger.error("Job '%s' failed for org '%s': session expired: %s", job_name, org_name, e)
         try:
             orgs.reconnect(org_name, stale=sf)
         except Exception as reconnect_e:
-            logger.error(
-                "Failed to re-authenticate to org '%s': %s", org_name, reconnect_e
-            )
+            logger.error("Failed to re-authenticate to org '%s': %s", org_name, reconnect_e)
         return False
     except Exception as e:
-        logger.error(
-            "Job '%s' failed for org '%s': %s", job_name, org_name, e
-        )
+        logger.error("Job '%s' failed for org '%s': %s", job_name, org_name, e)
         return False
 
 
@@ -492,9 +484,7 @@ def _add_job_with_schedule(scheduler, org_name, job_id, schedule, func, job_name
     so runs after a re-authentication use the refreshed session.
     """
     scheduler.add_job(
-        func=lambda: _run_job(
-            org_name, orgs.get_connection(org_name), func, job_name, job_id
-        ),
+        func=lambda: _run_job(org_name, orgs.get_connection(org_name), func, job_name, job_id),
         trigger=CronTrigger(**schedule),
         id=f"{job_id}::{org_name}",
         name=f"{job_name} [{org_name}]",
@@ -578,26 +568,28 @@ def schedule_tasks(scheduler):
             schedule = get_always_on_config(job_id, default_schedule, org_name=org_name)
             if schedule:
                 _run_job(org_name, sf, func, job_name, job_id)
-                _add_job_with_schedule(
-                    scheduler, org_name, job_id, schedule, func, job_name
-                )
+                _add_job_with_schedule(scheduler, org_name, job_id, schedule, func, job_name)
 
     logger.info("Executing enabled tasks at startup (respecting config)...")
     for org_name, sf in sf_connections.items():
         for job_id, default_schedule, func, job_name in SCHEDULED_JOBS:
             schedule = get_schedule_config(job_id, default_schedule, org_name=org_name)
             if schedule:
-                _run_job(org_name, sf, func, job_name, job_id)  # initial run only for jobs enabled by config
-                _add_job_with_schedule(
-                    scheduler, org_name, job_id, schedule, func, job_name
-                )
+                _run_job(
+                    org_name, sf, func, job_name, job_id
+                )  # initial run only for jobs enabled by config
+                _add_job_with_schedule(scheduler, org_name, job_id, schedule, func, job_name)
         for metric in custom_metrics.load_custom_metrics():
             schedule = metric.schedule_for(org_name)
             if schedule:
                 _run_job(org_name, sf, metric.collect, metric.job_name, metric.job_id)
                 _add_job_with_schedule(
-                    scheduler, org_name, metric.job_id, schedule,
-                    metric.collect, metric.job_name,
+                    scheduler,
+                    org_name,
+                    metric.job_id,
+                    schedule,
+                    metric.collect,
+                    metric.job_name,
                 )
     logger.info("Initial execution completed, all jobs scheduled with APScheduler")
 
@@ -629,9 +621,7 @@ def run_once(job_filter=None):
     known_ids = {job_id for job_id, *_ in all_jobs} | {m.job_id for m in custom}
 
     if job_filter and job_filter not in known_ids:
-        logger.error(
-            "Unknown job '%s'. Known jobs: %s", job_filter, ", ".join(sorted(known_ids))
-        )
+        logger.error("Unknown job '%s'. Known jobs: %s", job_filter, ", ".join(sorted(known_ids)))
         return 2
 
     connections = orgs.build_connections()
@@ -732,12 +722,8 @@ def main():
         )
     # Initialize APScheduler, sizing the worker pool to the fleet so every
     # org's jobs firing at the same cron tick don't queue up behind each other
-    max_workers = int(
-        os.getenv("SCHEDULER_MAX_WORKERS", min(len(sf_connections) * 2, 20))
-    )
-    scheduler = BlockingScheduler(
-        executors={"default": ThreadPoolExecutor(max_workers)}
-    )
+    max_workers = int(os.getenv("SCHEDULER_MAX_WORKERS", min(len(sf_connections) * 2, 20)))
+    scheduler = BlockingScheduler(executors={"default": ThreadPoolExecutor(max_workers)})
     # Schedule all tasks
     schedule_tasks(scheduler)
     try:

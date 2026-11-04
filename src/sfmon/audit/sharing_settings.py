@@ -9,10 +9,10 @@ Functions:
     - monitor_org_wide_sharing_settings: Main monitoring function
 """
 
-from .utils import get_user_name, categorize_user_group
-from .audit_trail import query_setup_audit_trail
 from ..logger import logger
+from .audit_trail import query_setup_audit_trail
 from .gauges import org_wide_sharing__setting_changes
+from .utils import categorize_user_group, get_user_name
 
 
 def monitor_org_wide_sharing_settings(sf):

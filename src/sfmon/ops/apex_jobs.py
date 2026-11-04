@@ -34,32 +34,33 @@ Performance Thresholds:
 
 import os
 
+import pandas as pd
+
+from ..log_parser import parse_logs
 from ..logger import logger
+from ..query import query_records_all
 from .gauges import (
-    async_job_status_gauge,
-    run_time_metric,
-    cpu_time_metric,
-    exec_time_metric,
-    db_total_time_metric,
-    callout_time_metric,
-    apex_exception_details_gauge,
+    apex_avg_cputime,
+    apex_avg_runtime,
+    apex_entry_point_count,
     apex_exception_category_count_gauge,
+    apex_exception_details_gauge,
+    apex_max_cputime,
+    apex_max_runtime,
+    apex_runtime_gt_5s_count,
+    apex_runtime_gt_5s_percentage,
+    apex_runtime_gt_10s_count,
+    apex_total_runtime,
+    async_job_status_gauge,
+    callout_time_metric,
+    concurrent_errors_count_gauge,
+    cpu_time_metric,
+    db_total_time_metric,
+    exec_time_metric,
+    run_time_metric,
     top_apex_concurrent_errors_sorted_by_avg_runtime,
     top_apex_concurrent_errors_sorted_by_count,
-    concurrent_errors_count_gauge,
-    apex_entry_point_count,
-    apex_avg_runtime,
-    apex_max_runtime,
-    apex_total_runtime,
-    apex_avg_cputime,
-    apex_max_cputime,
-    apex_runtime_gt_5s_count,
-    apex_runtime_gt_10s_count,
-    apex_runtime_gt_5s_percentage,
 )
-from ..log_parser import parse_logs
-import pandas as pd
-from ..query import query_records_all
 
 # Thresholds for long-running Apex requests (in milliseconds)
 LONG_RUNNING_APEX_MS = int(os.getenv("LONG_RUNNING_APEX_MS", 5000))
@@ -67,7 +68,7 @@ VERY_LONG_RUNNING_APEX_MS = int(os.getenv("VERY_LONG_RUNNING_APEX_MS", 10000))
 
 
 APEX_EXECUTION_EVENT_QUERY = """
-    SELECT Id FROM EventLogFile WHERE EventType = 'ApexExecution' and Interval = 'Hourly' 
+    SELECT Id FROM EventLogFile WHERE EventType = 'ApexExecution' and Interval = 'Hourly'
     ORDER BY LogDate DESC LIMIT 1
 """
 
@@ -78,7 +79,7 @@ def async_apex_job_status(sf):
     """
     logger.info("Getting Async Job status...")
     query = """
-        SELECT Id, Status, JobType, ApexClassId, MethodName, NumberOfErrors FROM AsyncApexJob 
+        SELECT Id, Status, JobType, ApexClassId, MethodName, NumberOfErrors FROM AsyncApexJob
         WHERE CreatedDate = TODAY
     """
     result = query_records_all(sf, query)
@@ -128,21 +129,13 @@ def monitor_apex_execution_time(sf):
             db_total_time = float(log_entry.get("DB_TOTAL_TIME", 0))
             callout_time = float(log_entry.get("CALLOUT_TIME", 0))
 
-            run_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(
-                run_time
-            )
-            cpu_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(
-                cpu_time
-            )
-            exec_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(
-                exec_time
-            )
+            run_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(run_time)
+            cpu_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(cpu_time)
+            exec_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(exec_time)
             db_total_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(
                 db_total_time
             )
-            callout_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(
-                callout_time
-            )
+            callout_time_metric.labels(entry_point=entry_point, quiddity=quiddity).set(callout_time)
     # pylint: disable=broad-except
     except Exception as e:
         logger.error("An unexpected error occurred in monitor_apex_execution : %s", e)
@@ -160,12 +153,10 @@ def expose_apex_exception_metrics(sf):
     apex_exception_category_count_gauge.clear()
 
     apex_unexpected_exception_query = """
-        SELECT Id FROM EventLogFile WHERE EventType = 'ApexUnexpectedException' and Interval = 'Hourly' 
+        SELECT Id FROM EventLogFile WHERE EventType = 'ApexUnexpectedException' and Interval = 'Hourly'
         ORDER BY LogDate DESC LIMIT 1
     """
-    apex_unexpected_exception_records = list(
-        parse_logs(sf, apex_unexpected_exception_query)
-    )
+    apex_unexpected_exception_records = list(parse_logs(sf, apex_unexpected_exception_query))
 
     exception_category_counts = {}
 
@@ -200,9 +191,7 @@ def expose_apex_exception_metrics(sf):
     try:
         # Expose the metrics for each exception category
         for category, count in exception_category_counts.items():
-            apex_exception_category_count_gauge.labels(exception_category=category).set(
-                count
-            )
+            apex_exception_category_count_gauge.labels(exception_category=category).set(count)
     # pylint: disable=broad-except
     except Exception as e:
         logger.error("Error while exposing category count metrics: %s", e)
@@ -311,8 +300,7 @@ def concurrent_apex_errors(sf):
         df["DB_TOTAL_TIME"] = pd.to_numeric(df["DB_TOTAL_TIME"], errors="coerce")
 
         df_filtered = df[
-            (df["IS_LONG_RUNNING_REQUEST"] == 1)
-            & (df["RUN_TIME"] > LONG_RUNNING_APEX_MS)
+            (df["IS_LONG_RUNNING_REQUEST"] == 1) & (df["RUN_TIME"] > LONG_RUNNING_APEX_MS)
         ]
 
         if df_filtered.empty:
@@ -333,7 +321,7 @@ def expose_concurrent_long_running_apex_errors(sf):
     try:
         concurrent_errors_count_gauge.clear()
         log_query = """
-            SELECT Id FROM EventLogFile WHERE EventType = 'ConcurrentLongRunningApexLimit' AND Interval = 'Daily' 
+            SELECT Id FROM EventLogFile WHERE EventType = 'ConcurrentLongRunningApexLimit' AND Interval = 'Daily'
             AND LogDate = TODAY ORDER BY LogDate DESC LIMIT 1
         """
 
@@ -345,11 +333,7 @@ def expose_concurrent_long_running_apex_errors(sf):
 
         df = pd.DataFrame(concurrent_long_running_apex_logs)
         requests_made = df["REQUEST_ID"].dropna().shape[0]
-        event_type = (
-            df["EVENT_TYPE"].iloc[0]
-            if not df.empty
-            else "ConcurrentLongRunningApexLimit"
-        )
+        event_type = df["EVENT_TYPE"].iloc[0] if not df.empty else "ConcurrentLongRunningApexLimit"
         concurrent_errors_count_gauge.labels(event_type=event_type).set(requests_made)
     # pylint: disable=broad-except
     except Exception as e:
@@ -405,9 +389,7 @@ def async_apex_execution_summary(sf):
             .reset_index()
         )
 
-        grouped["runtime_gt_5s_percentage"] = (
-            grouped["runtime_gt_5s"] / grouped["count"]
-        ) * 100
+        grouped["runtime_gt_5s_percentage"] = (grouped["runtime_gt_5s"] / grouped["count"]) * 100
 
         for _, row in grouped.iterrows():
             entry_point = row["ENTRY_POINT"]
@@ -419,12 +401,8 @@ def async_apex_execution_summary(sf):
             apex_total_runtime.labels(entry_point, quiddity).set(row["total_runtime"])
             apex_avg_cputime.labels(entry_point, quiddity).set(row["avg_cputime"])
             apex_max_cputime.labels(entry_point, quiddity).set(row["max_cputime"])
-            apex_runtime_gt_5s_count.labels(entry_point, quiddity).inc(
-                row["runtime_gt_5s"]
-            )
-            apex_runtime_gt_10s_count.labels(entry_point, quiddity).inc(
-                row["runtime_gt_10s"]
-            )
+            apex_runtime_gt_5s_count.labels(entry_point, quiddity).inc(row["runtime_gt_5s"])
+            apex_runtime_gt_10s_count.labels(entry_point, quiddity).inc(row["runtime_gt_10s"])
             apex_runtime_gt_5s_percentage.labels(entry_point, quiddity).set(
                 row["runtime_gt_5s_percentage"]
             )
